@@ -1,0 +1,492 @@
+/* Estilos personalizados para FullCalendar que se ajustan al tema Qoder Dark - Modernizados */
+
+/* Contenedor principal del calendario - Asegurar máxima especificidad */
+.fc,
+.qoder-dark-calendar-container .fc,
+.qoder-dark-calendar-container {
+  background-color: var(--qoder-dark-bg-secondary) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  font-family: "Consolas, 'Courier New', monospace" !important;
+  box-shadow: none !important;
+}
+
+/* Contenedores del calendario - Eliminar todos los fondos blancos */
+.fc .fc-scrollgrid,
+.qoder-dark-calendar-container .fc .fc-scrollgrid,
+.fc .fc-daygrid-body,
+.qoder-dark-calendar-container .fc .fc-daygrid-body,
+.fc .fc-timegrid-body,
+.qoder-dark-calendar-container .fc .fc-timegrid-body,
+.fc .fc-multimonth-body,
+.qoder-dark-calendar-container .fc .fc-multimonth-body,
+.fc .fc-scrollgrid-section,
+.qoder-dark-calendar-container .fc .fc-scrollgrid-section,
+.fc .fc-scrollgrid-section-header,
+.qoder-dark-calendar-container .fc .fc-scrollgrid-section-header,
+.fc .fc-scrollgrid-section-body,
+.qoder-dark-calendar-container .fc .fc-scrollgrid-section-body {
+  background-color: transparent !important;
+  border-color: var(--qoder-dark-border-primary) !important;
+}
+
+/* Contenedor de la vista del calendario - Eliminar fondo blanco */
+.fc .fc-view-harness,
+.qoder-dark-calendar-container .fc .fc-view-harness,
+.fc .fc-view-harness-active,
+.qoder-dark-calendar-container .fc .fc-view-harness-active {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Contenedor del cuerpo del calendario - Eliminar fondo blanco */
+.fc .fc-scrollgrid,
+.qoder-dark-calendar-container .fc .fc-scrollgrid,
+.fc .fc-daygrid-body,
+.qoder-dark-calendar-container .fc .fc-daygrid-body {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Contenedor padre del encabezado del calendario - Eliminar fondo blanco */
+.fc .fc-scrollgrid thead,
+.qoder-dark-calendar-container .fc .fc-scrollgrid thead,
+.fc .fc-scrollgrid-section-header,
+.qoder-dark-calendar-container .fc .fc-scrollgrid-section-header {
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+/* Barra de herramientas del calendario - Modernizada */
+.fc .fc-toolbar,
+.qoder-dark-calendar-container .fc .fc-toolbar {
+  background-color: var(--qoder-dark-bg-form) !important;
+  border: none !important;
+  border-radius: 16px !important;
+  padding: 1rem 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+  margin-top: 20px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
+  align-items: center !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Forzar fondo oscuro en todos los contenedores del calendario */
+.fc .fc-toolbar,
+.qoder-dark-calendar-container .fc .fc-toolbar,
+.fc .fc-toolbar-chunk,
+.qoder-dark-calendar-container .fc .fc-toolbar-chunk,
+.fc .fc-scrollgrid-header,
+.qoder-dark-calendar-container .fc .fc-scrollgrid-header,
+.fc .fc-scrollgrid-body,
+.qoder-dark-calendar-container .fc .fc-scrollgrid-body {
+  background-color: var(--qoder-dark-bg-form) !important;
+}
+
+/* Asegurar fondo oscuro en contenedores anidados */
+.fc .fc-toolbar .fc-button,
+.qoder-dark-calendar-container .fc .fc-toolbar .fc-button,
+.fc .fc-col-header,
+.qoder-dark-calendar-container .fc .fc-col-header,
+.fc .fc-daygrid-day,
+.qoder-dark-calendar-container .fc .fc-daygrid-day,
+.fc .fc-timegrid-col,
+.qoder-dark-calendar-container .fc .fc-timegrid-col {
+  background-color: var(--qoder-dark-bg-form) !important;
+}
+
+/* Título del calendario - Modernizado */
+.fc .fc-toolbar-title,
+.qoder-dark-calendar-container .fc .fc-toolbar-title {
+  color: var(--qoder-dark-text-primary) !important;
+  font-weight: 700 !important;
+  font-size: 1.5rem !important;
+  margin: 0 1rem !important;
+  flex-grow: 1;
+  text-align: center;
+}
+
+/* Botones de la barra de herramientas - Modernizados */
+.fc .fc-button,
+.qoder-dark-calendar-container .fc .fc-button {
+  background-color: var(--qoder-dark-button-secondary) !important;
+  border: none !important;
+  color: var(--qoder-dark-button-secondary-text) !important;
+  border-radius: 12px !important;
+  padding: 12px 20px !important;
+  font-family: "Consolas, 'Courier New', monospace" !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.fc .fc-button::before,
+.qoder-dark-calendar-container .fc .fc-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.fc .fc-button:hover,
+.qoder-dark-calendar-container .fc .fc-button:hover {
+  background-color: var(--qoder-dark-button-secondary-hover) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+.fc .fc-button:hover::before,
+.qoder-dark-calendar-container .fc .fc-button:hover::before {
+  opacity: 1;
+}
+
+.fc .fc-button:active,
+.fc .fc-button.fc-button-active,
+.qoder-dark-calendar-container .fc .fc-button:active,
+.qoder-dark-calendar-container .fc .fc-button.fc-button-active {
+  background-color: var(--qoder-dark-bg-hover) !important;
+  color: var(--qoder-dark-text-primary) !important;
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Encabezado del calendario - Modernizado */
+.fc .fc-col-header,
+.qoder-dark-calendar-container .fc .fc-col-header {
+  background-color: var(--qoder-dark-bg-form) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+  position: relative !important;
+}
+
+.fc .fc-col-header-cell,
+.qoder-dark-calendar-container .fc .fc-col-header-cell {
+  background-color: var(--qoder-dark-bg-form) !important;
+  border: none !important;
+  padding: 1rem 0.75rem !important;
+  border-bottom: 1px solid var(--qoder-dark-border-primary) !important;
+  border-right: 1px solid var(--qoder-dark-border-primary) !important;
+}
+
+.fc .fc-col-header-cell:last-child,
+.qoder-dark-calendar-container .fc .fc-col-header-cell:last-child {
+  border-right: none !important;
+}
+
+.fc .fc-col-header-cell-cushion,
+.qoder-dark-calendar-container .fc .fc-col-header-cell-cushion {
+  color: var(--qoder-dark-text-primary) !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  font-size: 1.1rem !important;
+}
+
+/* Días del calendario - Estilo tipo tablero Kanban - Modernizado */
+.fc .fc-daygrid-day,
+.qoder-dark-calendar-container .fc .fc-daygrid-day {
+  background-color: var(--qoder-dark-bg-form) !important;
+  border: 1px solid var(--qoder-dark-border-primary) !important;
+  transition: all 0.3s ease !important;
+  min-height: 160px !important;
+  padding: 8px !important;
+  border-radius: 12px !important;
+  margin: 6px !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1) !important;
+}
+
+.fc .fc-daygrid-day:hover,
+.qoder-dark-calendar-container .fc .fc-daygrid-day:hover {
+  background-color: var(--qoder-dark-bg-hover) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2) !important;
+}
+
+.fc .fc-daygrid-day.fc-day-today,
+.qoder-dark-calendar-container .fc .fc-daygrid-day.fc-day-today {
+  background-color: var(--qoder-dark-bg-hover) !important;
+  border: 2px solid var(--qoder-dark-text-muted) !important;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+}
+
+.fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number,
+.qoder-dark-calendar-container .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  background-color: var(--qoder-dark-bg-hover) !important;
+  color: var(--qoder-dark-text-primary) !important;
+  border-radius: 50% !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: bold !important;
+  font-size: 1.1rem !important;
+}
+
+/* Números de los días - Modernizado */
+.fc .fc-daygrid-day-number,
+.qoder-dark-calendar-container .fc .fc-daygrid-day-number {
+  color: var(--qoder-dark-text-secondary) !important;
+  padding: 0.75rem !important;
+  font-weight: 600 !important;
+  font-size: 1.1rem !important;
+}
+
+/* Eventos del calendario - Estilo tipo tarjeta Kanban - Modernizado */
+.fc .fc-event,
+.qoder-dark-calendar-container .fc .fc-event {
+  background-color: var(--qoder-dark-bg-form) !important;
+  border: 1px solid transparent !important;
+  color: var(--qoder-dark-text-primary) !important;
+  border-radius: 12px !important;
+  padding: 0.75rem !important;
+  margin: 0.3rem 0 !important;
+  font-family: "Consolas, 'Courier New', monospace" !important;
+  font-size: 0.95rem !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.fc .fc-event:hover,
+.qoder-dark-calendar-container .fc .fc-event:hover {
+  background-color: var(--qoder-dark-bg-hover) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25) !important;
+}
+
+.fc .fc-event:before,
+.qoder-dark-calendar-container .fc .fc-event:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: linear-gradient(to bottom, #0ea5e9, #0d9488) !important;
+  border-radius: 12px 0 0 12px !important;
+}
+
+/* Estilo especial para eventos con múltiples líneas - Modernizado */
+.fc .fc-event .fc-event-title,
+.qoder-dark-calendar-container .fc .fc-event .fc-event-title {
+  font-weight: 600 !important;
+  margin-bottom: 0.3rem !important;
+  display: block !important;
+  font-size: 1rem !important;
+}
+
+.fc .fc-event .fc-event-time,
+.qoder-dark-calendar-container .fc .fc-event .fc-event-time {
+  font-size: 0.85rem !important;
+  color: var(--qoder-dark-text-secondary) !important;
+  display: block !important;
+}
+
+/* Vista de semana - Estilo tipo tablero Kanban - Modernizado */
+.fc .fc-timegrid-slot,
+.qoder-dark-calendar-container .fc .fc-timegrid-slot {
+  background-color: var(--qoder-dark-bg-secondary) !important;
+  border-bottom: 1px solid var(--qoder-dark-border-primary) !important;
+  color: var(--qoder-dark-text-secondary) !important;
+  height: 70px !important;
+}
+
+/* Asegurar que las columnas de la vista semanal tengan bordes verticales más definidos - Modernizado */
+.fc .fc-timegrid-cols,
+.qoder-dark-calendar-container .fc .fc-timegrid-cols {
+  border: none !important;
+}
+
+.fc .fc-timegrid-col,
+.qoder-dark-calendar-container .fc .fc-timegrid-col {
+  border-right: 1px solid #444 !important;
+}
+
+.fc .fc-timegrid-col:last-child,
+.qoder-dark-calendar-container .fc .fc-timegrid-col:last-child {
+  border-right: none !important;
+}
+
+/* Asegurar bordes verticales completos en la vista semanal */
+.fc .fc-timegrid-body,
+.qoder-dark-calendar-container .fc .fc-timegrid-body {
+  border: none !important;
+}
+
+/* Forzar bordes verticales en toda la altura del calendario semanal */
+.fc .fc-timegrid-cols .fc-timegrid-col,
+.qoder-dark-calendar-container .fc .fc-timegrid-cols .fc-timegrid-col {
+  border-right: 1px solid #444 !important;
+}
+
+.fc .fc-timegrid-cols .fc-timegrid-col:last-child,
+.qoder-dark-calendar-container .fc .fc-timegrid-cols .fc-timegrid-col:last-child {
+  border-right: none !important;
+}
+
+/* Asegurar bordes verticales en las celdas de tiempo - Modernizado */
+.fc .fc-timegrid-axis,
+.qoder-dark-calendar-container .fc .fc-timegrid-axis {
+  background-color: var(--qoder-dark-bg-form) !important;
+  color: var(--qoder-dark-text-secondary) !important;
+  border-right: 1px solid #444 !important;
+  border-bottom: 1px solid var(--qoder-dark-border-primary) !important;
+  border-top: none !important;
+}
+
+/* Asegurar bordes verticales en las etiquetas de tiempo */
+.fc .fc-timegrid-slot-label,
+.qoder-dark-calendar-container .fc .fc-timegrid-slot-label {
+  border-right: 1px solid #444 !important;
+}
+
+/* Asegurar que las líneas horizontales y verticales se crucen sin superposiciones raras, manteniendo la grilla limpia */
+.fc .fc-timegrid-slots .fc-timegrid-slot,
+.qoder-dark-calendar-container .fc .fc-timegrid-slots .fc-timegrid-slot {
+  border-bottom: 1px solid var(--qoder-dark-border-primary) !important;
+}
+
+/* Asegurar que la vista diaria también tenga bordes - Modernizado */
+.fc .fc-timegrid-body,
+.qoder-dark-calendar-container .fc .fc-timegrid-body {
+  border: none !important;
+}
+
+/* Mejorar la definición de bordes verticales en la cuadrícula de tiempo - Modernizado */
+.fc .fc-timegrid-slots,
+.qoder-dark-calendar-container .fc .fc-timegrid-slots {
+  border: none !important;
+}
+
+/* Vista de día - Estilo tipo tablero Kanban - Modernizado */
+.fc .fc-timegrid-event-harness,
+.qoder-dark-calendar-container .fc .fc-timegrid-event-harness {
+  margin: 0.3rem 0.15rem !important;
+}
+
+/* Vista de mes - días fuera del mes actual - Modernizado */
+.fc .fc-daygrid-day.fc-day-other,
+.qoder-dark-calendar-container .fc .fc-daygrid-day.fc-day-other {
+  background-color: var(--qoder-dark-bg-primary) !important;
+  opacity: 0.7 !important;
+}
+
+.fc .fc-daygrid-day.fc-day-other .fc-daygrid-day-number,
+.qoder-dark-calendar-container .fc .fc-daygrid-day.fc-day-other .fc-daygrid-day-number {
+  color: var(--qoder-dark-text-secondary) !important;
+}
+
+/* Scrollbar del calendario - Modernizado */
+.fc .fc-scroller,
+.qoder-dark-calendar-container .fc .fc-scroller {
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--qoder-dark-border-primary) var(--qoder-dark-bg-form) !important;
+}
+
+.fc .fc-scroller::-webkit-scrollbar,
+.qoder-dark-calendar-container .fc .fc-scroller::-webkit-scrollbar {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+.fc .fc-scroller::-webkit-scrollbar-track,
+.qoder-dark-calendar-container .fc .fc-scroller::-webkit-scrollbar-track {
+  background: var(--qoder-dark-bg-form) !important;
+  border-radius: 6px !important;
+}
+
+.fc .fc-scroller::-webkit-scrollbar-thumb,
+.qoder-dark-calendar-container .fc .fc-scroller::-webkit-scrollbar-thumb {
+  background: var(--qoder-dark-border-primary) !important;
+  border-radius: 6px !important;
+}
+
+.fc .fc-scroller::-webkit-scrollbar-thumb:hover,
+.qoder-dark-calendar-container .fc .fc-scroller::-webkit-scrollbar-thumb:hover {
+  background: var(--qoder-dark-border-secondary) !important;
+}
+
+/* Ajustes para vista responsiva - Modernizados */
+@media (max-width: 768px) {
+  .fc .fc-toolbar,
+  .qoder-dark-calendar-container .fc .fc-toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 0.75rem 1rem !important;
+    border-radius: 12px !important;
+  }
+  
+  .fc .fc-toolbar-title,
+  .qoder-dark-calendar-container .fc .fc-toolbar-title {
+    text-align: center !important;
+    margin: 0.75rem 0 !important;
+    font-size: 1.25rem !important;
+  }
+  
+  .fc .fc-button-group,
+  .qoder-dark-calendar-container .fc .fc-button-group {
+    display: flex !important;
+    justify-content: center !important;
+  }
+  
+  /* Ajustar altura de slots en móvil - Modernizado */
+  .fc .fc-timegrid-slot,
+  .qoder-dark-calendar-container .fc .fc-timegrid-slot {
+    height: 60px !important;
+  }
+  
+  /* Eliminar bordes en dispositivos móviles - Modernizado */
+  .fc,
+  .qoder-dark-calendar-container .fc {
+    border: none !important;
+  }
+  
+  /* Ajustar días del calendario en móvil - Modernizado */
+  .fc .fc-daygrid-day,
+  .qoder-dark-calendar-container .fc .fc-daygrid-day {
+    min-height: 120px !important;
+    margin: 4px !important;
+    border-radius: 10px !important;
+  }
+}
+
+/* Forzar la eliminación de cualquier fondo blanco en todos los elementos del calendario */
+.fc *,
+.qoder-dark-calendar-container .fc * {
+  background-color: transparent !important;
+  border-color: var(--qoder-dark-border-primary) !important;
+}
+
+/* Excepción para elementos que deben tener fondo oscuro */
+.fc .fc-toolbar,
+.qoder-dark-calendar-container .fc .fc-toolbar,
+.fc .fc-col-header,
+.qoder-dark-calendar-container .fc .fc-col-header,
+.fc .fc-daygrid-day,
+.qoder-dark-calendar-container .fc .fc-daygrid-day,
+.fc .fc-timegrid-col,
+.qoder-dark-calendar-container .fc .fc-timegrid-col,
+.fc .fc-toolbar-chunk,
+.qoder-dark-calendar-container .fc .fc-toolbar-chunk {
+  background-color: var(--qoder-dark-bg-form) !important;
+}

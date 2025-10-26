@@ -1,0 +1,951 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Qoder Dark Theme - Professional Grayscale Palette - Modernizado */
+:root {
+  /* Nueva paleta de grises profesional */
+  --qoder-dark-bg-primary: #121212;        /* Fondo principal (body) */
+  --qoder-dark-bg-secondary: #1e1e1e;      /* Paneles, secciones y tarjetas */
+  --qoder-dark-bg-tertiary: #222222;       /* Alternativa para paneles */
+  --qoder-dark-bg-quaternary: #2c2c2c;     /* Barras superiores, menús o sidebars */
+  --qoder-dark-bg-form: #252525;           /* Formularios y modales */
+  --qoder-dark-bg-hover: #2a2a2a;          /* Hover states */
+  
+  /* Bordes y separadores */
+  --qoder-dark-border-primary: #3a3a3a;    /* Bordes y separadores */
+  --qoder-dark-border-secondary: #3f3f3f;  /* Inputs y campos de texto */
+  
+  /* Textos */
+  --qoder-dark-text-primary: #f1f1f1;      /* Texto principal */
+  --qoder-dark-text-secondary: #b0b0b0;    /* Texto secundario o placeholder */
+  --qoder-dark-text-muted: #6a6a6a;        /* Texto deshabilitado */
+  
+  /* Botones */
+  --qoder-dark-button-primary: #e0e0e0;    /* Botón primario */
+  --qoder-dark-button-primary-text: #000000; /* Texto botón primario */
+  --qoder-dark-button-secondary: #3c3c3c;  /* Botón secundario */
+  --qoder-dark-button-secondary-text: #f1f1f1; /* Texto botón secundario */
+  --qoder-dark-button-hover: #d0d0d0;      /* Hover botón primario */
+  --qoder-dark-button-secondary-hover: #4a4a4a; /* Hover botón secundario */
+  
+  /* Inputs */
+  --qoder-dark-input-bg: #2a2a2a;          /* Fondo inputs */
+  --qoder-dark-input-border: #3f3f3f;      /* Borde inputs */
+  --qoder-dark-input-focus: #555555;       /* Borde inputs en foco */
+  
+  /* Colores de acento naranja */
+  --qoder-dark-accent-orange: #f97316;     /* Naranja principal */
+  --qoder-dark-accent-orange-light: #fb923c; /* Naranja claro */
+  --qoder-dark-accent-orange-muted: rgba(249, 115, 22, 0.3); /* Naranja con transparencia */
+  
+  /* Colores de acento generales */
+  --qoder-accent-primary: #a0a0a0;     /* Gris claro */
+  --qoder-accent-secondary: #808080;   /* Gris medio */
+  --qoder-accent-success: #10b981;     /* Verde */
+  --qoder-accent-warning: #f59e0b;     /* Amarillo */
+  --qoder-accent-danger: #ef4444;      /* Rojo */
+  --qoder-accent-info: #0ea5e9;        /* Azul */
+}
+
+/* Base styles with Qoder Dark theme - Modernizado */
+html {
+  background-color: var(--qoder-dark-bg-primary);
+  color: var(--qoder-dark-text-primary);
+}
+
+body {
+  background-color: var(--qoder-dark-bg-primary);
+  color: var(--qoder-dark-text-primary);
+  font-family: "Consolas, 'Courier New', monospace";
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+/* Contenedores principales (páginas, secciones grandes, paneles) - Modernizado */
+.qoder-dark-container {
+  background: var(--qoder-dark-bg-secondary);
+  border: 1px solid var(--qoder-dark-border-primary);
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-container {
+    padding: 1.5rem;
+  }
+}
+
+/* Tarjetas individuales (filas de tabla, cajas pequeñas, items de lista, paneles secundarios) - Modernizado */
+.qoder-dark-card {
+  background: var(--qoder-dark-bg-form);
+  border: 1px solid var(--qoder-dark-border-primary);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-card {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* Nuevo: Tarjeta con acento naranja */
+.qoder-dark-card-orange {
+  background: var(--qoder-dark-bg-form);
+  border: 1px solid var(--qoder-dark-accent-orange);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.1);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-card-orange {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* Hover en tarjetas individuales - Modernizado */
+.qoder-dark-card:hover {
+  background: var(--qoder-dark-bg-hover);
+}
+
+/* Nuevo: Hover en tarjetas con acento naranja */
+.qoder-dark-card-orange:hover {
+  background: var(--qoder-dark-bg-hover);
+  border-color: var(--qoder-dark-accent-orange-light);
+}
+
+/* Tarjetas estáticas sin efecto hover - Para páginas de login y admin */
+.qoder-dark-card-static {
+  background: var(--qoder-dark-bg-form);
+  border: 1px solid var(--qoder-dark-border-primary);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-card-static {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* Estilos para filas de tablas - Modernizado */
+.qoder-dark-table-row {
+  background: var(--qoder-dark-bg-form);
+  border: 1px solid var(--qoder-dark-border-primary);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-table-row {
+    padding: 1.5rem;
+  }
+}
+
+.qoder-dark-table-row:hover {
+  background: var(--qoder-dark-bg-hover);
+}
+
+/* Estilos para el calendario - Modernizado */
+.qoder-dark-calendar-container {
+  background: var(--qoder-dark-bg-secondary);
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+.qoder-dark-calendar-day {
+  background: var(--qoder-dark-bg-form);
+  border: 1px solid var(--qoder-dark-border-primary);
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-calendar-day {
+    padding: 1.5rem;
+  }
+}
+
+.qoder-dark-calendar-day:hover {
+  background: var(--qoder-dark-bg-hover);
+}
+
+.qoder-dark-calendar-day.today {
+  background: var(--qoder-dark-bg-hover);
+  border: 2px solid var(--qoder-dark-text-muted);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.qoder-dark-calendar-event {
+  background: var(--qoder-dark-bg-form);
+  border: 1px solid var(--qoder-dark-border-primary);
+  border-radius: 12px;
+  padding: 0.5rem;
+  margin: 0.2rem 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-calendar-event {
+    padding: 0.75rem;
+    margin: 0.3rem 0;
+  }
+}
+
+.qoder-dark-calendar-event:hover {
+  background: var(--qoder-dark-bg-hover);
+}
+
+/* Aplicar el estilo qoder-dark-window - Modernizado */
+main {
+  background-color: var(--qoder-dark-bg-secondary);
+  border: 1px solid var(--qoder-dark-border-primary);
+  border-radius: 16px;
+  overflow: hidden;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+@media (min-width: 768px) {
+  main {
+    padding: 1.5rem;
+  }
+}
+
+/* Qoder Dark window styles - Modernizado */
+.qoder-dark-window {
+  background-color: var(--qoder-dark-bg-secondary);
+  border: 1px solid var(--qoder-dark-border-primary);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.qoder-dark-window-header {
+  background-color: var(--qoder-dark-bg-tertiary);
+  border-bottom: 1px solid var(--qoder-dark-border-primary);
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-window-header {
+    padding: 1rem 1.5rem;
+  }
+}
+
+.qoder-dark-window-content {
+  padding: 1rem;
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-window-content {
+    padding: 1.5rem;
+  }
+}
+
+/* Qoder Dark window without shadow - Modernizado */
+.qoder-dark-window-no-shadow {
+  background-color: var(--qoder-dark-bg-secondary);
+  border: 1px solid var(--qoder-dark-border-primary);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* Qoder Dark inputs - Modernizado */
+.qoder-dark-input {
+  background-color: var(--qoder-dark-input-bg);
+  border: 1px solid var(--qoder-dark-input-border);
+  border-radius: 12px;
+  color: var(--qoder-dark-text-primary);
+  padding: 0.5rem 0.75rem;
+  font-family: "Consolas, 'Courier New', monospace";
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-input {
+    padding: 0.75rem 1rem;
+  }
+}
+
+.qoder-dark-input:focus {
+  border-color: var(--qoder-dark-input-focus);
+  box-shadow: 0 0 0 3px rgba(85, 85, 85, 0.3);
+  outline: none;
+}
+
+/* Nuevo: Input con acento naranja */
+.qoder-dark-input-orange:focus {
+  border-color: var(--qoder-dark-accent-orange);
+  box-shadow: 0 0 0 3px var(--qoder-dark-accent-orange-muted);
+  outline: none;
+}
+
+.qoder-dark-input::placeholder {
+  color: var(--qoder-dark-text-secondary);
+}
+
+/* Qoder Dark search and filter boxes - Modernizado */
+.qoder-dark-search-box, .qoder-dark-filter-box {
+  background-color: var(--qoder-dark-input-bg);
+  border: 1px solid var(--qoder-dark-input-border);
+  border-radius: 12px;
+  color: var(--qoder-dark-text-primary);
+  padding: 0.5rem 0.75rem;
+  font-family: "Consolas, 'Courier New', monospace";
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-search-box, .qoder-dark-filter-box {
+    padding: 0.75rem 1rem;
+  }
+}
+
+.qoder-dark-search-box::-webkit-input-placeholder, .qoder-dark-filter-box::-webkit-input-placeholder {
+  color: var(--qoder-dark-text-secondary);
+}
+
+.qoder-dark-search-box::-moz-placeholder, .qoder-dark-filter-box::-moz-placeholder {
+  color: var(--qoder-dark-text-secondary);
+}
+
+.qoder-dark-search-box::placeholder,
+.qoder-dark-filter-box::placeholder {
+  color: var(--qoder-dark-text-secondary);
+}
+
+.qoder-dark-search-box:hover,
+.qoder-dark-filter-box:hover {
+  border-color: var(--qoder-dark-input-focus);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.qoder-dark-search-box:focus,
+.qoder-dark-filter-box:focus {
+  border-color: var(--qoder-dark-input-focus);
+  box-shadow: 0 0 0 3px rgba(95, 95, 95, 0.3), 0 4px 8px rgba(0, 0, 0, 0.15);
+  outline: none;
+}
+
+/* Qoder Dark selects - Modernizado */
+.qoder-dark-select {
+  background-color: var(--qoder-dark-input-bg);
+  border: 1px solid var(--qoder-dark-input-border);
+  border-radius: 12px;
+  color: var(--qoder-dark-text-primary);
+  padding: 0.5rem 0.75rem;
+  font-family: "Consolas, 'Courier New', monospace";
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b0b0b0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-select {
+    padding: 0.75rem 1rem;
+    background-position: right 1rem center;
+  }
+}
+
+.qoder-dark-select:focus {
+  border-color: var(--qoder-dark-input-focus);
+  box-shadow: 0 0 0 3px rgba(95, 95, 95, 0.3), 0 4px 8px rgba(0, 0, 0, 0.15);
+  outline: none;
+}
+
+/* Qoder Dark dropdown styles - Modernizados */
+.qoder-dark-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.qoder-dark-dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: var(--qoder-dark-bg-form);
+  border: 1px solid var(--qoder-dark-border-primary);
+  border-radius: 12px;
+  min-width: 200px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+  z-index: 1000;
+  right: 0;
+  top: 100%;
+  margin-top: 8px;
+}
+
+.qoder-dark-dropdown-content.show {
+  display: block;
+}
+
+.qoder-dark-dropdown-item {
+  padding: 10px 12px;
+  color: var(--qoder-dark-text-primary);
+  text-decoration: none;
+  display: block;
+  border-radius: 8px;
+  margin: 4px;
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-dropdown-item {
+    padding: 12px 16px;
+  }
+}
+
+.qoder-dark-dropdown-item:hover {
+  background-color: var(--qoder-dark-bg-hover);
+}
+
+/* Qoder Dark menu styles - Modernizado */
+.qoder-dark-menu {
+  background-color: var(--qoder-dark-bg-form);
+  border: 1px solid var(--qoder-dark-border-primary);
+  border-radius: 12px;
+  padding: 0.5rem 0;
+  min-width: 200px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+  z-index: 1000;
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-menu {
+    padding: 0.75rem 0;
+    min-width: 220px;
+  }
+}
+
+.qoder-dark-menu-item {
+  padding: 10px 12px;
+  color: var(--qoder-dark-text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-menu-item {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+}
+
+.qoder-dark-menu-item:hover {
+  background-color: var(--qoder-dark-bg-hover);
+  color: var(--qoder-dark-text-primary);
+}
+
+.qoder-dark-menu-item.active {
+  background-color: var(--qoder-dark-bg-hover);
+  color: var(--qoder-dark-text-primary);
+  border-left: 3px solid var(--qoder-dark-button-primary);
+}
+
+/* Qoder Dark button styles - Modernizados */
+.qoder-dark-button {
+  background-color: var(--qoder-dark-button-secondary);
+  color: var(--qoder-dark-button-secondary-text);
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: "Consolas, 'Courier New', monospace";
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-button {
+    padding: 12px 20px;
+  }
+}
+
+.qoder-dark-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1));
+  opacity: 0;
+}
+
+.qoder-dark-button:hover {
+  background-color: var(--qoder-dark-button-secondary-hover);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.qoder-dark-button:hover::before {
+  opacity: 1;
+}
+
+.qoder-dark-button:active {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Nuevo: Botón con acento naranja sutil */
+.qoder-dark-button-orange {
+  background-color: var(--qoder-dark-accent-orange);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: "Consolas, 'Courier New', monospace";
+  box-shadow: 0 2px 4px rgba(249, 115, 22, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-button-orange {
+    padding: 12px 20px;
+  }
+}
+
+.qoder-dark-button-orange::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2));
+  opacity: 0;
+}
+
+.qoder-dark-button-orange:hover {
+  background-color: var(--qoder-dark-accent-orange-light);
+  box-shadow: 0 4px 8px rgba(249, 115, 22, 0.4);
+}
+
+.qoder-dark-button-orange:hover::before {
+  opacity: 1;
+}
+
+.qoder-dark-button-orange:active {
+  box-shadow: 0 2px 4px rgba(249, 115, 22, 0.3);
+}
+
+/* Qoder Dark bubble styles - Modernizado */
+.qoder-dark-bubble {
+  background-color: var(--qoder-dark-bg-form);
+  border: 1px solid var(--qoder-dark-border-primary);
+  border-radius: 18px;
+  padding: 0.5rem 1rem;
+  max-width: 85%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-bubble {
+    padding: 0.75rem 1.25rem;
+  }
+}
+
+.qoder-dark-bubble:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.qoder-dark-bubble-sender {
+  border-bottom-right-radius: 6px;
+  margin-left: auto;
+}
+
+.qoder-dark-bubble-receiver {
+  border-bottom-left-radius: 6px;
+  margin-right: auto;
+}
+
+/* Qoder Dark status indicators - Modernizados */
+.qoder-dark-status-success {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 8px;
+  padding: 4px 10px;
+  display: inline-block;
+  margin: 0.2rem;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1);
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-status-success {
+    padding: 6px 14px;
+  }
+}
+
+.qoder-dark-status-info {
+  color: #0ea5e9;
+  background: rgba(14, 165, 233, 0.1);
+  border: 1px solid rgba(14, 165, 233, 0.3);
+  border-radius: 8px;
+  padding: 4px 10px;
+  display: inline-block;
+  margin: 0.2rem;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(14, 165, 233, 0.1);
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-status-info {
+    padding: 6px 14px;
+  }
+}
+
+.qoder-dark-status-warning {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 8px;
+  padding: 4px 10px;
+  display: inline-block;
+  margin: 0.2rem;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-status-warning {
+    padding: 6px 14px;
+  }
+}
+
+.qoder-dark-status-error {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 4px 10px;
+  display: inline-block;
+  margin: 0.2rem;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.1);
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-status-error {
+    padding: 6px 14px;
+  }
+}
+
+/* Qoder Dark badges - Modernizado */
+.qoder-dark-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-badge {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+  }
+}
+
+.qoder-dark-badge-primary {
+  background-color: var(--qoder-dark-button-primary);
+  color: var(--qoder-dark-button-primary-text);
+}
+
+.qoder-dark-badge-secondary {
+  background-color: var(--qoder-dark-button-secondary);
+  color: var(--qoder-dark-button-secondary-text);
+}
+
+/* Qoder Dark tooltips - Modernizado */
+.qoder-dark-tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.qoder-dark-tooltip .qoder-dark-tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: var(--qoder-dark-bg-tertiary);
+  color: var(--qoder-dark-text-primary);
+  text-align: center;
+  border-radius: 10px;
+  padding: 0.5rem;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  border: 1px solid var(--qoder-dark-border-primary);
+  font-size: 0.85rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-tooltip .qoder-dark-tooltip-text {
+    width: 220px;
+    padding: 0.75rem;
+    font-size: 0.95rem;
+  }
+}
+
+.qoder-dark-tooltip:hover .qoder-dark-tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Qoder Dark table styles - Modernizado */
+.qoder-dark-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: var(--qoder-dark-bg-secondary);
+  border: 1px solid var(--qoder-dark-border-primary);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.qoder-dark-table th {
+  background-color: var(--qoder-dark-bg-tertiary);
+  color: var(--qoder-dark-text-primary);
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--qoder-dark-border-primary);
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-table th {
+    padding: 1rem 1.5rem;
+  }
+}
+
+.qoder-dark-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--qoder-dark-border-primary);
+  color: var(--qoder-dark-text-primary);
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-table td {
+    padding: 1rem 1.5rem;
+  }
+}
+
+.qoder-dark-table tr:last-child td {
+  border-bottom: none;
+}
+
+.qoder-dark-table tr:hover td {
+  background-color: var(--qoder-dark-bg-hover);
+}
+
+/* Qoder Dark alert styles - Modernizado */
+.qoder-dark-alert {
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border: 1px solid transparent;
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-alert {
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+}
+
+.qoder-dark-alert-success {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: var(--qoder-dark-text-primary);
+}
+
+.qoder-dark-alert-info {
+  background-color: rgba(14, 165, 233, 0.1);
+  border-color: rgba(14, 165, 233, 0.3);
+  color: var(--qoder-dark-text-primary);
+}
+
+.qoder-dark-alert-warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: var(--qoder-dark-text-primary);
+}
+
+.qoder-dark-alert-error {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: var(--qoder-dark-text-primary);
+}
+
+/* Qoder Dark form styles - Modernizado */
+.qoder-dark-form-group {
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+  .qoder-dark-form-group {
+    margin-bottom: 1.5rem;
+  }
+}
+
+.qoder-dark-form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--qoder-dark-text-primary);
+}
+
+/* Qoder Dark utilities - Modernizado */
+.cursor-input {
+  cursor: text;
+}
+
+.cursor-button {
+  cursor: pointer;
+}
+
+.cursor-button-primary {
+  cursor: pointer;
+  background-color: var(--qoder-dark-button-primary);
+  color: var(--qoder-dark-button-primary-text);
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-weight: 600;
+  font-family: "Consolas, 'Courier New', monospace";
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .cursor-button-primary {
+    padding: 12px 20px;
+  }
+}
+
+.cursor-button-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2));
+  opacity: 0;
+}
+
+.cursor-button-primary:hover {
+  background-color: var(--qoder-dark-button-hover);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.cursor-button-primary:hover::before {
+  opacity: 1;
+}
+
+.cursor-button-primary:active {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Qoder Dark accent colors - Modernizado */
+.qoder-dark-accent-primary {
+  color: #a0a0a0;
+}
+
+.qoder-dark-accent-secondary {
+  color: #808080;
+}
+
+.qoder-dark-accent-success {
+  color: #10b981;
+}
+
+.qoder-dark-accent-info {
+  color: #0ea5e9;
+}
+
+.qoder-dark-accent-warning {
+  color: #f59e0b;
+}
+
+.qoder-dark-accent-danger {
+  color: #ef4444;
+}
+
+/* Qoder Dark custom scrollbar - Modernizado */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--qoder-dark-bg-secondary);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--qoder-dark-border-primary);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--qoder-dark-text-secondary);
+}
+
+/* Qoder Dark transitions - Modernizado */
+.smooth-transition {
+  transition: all 0.2s ease;
+}
+
+.hover-lift:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Responsive utilities - Modernizado */
+@media (max-width: 768px) {
+  .qoder-dark-window-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .qoder-dark-window-content {
+    padding: 1rem;
+  }
+  
+  .qoder-dark-table th,
+  .qoder-dark-table td {
+    padding: 0.75rem 1rem;
+  }
+}

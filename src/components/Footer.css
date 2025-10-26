@@ -1,20 +1,20 @@
 .footer {
   text-align: center;
   padding: 20px;
-  background-color: #000;
-  color: #fff;
+  background-color: transparent;
+  color: #808080;
   font-size: 14px;
   width: 100%;
   box-sizing: border-box;
 }
 
 .footer-link {
-  color: #fff;
+  color: #808080;
   text-decoration: none;
 }
 
 .footer-link:hover {
-  text-decoration: underline;
+  color: #fff;
 }
 
 .codexa-x {

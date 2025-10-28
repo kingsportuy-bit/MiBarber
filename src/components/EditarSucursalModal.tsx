@@ -17,10 +17,9 @@ export function EditarSucursalModal({ open, onOpenChange, initial, onSave, onCan
   const isEdit = Boolean(initial?.id);
   
   const [nombre_sucursal, setNombreSucursal] = useState(initial?.nombre_sucursal || "");
-  const [celular, setCelular] = useState(initial?.celular || "");
   const [telefono, setTelefono] = useState(initial?.telefono || "");
   const [direccion, setDireccion] = useState(initial?.direccion || "");
-  const [horario, setHorario] = useState(initial?.horario || ""); // Usar horario en lugar de info
+  const [info, setInfo] = useState(initial?.info || "");
   
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -28,10 +27,9 @@ export function EditarSucursalModal({ open, onOpenChange, initial, onSave, onCan
   useEffect(() => {
     if (open) {
       setNombreSucursal(initial?.nombre_sucursal || "");
-      setCelular(initial?.celular || "");
       setTelefono(initial?.telefono || "");
       setDireccion(initial?.direccion || "");
-      setHorario(initial?.horario || ""); // Resetear horario en lugar de info
+      setInfo(initial?.info || "");
       setErrors({});
     }
   }, [open, initial]);
@@ -56,12 +54,12 @@ export function EditarSucursalModal({ open, onOpenChange, initial, onSave, onCan
     try {
       const sucursalData = {
         nombre_sucursal,
-        celular,
         telefono,
         direccion,
-        horario // Usar horario en lugar de info
+        info,
       };
       
+      console.log("Datos a enviar para guardar sucursal:", sucursalData);
       // Guardar datos de la sucursal
       await onSave(sucursalData);
       
@@ -98,17 +96,7 @@ export function EditarSucursalModal({ open, onOpenChange, initial, onSave, onCan
                 {errors.nombre_sucursal && <p className="text-red-500 text-xs mt-1">{errors.nombre_sucursal}</p>}
               </div>
               
-              <div className="col-span-2 md:col-span-1">
-                <label className="text-xs text-qoder-dark-text-secondary">Celular</label>
-                <input 
-                  className="w-full qoder-dark-input p-3 rounded-lg" 
-                  value={celular} 
-                  onChange={(e) => setCelular(e.target.value)} 
-                  placeholder="Celular"
-                />
-              </div>
-              
-              <div className="col-span-2 md:col-span-1">
+              <div className="col-span-2">
                 <label className="text-xs text-qoder-dark-text-secondary">Teléfono</label>
                 <input 
                   className="w-full qoder-dark-input p-3 rounded-lg" 
@@ -133,8 +121,8 @@ export function EditarSucursalModal({ open, onOpenChange, initial, onSave, onCan
                 <label className="text-xs text-qoder-dark-text-secondary">Información Adicional</label>
                 <textarea 
                   className="w-full qoder-dark-input p-3 rounded-lg" 
-                  value={horario} 
-                  onChange={(e) => setHorario(e.target.value)} 
+                  value={info} 
+                  onChange={(e) => setInfo(e.target.value)} 
                   placeholder="Información adicional sobre la sucursal"
                   rows={3}
                 />
@@ -150,18 +138,19 @@ export function EditarSucursalModal({ open, onOpenChange, initial, onSave, onCan
                   }
                   onOpenChange(false);
                 }}
-                className="qoder-dark-button px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+                className="cancel-button"
               >
                 <span>Cancelar</span>
               </button>
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="qoder-dark-button-primary px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+                className="action-button"
               >
                 <span>{isEdit ? "Actualizar" : "Crear sucursal"}</span>
               </button>
             </div>
+
           </div>
         </Dialog.Content>
       </Dialog.Portal>

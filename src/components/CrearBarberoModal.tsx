@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useBarberos } from "@/hooks/useBarberos";
 import { useBarberiaInfo } from "@/hooks/useBarberiaInfo";
 import { toast } from "sonner";
@@ -26,6 +26,21 @@ export function CrearBarberoModal({ open, onOpenChange, idBarberia, id_sucursal,
     especialidades: [] as string[] // Cambiar a array de strings para seleccionar servicios
   });
   const [loading, setLoading] = useState(false);
+
+  // Resetear el formulario cuando se abre el modal
+  useEffect(() => {
+    if (open) {
+      setFormData({
+        nombre: "",
+        telefono: "",
+        email: "",
+        username: "",
+        password: "",
+        nivel_permisos: 2,
+        especialidades: []
+      });
+    }
+  }, [open]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -191,14 +206,14 @@ export function CrearBarberoModal({ open, onOpenChange, idBarberia, id_sucursal,
               onChange={(e) => setFormData(prev => ({ ...prev, nivel_permisos: parseInt(e.target.value) }))}
               className="qoder-dark-input w-full p-2 rounded-lg"
             >
-              <option value={1}>Administrador (1)</option>
-              <option value={2}>Barbero Normal (2)</option>
+              <option value={1}>Administrador - Acceso completo (1)</option>
+              <option value={2}>Barbero Normal - Acceso limitado (2)</option>
             </select>
           </div>
           
           <div>
             <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-1">
-              Especialidades (seleccione los servicios que puede realizar)
+              Especialidades (servicios que puede realizar este barbero)
             </label>
             <div className="border border-qoder-dark-border-primary rounded-lg p-3 max-h-40 overflow-y-auto">
               {serviciosQuery.isLoading ? (
@@ -224,24 +239,25 @@ export function CrearBarberoModal({ open, onOpenChange, idBarberia, id_sucursal,
               )}
             </div>
           </div>
-          
+
           <div className="flex justify-end space-x-3 pt-4">
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="qoder-dark-button px-4 py-2 rounded-lg"
+              className="cancel-button"
               disabled={loading}
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="qoder-dark-button-primary px-4 py-2 rounded-lg"
+              className="action-button"
               disabled={loading}
             >
               {loading ? "Creando..." : "Crear Barbero"}
             </button>
           </div>
+
         </form>
       </div>
     </div>

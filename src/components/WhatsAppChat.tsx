@@ -28,6 +28,7 @@ export function WhatsAppChat() {
   const [message, setMessage] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null); // Estado para imagen en pantalla completa
+  const [showBackgroundImage, setShowBackgroundImage] = useState<boolean>(false); // Estado para controlar la visibilidad de la imagen de fondo
   
   // Cambiar para que no seleccione automáticamente el primer chat
   const activeConv = grouped?.find((g: ChatConversation) => g.session_id === active) || null;
@@ -45,6 +46,24 @@ export function WhatsAppChat() {
 
   // Mostrar todas las conversaciones sin filtrar (eliminamos la búsqueda)
   const filteredConversations = grouped || [];
+
+  // Efecto para manejar el evento de tecla Escape y deseleccionar el chat
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setActive(null);
+        setShowBackgroundImage(false);
+      }
+    };
+
+    // Agregar el event listener cuando el componente se monta
+    window.addEventListener('keydown', handleEscapeKey);
+
+    // Limpiar el event listener cuando el componente se desmonta
+    return () => {
+      window.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, []);
 
   // Efecto para hacer scroll al último mensaje cuando cambia el chat activo
   useEffect(() => {
@@ -99,6 +118,13 @@ export function WhatsAppChat() {
       clearTimeout(timer3);
     };
   }, [activeConv?.messages]);
+
+  // Efecto para mostrar la imagen de fondo cuando se selecciona un chat
+  useEffect(() => {
+    if (active !== null) {
+      setShowBackgroundImage(true);
+    }
+  }, [active]);
 
   // Función para verificar si un mensaje contiene una imagen
   const isImageUrl = (content: string) => {
@@ -246,15 +272,19 @@ export function WhatsAppChat() {
   return (
     <>
       {/* Versión desktop */}
-      <div className="hidden sm:block">
+      <div className="hidden sm:block h-screen w-full">
         {/* Contenedor principal del chat */}
-        <div className="flex h-[calc(100vh-64px)] w-full bg-qoder-dark-bg-primary rounded-xl overflow-hidden min-w-0">
+        <div className="flex h-[calc(100vh-60px)] w-full bg-qoder-dark-bg-secondary overflow-hidden min-w-0 mt-[60px]">
           {/* Panel izquierdo - Lista de chats estilo WhatsApp */}
-          <aside className="w-80 border-r border-qoder-dark-border-primary flex flex-col bg-qoder-dark-bg-quaternary md:w-72 sm:w-64 xs:w-full min-w-0">
+          <aside className="w-[450px] border-r border-qoder-dark-border-primary flex flex-col bg-qoder-dark-bg-form md:w-[400px] sm:w-[350px] xs:w-full min-w-0 relative" style={{ fontSize: '1.2705em' }}>
             {/* Header del panel de chats */}
-            <div className="p-2 border-b border-qoder-dark-border-primary bg-qoder-dark-bg-quaternary min-w-0">
+            <div className="p-2 bg-qoder-dark-bg-header min-w-0 relative">
+              {/* Identificador de sección */}
+              <div className="absolute top-1 right-1 text-xs text-qoder-dark-text-muted font-bold bg-qoder-dark-bg-secondary px-1 rounded">
+                H
+              </div>
               <div className="flex items-center justify-between mb-2">
-                <h2 className="font-semibold text-qoder-dark-text-primary px-2">Chats de WhatsApp</h2>
+                <h2 className="font-semibold text-qoder-dark-text-primary px-2" style={{ fontSize: '1.1em' }}>WhatsApp</h2>
                 <div className="flex items-center gap-1 ml-auto">
                   {isRefreshing && (
                     <div className="flex items-center gap-1 text-xs text-qoder-dark-text-secondary">
@@ -264,7 +294,7 @@ export function WhatsAppChat() {
                   <button 
                     onClick={refreshChats}
                     disabled={isRefreshing}
-                    className="p-2 rounded-full hover:bg-qoder-dark-bg-hover transition-colors disabled:opacity-50"
+                    className="p-2 rounded-full hover:bg-qoder-dark-bg-hover transition-colors disabled:opacity-50 bg-transparent !bg-none border-none"
                     title="Refrescar chats"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-qoder-dark-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -305,7 +335,11 @@ export function WhatsAppChat() {
             </div>
             
             {/* Lista de conversaciones */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar bg-qoder-dark-bg-quaternary scrollbar-styled min-w-0">
+            <div className="flex-1 overflow-y-auto custom-scrollbar border-b border-qoder-dark-border-primary bg-qoder-dark-bg-header scrollbar-styled min-w-0 relative" style={{ padding: '0 10px' }}>
+              {/* Identificador de sección */}
+              <div className="absolute top-1 right-1 text-xs text-qoder-dark-text-muted font-bold bg-qoder-dark-bg-secondary px-1 rounded">
+                C
+              </div>
               {isLoading && (
                 <div className="p-4 text-center">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-qoder-dark-accent-primary mx-auto mb-2"></div>
@@ -319,16 +353,16 @@ export function WhatsAppChat() {
                 const isActive = active === conversation.session_id;
                 
                 return (
-                  <button
+                  <div
                     key={conversation.session_id}
                     onClick={() => setActive(conversation.session_id)}
-                    className={`w-full text-left p-3 hover:bg-qoder-dark-bg-hover transition-colors ${
-                      isActive ? 'bg-qoder-dark-bg-hover' : ''
+                    className={`w-full text-left p-2 rounded-lg transition-colors cursor-pointer mb-1 ${
+                      isActive ? 'bg-[#2D2E2E]' : 'hover:bg-[#2D2E2E]'
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       {/* Avatar del cliente */}
-                      <div className="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0">
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
                         {(() => {
                           const clientInfo = getClientInfo(conversation.session_id);
                           const fotoPerfil = clientInfo?.foto_perfil;
@@ -361,14 +395,16 @@ export function WhatsAppChat() {
                       <div className="flex-1 min-w-0">
                         {/* Nombre del cliente y timestamp */}
                         <div className="flex items-center justify-between mb-1">
-                          <h3 className="font-semibold text-qoder-dark-text-primary truncate">{clientName}</h3>
+                          <h3 className="font-normal text-qoder-dark-text-primary truncate" style={{ fontSize: '1.09375rem' }}>
+                            {clientName}
+                          </h3>
                           <span className="text-xs text-qoder-dark-text-secondary flex-shrink-0">
                             {lastMessage ? formatWhatsAppTimestamp(lastMessage.timestamp) : ""}
                           </span>
                         </div>
                         
                         {/* Último mensaje */}
-                        <div className="text-sm text-qoder-dark-text-secondary truncate">
+                        <div className="text-qoder-dark-text-secondary truncate" style={{ fontSize: '0.8125rem' }}>
                           {lastMessage ? (
                             <span>
                               {isImageUrl(lastMessage.content) ? (
@@ -386,7 +422,7 @@ export function WhatsAppChat() {
                         </div>
                       </div>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
               
@@ -399,10 +435,35 @@ export function WhatsAppChat() {
           </aside>
 
           {/* Panel derecho - Ventana de chat */}
-          <div className="flex-1 flex flex-col bg-qoder-dark-bg-secondary min-w-0">
+          <div className="flex-1 flex flex-col min-w-0 relative" style={{ backgroundColor: '#161717' }}>
+            {/* Identificador de sección */}
+            <div className="absolute top-2 right-2 text-xs text-qoder-dark-text-muted font-bold bg-qoder-dark-bg-secondary px-1 rounded z-10">
+              V
+            </div>
+            
+            {/* Contenedor con color #161717 y imagen de fondo detrás de M y E */}
+            {showBackgroundImage && (
+              <div 
+                className="absolute inset-0 z-0 overflow-hidden"
+                style={{ backgroundColor: '#161717' }}
+              >
+                <div 
+                  className="absolute inset-0 bg-[url('https://i.postimg.cc/bwtp831q/m5BEg2K4OR4.png')] bg-repeat bg-center"
+                  style={{ 
+                    backgroundSize: 'auto 100%',
+                    mixBlendMode: 'overlay'
+                  }}
+                ></div>
+              </div>
+            )}
+            
             {/* Header del chat */}
             {activeConv ? (
-              <div className="p-3 border-b border-qoder-dark-border-primary bg-qoder-dark-bg-quaternary flex items-center justify-between min-w-0">
+              <div className="p-3 bg-qoder-dark-bg-header flex items-center justify-between min-w-0 relative">
+                {/* Identificador de sección */}
+                <div className="absolute top-1 right-1 text-xs text-qoder-dark-text-muted font-bold bg-qoder-dark-bg-secondary px-1 rounded">
+                  H2
+                </div>
                 <div className="flex items-center gap-3">
                   <button 
                     onClick={() => setActive(null)}
@@ -450,7 +511,7 @@ export function WhatsAppChat() {
                 
                 <div className="flex items-center gap-2">
                   {/* Control humano/IA */}
-                  <div className="flex items-center gap-2 bg-qoder-dark-bg-primary px-3 py-1 rounded-full">
+                  <div className="flex items-center gap-2 bg-qoder-dark-bg-form px-3 py-1 rounded-full border border-qoder-dark-border-primary">
                     <span className="text-xs text-qoder-dark-text-secondary">IA</span>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input 
@@ -459,20 +520,23 @@ export function WhatsAppChat() {
                         checked={getClientInfo(activeConv.session_id)?.chat_humano === 1}
                         onChange={(e) => handleControlHumanoChange(e.target.checked)}
                       />
-                      <div className="w-11 h-6 bg-blue-500 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                      <div className={`w-11 h-6 ${getClientInfo(activeConv.session_id)?.chat_humano === 1 ? 'bg-[#144D37] ' : 'bg-[#14274D]'} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all`}></div>
                     </label>
                     <span className="text-xs text-qoder-dark-text-secondary">Humano</span>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="p-4 border-b border-qoder-dark-border-primary bg-qoder-dark-bg-quaternary flex items-center justify-center h-16">
-                <h3 className="font-semibold text-qoder-dark-text-primary">Selecciona un chat para comenzar</h3>
+              <div className="p-4 bg-[#161717] flex items-center justify-center h-16">
               </div>
             )}
             
             {/* Área de mensajes */}
-            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar scrollbar-styled bg-qoder-dark-bg-secondary bg-[url('/whatsapp-bg.png')] bg-repeat bg-[length:300px_500px] min-w-0" id="messages-container">
+            <div className="flex-1 overflow-y-auto p-12 custom-scrollbar scrollbar-styled bg-transparent bg-[url('/whatsapp-bg.png')] bg-repeat bg-[length:300px_500px] min-w-0 relative" id="messages-container">
+              {/* Identificador de sección */}
+              <div className="absolute top-1 right-1 text-xs text-qoder-dark-text-muted font-bold bg-qoder-dark-bg-secondary px-1 rounded">
+                M
+              </div>
               {activeConv ? (
                 <div className="space-y-2">
                   {activeConv.messages.map((msg: ChatMessage, index: number) => (
@@ -481,12 +545,12 @@ export function WhatsAppChat() {
                       className={`flex ${(msg.type === 'ai' && msg.source === 'manual') || msg.type === 'ai' ? 'justify-end' : 'justify-start'} mb-2`}
                     >
                       <div 
-                        className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl px-4 py-2 rounded-lg ${
+                        className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl px-4 py-2 rounded-3xl ${
                           (msg.type === 'ai' && msg.source === 'manual') 
-                            ? 'bg-green-600 text-white rounded-br-none' 
+                            ? 'whatsapp-outgoing-bubble' 
                             : (msg.type === 'ai' 
-                                ? 'bg-blue-500 text-white rounded-br-none' 
-                                : 'bg-qoder-dark-bg-primary text-qoder-dark-text-primary rounded-bl-none')
+                                ? 'whatsapp-incoming-bubble' 
+                                : 'whatsapp-client-bubble')
                         }`}
                       >
                         {/* Verificar si el contenido es una imagen */}
@@ -504,11 +568,11 @@ export function WhatsAppChat() {
                                   onClick={() => setFullscreenImage(imageData?.imageUrl || msg.content)}
                                 />
                                 {imageData?.caption && (
-                                  <p className="text-xs text-qoder-dark-text-primary mt-1">
+                                  <p className="text-sm text-qoder-dark-text-primary mt-1">
                                     {imageData.caption}
                                   </p>
                                 )}
-                                <p className="text-xs opacity-70 mt-1">
+                                <p className="text-xs opacity-50 mt-1">
                                   {msg.type === 'ai' && msg.source === 'manual' ? 'Humano' : (msg.type === 'ai' ? 'IA' : 'Cliente')} • {formatWhatsAppTimestamp(msg.timestamp)}
                                 </p>
                               </div>
@@ -516,10 +580,11 @@ export function WhatsAppChat() {
                           })()
                         ) : (
                           <div className="space-y-1">
-                            <p className="whitespace-pre-wrap">{msg.content}</p>
-                            <p className="text-xs opacity-70 mt-1">
-                              {msg.type === 'ai' && msg.source === 'manual' ? 'Humano' : (msg.type === 'ai' ? 'IA' : 'Cliente')} • {formatWhatsAppTimestamp(msg.timestamp)}
-                            </p>
+                            <p className="whitespace-pre-wrap message-text">{msg.content}</p>
+                            <div className="message-info">
+                              <span className="message-sender">{msg.type === 'ai' && msg.source === 'manual' ? 'Humano' : (msg.type === 'ai' ? 'IA' : 'Cliente')}</span>
+                              <span className="message-time">{formatWhatsAppTimestamp(msg.timestamp)}</span>
+                            </div>
                           </div>
                         )}
                       </div>
@@ -528,12 +593,8 @@ export function WhatsAppChat() {
                   <div ref={messagesEndRef} style={{ height: '1px' }} />
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-full">
+                <div className="flex items-center justify-center h-full bg-[#161717]">
                   <div className="text-center text-qoder-dark-text-secondary">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-24 w-24 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    <h3 className="text-xl font-semibold mb-2">WhatsApp Web</h3>
                     <p className="max-w-md">Selecciona un chat para comenzar a enviar y recibir mensajes</p>
                   </div>
                 </div>
@@ -542,7 +603,11 @@ export function WhatsAppChat() {
             
             {/* Área de entrada de mensaje */}
             {activeConv && (
-              <div className="p-3 border-t border-qoder-dark-border-primary bg-qoder-dark-bg-quaternary min-w-0">
+              <div className="p-3 bg-transparent min-w-0 relative">
+                {/* Identificador de sección */}
+                <div className="absolute top-1 right-1 text-xs text-qoder-dark-text-muted font-bold bg-qoder-dark-bg-secondary px-1 rounded">
+                  E
+                </div>
                 <div className="flex items-center gap-2 min-w-0">
                   <input
                     type="text"
@@ -550,8 +615,13 @@ export function WhatsAppChat() {
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Escribe un mensaje..."
-                    className="flex-1 qoder-dark-input py-3 px-4 rounded-full focus:outline-none"
+                    className="flex-1 py-4 px-4 focus:outline-none focus:ring-0 focus:ring-transparent focus:border-transparent bg-[#242626] relative pill-effect border-0"
+                    style={{ backgroundColor: '#242626' }}
                   />
+                  {/* Identificador de burbuja de escribir mensaje - B */}
+                  <div className="absolute top-1 left-1 text-xs text-qoder-dark-text-muted font-bold bg-qoder-dark-bg-secondary px-1 rounded z-10">
+                    B
+                  </div>
                 </div>
               </div>
             )}
@@ -560,7 +630,7 @@ export function WhatsAppChat() {
       </div>
 
       {/* Versión móvil */}
-      <div className="block sm:hidden">
+      <div className="block sm:hidden h-screen w-full mt-16 fixed top-0 left-0 z-10">
         <WhatsAppChatMobile />
       </div>
 

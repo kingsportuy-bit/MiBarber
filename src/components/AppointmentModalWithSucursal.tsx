@@ -1315,64 +1315,26 @@ export function AppointmentModalWithSucursal({
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Contenido del formulario - responsive */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Fecha */}
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
-                  Fecha
-                </label>
-                <input
-                  type="date"
-                  value={values.fecha || ""}
-                  onChange={(e) => update("fecha", e.target.value)}
-                  min={today}
-                  className="qoder-dark-input w-full px-3 py-2 rounded-lg"
-                  required
-                />
-              </div>
-              
-              {/* Hora */}
-              <div>
-                <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
-                  Hora
-                </label>
-                <select
-                  value={values.hora || ""}
-                  onChange={(e) => update("hora", e.target.value)}
-                  className="qoder-dark-select w-full px-3 py-2 rounded-lg"
-                  required
-                  disabled={
-                    !selectedSucursalId ||
-                    !values.fecha ||
-                    (!isAdmin && !barberoActual?.id_barbero && !values.barbero) ||
-                    (isAdmin && !values.barbero)
-                  }
-                >
-                  <option value="">Seleccione una hora</option>
-                  {availableTimes.map((time) => (
-                    <option key={time} value={time}>
-                      {time}
-                    </option>
-                  ))}
-                </select>
-                {availableTimes.length === 0 && (
-                  <p className="text-xs text-qoder-dark-text-secondary mt-1">
-                    No hay horarios disponibles para la fecha seleccionada
-                  </p>
-                )}
-              </div>
-              
-              {/* Duración */}
-              <div>
-                <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
-                  Duración
-                </label>
-                <input
-                  type="text"
-                  value={values.duracion || ""}
-                  readOnly
-                  className="qoder-dark-input w-full px-3 py-2 rounded-lg bg-qoder-dark-bg-secondary"
-                />
-              </div>
+              {/* Selector de sucursal - solo para administradores */}
+              {isAdmin && (
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
+                    Sucursal
+                  </label>
+                  <select
+                    value={selectedSucursalId || ""}
+                    onChange={(e) => setSelectedSucursalId(e.target.value || undefined)}
+                    className="qoder-dark-select w-full px-3 py-2 rounded-lg"
+                  >
+                    <option value="">Seleccione una sucursal</option>
+                    {sucursales.map((sucursal) => (
+                      <option key={sucursal.id} value={sucursal.id}>
+                        {sucursal.nombre_sucursal || `Sucursal ${sucursal.numero_sucursal}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               
               {/* Cliente */}
               <div className="md:col-span-2">
@@ -1382,19 +1344,77 @@ export function AppointmentModalWithSucursal({
                 <input
                   type="text"
                   value={values.cliente_nombre || ""}
-                  onChange={(e) => update("cliente_nombre", e.target.value)}
+                  onChange={(e) => {
+                    update("cliente_nombre", e.target.value);
+                    setSearchTerm(e.target.value);
+                  }}
                   className="qoder-dark-input w-full px-3 py-2 rounded-lg"
                   required
                   list="clientes-list"
                 />
-                {clientesData && clientesData.length > 0 && (
+                {clientesData && clientesData.length > 0 && searchTerm && (
                   <datalist id="clientes-list">
-                    {clientesData.map((cliente: Client) => (
+                    {filteredClientes.map((cliente: Client) => (
                       <option key={cliente.id_cliente} value={cliente.nombre}>
                         {cliente.nombre}
                       </option>
                     ))}
                   </datalist>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowQuickClientForm(!showQuickClientForm)}
+                  className="mt-2 text-sm text-qoder-dark-accent-primary hover:underline"
+                >
+                  + Crear cliente rápido
+                </button>
+                
+                {/* Formulario de cliente rápido */}
+                {showQuickClientForm && (
+                  <div className="mt-3 p-3 bg-qoder-dark-bg-secondary rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-xs text-qoder-dark-text-primary mb-1">
+                          Nombre *
+                        </label>
+                        <input
+                          type="text"
+                          value={quickClientData.nombre}
+                          onChange={(e) => setQuickClientData({...quickClientData, nombre: e.target.value})}
+                          className="qoder-dark-input w-full px-2 py-1 text-sm rounded"
+                          placeholder="Nombre completo"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-qoder-dark-text-primary mb-1">
+                          Teléfono
+                        </label>
+                        <input
+                          type="text"
+                          value={quickClientData.telefono}
+                          onChange={(e) => setQuickClientData({...quickClientData, telefono: e.target.value})}
+                          className="qoder-dark-input w-full px-2 py-1 text-sm rounded"
+                          placeholder="Teléfono"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        type="button"
+                        onClick={handleCreateQuickClient}
+                        className="qoder-dark-button px-3 py-1 text-sm rounded"
+                      >
+                        Crear
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowQuickClientForm(false)}
+                        className="cancel-button px-3 py-1 text-sm rounded"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
               
@@ -1450,6 +1470,55 @@ export function AppointmentModalWithSucursal({
                 )}
               </div>
               
+              {/* Fecha y Hora en la misma fila */}
+              <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Fecha */}
+                <div>
+                  <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
+                    Fecha
+                  </label>
+                  <input
+                    type="date"
+                    value={values.fecha || ""}
+                    onChange={(e) => update("fecha", e.target.value)}
+                    min={today}
+                    className="qoder-dark-input w-full px-3 py-2 rounded-lg"
+                    required
+                  />
+                </div>
+                
+                {/* Hora */}
+                <div>
+                  <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
+                    Hora
+                  </label>
+                  <select
+                    value={values.hora || ""}
+                    onChange={(e) => update("hora", e.target.value)}
+                    className="qoder-dark-select w-full px-3 py-2 rounded-lg"
+                    required
+                    disabled={
+                      !selectedSucursalId ||
+                      !values.fecha ||
+                      (!isAdmin && !barberoActual?.id_barbero && !values.barbero) ||
+                      (isAdmin && !values.barbero)
+                    }
+                  >
+                    <option value="">Seleccione una hora</option>
+                    {availableTimes.map((time) => (
+                      <option key={time} value={time}>
+                        {time}
+                      </option>
+                    ))}
+                  </select>
+                  {availableTimes.length === 0 && (
+                    <p className="text-xs text-qoder-dark-text-secondary mt-1">
+                      No hay horarios disponibles para la fecha seleccionada
+                    </p>
+                  )}
+                </div>
+              </div>
+              
               {/* Nota */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
@@ -1466,20 +1535,20 @@ export function AppointmentModalWithSucursal({
             
             {/* Botones de acción - responsive */}
             <div className="flex flex-col sm:flex-row gap-2 pt-4">
-              <button
-                type="submit"
-                className="qoder-dark-button-primary px-4 py-2 rounded-lg flex-1 hover-lift smooth-transition"
-              >
-                {isEdit ? "Actualizar" : "Crear"} Turno
-              </button>
               <Dialog.Close asChild>
                 <button
                   type="button"
-                  className="qoder-dark-button px-4 py-2 rounded-lg flex-1 hover-lift smooth-transition"
+                  className="cancel-button flex-1"
                 >
                   Cancelar
                 </button>
               </Dialog.Close>
+              <button
+                type="submit"
+                className="action-button flex-1"
+              >
+                {isEdit ? "Actualizar" : "Crear"} Turno
+              </button>
             </div>
           </form>
         </Dialog.Content>

@@ -148,12 +148,13 @@ export function RegistroAdministrador({ onRegistroCompleto }: RegistroAdministra
           <div className="flex justify-end pt-4">
             <button
               type="submit"
-              className="qoder-dark-button-primary px-6 py-3 rounded-lg font-medium hover-lift smooth-transition w-full"
+              className="action-button w-full"
               disabled={crearBarberia.isPending}
             >
               {crearBarberia.isPending ? "Creando..." : "Crear Barbería"}
             </button>
           </div>
+
         </form>
       </div>
     </div>

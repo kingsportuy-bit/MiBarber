@@ -118,8 +118,7 @@ export interface Sucursal {
   nombre_sucursal: string | null;
   direccion: string | null;
   telefono: string | null;
-  celular: string | null;
-  horario: string | null; // text (horario en formato texto)
+  info: string | null; // text (información adicional en formato texto)
   created_at: string; // timestamptz
   updated_at: string; // timestamptz
 }

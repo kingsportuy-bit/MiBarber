@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Barbero, Service } from "@/types/db";
 import { getSupabaseClient } from "@/lib/supabaseClient";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface EditarBarberoModalProps {
   open: boolean;
@@ -23,6 +24,9 @@ export function EditarBarberoModal({
   const [especialidades, setEspecialidades] = useState<string[]>(barbero.especialidades || []);
   const [serviciosDisponibles, setServiciosDisponibles] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Cliente de consulta para invalidar cachés
+  const queryClient = useQueryClient();
 
   const loadServiciosDisponibles = useCallback(async () => {
     try {
@@ -68,6 +72,12 @@ export function EditarBarberoModal({
         telefono,
         especialidades
       });
+      
+      // Invalidar las consultas relacionadas con barberos y servicios para que se actualicen
+      queryClient.invalidateQueries({ queryKey: ["barberos"] });
+      queryClient.invalidateQueries({ queryKey: ["barberos-list"] });
+      queryClient.invalidateQueries({ queryKey: ["servicios"] });
+      
       onOpenChange(false);
     } catch (error) {
       console.error("Error al guardar los cambios:", error);
@@ -210,20 +220,20 @@ export function EditarBarberoModal({
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="qoder-dark-button px-4 py-2 rounded-lg"
+                  className="cancel-button"
                   disabled={isLoading}
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="qoder-dark-button-primary px-4 py-2 rounded-lg flex items-center"
+                  className="action-button"
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <>
                       <svg
-                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-black"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -249,6 +259,7 @@ export function EditarBarberoModal({
                   )}
                 </button>
               </div>
+
             </form>
           </div>
         </div>

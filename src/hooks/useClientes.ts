@@ -26,18 +26,28 @@ export function useClientes(
     queryKey: ["clientes", { search, sortBy, idBarberia, idSucursal }],
     queryFn: async (): Promise<Client[]> => {
       let q = (supabase as any).from("mibarber_clientes").select("*");
+      
+      console.log("🔍 Consulta de clientes:", {
+        idBarberia,
+        idSucursal,
+        search,
+        sortBy
+      });
 
       // Filtrar por barbería - siempre aplicar si está disponible
       if (idBarberia) {
+        console.log("🔍 Filtrando por idBarberia:", idBarberia);
         q = q.eq("id_barberia", idBarberia);
       }
 
       // Filtrar por sucursal - siempre aplicar si está disponible
       if (idSucursal) {
+        console.log("🔍 Filtrando por idSucursal:", idSucursal);
         q = q.eq("id_sucursal", idSucursal);
       }
 
       // Aplicar ordenamiento
+      console.log("🔍 Aplicando ordenamiento:", sortBy);
       switch (sortBy) {
         case "ultimo_agregado":
           q = q.order("fecha_creacion", { ascending: false });
@@ -59,18 +69,59 @@ export function useClientes(
           break;
       }
 
+      // Solo aplicar búsqueda si hay texto
       if (search && search.trim()) {
-        const s = `%${search.trim()}%`;
-        q = q.or(`nombre.ilike.${s},id_cliente.ilike.${s},notas.ilike.${s}`);
+        const s = search.trim().toLowerCase();
+        console.log("🔍 Aplicando búsqueda:", s);
+        
+        // Usar la misma lógica que en el modal de citas
+        // Filtrar clientes localmente después de obtener todos los datos
+        // Esto es más confiable que las consultas OR complejas
+        const { data, error } = await q;
+        
+        if (error) {
+          console.error("❌ Error consultando clientes:", error);
+          console.error("❌ Detalles del error:", {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint
+          });
+          throw error;
+        }
+        
+        // Filtrar los resultados localmente
+        if (data && data.length > 0) {
+          const filteredData = data.filter(
+            (cliente: Client) =>
+              cliente.nombre.toLowerCase().includes(s) ||
+              (cliente.telefono && cliente.telefono.toLowerCase().includes(s)) ||
+              (cliente.id_cliente && cliente.id_cliente.toLowerCase().includes(s)) ||
+              (cliente.notas && cliente.notas.toLowerCase().includes(s))
+          );
+          console.log("✅ Clientes obtenidos y filtrados:", filteredData.length);
+          return filteredData as Client[];
+        }
+        
+        console.log("✅ Clientes obtenidos:", data?.length || 0);
+        return data as Client[];
       }
 
+      console.log("🔍 Ejecutando query sin búsqueda");
       const { data, error } = await q;
 
       if (error) {
         console.error("❌ Error consultando clientes:", error);
+        console.error("❌ Detalles del error:", {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
         throw error;
       }
 
+      console.log("✅ Clientes obtenidos:", data?.length || 0);
       return data as Client[];
     },
   });

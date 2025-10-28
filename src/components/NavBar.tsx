@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { MobileMenu } from "@/components/MobileMenu";
+import { UserDropdownMenu } from "@/components/UserDropdownMenu";
 
 interface Tab {
   href: string;
@@ -125,7 +126,7 @@ export function NavBar() {
     if (
       authState.isAuthenticated &&
       !authState.isAdmin &&
-      pathname === "/caja"
+      (pathname === "/caja")
     ) {
       router.push("/agenda");
     }
@@ -146,14 +147,11 @@ export function NavBar() {
         { href: "/agenda", label: "Agenda" },
         { href: "/clientes", label: "Clientes" },
         { href: "/whatsapp", label: "WhatsApp" },
-        { href: "/estadisticas", label: "Estadísticas" },
-        { href: "/caja", label: "Caja" },
       ];
     } else {
       tabs = [
         { href: "/agenda", label: "Agenda" },
         { href: "/whatsapp", label: "WhatsApp" },
-        { href: "/mis-estadisticas", label: "Mis Estadísticas" },
       ];
     }
   }
@@ -196,13 +194,14 @@ export function NavBar() {
   }
 
   return (
-    <nav className="sticky top-0 z-40 w-full border-b border-qoder-dark-border-primary bg-qoder-dark-bg-quaternary">
-      <div className="mx-auto max-w-6xl px-4 h-12 flex items-center min-w-0">
+    <nav className="navbar">
+      <div className="nav-container min-w-0">
         <Link
-          href="/mibarber"
-          className="font-semibold text-qoder-dark-text-primary hover:text-qoder-dark-accent-primary px-3 py-1 rounded-md hover:bg-qoder-dark-bg-hover mr-4"
+          href="/inicio"
+          className={`nav-logo font-bold ${pathname?.startsWith("/inicio") ? 'active' : ''}`}
         >
-          MiBarber
+          <span className="barberox-barbero">Barbero</span>
+          <span className="barberox-x">x</span>
         </Link>
         
         {/* Navegación de escritorio - ocultar en móviles */}
@@ -214,11 +213,7 @@ export function NavBar() {
                 <Link
                   key={t.href}
                   href={t.href}
-                  className={`px-3 py-1 rounded-md ${
-                    active
-                      ? "bg-qoder-dark-bg-hover text-qoder-dark-text-primary"
-                      : "text-qoder-dark-text-secondary hover:bg-qoder-dark-bg-hover hover:text-qoder-dark-text-primary"
-                  }`}
+                  className={`nav-link ${active ? 'active' : ''}`}
                 >
                   {t.label}
                 </Link>
@@ -227,52 +222,23 @@ export function NavBar() {
         </div>
         
         <div className="ml-auto flex items-center gap-4">
-          {authState.isAuthenticated && (
-            <Link
-              href={authState.isAdmin ? "/mi-barberia" : "/mis-datos"}
-              className={`hidden md:block px-3 py-1 rounded-md text-sm ${
-                (authState.isAdmin && pathname === "/mi-barberia") || 
-                (!authState.isAdmin && pathname === "/mis-datos")
-                  ? "bg-qoder-dark-bg-hover text-qoder-dark-text-primary"
-                  : "text-qoder-dark-text-secondary hover:bg-qoder-dark-bg-hover hover:text-qoder-dark-text-primary"
-              }`}
-            >
-              {authState.isAdmin ? "Mi Barbería" : "Mis Datos"}
-            </Link>
-          )}
+          {/* Estadísticas y Mi Barbería se mueven al menú desplegable */}
           
           {authState.isAuthenticated && authState.userName && (
-            <div className="hidden md:block text-qoder-dark-text-primary text-sm font-medium bg-qoder-dark-bg-secondary px-3 py-1 rounded-full border border-qoder-dark-border-primary">
-              {authState.userName}
-            </div>
+            <UserDropdownMenu 
+              userName={authState.userName}
+              isAdmin={authState.isAdmin}
+              onLogout={handleLogout}
+            />
           )}
           
           {authState.isAuthenticated ? (
-            <button
-              onClick={handleLogout}
-              className="hidden md:flex text-qoder-dark-text-secondary hover:text-qoder-dark-text-primary p-1 rounded-md hover:bg-qoder-dark-bg-hover items-center gap-1"
-              title="Cerrar sesión"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h12a3 3 0 013 3v1"
-                />
-              </svg>
-              <span className="text-sm">Salir</span>
-            </button>
+            // El botón de salir se ha movido al menú desplegable del usuario
+            null
           ) : (
             <Link
               href="/login"
-              className="hidden md:block text-qoder-dark-text-secondary hover:text-qoder-dark-text-primary px-3 py-1 rounded-md hover:bg-qoder-dark-bg-hover text-sm"
+              className="hidden md:block nav-link"
             >
               Iniciar Sesión
             </Link>
@@ -285,8 +251,9 @@ export function NavBar() {
           {authState.isAuthenticated && (
             <button
               onClick={handleLogout}
-              className="md:hidden p-2 rounded-md text-qoder-dark-text-secondary hover:text-qoder-dark-text-primary hover:bg-qoder-dark-bg-hover"
+              className="md:hidden p-2 rounded-md text-qoder-dark-text-primary hover:text-qoder-dark-accent-orange hover:bg-qoder-dark-bg-hover"
               title="Cerrar sesión"
+              style={{ fontFamily: "'Roboto', 'Arial', sans-serif", color: '#ffffff' }}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

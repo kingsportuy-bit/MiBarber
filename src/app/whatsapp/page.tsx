@@ -7,17 +7,15 @@ import { WhatsAppChat } from "@/components/WhatsAppChat";
 
 export default function WhatsAppPage() {
   // Establecer el título de la página
-  usePageTitle("MiBarber | WhatsApp");
+  usePageTitle("Barberox | WhatsApp");
   
   return (
     <>
       <Head>
-        <title>MiBarber | WhatsApp</title>
+        <title>Barberox | WhatsApp</title>
       </Head>
-      <div className="flex flex-col h-full w-full min-w-0">
-        <div className="flex-grow h-full min-w-0">
-          <WhatsAppChat />
-        </div>
+      <div className="flex flex-col h-screen w-full min-w-0">
+        <WhatsAppChat />
       </div>
     </>
   );

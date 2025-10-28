@@ -3,8 +3,13 @@
 import { useState } from "react";
 import { useSucursales } from "@/hooks/useSucursales";
 import { EditarSucursalModal } from "@/components/EditarSucursalModal";
+import { SucursalInfoCard } from "@/components/SucursalInfoCard";
+import { SucursalBarberosSection } from "@/components/SucursalBarberosSection";
+import { SucursalServiciosSection } from "@/components/SucursalServiciosSection";
+import { SucursalHorariosSection } from "@/components/SucursalHorariosSection";
+import { useServicios } from "@/hooks/useServicios";
 import { toast } from "sonner";
-import type { Sucursal } from "@/types/db";
+import type { Sucursal, Service } from "@/types/db";
 
 interface SucursalesManagerProps {
   idBarberia?: string;
@@ -22,6 +27,16 @@ export function SucursalesManager({ idBarberia, isAdmin }: SucursalesManagerProp
     deleteSucursal
   } = useSucursales(idBarberia || undefined);
   
+  const { 
+    servicios, 
+    isLoading: isLoadingServicios, 
+    isError: isErrorServicios, 
+    error: errorServicios,
+    createServicio,
+    updateServicio,
+    deleteServicio
+  } = useServicios(idBarberia);
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sucursalToEdit, setSucursalToEdit] = useState<Sucursal | null>(null);
   const [sucursalToDelete, setSucursalToDelete] = useState<Sucursal | null>(null);
@@ -34,6 +49,25 @@ export function SucursalesManager({ idBarberia, isAdmin }: SucursalesManagerProp
   const handleEditSucursal = (sucursal: Sucursal) => {
     setSucursalToEdit(sucursal);
     setIsModalOpen(true);
+  };
+
+  // Funciones adaptadoras para los servicios
+  const handleCreateService = async (service: Omit<Service, "id_servicio" | "created_at" | "updated_at" | "activo">) => {
+    return createServicio.mutateAsync({
+      ...service,
+      activo: true
+    } as Omit<Service, "id_servicio" | "created_at" | "updated_at">);
+  };
+
+  const handleUpdateService = async (id: string, service: Partial<Service>) => {
+    return updateServicio.mutateAsync({
+      id_servicio: id,
+      ...service
+    } as Partial<Service> & { id_servicio: string });
+  };
+
+  const handleDeleteService = async (id: string) => {
+    return deleteServicio.mutateAsync(id);
   };
 
   const handleSaveSucursal = async (values: Partial<Sucursal>) => {
@@ -89,7 +123,7 @@ export function SucursalesManager({ idBarberia, isAdmin }: SucursalesManagerProp
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold text-qoder-dark-text-primary">
           Sucursales
@@ -107,88 +141,78 @@ export function SucursalesManager({ idBarberia, isAdmin }: SucursalesManagerProp
         )}
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-qoder-dark-border-primary">
-          <thead>
-            <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
-                Número
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
-                Nombre
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
-                Dirección
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
-                Contacto
-              </th>
-              {isAdmin && (
-                <th className="px-4 py-3 text-right text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
-                  Acciones
-                </th>
-              )}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-qoder-dark-border-primary">
-            {isLoading && (
-              <tr>
-                <td className="px-4 py-3 text-qoder-dark-text-primary" colSpan={isAdmin ? 5 : 4}>
-                  Cargando sucursales...
-                </td>
-              </tr>
-            )}
-            {sucursales?.map((sucursal) => (
-              <tr key={sucursal.id}>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-qoder-dark-text-primary">
-                  #{sucursal.numero_sucursal}
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-qoder-dark-text-primary">
-                  {sucursal.nombre_sucursal || "Sin nombre"}
-                </td>
-                <td className="px-4 py-3 text-sm text-qoder-dark-text-primary">
-                  {sucursal.direccion || "Sin dirección"}
-                </td>
-                <td className="px-4 py-3 text-sm text-qoder-dark-text-primary">
-                  <div>
-                    {sucursal.celular && <div>Cel: {sucursal.celular}</div>}
-                    {sucursal.telefono && <div>Tel: {sucursal.telefono}</div>}
-                  </div>
-                </td>
-                {isAdmin && (
-                  <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex justify-end space-x-2">
-                      <button
-                        onClick={() => handleEditSucursal(sucursal)}
-                        className="text-blue-500 hover:text-blue-300"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => setSucursalToDelete(sucursal)}
-                        className="text-red-500 hover:text-red-300"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
-                  </td>
-                )}
-              </tr>
-            ))}
-            {!isLoading && sucursales?.length === 0 && (
-              <tr>
-                <td className="px-4 py-3 text-qoder-dark-text-primary" colSpan={isAdmin ? 5 : 4}>
-                  No hay sucursales registradas
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      {isLoading && (
+        <div className="text-qoder-dark-text-primary">
+          Cargando sucursales...
+        </div>
+      )}
+
+      {sucursales?.map((sucursal) => (
+        <div key={sucursal.id} className="space-y-6">
+          <SucursalInfoCard 
+            sucursal={sucursal}
+            onEdit={() => handleEditSucursal(sucursal)}
+            onEditHorarios={() => {
+              // Esta función se podría usar para abrir un modal de edición de horarios
+              // Por ahora, simplemente mostramos la sección de horarios
+            }}
+          />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <SucursalHorariosSection idSucursal={sucursal.id} />
+            <SucursalBarberosSection 
+              sucursalId={sucursal.numero_sucursal} 
+              sucursalUuid={sucursal.id} 
+              sucursalNombre={sucursal.nombre_sucursal || undefined}
+              isAdmin={isAdmin}
+            />
+          </div>
+          
+          <SucursalServiciosSection
+            sucursalId={sucursal.id}
+            idBarberia={idBarberia || ''}
+            servicios={servicios}
+            isLoading={isLoadingServicios}
+            onCreateService={handleCreateService}
+            onUpdateService={handleUpdateService}
+            onDeleteService={handleDeleteService}
+          />
+          
+          {/* Sección de Información Adicional */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-qoder-dark-text-primary mb-3 flex items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-qoder-dark-accent-primary mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              Información Adicional
+            </h3>
+            <div className="bg-qoder-dark-bg-form rounded-lg p-4">
+              <p className="text-qoder-dark-text-primary whitespace-pre-line">
+                {sucursal.info || "No se ha proporcionado información adicional para esta sucursal."}
+              </p>
+            </div>
+          </div>
+        </div>
+      ))}
+
+      {!isLoading && sucursales?.length === 0 && (
+        <div className="text-center py-8 bg-qoder-dark-bg-form rounded-lg border border-qoder-dark-border-primary">
+          <p className="text-qoder-dark-text-secondary">
+            No hay sucursales registradas
+          </p>
+        </div>
+      )}
 
       {/* Modal para crear/editar sucursal */}
       <EditarSucursalModal

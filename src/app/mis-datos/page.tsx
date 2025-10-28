@@ -9,7 +9,7 @@ import { useActualizarBarbero } from "@/hooks/useActualizarBarbero";
 import { EditarBarberoModal } from "@/components/EditarBarberoModal";
 
 export default function MisDatosPage() {
-  usePageTitle("MiBarber | Mis Datos");
+  usePageTitle("Barberox | Mis Datos");
   return <MisDatosContent />;
 }
 

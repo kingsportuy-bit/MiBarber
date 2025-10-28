@@ -8,12 +8,12 @@ import { AdminProtectedRoute } from "@/components/AdminProtectedRoute";
 
 export default function ClientesPage() {
   // Establecer el título de la página
-  usePageTitle("MiBarber | Clientes");
+  usePageTitle("Barberox | Clientes");
   
   return (
     <AdminProtectedRoute>
       <Head>
-        <title>MiBarber | Clientes</title>
+        <title>Barberox | Clientes</title>
       </Head>
       <div className="flex flex-col h-full">
         <div className="flex justify-between items-center mb-4">

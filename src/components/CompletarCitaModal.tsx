@@ -110,19 +110,20 @@ export function CompletarCitaModal({ citaId, onClose, onCompletado }: CompletarC
         <div className="flex justify-end space-x-3 mt-6">
           <button
             onClick={onClose}
-            className="qoder-dark-button-secondary px-4 py-2"
+            className="cancel-button"
             disabled={isLoading}
           >
             Cancelar
           </button>
           <button
             onClick={handleCompletar}
-            className="qoder-dark-button px-4 py-2"
+            className="action-button"
             disabled={isLoading}
           >
             {isLoading ? "Completando..." : "Completar Cita"}
           </button>
         </div>
+
       </div>
     </div>
   );

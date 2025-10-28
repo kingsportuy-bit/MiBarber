@@ -15,7 +15,7 @@ import { toast } from "sonner";
 
 export default function AgendaPage() {
   // Establecer el título de la página
-  usePageTitle("MiBarber | Agenda");
+  usePageTitle("Barberox | Agenda");
   
   const { idBarberia, barbero, isAdmin } = useBarberoAuth();
   const { sucursales } = useSucursales(idBarberia || undefined); // Obtener sucursales filtradas por idBarberia
@@ -190,7 +190,7 @@ export default function AgendaPage() {
   return (
     <>
       <Head>
-        <title>MiBarber | Agenda</title>
+        <title>Barberox | Agenda</title>
       </Head>
       <div className="flex flex-col h-full">
         <div className="flex justify-between items-center mb-4">

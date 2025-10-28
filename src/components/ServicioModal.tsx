@@ -3,7 +3,16 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import type { Service } from "@/types/db";
+import type { Service, Barbero } from "@/types/db";
+import { useBarberosList } from "@/hooks/useBarberosList";
+import { useActualizarEspecialidadesBarbero } from "@/hooks/useActualizarEspecialidadesBarbero";
+
+// Tipo para la información de asignación de barbero
+type BarberoAsignacionInfo = {
+  barberoId: string;
+  asignar: boolean;
+  servicioId: string | undefined;
+} | string | null;
 
 type Props = {
   open: boolean;
@@ -11,17 +20,28 @@ type Props = {
   initial?: Partial<Service>;
   onSave: (values: Omit<Service, "id_servicio" | "created_at" | "updated_at" | "activo"> | Partial<Service>) => Promise<void>;
   onCancel?: () => void;
+  idBarberia?: string;
+  idSucursal?: string;
+  onBarberoSeleccionado?: (info: BarberoAsignacionInfo) => void;
 };
 
-export function ServicioModal({ open, onOpenChange, initial, onSave, onCancel }: Props) {
+export function ServicioModal({ open, onOpenChange, initial, onSave, onCancel, idBarberia, idSucursal, onBarberoSeleccionado }: Props) {
   const isEdit = Boolean(initial?.id_servicio);
   
   const [nombre, setNombre] = useState(initial?.nombre || "");
   const [precio, setPrecio] = useState(initial?.precio || 0);
   const [duracion_minutos, setDuracionMinutos] = useState(initial?.duracion_minutos || 30);
   const [descripcion, setDescripcion] = useState(initial?.descripcion || "");
+  const [barberoId, setBarberoId] = useState<string | null>(null);
+  const [barberosAsignaciones, setBarberosAsignaciones] = useState<Record<string, boolean>>({});
   
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Obtener barberos para la sucursal
+  const { data: barberos, isLoading: isLoadingBarberos } = useBarberosList(idBarberia, idSucursal);
+  
+  // Hook para actualizar especialidades de barbero
+  const { mutateAsync: actualizarEspecialidades } = useActualizarEspecialidadesBarbero();
 
   // Resetear el formulario cuando se abre el modal
   useEffect(() => {
@@ -30,9 +50,22 @@ export function ServicioModal({ open, onOpenChange, initial, onSave, onCancel }:
       setPrecio(initial?.precio || 0);
       setDuracionMinutos(initial?.duracion_minutos || 30);
       setDescripcion(initial?.descripcion || "");
+      setBarberoId(null);
       setErrors({});
+      
+      // Inicializar las asignaciones de barberos para el modo edición
+      if (isEdit && initial?.id_servicio) {
+        const asignaciones: Record<string, boolean> = {};
+        barberos?.forEach(barbero => {
+          const tieneEspecialidad = barbero.especialidades?.includes(initial.id_servicio || '') || false;
+          asignaciones[barbero.id_barbero] = tieneEspecialidad;
+        });
+        setBarberosAsignaciones(asignaciones);
+      } else {
+        setBarberosAsignaciones({});
+      }
     }
-  }, [open, initial]);
+  }, [open, initial, isEdit, barberos]);
 
   // Validar el formulario
   const validate = () => {
@@ -63,7 +96,14 @@ export function ServicioModal({ open, onOpenChange, initial, onSave, onCancel }:
         descripcion: descripcion || null
       };
       
+      // Guardar el servicio
       await onSave(serviceData);
+      
+      // Notificar al componente padre sobre el barbero seleccionado
+      if (onBarberoSeleccionado) {
+        onBarberoSeleccionado(barberoId);
+      }
+      
       toast.success(isEdit ? "Servicio actualizado" : "Servicio creado");
       onOpenChange(false);
     } catch (error) {
@@ -131,6 +171,70 @@ export function ServicioModal({ open, onOpenChange, initial, onSave, onCancel }:
                   placeholder="Descripción del servicio"
                 />
               </div>
+              
+              {/* Selector de barbero para asignar/desasignar especialidad */}
+              {barberos && barberos.length > 0 && (
+                <div className="col-span-2">
+                  <label className="text-xs text-qoder-dark-text-secondary">Barberos que ofrecen este servicio</label>
+                  <div className="space-y-2 max-h-40 overflow-y-auto p-2 bg-qoder-dark-bg-secondary rounded-lg">
+                    {barberos.map((barbero) => {
+                      // Verificar si este barbero ya tiene este servicio en sus especialidades
+                      const tieneEspecialidad = isEdit 
+                        ? barberosAsignaciones[barbero.id_barbero] !== undefined 
+                          ? barberosAsignaciones[barbero.id_barbero]
+                          : barbero.especialidades?.includes(initial?.id_servicio || '') || false
+                        : barberoId === barbero.id_barbero;
+                      
+                      return (
+                        <div key={barbero.id_barbero} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id={`barbero-${barbero.id_barbero}`}
+                            checked={tieneEspecialidad}
+                            onChange={(e) => {
+                              if (isEdit) {
+                                // En modo edición, actualizar el estado local y notificar al componente padre
+                                setBarberosAsignaciones(prev => ({
+                                  ...prev,
+                                  [barbero.id_barbero]: e.target.checked
+                                }));
+                                
+                                if (onBarberoSeleccionado) {
+                                  onBarberoSeleccionado({
+                                    barberoId: barbero.id_barbero,
+                                    asignar: e.target.checked,
+                                    servicioId: initial?.id_servicio
+                                  });
+                                }
+                              } else {
+                                // En modo creación, solo permitir seleccionar un barbero
+                                if (e.target.checked) {
+                                  setBarberoId(barbero.id_barbero);
+                                  if (onBarberoSeleccionado) {
+                                    onBarberoSeleccionado(barbero.id_barbero);
+                                  }
+                                } else {
+                                  setBarberoId(null);
+                                  if (onBarberoSeleccionado) {
+                                    onBarberoSeleccionado(null);
+                                  }
+                                }
+                              }
+                            }}
+                            className="mr-2 h-4 w-4 text-qoder-dark-accent-primary rounded"
+                          />
+                          <label htmlFor={`barbero-${barbero.id_barbero}`} className="text-sm text-qoder-dark-text-primary">
+                            {barbero.nombre}
+                          </label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {isLoadingBarberos && (
+                    <p className="text-xs text-qoder-dark-text-secondary mt-1">Cargando barberos...</p>
+                  )}
+                </div>
+              )}
             </div>
             <div className="mt-4 flex justify-end gap-2 p-4 pt-0">
               <button
@@ -141,19 +245,20 @@ export function ServicioModal({ open, onOpenChange, initial, onSave, onCancel }:
                   }
                   onOpenChange(false);
                 }}
-                className="qoder-dark-button px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+                className="cancel-button"
               >
                 <span>Cancelar</span>
               </button>
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="qoder-dark-button-primary px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+                className="action-button"
                 disabled={!nombre || precio <= 0}
               >
                 <span>{isEdit ? "Actualizar" : "Crear servicio"}</span>
               </button>
             </div>
+
           </div>
         </Dialog.Content>
       </Dialog.Portal>

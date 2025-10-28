@@ -122,7 +122,7 @@ export default function AdminPage() {
         id: idSucursal,
         id_barberia: idBarberia,
         numero_sucursal: 1,
-        nombre_sucursal: "Sucursal Principal",
+        nombre_sucursal: formData.nombreBarberia, // Cambiar de "Sucursal Principal" a formData.nombreBarberia
         direccion: "",
         telefono: formData.telefono,
         celular: formData.telefono
@@ -134,7 +134,7 @@ export default function AdminPage() {
           id: idSucursal,
           id_barberia: idBarberia,
           numero_sucursal: 1,
-          nombre_sucursal: "Sucursal Principal",
+          nombre_sucursal: formData.nombreBarberia, // Cambiar de "Sucursal Principal" a formData.nombreBarberia
           direccion: "",
           telefono: formData.telefono,
           celular: formData.telefono
@@ -281,22 +281,22 @@ export default function AdminPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-qoder-dark-bg-primary p-4">
-        <div className="qoder-dark-card max-w-md w-full p-8">
-          <div className="text-center">
+      <div className="flex flex-col justify-center items-center min-h-screen bg-transparent p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center bg-transparent p-8 rounded-none border-0">
             <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-qoder-dark-text-primary mb-4">
+            <h2 className="text-3xl font-bold text-qoder-dark-text-primary mb-4">
               ¡Configuración Completada!
             </h2>
             <p className="text-qoder-dark-text-secondary mb-6">
               Su sistema ha sido configurado exitosamente. Por favor, guarde estas credenciales de acceso:
             </p>
             
-            <div className="bg-qoder-dark-bg-secondary p-6 rounded-lg mb-6 text-left">
+            <div className="bg-qoder-dark-bg-secondary bg-opacity-80 p-6 rounded-lg mb-6 text-left">
               <div className="mb-4">
                 <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-1">
                   Nombre de Usuario
@@ -317,10 +317,11 @@ export default function AdminPage() {
             
             <button
               onClick={() => router.push("/login")}
-              className="qoder-dark-button-primary px-6 py-3 rounded-lg font-medium w-full"
+              className="action-button w-full"
             >
               Ir al Login
             </button>
+
           </div>
         </div>
       </div>
@@ -328,18 +329,18 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-qoder-dark-bg-primary p-4">
-      <div className="qoder-dark-card max-w-md w-full p-8">
+    <div className="flex flex-col justify-center items-center min-h-screen bg-transparent p-4">
+      <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-qoder-dark-text-primary mb-2">
+          <h1 className="text-4xl font-bold text-qoder-dark-text-primary mb-2">
             Configuración Inicial
           </h1>
           <p className="text-qoder-dark-text-secondary">
-            Configure su sistema MiBarber
+            Configure su sistema Barberox
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 bg-transparent p-6 rounded-none border-0">
           <div>
             <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-2">
               Nombre de la Barbería
@@ -439,12 +440,13 @@ export default function AdminPage() {
           <div className="flex justify-end pt-4">
             <button
               type="submit"
-              className="qoder-dark-button-primary px-6 py-3 rounded-lg font-medium w-full"
+              className="action-button w-full"
               disabled={loading}
             >
               {loading ? "Configurando..." : "Completar Configuración"}
             </button>
           </div>
+
         </form>
       </div>
     </div>

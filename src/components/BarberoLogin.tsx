@@ -95,7 +95,7 @@ export function BarberoLogin({ onLogin }: BarberoLoginProps) {
           <div className="flex justify-end pt-4">
             <button
               type="submit"
-              className="qoder-dark-button-primary px-6 py-3 rounded-lg font-medium hover-lift smooth-transition w-full"
+              className="action-button w-full"
               disabled={login.isPending}
             >
               {login.isPending ? "Iniciando sesión..." : "Iniciar Sesión"}

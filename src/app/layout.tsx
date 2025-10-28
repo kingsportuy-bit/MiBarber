@@ -1,22 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import "./custom-styles.css";
 import { Providers } from "@/components/Providers";
 import { GeneralLayout } from "@/components/GeneralLayout";
 import { ConditionalNavBar } from "@/components/ConditionalNavBar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
-  title: "MiBarber",
+  title: "Barberox",
   description: "Barber shop management system",
 };
 
@@ -26,8 +22,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
-      <body className="bg-qoder-dark-bg-primary text-qoder-dark-text-primary min-h-screen flex flex-col min-w-0">
+    <html lang="es" className={inter.variable}>
+      <body className="min-h-screen flex flex-col min-w-0 font-sans" style={{ backgroundColor: 'transparent' }}>
+        {/* Contenedor de fondo fijo con destellos naranjas intermitentes */}
+        <div className="background-container">
+          <div className="sparkle-1"></div>
+          <div className="sparkle-2"></div>
+        </div>
         <Providers>
           <ConditionalNavBar />
           <GeneralLayout>

@@ -1,7 +1,7 @@
 import type { Barbero } from "@/types/db";
 
 /**
- * Sistema de permisos para MiBarber
+ * Sistema de permisos para Barberox
  *
  * Tipos de barberos:
  * 1. Owner (nivel_permisos=1, admin=true) - Acceso total

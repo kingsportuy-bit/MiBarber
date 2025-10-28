@@ -26,8 +26,8 @@ export default function LoginPage() {
             // Verificar si la sesión aún es válida
             if (sessionData.expiresAt && Date.now() < sessionData.expiresAt) {
               // Si ya está autenticado, redirigir a la página protegida
-              console.log('✅ Login: Usuario ya autenticado, redirigiendo a /mibarber');
-              router.replace("/mibarber");
+              console.log('✅ Login: Usuario ya autenticado, redirigiendo a /inicio');
+              router.replace("/inicio");
               return;
             } else {
               // Sesión expirada, limpiar
@@ -111,7 +111,7 @@ export default function LoginPage() {
       // antes de redirigir
       setTimeout(() => {
         // Redirigir a la página protegida
-        router.replace("/mibarber");
+        router.replace("/inicio");
       }, 100); // Pequeño retraso para asegurar la actualización del estado
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Error al iniciar sesión";
@@ -123,78 +123,73 @@ export default function LoginPage() {
   // Si está verificando la autenticación, mostrar pantalla de carga
   if (checkingAuth) {
     return (
-      <div className="min-h-screen flex flex-col bg-qoder-dark-bg-primary">
-        <div className="flex-grow flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-qoder-dark-accent-primary mx-auto mb-4"></div>
-            <p className="text-qoder-dark-text-secondary">Verificando sesión...</p>
-          </div>
+      <div className="flex items-center justify-center min-h-screen bg-transparent">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-qoder-dark-accent-primary mx-auto mb-4"></div>
+          <p className="text-qoder-dark-text-secondary">Verificando sesión...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-qoder-dark-bg-primary">
-      <div className="flex-grow flex items-center justify-center px-4 mt-5">
-        <div className="max-w-6xl w-full flex-grow flex flex-col">
-          <div className="qoder-dark-card-static w-full max-w-md p-8 mx-auto my-auto">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-qoder-dark-text-primary mb-2">
-                MiBarber
-              </h1>
-              <p className="text-qoder-dark-text-secondary">
-                Sistema de gestión para barberías
-              </p>
-            </div>
-
-            <form onSubmit={onSubmit} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-2">
-                  Nombre de Usuario
-                </label>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="qoder-dark-input w-full p-3 rounded-lg"
-                  placeholder="Ingresa tu nombre de usuario"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-2">
-                  Contraseña
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="qoder-dark-input w-full p-3 rounded-lg"
-                  placeholder="Ingresa tu contraseña"
-                  required
-                />
-              </div>
-              
-              {error && (
-                <div className="text-red-400 text-sm py-2">
-                  {error}
-                </div>
-              )}
-              
-              <div className="flex justify-end pt-4">
-                <button
-                  type="submit"
-                  className="qoder-dark-button-primary px-6 py-3 rounded-lg font-medium w-full"
-                  disabled={loading}
-                >
-                  {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
-                </button>
-              </div>
-            </form>
-          </div>
+    <div className="flex flex-col justify-center items-center min-h-screen bg-transparent p-4">
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-8">
+          <h1 className="text-5xl font-bold text-qoder-dark-text-primary mb-2">
+            <span className="barberox-barbero">Barbero</span>
+            <span className="barberox-x">x</span>
+          </h1>
+          <p className="text-qoder-dark-text-secondary">
+            Sistema de gestión para barberías
+          </p>
         </div>
+
+        <form onSubmit={onSubmit} className="space-y-6 bg-transparent p-6 rounded-none border-0">
+          <div>
+            <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-2">
+              Nombre de Usuario
+            </label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="qoder-dark-input w-full p-3 rounded-lg"
+              placeholder="Ingresa tu nombre de usuario"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-2">
+              Contraseña
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="qoder-dark-input w-full p-3 rounded-lg"
+              placeholder="Ingresa tu contraseña"
+              required
+            />
+          </div>
+          
+          {error && (
+            <div className="text-red-400 text-sm py-2">
+              {error}
+            </div>
+          )}
+          
+          <div className="flex justify-end pt-4">
+            <button
+              type="submit"
+              className="action-button w-full"
+              disabled={loading}
+            >
+              {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

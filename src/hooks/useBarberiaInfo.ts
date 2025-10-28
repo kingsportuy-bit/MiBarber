@@ -7,11 +7,10 @@ export interface BarberiaInfo {
   id: string;
   numero_sucursal: number;
   nombre_sucursal: string;
-  celular: string;
   telefono: string;
   direccion: string;
+  info: string;
   id_barberia?: string;
-  // Eliminamos la propiedad 'horario' ya que ahora se maneja en la tabla de horarios
 }
 
 export function useBarberiaInfo() {
@@ -24,7 +23,7 @@ export function useBarberiaInfo() {
     try {
       let query = (supabase as any)
         .from("mibarber_sucursales")
-        .select("id, numero_sucursal, nombre_sucursal, direccion, telefono, celular, id_barberia")
+        .select("id, numero_sucursal, nombre_sucursal, direccion, telefono, info, id_barberia")
         .limit(1)
         .single();
       
@@ -33,48 +32,63 @@ export function useBarberiaInfo() {
         query = query.eq("id_barberia", idBarberia);
       }
       
+      console.log("Executing barberia info query with idBarberia:", idBarberia);
       const { data, error } = await query;
       
+      console.log("Barberia info query result - Data:", data);
+      console.log("Barberia info query result - Error:", error);
+      
       if (error) {
-        // Si no existe registro, devolver valores por defecto
-        if (error.code === "PGRST116") {
-          return {
-            id: "",
-            numero_sucursal: 1,
-            nombre_sucursal: "",
-            celular: "",
-            telefono: "",
-            direccion: "",
-            id_barberia: undefined
-          };
-        }
         console.error("Error fetching barberia info:", error);
+        console.error("Error details:", {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
         throw error;
       }
       
-      console.log("fetchBarberiaInfo - Datos obtenidos:", data);
+      // Si no existe registro, devolver valores por defecto
+      if (!data) {
+        return {
+          id: "",
+          numero_sucursal: 1,
+          nombre_sucursal: "",
+          direccion: "",
+          telefono: "",
+          info: ""
+        };
+      }
       
       return {
-        id: data?.id || "",
-        numero_sucursal: data?.numero_sucursal || 1,
-        nombre_sucursal: data?.nombre_sucursal || "",
-        celular: data?.celular || "",
-        telefono: data?.telefono || "",
-        direccion: data?.direccion || "",
-        id_barberia: data?.id_barberia || undefined
+        id: data.id,
+        numero_sucursal: data.numero_sucursal,
+        nombre_sucursal: data.nombre_sucursal || "",
+        direccion: data.direccion || "",
+        telefono: data.telefono || "",
+        info: data.info || ""
       };
     } catch (error) {
       console.error("Exception in fetchBarberiaInfo:", error);
+      console.error("Error type:", typeof error);
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+      }
       throw error;
     }
   };
 
+  // Obtener todas las sucursales
   const fetchSucursales = async (): Promise<Sucursal[]> => {
     try {
+      console.log("fetchSucursales - Iniciando consulta con idBarberia:", idBarberia);
+      
       let query = (supabase as any)
         .from("mibarber_sucursales")
-        .select("id, numero_sucursal, nombre_sucursal, direccion, telefono, celular, id_barberia")
-        .order("numero_sucursal", { ascending: true });
+        .select("*")
+        .order("numero_sucursal");
       
       // Si tenemos un idBarberia, filtrar por él
       if (idBarberia) {
@@ -82,10 +96,20 @@ export function useBarberiaInfo() {
         query = query.eq("id_barberia", idBarberia);
       }
       
+      console.log("Executing sucursales query");
       const { data, error } = await query;
+      
+      console.log("Sucursales query result - Data:", data);
+      console.log("Sucursales query result - Error:", error);
       
       if (error) {
         console.error("Error fetching sucursales:", error);
+        console.error("Error details:", {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
         throw error;
       }
       
@@ -99,12 +123,17 @@ export function useBarberiaInfo() {
         nombre_sucursal: sucursal.nombre_sucursal,
         direccion: sucursal.direccion,
         telefono: sucursal.telefono,
-        celular: sucursal.celular,
+        info: sucursal.info, // Usar 'info' en lugar de 'horario'
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })) as Sucursal[];
     } catch (error) {
       console.error("Exception in fetchSucursales:", error);
+      console.error("Error type:", typeof error);
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+      }
       throw error;
     }
   };
@@ -115,27 +144,39 @@ export function useBarberiaInfo() {
       console.log("Updating sucursal info with data:", info);
       
       // Asegurarse de que siempre se incluya un ID
-      const updateData = {
-        ...info,
+      if (!info.id) {
+        throw new Error("ID de sucursal es requerido para actualizar");
+      }
+      
+      // Crear objeto de actualización con los campos correctos
+      const updateData: any = {
+        nombre_sucursal: info.nombre_sucursal,
+        telefono: info.telefono,
+        direccion: info.direccion,
+        info: info.info, // Usar el campo 'info' correctamente
         updated_at: new Date().toISOString()
       };
       
-      // Eliminar campos que no pertenecen a la tabla si están presentes
-      if ('sucursal' in updateData) {
-        delete updateData.sucursal;
-      }
+      // Eliminar campos undefined o null para evitar errores
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] === undefined || updateData[key] === null) {
+          delete updateData[key];
+        }
+      });
       
       console.log("Sending update data:", updateData);
+      console.log("Updating sucursal with ID:", info.id);
       
-      // Para una tabla con ID UUID, usamos upsert
+      // Usar update en lugar de upsert para actualizar la sucursal existente
       const { data, error } = await (supabase as any)
         .from("mibarber_sucursales")
-        .upsert(updateData as any, { 
-          onConflict: "id",
-          returning: "representation"
-        })
+        .update(updateData)
+        .eq("id", info.id)
         .select()
         .single();
+      
+      console.log("Supabase response - Data:", data);
+      console.log("Supabase response - Error:", error);
       
       if (error) {
         console.error("Error updating sucursal info:", error);
@@ -145,7 +186,7 @@ export function useBarberiaInfo() {
           details: error.details,
           hint: error.hint
         });
-        throw error;
+        throw new Error(`Supabase error: ${error.message || 'Unknown error'}`);
       }
       
       console.log("Sucursal info updated successfully:", data);

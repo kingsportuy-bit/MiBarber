@@ -119,7 +119,7 @@ export function SucursalBarberosSection({
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold text-qoder-dark-text-primary">
-          Barberos de la Sucursal {sucursalNombre ? sucursalNombre : `#${sucursalId}`}
+          Barberos
         </h3>
         <button
           onClick={() => {
@@ -140,46 +140,71 @@ export function SucursalBarberosSection({
         <table className="min-w-full divide-y divide-qoder-dark-border-primary">
           <thead>
             <tr>
-              <th className="px-3 py-2 text-left text-qoder-dark-text-primary">Nombre</th>
-              <th className="px-3 py-2 text-left text-qoder-dark-text-primary">Teléfono</th>
-              <th className="px-3 py-2 text-left text-qoder-dark-text-primary">Email</th>
-              <th className="px-3 py-2 text-left text-qoder-dark-text-primary">Especialidades</th>
-              <th className="px-3 py-2 text-left text-qoder-dark-text-primary">Rol</th>
-              <th className="px-3 py-2 text-left text-qoder-dark-text-primary">Estado</th>
-              <th className="px-3 py-2 text-left text-qoder-dark-text-primary">Acciones</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
+                Nombre
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
+                Teléfono
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
+                Email
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
+                Especialidades
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
+                Rol
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
+                Estado
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
+                Acciones
+              </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-qoder-dark-border-primary">
             {barberosQuery.isLoading && (
-              <tr><td className="px-3 py-2 text-qoder-dark-text-primary" colSpan={7}>Cargando…</td></tr>
+              <tr>
+                <td className="px-4 py-3 text-qoder-dark-text-primary" colSpan={7}>
+                  Cargando barberos...
+                </td>
+              </tr>
             )}
             {barberosQuery.isError && (
-              <tr><td className="px-3 py-2 text-qoder-dark-text-primary" colSpan={7}>Error: {barberosQuery.error?.message}</td></tr>
+              <tr>
+                <td className="px-4 py-3 text-qoder-dark-text-primary" colSpan={7}>
+                  Error: {barberosQuery.error?.message}
+                </td>
+              </tr>
             )}
             {barberosQuery.data?.map((barbero: Barbero) => (
-              <tr 
-                key={barbero.id_barbero} 
-                className="border-t border-qoder-dark-border-primary hover:bg-qoder-dark-bg-hover transition-all duration-200 ease-in-out transform hover:-translate-y-0.5 hover:shadow-lg"
-              >
-                <td className="px-3 py-2 font-medium text-qoder-dark-text-primary rounded-l-lg bg-qoder-dark-bg-secondary">{barbero.nombre}</td>
-                <td className="px-3 py-2 text-qoder-dark-text-primary bg-qoder-dark-bg-secondary">{barbero.telefono}</td>
-                <td className="px-3 py-2 text-qoder-dark-text-primary bg-qoder-dark-bg-secondary">{barbero.email}</td>
-                <td className="px-3 py-2 bg-qoder-dark-bg-secondary">
+              <tr key={barbero.id_barbero}>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-qoder-dark-text-primary">
+                  {barbero.nombre}
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-qoder-dark-text-primary">
+                  {barbero.telefono}
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-qoder-dark-text-primary">
+                  {barbero.email}
+                </td>
+                <td className="px-4 py-3 text-sm text-qoder-dark-text-primary">
                   <div className="flex flex-wrap gap-1">
                     {barbero.especialidades && barbero.especialidades.map((esp: string, index: number) => (
                       <span key={index} className="bg-qoder-dark-bg-secondary text-qoder-dark-text-secondary text-xs px-2 py-1 rounded">
-                        {getNombreServicio(esp)} {/* Mostrar el nombre del servicio en lugar del ID */}
+                        {getNombreServicio(esp)}
                       </span>
                     ))}
                   </div>
                 </td>
-                <td className="px-3 py-2 bg-qoder-dark-bg-secondary">
+                <td className="px-4 py-3 text-sm text-qoder-dark-text-primary">
                   <BarberoNivelPermisos 
                     barbero={barbero} 
-                    onUpdate={() => {}} // En este contexto no necesitamos hacer nada especial al actualizar
+                    onUpdate={() => {}}
                   />
                 </td>
-                <td className="px-3 py-2 bg-qoder-dark-bg-secondary">
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-qoder-dark-text-primary">
                   <span className={`px-2 py-1 rounded text-xs ${
                     barbero.activo 
                       ? "bg-green-900 text-green-300" 
@@ -188,11 +213,12 @@ export function SucursalBarberosSection({
                     {barbero.activo ? 'Activo' : 'Inactivo'}
                   </span>
                 </td>
-                <td className="px-3 py-2 bg-qoder-dark-bg-secondary rounded-r-lg">
-                  <div className="flex space-x-2">
+                <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                  <div className="flex justify-end space-x-2">
                     <button 
                       onClick={(e) => { e.stopPropagation(); handleEdit(barbero); }}
-                      className="text-blue-500 hover:text-blue-300"
+                      className="text-blue-500 hover:text-blue-300 bg-transparent !bg-none border-none p-1"
+                      title="Editar barbero"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -202,10 +228,11 @@ export function SucursalBarberosSection({
                       onClick={(e) => { e.stopPropagation(); handleDelete(barbero); }}
                       className={`${
                         isBarberoProtegido(barbero) 
-                          ? "text-gray-500 cursor-not-allowed" 
-                          : "text-red-500 hover:text-red-300"
+                          ? "text-gray-500 cursor-not-allowed bg-transparent !bg-none border-none p-1" 
+                          : "text-red-500 hover:text-red-300 bg-transparent !bg-none border-none p-1"
                       }`}
                       disabled={isBarberoProtegido(barbero)}
+                      title={isBarberoProtegido(barbero) ? "No se puede eliminar" : "Eliminar barbero"}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -217,12 +244,11 @@ export function SucursalBarberosSection({
             ))}
             {!barberosQuery.isLoading && !barberosQuery.isError && barberosQuery.data?.length === 0 && (
               <tr>
-                <td className="px-3 py-2 text-qoder-dark-text-primary" colSpan={7}>
+                <td className="px-4 py-3 text-qoder-dark-text-primary" colSpan={7}>
                   No hay barberos registrados en esta sucursal
                 </td>
               </tr>
             )}
-
           </tbody>
         </table>
       </div>

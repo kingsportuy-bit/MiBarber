@@ -55,10 +55,10 @@ interface Task extends Appointment {
 }
 
 const columnStates: Column[] = [
-  { id: "pendiente", title: "Pendientes", color: "text-yellow-500", bgColor: "bg-yellow-500/10" },
+  { id: "pendiente", title: "Pendientes", color: "text-orange-500", bgColor: "bg-orange-500/10" },
   { id: "confirmado", title: "Confirmadas", color: "text-blue-500", bgColor: "bg-blue-500/10" },
   { id: "completado", title: "Completadas", color: "text-green-500", bgColor: "bg-green-500/10" },
-  { id: "cancelado", title: "Canceladas", color: "text-red-500", bgColor: "bg-red-500/10" },
+  { id: "cancelado", title: "Canceladas", color: "text-gray-500", bgColor: "bg-gray-500/10" },
 ];
 
 // Componente para una tarjeta arrastrable
@@ -282,7 +282,7 @@ function ColumnContainer({
       className={`rounded-2xl p-4 md:p-5 h-full transition-all duration-200 ${
         isOver 
           ? `${column.bgColor} ring-4 ring-inset ring-qoder-dark-accent-primary/50 bg-opacity-30 shadow-lg` 
-          : 'bg-qoder-dark-bg-secondary shadow-md'
+          : 'bg-black shadow-md'
       }`}
     >
       <div className="flex items-center justify-between mb-4 pb-2 border-b border-qoder-dark-border">
@@ -627,12 +627,14 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
             </svg>
           </button>
           
-          <button 
-            onClick={goToToday}
-            className="px-3 py-2 rounded-lg qoder-dark-button text-sm font-medium"
-          >
-            Hoy
-          </button>
+          {getLocalDateString(currentDate) !== getLocalDateString(new Date()) && (
+            <button 
+              onClick={goToToday}
+              className="px-3 py-2 rounded-lg qoder-dark-button text-sm font-medium"
+            >
+              Hoy
+            </button>
+          )}
         </div>
         
         <div className="text-center flex-1 mx-2">

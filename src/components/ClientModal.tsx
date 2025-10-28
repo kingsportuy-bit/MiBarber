@@ -118,7 +118,7 @@ export function ClientModal({
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                className="qoder-dark-button px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+                className="cancel-button"
               >
                 <span>Cancelar</span>
               </button>
@@ -127,7 +127,7 @@ export function ClientModal({
                 onClick={async () => {
                   await onSave(values);
                 }}
-                className="qoder-dark-button-primary px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+                className="action-button"
               >
                 <span>{isEdit ? "Actualizar" : "Crear cliente"}</span>
               </button>

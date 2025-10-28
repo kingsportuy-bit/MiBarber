@@ -95,12 +95,15 @@ export function ClientsTable() {
       console.log("Guardando cliente:", values);
 
       if (editing?.id_cliente) {
-        // Permitir editar nombre, teléfono y notas
+        // Permitir editar todos los campos disponibles
         const updateData = {
           id_cliente: values.id_cliente!,
           nombre: values.nombre,
           telefono: values.telefono,
           notas: values.notas,
+          email: (values as any).email,
+          fecha_nacimiento: (values as any).fecha_nacimiento,
+          direccion: (values as any).direccion,
         };
         console.log("Actualizando cliente:", updateData);
         await updateMutation.mutateAsync(updateData);
@@ -118,6 +121,9 @@ export function ClientsTable() {
           nombre: values.nombre,
           telefono: values.telefono || null,
           notas: values.notas || null,
+          email: (values as any).email || null,
+          fecha_nacimiento: (values as any).fecha_nacimiento || null,
+          direccion: (values as any).direccion || null,
           // Agregar el ID de barbería y sucursal del usuario actual
           id_barberia: idBarberia || undefined,
           id_sucursal: selectedSucursal || barberoActual?.id_sucursal || undefined,
@@ -188,7 +194,7 @@ export function ClientsTable() {
       <div className="space-y-4 h-full flex flex-col">
         {/* Barra de búsqueda y acciones - responsive */}
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-4 w-full">
+          <div className="flex flex-wrap items-center gap-4">
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
@@ -214,7 +220,7 @@ export function ClientsTable() {
               </select>
             )}
           </div>
-          <div className="flex gap-2 w-full sm:w-auto">
+          <div className="flex gap-2">
             <button
               onClick={() => {
                 setEditing(undefined);
@@ -364,12 +370,12 @@ export function ClientsTable() {
                         <div className="flex space-x-2">
                           <button
                             onClick={() => showClientDetails(c)}
-                            className="text-qoder-dark-accent-primary hover:text-qoder-dark-accent-secondary p-1"
+                            className="text-white hover:text-gray-300 bg-transparent !bg-none border-none p-1"
                             title="Ver ficha del cliente"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4 md:h-5 md:w-5"
+                              className="h-5 w-5"
                               fill="none"
                               viewBox="0 0 24 24"
                               stroke="currentColor"
@@ -393,11 +399,12 @@ export function ClientsTable() {
                               setEditing(c);
                               setOpen(true);
                             }}
-                            className="text-blue-500 hover:text-blue-300 p-1"
+                            className="text-blue-500 hover:text-blue-300 bg-transparent !bg-none border-none p-1"
+                            title="Editar cliente"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4 md:h-5 md:w-5"
+                              className="h-5 w-5"
                               fill="none"
                               viewBox="0 0 24 24"
                               stroke="currentColor"
@@ -412,11 +419,12 @@ export function ClientsTable() {
                           </button>
                           <button
                             onClick={() => confirmDelete(c)}
-                            className="text-red-500 hover:text-red-300 p-1"
+                            className="text-red-500 hover:text-red-300 bg-transparent !bg-none border-none p-1"
+                            title="Eliminar cliente"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4 md:h-5 md:w-5"
+                              className="h-5 w-5"
                               fill="none"
                               viewBox="0 0 24 24"
                               stroke="currentColor"
@@ -466,7 +474,7 @@ export function ClientsTable() {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => showClientDetails(c)}
-                          className="text-qoder-dark-accent-primary hover:text-qoder-dark-accent-secondary p-1"
+                          className="text-white hover:text-gray-300 bg-transparent !bg-none border-none p-1"
                           title="Ver ficha del cliente"
                         >
                           <svg
@@ -495,7 +503,8 @@ export function ClientsTable() {
                             setEditing(c);
                             setOpen(true);
                           }}
-                          className="text-blue-500 hover:text-blue-300 p-1"
+                          className="text-blue-500 hover:text-blue-300 bg-transparent !bg-none border-none p-1"
+                          title="Editar cliente"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -514,7 +523,8 @@ export function ClientsTable() {
                         </button>
                         <button
                           onClick={() => confirmDelete(c)}
-                          className="text-red-500 hover:text-red-300 p-1"
+                          className="text-red-500 hover:text-red-300 bg-transparent !bg-none border-none p-1"
+                          title="Eliminar cliente"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"

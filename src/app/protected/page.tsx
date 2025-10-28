@@ -13,7 +13,7 @@ import { getLocalDateString } from "@/utils/dateUtils"; // Importar la utilidad 
 import { CustomDatePicker } from "@/components/CustomDatePicker"; // Agregar esta importación
 
 export default function ProtectedPage() {
-  usePageTitle("MiBarber | Dashboard");
+  usePageTitle("Barberox | Dashboard");
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);

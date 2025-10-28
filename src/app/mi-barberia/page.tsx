@@ -17,9 +17,10 @@ import { SucursalHorariosSection } from "@/components/SucursalHorariosSection";
 import { SucursalHorarioDisplay } from "@/components/SucursalHorarioDisplay";
 import { EditarSucursalModal } from "@/components/EditarSucursalModal";
 import { EditarHorariosSucursalModal } from "@/components/EditarHorariosSucursalModal";
+import { EditarInfoAdicionalModal } from "@/components/EditarInfoAdicionalModal";
 
 export default function MiBarberiaPage() {
-  usePageTitle("MiBarber | Mi Barbería");
+  usePageTitle("Barberox | Mi Barbería");
 
   return <MiBarberiaContent />;
 }
@@ -60,6 +61,10 @@ function MiBarberiaContent() {
     nombre: string;
   } | null>(null); // Sucursal para editar horarios
   
+  // Estados para el modal de información adicional
+  const [isInfoAdicionalModalOpen, setIsInfoAdicionalModalOpen] = useState(false);
+  const [sucursalParaInfoAdicional, setSucursalParaInfoAdicional] = useState<any>(null);
+  
   // Funciones para manejar el modo de edición de datos personales
   const handleEditClick = () => {
     setIsEditing(true);
@@ -95,22 +100,60 @@ function MiBarberiaContent() {
   };
 
   // Guardar sucursal (crear o actualizar)
-  const handleSaveSucursal = async (values: any) => {
+  const handleSaveSucursal = async (values: Partial<Sucursal>) => {
     try {
-      if (sucursalToEdit) {
+      console.log("Guardando sucursal con valores:", values);
+      
+      // Si se proporciona un ID, actualizar la sucursal existente
+      if (values.id) {
         // Actualizar sucursal existente
-        await updateBarberiaInfoMutation.mutateAsync({
+        const updateData = {
+          id: values.id,
+          numero_sucursal: values.numero_sucursal,
+          nombre_sucursal: values.nombre_sucursal,
+          telefono: values.telefono,
+          direccion: values.direccion,
+          info: values.info,
+          updated_at: new Date().toISOString(),
+        };
+        
+        console.log("Datos de actualización:", updateData);
+        const result = await updateBarberiaInfoMutation.mutateAsync(updateData);
+        console.log("Resultado de actualización:", result);
+      } else if (sucursalToEdit?.id) {
+        // Actualizar sucursal existente (caso cuando se edita desde el modal principal)
+        const updateData = {
           id: sucursalToEdit.id,
           numero_sucursal: sucursalToEdit.numero_sucursal,
-          ...values,
+          nombre_sucursal: values.nombre_sucursal,
+          telefono: values.telefono,
+          direccion: values.direccion,
+          info: values.info,
           updated_at: new Date().toISOString(),
-        });
+        };
+        
+        console.log("Datos de actualización:", updateData);
+        const result = await updateBarberiaInfoMutation.mutateAsync(updateData);
+        console.log("Resultado de actualización:", result);
       } else {
         // Crear nueva sucursal
-        const newSucursal = await createSucursalMutation.mutateAsync({
-          ...values,
-          id_barberia: idBarberia || undefined,
-        });
+        // Asegurarse de que se proporcionen todos los campos requeridos
+        if (!idBarberia) {
+          throw new Error("ID de barbería no disponible");
+        }
+        
+        // Crear un objeto con solo los campos necesarios para la creación
+        const newSucursalData: any = {
+          nombre_sucursal: values.nombre_sucursal || null,
+          telefono: values.telefono || null,
+          direccion: values.direccion || null,
+          info: values.info || null,
+          id_barberia: idBarberia,
+        };
+        
+        console.log("Datos para crear nueva sucursal:", newSucursalData);
+        const newSucursal = await createSucursalMutation.mutateAsync(newSucursalData);
+        console.log("Resultado de creación:", newSucursal);
 
         // Si se creó una nueva sucursal, establecerla como la sucursal a editar
         // para que el usuario pueda configurar los horarios inmediatamente
@@ -119,10 +162,31 @@ function MiBarberiaContent() {
         }
       }
       setIsModalOpen(false);
+      setIsInfoAdicionalModalOpen(false);
       setSucursalToEdit(null);
-    } catch (error) {
+      setSucursalParaInfoAdicional(null);
+    } catch (error: any) {
       console.error("Error al guardar la sucursal:", error);
-      alert("Error al guardar la sucursal");
+      console.error("Detalles del error:", {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        name: error instanceof Error ? error.name : 'Unknown error type',
+        code: error?.code,
+        details: error?.details,
+        hint: error?.hint
+      });
+      
+      // Mostrar mensaje de error más específico
+      let errorMessage = "Error al guardar la sucursal";
+      if (error instanceof Error) {
+        errorMessage = error.message || errorMessage;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      alert(`Error al guardar la sucursal: ${errorMessage}`);
     }
   };
 
@@ -134,6 +198,12 @@ function MiBarberiaContent() {
         sucursal.nombre_sucursal || `Sucursal ${sucursal.numero_sucursal}`,
     });
     setIsHorariosModalOpen(true);
+  };
+
+  // Función para abrir el modal de edición de información adicional
+  const handleEditInfoAdicional = (sucursal: any) => {
+    setSucursalParaInfoAdicional(sucursal);
+    setIsInfoAdicionalModalOpen(true);
   };
 
   // Verificar si es administrador, si no, redirigir
@@ -391,8 +461,11 @@ function MiBarberiaContent() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex space-x-2">
-                          <span className="bg-qoder-dark-accent-success/20 text-qoder-dark-accent-success text-xs px-3 py-1 rounded-full flex items-center">
+                        <div className="flex space-x-2 items-center">
+                          <button
+                            onClick={() => handleEditHorarios(sucursal)}
+                            className="px-3 py-1 bg-qoder-dark-bg-secondary hover:bg-qoder-dark-accent-primary/20 text-qoder-dark-text-primary rounded-lg transition-colors duration-200 text-sm flex items-center"
+                          >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               className="h-4 w-4 mr-1"
@@ -404,11 +477,32 @@ function MiBarberiaContent() {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth={2}
-                                d="M5 13l4 4L19 7"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                               />
                             </svg>
-                            Activa
-                          </span>
+                            Editar horarios
+                          </button>
+                          <button
+                            onClick={() => handleEditSucursal(sucursal)}
+                            className="px-3 py-1 bg-qoder-dark-bg-secondary hover:bg-qoder-dark-accent-primary/20 text-qoder-dark-text-primary rounded-lg transition-colors duration-200 text-sm flex items-center"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4 mr-1"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                              />
+                            </svg>
+                            Editar sucursal
+                          </button>
+
                         </div>
                       </div>
                     </div>
@@ -431,7 +525,7 @@ function MiBarberiaContent() {
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
                                   strokeWidth={2}
-                                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                                  d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2h1C9.716 21 3 14.284 3 6V5z"
                                 />
                               </svg>
                             </div>
@@ -439,26 +533,7 @@ function MiBarberiaContent() {
                               Contacto
                             </h4>
                           </div>
-                          <div className="space-y-3">
-                            <div className="flex items-center">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4 text-qoder-dark-text-secondary mr-3"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2h1C9.716 21 3 14.284 3 6V5z"
-                                />
-                              </svg>
-                              <span className="text-qoder-dark-text-primary">
-                                {sucursal.celular || "No especificado"}
-                              </span>
-                            </div>
+                          <div className="space-y-2">
                             <div className="flex items-center">
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -566,6 +641,7 @@ function MiBarberiaContent() {
                             <SucursalHorarioDisplay idSucursal={sucursal.id} />
                           </div>
                         </div>
+
                       </div>
 
                       {/* Sección de Barberos */}
@@ -593,49 +669,58 @@ function MiBarberiaContent() {
                         />
                       </div>
 
-                      {/* Botones de acción */}
-                      <div className="flex justify-end space-x-3">
-                        <button
-                          onClick={() => handleEditHorarios(sucursal)}
-                          className="px-4 py-2 bg-qoder-dark-bg-secondary hover:bg-qoder-dark-accent-primary/20 text-qoder-dark-text-primary rounded-lg transition-colors duration-200 flex items-center"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 mr-2"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
+                      {/* Sección de Información Adicional */}
+                      <div className="mb-6">
+                        <div className="flex justify-between items-center mb-4">
+                          <div className="flex items-center">
+                            <div className="bg-qoder-dark-accent-primary/10 p-2 rounded-lg mr-3">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5 text-qoder-dark-accent-primary"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                              </svg>
+                            </div>
+                            <h3 className="text-lg font-semibold text-qoder-dark-text-primary">
+                              Información Adicional
+                            </h3>
+                          </div>
+                          <button
+                            onClick={() => handleEditInfoAdicional(sucursal)}
+                            className="px-3 py-1 bg-qoder-dark-bg-secondary hover:bg-qoder-dark-accent-primary/20 text-qoder-dark-text-primary rounded-lg transition-colors duration-200 text-sm flex items-center"
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                          </svg>
-                          Editar Horarios
-                        </button>
-                        <button
-                          onClick={() => handleEditSucursal(sucursal)}
-                          className="px-4 py-2 bg-qoder-dark-bg-secondary hover:bg-qoder-dark-accent-primary/20 text-qoder-dark-text-primary rounded-lg transition-colors duration-200 flex items-center"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 mr-2"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                            />
-                          </svg>
-                          Editar Sucursal
-                        </button>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4 mr-1"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                              />
+                            </svg>
+                            Editar
+                          </button>
+                        </div>
+                        <div className="bg-qoder-dark-bg-form rounded-lg p-4">
+                          <p className="text-qoder-dark-text-primary whitespace-pre-line">
+                            {sucursal.info || "No se ha proporcionado información adicional para esta sucursal."}
+                          </p>
+                        </div>
                       </div>
+
                     </div>
                   </div>
                 ))}
@@ -691,6 +776,20 @@ function MiBarberiaContent() {
           nombreSucursal={sucursalParaHorarios.nombre}
         />
       )}
+
+      {/* Modal para editar información adicional */}
+      <EditarInfoAdicionalModal
+        open={isInfoAdicionalModalOpen}
+        onOpenChange={(open) => {
+          setIsInfoAdicionalModalOpen(open);
+          // Limpiar la sucursal seleccionada cuando se cierra el modal
+          if (!open) {
+            setSucursalParaInfoAdicional(null);
+          }
+        }}
+        initial={sucursalParaInfoAdicional}
+        onSave={handleSaveSucursal}
+      />
     </div>
   );
 }

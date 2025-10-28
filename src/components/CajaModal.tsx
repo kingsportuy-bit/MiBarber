@@ -380,14 +380,14 @@ export function CajaModal({ open, onOpenChange, initial, onSave }: Props) {
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                className="qoder-dark-button px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+                className="cancel-button"
               >
                 <span>Cancelar</span>
               </button>
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="qoder-dark-button-primary px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+                className="action-button"
               >
                 <span>{isEdit ? "Actualizar" : "Crear registro"}</span>
               </button>

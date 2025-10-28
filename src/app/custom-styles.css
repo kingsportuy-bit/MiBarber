@@ -1,0 +1,402 @@
+:root {
+  --color-primary: #ff7700; /* Naranja principal */
+  --color-primary-dark: #cc5500; /* Naranja oscuro */
+  --color-background: #000000; /* Negro puro */
+  --color-background-transparent: rgba(0, 0, 0, 0.8); /* Negro con transparencia */
+  --color-text: rgba(255, 255, 255, 0.87); /* Texto blanco */
+  --color-text-secondary: rgba(255, 255, 255, 0.6); /* Texto blanco secundario */
+  --color-accent: #00CCC2; /* Azul turquesa para acentos */
+}
+
+/* Navbar styles */
+.navbar {
+  background: rgba(0, 0, 0, 0.8); /* Fondo negro con 80% de opacidad */
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 165, 0, 0.2); /* Borde naranja claro */
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'Roboto', 'Arial', sans-serif; /* Fuente consistente para todo el navbar */
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+  font-family: 'Roboto', 'Arial', sans-serif;
+}
+
+a.nav-logo {
+  justify-self: start;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  box-sizing: border-box;
+  transition: color 0.3s ease; /* Transición suave para el color */
+  position: relative;
+  font-family: 'Roboto', 'Arial', sans-serif; /* Fuente consistente */
+}
+
+a.nav-logo:hover {
+  text-decoration: none;
+}
+
+a.nav-logo.active {
+  /* Los colores específicos se manejan en los spans internos */
+}
+
+a.nav-logo.active::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 3px;
+  background: linear-gradient(90deg, #cc5500, #ff7700); /* Degradado naranja */
+}
+
+/* Estilos personalizados para Barberox */
+.barberox-barbero {
+  color: #ff7700 !important;
+  font-weight: bold;
+}
+
+.barberox-x {
+  color: #00CCC2 !important;
+  font-weight: bold;
+}
+
+.logo-icon {
+  margin-right: 10px;
+  color: #ff7700; /* Color naranja para el icono */
+}
+
+.nav-menu {
+  display: flex;
+  list-style: none;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', 'Arial', sans-serif; /* Fuente consistente */
+}
+
+.nav-item {
+  height: 60px;
+  display: flex;
+  align-items: center;
+}
+
+a.nav-link {
+  color: #fff; /* Color blanco para los enlaces */
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  height: 100%;
+  position: relative;
+  font-weight: 500;
+  font-family: 'Roboto', 'Arial', sans-serif; /* Fuente consistente */
+  font-size: 1rem; /* Tamaño de fuente consistente */
+}
+
+a.nav-link:hover {
+  color: #ff7700; /* Color naranja al pasar el mouse */
+  text-decoration: none;
+}
+
+a.nav-link.active {
+  color: #ff7700; /* Color naranja cuando está activo */
+}
+
+a.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #cc5500, #ff7700); /* Degradado naranja */
+  transition: width 0.3s ease; /* Transición suave para el ancho */
+}
+
+a.nav-link:hover::after {
+  width: 70%; /* Barra inferior al 70% al pasar el mouse */
+}
+
+a.nav-link.active::after {
+  width: 70%; /* Barra inferior al 70% cuando está activo */
+}
+
+@media screen and (max-width: 768px) {
+  .nav-container {
+    padding: 0 15px;
+  }
+
+  .nav-menu {
+    margin-right: 1rem;
+  }
+
+  a.nav-link {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  a.nav-logo {
+    font-size: 1.5rem;
+  }
+}
+
+/* Estilos universales para menús desplegables */
+select {
+  background: rgba(255, 255, 255, 0.1); /* Fondo claro con transparencia */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Borde claro */
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: white; /* Texto blanco */
+  font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 14px;
+  padding-right: 35px;
+  font-family: 'Roboto', 'Arial', sans-serif; /* Fuente principal */
+}
+
+select:focus {
+  outline: none;
+  border-color: #ff7700; /* Borde naranja al enfocar */
+  box-shadow: 0 0 0 3px rgba(255, 119, 0, 0.2); /* Sombra naranja */
+  background: rgba(255, 255, 255, 0.08); /* Fondo ligeramente más oscuro */
+}
+
+select:hover {
+  background: rgba(255, 255, 255, 0.15); /* Fondo más claro al pasar el mouse */
+  border-color: rgba(255, 255, 255, 0.3); /* Borde más visible */
+}
+
+select option {
+  background: rgba(30, 30, 30, 0.95); /* Fondo oscuro para opciones */
+  color: white; /* Texto blanco */
+  padding: 10px;
+}
+
+/* Estilos para menús contextuales y dropdowns */
+.dropdown-menu {
+  background: rgba(30, 30, 30, 0.95); /* Fondo oscuro con transparencia */
+  border: 1px solid rgba(255, 119, 0, 0.3); /* Borde naranja */
+  border-radius: 6px;
+  padding: 5px 0;
+  min-width: 150px;
+  z-index: 1000;
+}
+
+.dropdown-item {
+  padding: 12px 15px;
+  color: #ff7700; /* Texto naranja */
+  text-decoration: none;
+  display: block;
+  transition: all 0.2s ease; /* Transición suave */
+  font-weight: 500;
+  background: transparent;
+  font-family: 'Roboto', 'Arial', sans-serif; /* Fuente consistente */
+  font-size: 1rem; /* Tamaño de fuente consistente */
+}
+
+.dropdown-item:hover {
+  background: rgba(255, 119, 0, 0.3) !important; /* Fondo naranja al pasar el mouse */
+  color: #ff7700;
+  font-weight: 600;
+}
+
+.dropdown-item.active {
+  background: rgba(255, 119, 0, 0.5) !important; /* Fondo naranja más intenso cuando está activo */
+  color: #ff7700;
+  font-weight: 600;
+}
+
+.dropdown-item:focus {
+  background: rgba(255, 119, 0, 0.4) !important; /* Fondo naranja al enfocar */
+  color: #ff7700;
+  outline: none;
+}
+
+/* Asegurar que no haya estilos heredados que causen fondo celeste */
+.dropdown-menu *,
+.dropdown-item * {
+  background-color: transparent !important;
+}
+
+/* Estilos para checkboxes y radios */
+input[type="checkbox"], input[type="radio"] {
+  accent-color: #ff7700; /* Color naranja para los controles */
+  width: 18px;
+  height: 18px;
+}
+
+input[type="checkbox"]:focus, input[type="radio"]:focus {
+  outline: 2px solid #ff7700; /* Contorno naranja al enfocar */
+  outline-offset: 2px;
+}
+
+/* Estilos para botones de menú */
+.menu-button {
+  background: rgba(255, 255, 255, 0.1); /* Fondo claro con transparencia */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Borde claro */
+  border-radius: 6px;
+  color: white; /* Texto blanco */
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-family: 'Roboto', 'Arial', sans-serif; /* Fuente principal */
+}
+
+.menu-button:hover {
+  background: rgba(255, 255, 255, 0.15); /* Fondo más claro al pasar el mouse */
+  border-color: rgba(255, 255, 255, 0.3); /* Borde más visible */
+}
+
+.menu-button:focus {
+  outline: none;
+  border-color: #ff7700; /* Borde naranja al enfocar */
+  box-shadow: 0 0 0 3px rgba(255, 119, 0, 0.2); /* Sombra naranja */
+}
+
+/* Estilos de texto */
+h1, h2, h3, h4, h5, h6 {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 0.6rem;
+  text-align: center;
+  position: relative;
+  padding-bottom: 6px;
+}
+
+h1::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #cc5500, #ff7700);
+  border-radius: 2px;
+}
+
+/* Estilos de botones */
+button {
+  background: linear-gradient(90deg, #cc5500, #ff7700);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.85rem;
+  box-sizing: border-box;
+  font-family: 'Roboto', 'Arial', sans-serif; /* Fuente consistente */
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+button.secondary {
+  background: transparent;
+  border: 2px solid #ff7700;
+  color: #ff7700;
+}
+
+button.secondary:hover {
+  background: rgba(255, 119, 0, 0.1);
+}
+
+/* Estilos de formularios */
+input, select, textarea {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: white;
+  font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'Roboto', 'Arial', sans-serif;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #ff7700;
+  box-shadow: 0 0 0 3px rgba(255, 119, 0, 0.2);
+}
+
+/* Estilos para enlaces */
+a {
+  color: #ff7700;
+  text-decoration: none;
+  font-family: 'Roboto', 'Arial', sans-serif; /* Fuente consistente */
+}
+
+a:hover {
+  color: #cc5500;
+  text-decoration: underline;
+}
+
+/* Estilos específicos para botones en el navbar */
+.navbar button {
+  font-family: 'Roboto', 'Arial', sans-serif;
+}
+
+/* Estilos para el footer */
+.footer {
+  margin-top: auto;
+  text-align: center;
+  padding: 20px 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Estilo especial para la X de Codexa */
+.codexa-x {
+  color: #00CCC2;
+}
+
+/* Estilos para el menú desplegable de la aplicación */
+.nav-logo.font-bold {
+  font-weight: 700 !important;
+}

@@ -469,12 +469,14 @@ export function AgendaBoard({
             </svg>
           </button>
           
-          <button 
-            onClick={goToToday}
-            className="px-2 py-1 rounded-lg qoder-dark-button text-xs font-medium md:px-3 md:py-2 md:text-sm"
-          >
-            Hoy
-          </button>
+          {getLocalDateString(currentDate) !== getLocalDateString(new Date()) && (
+            <button 
+              onClick={goToToday}
+              className="px-2 py-1 rounded-lg qoder-dark-button text-xs font-medium md:px-3 md:py-2 md:text-sm"
+            >
+              Hoy
+            </button>
+          )}
         </div>
         
         <div className="text-center flex-1 mx-2">

@@ -336,19 +336,20 @@ export function EditarHorariosSucursalModal({
                 <button
                   type="button"
                   onClick={() => onOpenChange(false)}
-                  className="px-4 py-2 bg-qoder-dark-bg-primary text-qoder-dark-text-primary rounded-lg hover:bg-qoder-dark-bg-hover border border-qoder-dark-border-primary"
+                  className="cancel-button"
                   disabled={guardando}
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-qoder-dark-accent-primary text-white rounded-lg hover:bg-qoder-dark-accent-hover disabled:opacity-50"
+                  className="action-button"
                   disabled={guardando}
                 >
                   {guardando ? "Guardando..." : "Guardar Horarios"}
                 </button>
               </div>
+
             </form>
           </div>
         </Dialog.Content>

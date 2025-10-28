@@ -7,12 +7,12 @@ interface PageHeadProps {
 
 export function PageHead({ title }: PageHeadProps) {
   useEffect(() => {
-    document.title = `MiBarber | ${title}`;
+    document.title = `Barberox | ${title}`;
   }, [title]);
 
   return (
     <Head>
-      <title>MiBarber | {title}</title>
+      <title>Barberox | {title}</title>
     </Head>
   );
 }

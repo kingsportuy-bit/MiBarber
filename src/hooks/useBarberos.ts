@@ -70,10 +70,12 @@ export function useBarberos(sucursalId?: string): UseBarberosResult {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["barberos"] });
+      queryClient.invalidateQueries({ queryKey: ["barberos-list"] });
+      queryClient.invalidateQueries({ queryKey: ["servicios"] });
+      queryClient.invalidateQueries({ queryKey: ["servicios-list"] });
     },
   });
 
-  // Actualizar un barbero
   const updateBarbero = useMutation({
     mutationFn: async ({ id_barbero, ...updates }: Partial<Barbero> & { id_barbero: string }) => {
       // Verificar si se está intentando cambiar el nivel de permisos de un barbero protegido
@@ -130,10 +132,12 @@ export function useBarberos(sucursalId?: string): UseBarberosResult {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["barberos"] });
+      queryClient.invalidateQueries({ queryKey: ["barberos-list"] });
+      queryClient.invalidateQueries({ queryKey: ["servicios"] });
+      queryClient.invalidateQueries({ queryKey: ["servicios-list"] });
     },
   });
 
-  // Eliminar un barbero
   const deleteBarbero = useMutation({
     mutationFn: async (id_barbero: string) => {
       // Verificar si se está intentando eliminar un barbero protegido
@@ -166,6 +170,9 @@ export function useBarberos(sucursalId?: string): UseBarberosResult {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["barberos"] });
+      queryClient.invalidateQueries({ queryKey: ["barberos-list"] });
+      queryClient.invalidateQueries({ queryKey: ["servicios"] });
+      queryClient.invalidateQueries({ queryKey: ["servicios-list"] });
     },
   });
 

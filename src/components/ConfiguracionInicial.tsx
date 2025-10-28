@@ -64,7 +64,7 @@ export function ConfiguracionInicial({ onComplete }: ConfiguracionInicialProps) 
             Configuración Inicial de tu Barbería
           </h2>
           <p className="text-qoder-dark-text-secondary">
-            Bienvenido a MiBarber! Completa la información de tu primera sucursal para comenzar.
+            Bienvenido a Barberox! Completa la información de tu primera sucursal para comenzar.
           </p>
         </div>
 
@@ -80,7 +80,7 @@ export function ConfiguracionInicial({ onComplete }: ConfiguracionInicialProps) 
                 value={formData.nombre_barberia}
                 onChange={handleChange}
                 className="qoder-dark-input w-full p-3 rounded-lg"
-                placeholder="Ej: MiBarber Principal"
+                placeholder="Ej: Barberox Principal"
                 required
               />
             </div>
@@ -170,7 +170,7 @@ export function ConfiguracionInicial({ onComplete }: ConfiguracionInicialProps) 
             
             <button
               type="submit"
-              className="qoder-dark-button-primary px-6 py-3 rounded-lg font-medium hover-lift smooth-transition"
+              className="action-button"
               disabled={updateBarberiaInfoMutation.isPending}
             >
               {updateBarberiaInfoMutation.isPending ? "Guardando..." : "Comenzar"}

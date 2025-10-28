@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { useWhatsAppChats } from "@/hooks/useWhatsAppChats";
 import { useClientes } from "@/hooks/useClientes";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
@@ -45,55 +45,26 @@ export function WhatsAppChatMobile() {
   // Mostrar todas las conversaciones sin filtrar (eliminamos la búsqueda)
   const filteredConversations = grouped || [];
 
-  // Función mejorada para hacer scroll al último mensaje
-  const scrollToBottom = () => {
-    const container = document.getElementById('messages-container');
-    if (container) {
-      // Usar requestAnimationFrame para asegurar que el DOM se haya actualizado
-      requestAnimationFrame(() => {
-        container.scrollTop = container.scrollHeight;
+  // Efecto principal para hacer scroll al final usando ref
+  useLayoutEffect(() => {
+    if (activeConv && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ 
+        behavior: "instant",
+        block: "end" 
       });
     }
-  };
+  }, [activeConv?.session_id, activeConv?.messages]);
 
-  // Efecto para hacer scroll al último mensaje cuando cambia el chat activo
-  useEffect(() => {
-    if (!activeConv) return;
-
-    // Ejecutar inmediatamente
-    scrollToBottom();
-    
-    // Ejecutar después de diferentes intervalos para asegurar la actualización del DOM
-    const timer1 = setTimeout(scrollToBottom, 50);
-    const timer2 = setTimeout(scrollToBottom, 100);
-    const timer3 = setTimeout(scrollToBottom, 200);
-    const timer4 = setTimeout(scrollToBottom, 500); // Agregar un timer adicional más largo
-    
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-      clearTimeout(timer4);
-    };
-  }, [activeConv?.session_id, active]);
-
-  // Efecto adicional para asegurar el scroll al final cuando cambian los mensajes
-  useEffect(() => {
-    if (!activeConv) return;
-
-    // Ejecutar después de diferentes intervalos para asegurar la actualización del DOM
-    const timer1 = setTimeout(scrollToBottom, 50);
-    const timer2 = setTimeout(scrollToBottom, 100);
-    const timer3 = setTimeout(scrollToBottom, 200);
-    const timer4 = setTimeout(scrollToBottom, 500); // Agregar un timer adicional más largo
-    
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-      clearTimeout(timer4);
-    };
-  }, [activeConv?.messages, activeConv]);
+  // Efecto para cuando cambiamos de vista
+  useLayoutEffect(() => {
+    if (!showChatList && messagesEndRef.current) {
+      // Pequeño delay solo cuando cambiamos de vista
+      const timer = setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "instant", block: "end" });
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [showChatList, activeConv?.session_id]);
 
   // Función para verificar si un mensaje contiene una imagen
   const isImageUrl = (content: string) => {
@@ -252,12 +223,12 @@ export function WhatsAppChatMobile() {
   return (
     <>
       {/* Contenedor principal del chat - diseño móvil */}
-      <div className="flex flex-col h-[calc(100vh-64px)] w-full bg-qoder-dark-bg-primary rounded-xl overflow-hidden min-w-0">
+      <div className="flex flex-col h-[calc(100vh-64px)] w-full bg-[#161717] overflow-hidden min-w-0">
         {showChatList ? (
           // Vista de lista de chats (móvil)
           <div className="flex flex-col h-full w-full min-w-0">
             {/* Header del panel de chats */}
-            <div className="p-3 border-b border-qoder-dark-border-primary bg-qoder-dark-bg-quaternary min-w-0">
+            <div className="p-3 bg-[#161717] min-w-0">
               <div className="flex items-center justify-between mb-2">
                 <h2 className="font-semibold text-qoder-dark-text-primary">Chats de WhatsApp</h2>
                 <div className="flex items-center gap-1 ml-auto">
@@ -310,7 +281,7 @@ export function WhatsAppChatMobile() {
             </div>
             
             {/* Lista de conversaciones */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar bg-qoder-dark-bg-quaternary scrollbar-styled min-w-0">
+            <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#161717] scrollbar-styled min-w-0">
               {isLoading && (
                 <div className="p-4 text-center">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-qoder-dark-accent-primary mx-auto mb-2"></div>
@@ -324,16 +295,16 @@ export function WhatsAppChatMobile() {
                 const isActive = active === conversation.session_id;
                 
                 return (
-                  <button
+                  <div
                     key={conversation.session_id}
                     onClick={() => handleSelectChat(conversation.session_id)}
-                    className={`w-full text-left p-3 hover:bg-qoder-dark-bg-hover transition-colors ${
+                    className={`w-full text-left p-3 hover:bg-qoder-dark-bg-hover transition-colors cursor-pointer ${
                       isActive ? 'bg-qoder-dark-bg-hover' : ''
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       {/* Avatar del cliente */}
-                      <div className="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0">
+                      <div className="w-12 h-12 rounded-full bg-[#161717] flex items-center justify-center flex-shrink-0">
                         {(() => {
                           const clientInfo = getClientInfo(conversation.session_id);
                           const fotoPerfil = clientInfo?.foto_perfil;
@@ -345,11 +316,13 @@ export function WhatsAppChatMobile() {
                                 alt={clientName} 
                                 width={40}
                                 height={40}
-                                className="rounded-full object-cover"
+                                className="w-full h-full rounded-full object-cover"
                                 onError={(e) => {
                                   // Si la imagen no carga, mostrar el avatar con inicial
                                   e.currentTarget.onerror = null;
-                                  e.currentTarget.parentElement!.innerHTML = `<span class="text-white font-semibold">${clientName.charAt(0).toUpperCase()}</span>`;
+                                  if (e.currentTarget.parentElement) {
+                                    e.currentTarget.parentElement.innerHTML = `<span class="text-white font-semibold">${clientName.charAt(0).toUpperCase()}</span>`;
+                                  }
                                 }}
                               />
                             );
@@ -391,7 +364,7 @@ export function WhatsAppChatMobile() {
                         </div>
                       </div>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
               
@@ -407,7 +380,7 @@ export function WhatsAppChatMobile() {
           <div className="flex flex-col h-full w-full min-w-0">
             {/* Header del chat */}
             {activeConv && (
-              <div className="p-3 border-b border-qoder-dark-border-primary bg-qoder-dark-bg-quaternary flex items-center justify-between min-w-0">
+              <div className="p-3 bg-[#161717] flex items-center justify-between min-w-0">
                 <div className="flex items-center gap-3">
                   <button 
                     onClick={handleBackToChats}
@@ -432,7 +405,10 @@ export function WhatsAppChatMobile() {
                             onError={(e) => {
                               // Si la imagen no carga, mostrar el avatar con inicial
                               e.currentTarget.onerror = null;
-                              e.currentTarget.parentElement!.innerHTML = `<span class="text-white font-semibold">${clientName.charAt(0).toUpperCase()}</span>`;
+                              e.currentTarget.onerror = null;
+                              if (e.currentTarget.parentElement) {
+                                e.currentTarget.parentElement.innerHTML = `<span class="text-white font-semibold">${clientName.charAt(0).toUpperCase()}</span>`;
+                              }
                             }}
                           />
                         );
@@ -464,7 +440,7 @@ export function WhatsAppChatMobile() {
                         checked={getClientInfo(activeConv.session_id)?.chat_humano === 1}
                         onChange={(e) => handleControlHumanoChange(e.target.checked)}
                       />
-                      <div className="w-11 h-6 bg-blue-500 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                      <div className="w-11 h-6 bg-blue-500 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500" style={{ backgroundColor: getClientInfo(activeConv.session_id)?.chat_humano === 1 ? '#144D37' : '#14274D' }}></div>
                     </label>
                     <span className="text-xs text-qoder-dark-text-secondary">Humano</span>
                   </div>
@@ -472,8 +448,34 @@ export function WhatsAppChatMobile() {
               </div>
             )}
             
-            {/* Área de mensajes */}
-            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar scrollbar-styled bg-qoder-dark-bg-secondary bg-[url('/whatsapp-bg.png')] bg-repeat bg-[length:300px_500px] min-w-0" id="messages-container">
+            {/* Área de mensajes - WhatsApp Mobile Style */}
+            <div 
+              className="flex-1 relative overflow-hidden min-w-0"
+              style={{ backgroundColor: '#161717' }}
+            >
+              {/* Capa de fondo fija con patrón */}
+              <div 
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  backgroundImage: "url('/whatsapp-bg.png')",
+                  backgroundRepeat: 'repeat',
+                  backgroundSize: '300px 500px',
+                  backgroundPosition: 'center',
+                  backgroundAttachment: 'fixed',
+                  mixBlendMode: 'overlay',
+                  opacity: 0.1
+                }}
+              />
+              
+              {/* Contenido scrollable sobre el fondo */}
+              <div 
+                className="relative h-full overflow-y-auto p-4 custom-scrollbar scrollbar-styled"
+                id="messages-container"
+                style={{ 
+                  overscrollBehavior: 'contain',
+                  backgroundColor: 'transparent'
+                }}
+              >
               {activeConv ? (
                 <div className="space-y-2">
                   {activeConv.messages.map((msg: ChatMessage, index: number) => (
@@ -482,12 +484,12 @@ export function WhatsAppChatMobile() {
                       className={`flex ${(msg.type === 'ai' && msg.source === 'manual') || msg.type === 'ai' ? 'justify-end' : 'justify-start'} mb-2`}
                     >
                       <div 
-                        className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl px-4 py-2 rounded-lg ${
+                        className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl px-4 py-2 rounded-3xl ${
                           (msg.type === 'ai' && msg.source === 'manual') 
-                            ? 'bg-green-600 text-white rounded-br-none' 
+                            ? 'whatsapp-outgoing-bubble' 
                             : (msg.type === 'ai' 
-                                ? 'bg-blue-500 text-white rounded-br-none' 
-                                : 'bg-qoder-dark-bg-primary text-qoder-dark-text-primary rounded-bl-none')
+                                ? 'whatsapp-incoming-bubble' 
+                                : 'whatsapp-client-bubble')
                         }`}
                       >
                         {/* Verificar si el contenido es una imagen */}
@@ -505,11 +507,11 @@ export function WhatsAppChatMobile() {
                                   onClick={() => setFullscreenImage(imageData?.imageUrl || msg.content)}
                                 />
                                 {imageData?.caption && (
-                                  <p className="text-xs text-qoder-dark-text-primary mt-1">
+                                  <p className="text-sm text-qoder-dark-text-primary mt-1">
                                     {imageData.caption}
                                   </p>
                                 )}
-                                <p className="text-xs opacity-70 mt-1">
+                                <p className="text-xs opacity-50 mt-1">
                                   {msg.type === 'ai' && msg.source === 'manual' ? 'Humano' : (msg.type === 'ai' ? 'IA' : 'Cliente')} • {formatWhatsAppTimestamp(msg.timestamp)}
                                 </p>
                               </div>
@@ -517,10 +519,11 @@ export function WhatsAppChatMobile() {
                           })()
                         ) : (
                           <div className="space-y-1">
-                            <p className="whitespace-pre-wrap">{msg.content}</p>
-                            <p className="text-xs opacity-70 mt-1">
-                              {msg.type === 'ai' && msg.source === 'manual' ? 'Humano' : (msg.type === 'ai' ? 'IA' : 'Cliente')} • {formatWhatsAppTimestamp(msg.timestamp)}
-                            </p>
+                            <p className="whitespace-pre-wrap message-text">{msg.content}</p>
+                            <div className="message-info">
+                              <span className="message-sender">{msg.type === 'ai' && msg.source === 'manual' ? 'Humano' : (msg.type === 'ai' ? 'IA' : 'Cliente')}</span>
+                              <span className="message-time">{formatWhatsAppTimestamp(msg.timestamp)}</span>
+                            </div>
                           </div>
                         )}
                       </div>
@@ -540,10 +543,11 @@ export function WhatsAppChatMobile() {
                 </div>
               )}
             </div>
+          </div>
             
             {/* Área de entrada de mensaje */}
             {activeConv && (
-              <div className="p-3 border-t border-qoder-dark-border-primary bg-qoder-dark-bg-quaternary min-w-0">
+              <div className="p-3 bg-[#161717] min-w-0">
                 <div className="flex items-center gap-2 min-w-0">
                   <input
                     type="text"

@@ -150,7 +150,7 @@ export const LazyAppointmentList = dynamic(
 // =============================================
 
 export const LazyAppointmentModal = dynamic(
-  () => import('@/components/AppointmentModal').then(mod => mod.AppointmentModal),
+  () => import('@/components/AppointmentModalWithSucursal').then(mod => mod.AppointmentModalWithSucursal),
   {
     ssr: false,
   }

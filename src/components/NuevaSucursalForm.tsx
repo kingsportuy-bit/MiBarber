@@ -27,7 +27,8 @@ export function NuevaSucursalForm({
     nombre_sucursal: "",
     celular: "",
     telefono: "",
-    direccion: ""
+    direccion: "",
+    info: ""
   });
 
   // Manejar cambios en el formulario de sucursal
@@ -43,8 +44,7 @@ export function NuevaSucursalForm({
     if (newSucursal.nombre_sucursal && idBarberia) {
       createSucursal.mutate({
         ...newSucursal,
-        id_barberia: idBarberia,
-        horario: null // horario es nullable
+        id_barberia: idBarberia
       }, {
         onSuccess: (data) => {
           if (data && data.id) {

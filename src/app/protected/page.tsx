@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { WindowLayout } from "@/components/WindowLayout";
 import { KanbanBoardDndKit } from "@/components/KanbanBoardDndKit";
-import { AppointmentModal } from "@/components/AppointmentModal";
+import { AppointmentModalWithSucursal } from "@/components/AppointmentModalWithSucursal";
 import { useBarberos } from "@/hooks/useBarberos";
 import { useSucursales } from "@/hooks/useSucursales";
 import type { Appointment, Sucursal } from "@/types/db";
@@ -142,7 +142,7 @@ export default function ProtectedPage() {
         }}
       />
       
-      <AppointmentModal 
+      <AppointmentModalWithSucursal 
         open={isModalOpen} 
         onOpenChange={setIsModalOpen} 
         initial={selectedAppointment || undefined}

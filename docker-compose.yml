@@ -11,13 +11,13 @@ services:
         max_attempts: 3
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.mibarber.rule=Host(`mibarber.codexa.uy`)"
+        - "traefik.http.routers.mibarber.rule=Host(`barberox.codexa.uy`)"
         - "traefik.http.routers.mibarber.entrypoints=websecure"
         - "traefik.http.routers.mibarber.tls.certresolver=letsencryptresolver"
         - "traefik.http.services.mibarber.loadbalancer.server.port=3000"
         - "traefik.docker.network=oraclelabsnet"
         # Redirect HTTP to HTTPS
-        - "traefik.http.routers.mibarber-http.rule=Host(`mibarber.codexa.uy`)"
+        - "traefik.http.routers.mibarber-http.rule=Host(`barberox.codexa.uy`)"
         - "traefik.http.routers.mibarber-http.entrypoints=web"
         - "traefik.http.routers.mibarber-http.middlewares=redirect-to-https"
         - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"

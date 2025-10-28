@@ -35,3 +35,4 @@ coverage/
 
 # Docker
 *.log
+docker-compose.yml

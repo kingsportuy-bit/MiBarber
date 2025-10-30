@@ -23,24 +23,25 @@ export function BarberoLogin({ onLogin }: BarberoLoginProps) {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     
-    login.mutate(
-      { 
+    try {
+      // Llamar a login directamente como una función
+      const response = await login({ 
         username: formData.username, 
         password: formData.password 
-      },
-      {
-        onSuccess: () => {
-          onLogin();
-        },
-        onError: (error: any) => {
-          setError(error.message || "Error al iniciar sesión");
-        }
+      });
+      
+      if (response.success) {
+        onLogin();
+      } else {
+        setError(response.error || "Error al iniciar sesión");
       }
-    );
+    } catch (error: any) {
+      setError(error.message || "Error al iniciar sesión");
+    }
   };
 
   return (
@@ -96,9 +97,8 @@ export function BarberoLogin({ onLogin }: BarberoLoginProps) {
             <button
               type="submit"
               className="action-button w-full"
-              disabled={login.isPending}
             >
-              {login.isPending ? "Iniciando sesión..." : "Iniciar Sesión"}
+              Iniciar Sesión
             </button>
           </div>
         </form>

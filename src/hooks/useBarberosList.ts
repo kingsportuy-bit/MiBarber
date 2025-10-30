@@ -8,35 +8,56 @@ export function useBarberosList(idBarberia?: string | null, idSucursal?: string 
   return useQuery({
     queryKey: ["barberos-list", idBarberia, idSucursal],
     queryFn: async (): Promise<Barbero[]> => {
+      console.log('═══════════════════════════════════════════');
+      console.log('🔍 useBarberosList - queryFn ejecutado');
+      console.log('═══════════════════════════════════════════');
+      console.log('🔍 idBarberia recibido:', idBarberia);
+      console.log('🔍 idSucursal recibido:', idSucursal);
+      console.log('🔍 Tipo de idBarberia:', typeof idBarberia);
+      console.log('🔍 Tipo de idSucursal:', typeof idSucursal);
+
       let query = (supabase as any)
         .from("mibarber_barberos")
         .select("*")
         .eq("activo", true)
         .order("nombre", { ascending: true });
-      
-      // Si se proporciona un idBarberia, filtrar por él
+
       if (idBarberia) {
-        console.log("useBarberosList - Filtrando por idBarberia:", idBarberia);
+        console.log('✅ Filtrando por idBarberia:', idBarberia);
         query = query.eq("id_barberia", idBarberia);
+      } else {
+        console.warn('⚠️ idBarberia es null/undefined - NO SE FILTRA POR BARBERÍA');
       }
-      
-      // Si se proporciona un idSucursal, filtrar por él
+
       if (idSucursal) {
-        console.log("useBarberosList - Filtrando por idSucursal:", idSucursal);
+        console.log('✅ Filtrando por idSucursal:', idSucursal);
         query = query.eq("id_sucursal", idSucursal);
+      } else {
+        console.warn('⚠️ idSucursal es null/undefined - NO SE FILTRA POR SUCURSAL');
       }
-      
+
+      console.log('🔍 Ejecutando query a Supabase...');
       const { data, error } = await query;
-      
+
+      console.log('🔍 Respuesta de Supabase:');
+      console.log(' - Data length:', data?.length);
+      console.log(' - Error:', error);
+      if (data && data.length > 0) {
+        console.log(' - Primer barbero:', {
+          nombre: data[0].nombre,
+          id_barberia: data[0].id_barberia,
+          id_sucursal: data[0].id_sucursal
+        });
+      }
+      console.log('═══════════════════════════════════════════');
+
       if (error) {
         console.error("❌ Error obteniendo lista de barberos:", error);
         throw error;
       }
-      
-      console.log("useBarberosList - Datos obtenidos:", data);
-      
+
       return data as Barbero[];
     },
-    staleTime: 5 * 60 * 1000, // 5 minutos
+    staleTime: 0, // ← Cambiar de 5 * 60 * 1000 a 0
   });
 }

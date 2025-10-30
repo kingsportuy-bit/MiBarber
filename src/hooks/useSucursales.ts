@@ -63,7 +63,29 @@ export function useSucursales(idBarberia?: string) {
       return data as Sucursal;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sucursales"] });
+      console.log('✅ onSuccess ejecutado - Limpiando cache');
+      // ✅ DESPUÉS (BORRA TODO)
+      queryClient.removeQueries({ queryKey: ["sucursales"] });
+      queryClient.removeQueries({ queryKey: ["barberos-list"] });
+      queryClient.removeQueries({ queryKey: ["barberos"] });
+      queryClient.removeQueries({ queryKey: ["citas"] });
+      queryClient.removeQueries({ queryKey: ["horarios"] });
+      queryClient.removeQueries({ queryKey: ["dashboard"] });
+      queryClient.removeQueries({ queryKey: ["estadisticas"] });
+      queryClient.removeQueries({ queryKey: ["clientes"] });
+
+      // Forzar refresh inmediato
+      queryClient.refetchQueries({
+        queryKey: ["sucursales"],
+        type: 'active'
+      });
+      
+      console.log('✅ Cache limpiado y queries refetchadas');
+      // ✅ SOLUCIÓN MEJORADA: No recargar la página, solo refetch queries
+      // setTimeout(() => {
+      //   console.log('🔄 RELOAD NOW!');
+      //   window.location.reload();
+      // }, 500);
     },
   });
 
@@ -84,7 +106,29 @@ export function useSucursales(idBarberia?: string) {
       return data as Sucursal;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sucursales"] });
+      console.log('✅ onSuccess ejecutado - Limpiando cache');
+      // ✅ DESPUÉS (BORRA TODO)
+      queryClient.removeQueries({ queryKey: ["sucursales"] });
+      queryClient.removeQueries({ queryKey: ["barberos-list"] });
+      queryClient.removeQueries({ queryKey: ["barberos"] });
+      queryClient.removeQueries({ queryKey: ["citas"] });
+      queryClient.removeQueries({ queryKey: ["horarios"] });
+      queryClient.removeQueries({ queryKey: ["dashboard"] });
+      queryClient.removeQueries({ queryKey: ["estadisticas"] });
+      queryClient.removeQueries({ queryKey: ["clientes"] });
+
+      // Forzar refresh inmediato
+      queryClient.refetchQueries({
+        queryKey: ["sucursales"],
+        type: 'active'
+      });
+      
+      console.log('✅ Cache limpiado y queries refetchadas');
+      // ✅ SOLUCIÓN MEJORADA: No recargar la página, solo refetch queries
+      // setTimeout(() => {
+      //   console.log('🔄 RELOAD NOW!');
+      //   window.location.reload();
+      // }, 500);
     },
   });
 
@@ -103,7 +147,29 @@ export function useSucursales(idBarberia?: string) {
       return true;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sucursales"] });
+      console.log('✅ onSuccess ejecutado - Limpiando cache');
+      // ✅ DESPUÉS (BORRA TODO)
+      queryClient.removeQueries({ queryKey: ["sucursales"] });
+      queryClient.removeQueries({ queryKey: ["barberos-list"] });
+      queryClient.removeQueries({ queryKey: ["barberos"] });
+      queryClient.removeQueries({ queryKey: ["citas"] });
+      queryClient.removeQueries({ queryKey: ["horarios"] });
+      queryClient.removeQueries({ queryKey: ["dashboard"] });
+      queryClient.removeQueries({ queryKey: ["estadisticas"] });
+      queryClient.removeQueries({ queryKey: ["clientes"] });
+
+      // Forzar refresh inmediato
+      queryClient.refetchQueries({
+        queryKey: ["sucursales"],
+        type: 'active'
+      });
+      
+      console.log('✅ Cache limpiado y queries refetchadas');
+      // ✅ SOLUCIÓN MEJORADA: No recargar la página, solo refetch queries
+      // setTimeout(() => {
+      //   console.log('🔄 RELOAD NOW!');
+      //   window.location.reload();
+      // }, 500);
     },
   });
 

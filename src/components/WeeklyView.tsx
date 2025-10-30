@@ -26,7 +26,11 @@ export function WeeklyView({
 }) {
   // Convertir el ID de barbero de string a número si es necesario
   const barberoId = barbero ? parseInt(barbero, 10) : undefined;
-  const { data: citas, isLoading } = useCitas(undefined, undefined, barberoId?.toString());
+  const { data: citas, isLoading } = useCitas({
+    sucursalId: undefined,
+    fecha: undefined,
+    barberoId: barberoId?.toString()
+  });
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(startOfWeek(getUruguayDate(), { weekStartsOn: 1 }));
 
   // Generar los días de la semana (lunes a sábado) usando useMemo para evitar recrearlos innecesariamente

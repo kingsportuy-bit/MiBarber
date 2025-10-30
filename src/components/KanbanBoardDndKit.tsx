@@ -29,6 +29,7 @@ import { useHorariosSucursales } from "@/hooks/useHorariosSucursales";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 import { getLocalDateString, getLocalDateTime } from "@/utils/dateUtils";
 import type { Appointment } from "@/types/db";
+import { useGlobalFilters } from "@/contexts/GlobalFiltersContext"; // Importar el hook de filtros globales
 
 interface KanbanBoardDndKitProps {
   onEdit: (appointment: Appointment) => void;
@@ -323,11 +324,31 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
   
   const { barbero: barberoActual, isAdmin, idBarberia } = useBarberoAuth();
   const { sucursales } = useSucursales(idBarberia || undefined);
+  const { filters: globalFilters } = useGlobalFilters(); // Usar filtros globales
   const [isInitialSelectionDone, setIsInitialSelectionDone] = useState(false); // Bandera para controlar la preseleccion inicial
   
-  const [selectedSucursal, setSelectedSucursal] = useState<string | undefined>(filters?.sucursalId);
-  const [selectedBarbero, setSelectedBarbero] = useState<string | undefined>(filters?.barberoId);
+  // Usar los filtros globales o los filtros pasados como props
+  const effectiveFilters = filters || globalFilters;
+  
+  const [selectedSucursal, setSelectedSucursal] = useState<string | undefined>(
+    effectiveFilters?.sucursalId || undefined
+  );
+  const [selectedBarbero, setSelectedBarbero] = useState<string | undefined>(
+    effectiveFilters?.barberoId || undefined
+  );
   const [currentDate, setCurrentDate] = useState<Date>(() => {
+    // Si hay una fecha en los filtros, usarla, de lo contrario usar la fecha actual
+    // Verificar qué tipo de filtro tenemos
+    if (effectiveFilters) {
+      // Para filtros locales (props)
+      if ('fecha' in effectiveFilters && effectiveFilters.fecha) {
+        return new Date(effectiveFilters.fecha);
+      }
+      // Para filtros globales
+      if ('fechaInicio' in effectiveFilters && effectiveFilters.fechaInicio) {
+        return new Date(effectiveFilters.fechaInicio);
+      }
+    }
     // Usar la fecha ajustada a la zona horaria local
     const localDate = getLocalDateTime();
     return localDate;
@@ -362,11 +383,11 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
   const { data: barberos } = useBarberosList(idBarberia, selectedSucursal || undefined);
   const { data: servicios } = useServiciosListPorSucursal(selectedSucursal);
   
-  const { data: citas = [], isLoading, isError, refetch } = useCitas(
-    selectedSucursal,
-    selectedDate, // Usar la fecha formateada
-    selectedBarbero || (barberoActual?.id_barbero && !isAdmin ? barberoActual.id_barbero : undefined)
-  );
+  const { data: citas = [], isLoading, isError, refetch } = useCitas({
+    sucursalId: selectedSucursal,
+    fecha: selectedDate, // Usar la fecha formateada
+    barberoId: selectedBarbero || (barberoActual?.id_barbero && !isAdmin ? barberoActual.id_barbero : undefined)
+  });
   
   const supabase = getSupabaseClient();
   const boardRef = useRef<HTMLDivElement>(null);

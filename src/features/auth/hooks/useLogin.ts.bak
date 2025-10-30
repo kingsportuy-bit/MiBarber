@@ -1,0 +1,66 @@
+  // Función de login
+  const login = async (credentials: LoginCredentials): Promise<LoginResponse> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      console.log('useLogin - Intentando login con credenciales:', credentials);
+      
+      // Buscar barbero por username
+      const { data: barbero, error: fetchError } = await supabase
+        .from('mibarber_barberos')
+        .select('*')
+        .eq('username', credentials.username)
+        .single();
+
+      console.log('useLogin - Resultado de búsqueda de barbero:', { barbero, fetchError });
+
+      if (fetchError || !barbero) {
+        const errorMsg = 'Usuario o contraseña incorrectos';
+        console.log('useLogin - Error: ', errorMsg);
+        throw new Error(errorMsg);
+      }
+
+      // Verificar password
+      console.log('useLogin - Verificando password...');
+      const isValidPassword = await AuthService.verifyPassword(
+        credentials.password,
+        (barbero as any).password_hash || ''
+      );
+      console.log('useLogin - Password válido:', isValidPassword);
+
+      if (!isValidPassword) {
+        const errorMsg = 'Usuario o contraseña incorrectos';
+        console.log('useLogin - Error: ', errorMsg);
+        throw new Error(errorMsg);
+      }
+
+      // Crear y guardar sesión
+      console.log('useLogin - Creando sesión...');
+      const session = AuthService.createSessionFromBarbero(barbero as Barbero);
+      
+      console.log('useLogin - Guardando sesión:', session);
+      AuthService.saveSession(session);
+
+      // Disparar evento personalizado para notificar el cambio
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('barberAuthChange', {
+            detail: { user: barbero, action: 'login' },
+          })
+        );
+      }
+
+      // Invalidar queries relacionadas
+      queryClient.invalidateQueries({ queryKey: ['barberoAuth'] });
+
+      return { success: true };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error de autenticación';
+      console.error('useLogin - Error en login:', errorMessage);
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };

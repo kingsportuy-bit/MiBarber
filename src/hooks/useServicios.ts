@@ -50,6 +50,9 @@ export function useServicios(idSucursal?: string) {
       queryClient.invalidateQueries({ queryKey: ["servicios-list"] });
       queryClient.invalidateQueries({ queryKey: ["barberos"] });
       queryClient.invalidateQueries({ queryKey: ["barberos-list"] });
+      // Invalidar también las queries sin sucursalId específicas
+      queryClient.invalidateQueries({ queryKey: ["servicios", undefined] });
+      queryClient.invalidateQueries({ queryKey: ["barberos", undefined] });
     },
   });
 
@@ -73,6 +76,9 @@ export function useServicios(idSucursal?: string) {
       queryClient.invalidateQueries({ queryKey: ["servicios-list"] });
       queryClient.invalidateQueries({ queryKey: ["barberos"] });
       queryClient.invalidateQueries({ queryKey: ["barberos-list"] });
+      // Invalidar también las queries sin sucursalId específicas
+      queryClient.invalidateQueries({ queryKey: ["servicios", undefined] });
+      queryClient.invalidateQueries({ queryKey: ["barberos", undefined] });
     },
   });
 
@@ -94,6 +100,9 @@ export function useServicios(idSucursal?: string) {
       queryClient.invalidateQueries({ queryKey: ["servicios-list"] });
       queryClient.invalidateQueries({ queryKey: ["barberos"] });
       queryClient.invalidateQueries({ queryKey: ["barberos-list"] });
+      // Invalidar también las queries sin sucursalId específicas
+      queryClient.invalidateQueries({ queryKey: ["servicios", undefined] });
+      queryClient.invalidateQueries({ queryKey: ["barberos", undefined] });
     },
   });
 

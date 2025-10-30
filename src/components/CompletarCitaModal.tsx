@@ -18,9 +18,36 @@ export function CompletarCitaModal({ citaId, onClose, onCompletado }: CompletarC
   
   const supabase = getSupabaseClient();
 
+  // Validación mejorada del número de factura
+  const validateNumeroFactura = (value: string): boolean => {
+    // Permitir vacío (opcional)
+    if (!value) return true;
+    
+    // Validar formato: solo números y guiones
+    const facturaRegex = /^[0-9\-]+$/;
+    return facturaRegex.test(value);
+  };
+
+  // Validación mejorada del método de pago
+  const validateMetodoPago = (value: string): boolean => {
+    const metodosValidos = ["", "Efectivo", "Tarjeta de Débito", "Tarjeta de Crédito", "Transferencia", "Otro"];
+    return metodosValidos.includes(value);
+  };
+
   const handleCompletar = async () => {
+    // Validaciones mejoradas
     if (!metodoPago) {
       setError("Por favor, seleccione un método de pago");
+      return;
+    }
+    
+    if (!validateMetodoPago(metodoPago)) {
+      setError("Método de pago no válido");
+      return;
+    }
+    
+    if (numeroFactura && !validateNumeroFactura(numeroFactura)) {
+      setError("El número de factura solo puede contener números y guiones");
       return;
     }
     
@@ -28,27 +55,57 @@ export function CompletarCitaModal({ citaId, onClose, onCompletado }: CompletarC
     setError("");
     
     try {
+      // Primero obtener la cita para tener los datos necesarios
+      const { data: citaData, error: citaError } = await (supabase as any)
+        .from("mibarber_citas")
+        .select("id_cliente, id_servicio, id_barbero, id_sucursal, id_barberia")
+        .eq("id_cita", citaId)
+        .single();
+      
+      if (citaError) throw citaError;
+      if (!citaData) throw new Error("No se encontró la cita");
+      
+      // Obtener el precio del servicio
+      let monto = 0;
+      if (citaData.id_servicio) {
+        const { data: servicioData, error: servicioError } = await (supabase as any)
+          .from("mibarber_servicios")
+          .select("precio")
+          .eq("id_servicio", citaData.id_servicio)
+          .single();
+        
+        if (!servicioError && servicioData) {
+          monto = servicioData.precio;
+        }
+      }
+      
       // Actualizar la cita a estado "completado"
-      const { error: citaError } = await (supabase as any)
+      const { error: updateError } = await (supabase as any)
         .from("mibarber_citas")
         .update({ 
           estado: "completado",
-          nro_factura: numeroFactura || null
+          nro_factura: numeroFactura || null,
+          metodo_pago: metodoPago
         })
         .eq("id_cita", citaId);
       
-      if (citaError) throw citaError;
+      if (updateError) throw updateError;
       
       // Crear registro en caja
       const { error: cajaError } = await (supabase as any)
         .from("mibarber_caja")
         .insert({
           id_cita: citaId,
-          id_cliente: "", // Se obtendrá de la cita
-          monto: 0, // Se obtendrá del servicio
-          numero_factura: numeroFactura || "",
+          id_cliente: citaData.id_cliente || null,
+          monto: monto,
+          numero_factura: numeroFactura || null,
           fecha: new Date().toISOString(),
-          metodo_pago: metodoPago
+          metodo_pago: metodoPago,
+          tipo: "ingreso",
+          concepto: "Servicio de barbería",
+          barbero: citaData.id_barbero || null,
+          id_sucursal: citaData.id_sucursal || null,
+          id_barberia: citaData.id_barberia || null
         });
       
       if (cajaError) throw cajaError;
@@ -86,6 +143,9 @@ export function CompletarCitaModal({ citaId, onClose, onCompletado }: CompletarC
               className="w-full qoder-dark-input p-2"
               placeholder="Ingrese el número de factura"
             />
+            {numeroFactura && !validateNumeroFactura(numeroFactura) && (
+              <p className="text-red-400 text-xs mt-1">Solo números y guiones permitidos</p>
+            )}
           </div>
           
           <div>
@@ -95,7 +155,7 @@ export function CompletarCitaModal({ citaId, onClose, onCompletado }: CompletarC
             <select
               value={metodoPago}
               onChange={(e) => setMetodoPago(e.target.value)}
-              className="w-full qoder-dark-input p-2"
+              className={`w-full qoder-dark-input p-2 ${!metodoPago && error ? 'border-red-500' : ''}`}
             >
               <option value="">Seleccione un método de pago</option>
               <option value="Efectivo">Efectivo</option>

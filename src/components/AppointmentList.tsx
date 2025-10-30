@@ -26,11 +26,11 @@ export function AppointmentList({ fecha }: AppointmentListProps) {
   }, [sucursalFiltro]);
   
   // Obtener citas con los filtros aplicados
-  const { data: citas, isLoading } = useCitas(
-    isAdmin && sucursalFiltro ? sucursalFiltro : undefined, // Aplicar filtro de sucursal si es admin
-    undefined, // No filtrar por fecha específica (lo haremos después)
-    isAdmin && barberoFiltro ? barberoFiltro : undefined // Aplicar filtro de barbero si es admin
-  );
+  const { data: citas, isLoading } = useCitas({
+    sucursalId: isAdmin && sucursalFiltro ? sucursalFiltro : undefined, // Aplicar filtro de sucursal si es admin
+    fecha: undefined, // No filtrar por fecha específica (lo haremos después)
+    barberoId: isAdmin && barberoFiltro ? barberoFiltro : undefined // Aplicar filtro de barbero si es admin
+  });
   
   // Formatear la fecha para mostrar
   const formatDisplayDate = (dateString: string) => {

@@ -11,6 +11,8 @@ import type { Appointment, Sucursal } from "@/types/db";
 import { useCitas } from "@/hooks/useCitas";
 import { getLocalDateString } from "@/utils/dateUtils"; // Importar la utilidad de fecha
 import { CustomDatePicker } from "@/components/CustomDatePicker"; // Agregar esta importación
+import { useGlobalFilters } from "@/hooks/useGlobalFilters";
+import { GlobalFilters } from "@/components/shared/GlobalFilters";
 
 export default function ProtectedPage() {
   usePageTitle("Barberox | Dashboard");
@@ -19,17 +21,11 @@ export default function ProtectedPage() {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   // Usar la utilidad de fecha corregida
   const [selectedDate, setSelectedDate] = useState<string>(getLocalDateString());
-  const [selectedSucursal, setSelectedSucursal] = useState<string | undefined>(undefined);
-  const [selectedBarbero, setSelectedBarbero] = useState<string | undefined>(undefined);
+  const { filters, isAdmin } = useGlobalFilters();
   
   const { refetch } = useCitas();
-  const { data: barberos, isLoading: isLoadingBarberos } = useBarberos(selectedSucursal);
+  const { data: barberos, isLoading: isLoadingBarberos } = useBarberos(filters.sucursalId || undefined);
   const { sucursales, isLoading: isLoadingSucursales } = useSucursales();
-
-  // Cuando se selecciona una sucursal, resetear el barbero seleccionado
-  useEffect(() => {
-    setSelectedBarbero(undefined);
-  }, [selectedSucursal]);
 
   const handleEdit = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
@@ -61,6 +57,9 @@ export default function ProtectedPage() {
 
   return (
     <div className="flex flex-col h-full">
+      {/* Filtros globales - solo visibles para administradores */}
+      {isAdmin && <GlobalFilters className="mb-4" />}
+      
       <div className="qoder-dark-card p-4 mb-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2">
@@ -88,56 +87,14 @@ export default function ProtectedPage() {
               Hoy
             </button>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <label className="text-qoder-dark-text-primary">Sucursal:</label>
-            <select
-              value={selectedSucursal || ""}
-              onChange={(e) => setSelectedSucursal(e.target.value || undefined)}
-              className="qoder-dark-select px-3 py-1 rounded-lg"
-              disabled={isLoadingSucursales}
-            >
-              <option value="">Todas</option>
-              {isLoadingSucursales ? (
-                <option disabled>Cargando...</option>
-              ) : (
-                sucursales?.map((sucursal: Sucursal) => (
-                  <option key={sucursal.id} value={sucursal.id}>
-                    {sucursal.nombre_sucursal || `Sucursal ${sucursal.numero_sucursal}`}
-                  </option>
-                ))
-              )}
-            </select>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <label className="text-qoder-dark-text-primary">Barbero:</label>
-            <select
-              value={selectedBarbero || ""}
-              onChange={(e) => setSelectedBarbero(e.target.value || undefined)}
-              className="qoder-dark-select px-3 py-1 rounded-lg"
-              disabled={isLoadingBarberos}
-            >
-              <option value="">Todos</option>
-              {isLoadingBarberos ? (
-                <option disabled>Cargando...</option>
-              ) : (
-                barberos?.map((barbero) => (
-                  <option key={barbero.id_barbero} value={barbero.id_barbero}>
-                    {barbero.nombre}
-                  </option>
-                ))
-              )}
-            </select>
-          </div>
         </div>
       </div>
       
       <KanbanBoardDndKit 
         onEdit={handleEdit} 
         filters={{
-          sucursalId: selectedSucursal,
-          barberoId: selectedBarbero,
+          sucursalId: filters.sucursalId || undefined,
+          barberoId: filters.barberoId || undefined,
           fecha: selectedDate
         }}
       />

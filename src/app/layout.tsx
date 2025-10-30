@@ -5,6 +5,7 @@ import "./custom-styles.css";
 import { Providers } from "@/components/Providers";
 import { GeneralLayout } from "@/components/GeneralLayout";
 import { ConditionalNavBar } from "@/components/ConditionalNavBar";
+import { GlobalFiltersProvider } from "@/contexts/GlobalFiltersContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -30,10 +31,12 @@ export default function RootLayout({
           <div className="sparkle-2"></div>
         </div>
         <Providers>
-          <ConditionalNavBar />
-          <GeneralLayout>
-            {children}
-          </GeneralLayout>
+          <GlobalFiltersProvider>
+            <ConditionalNavBar />
+            <GeneralLayout>
+              {children}
+            </GeneralLayout>
+          </GlobalFiltersProvider>
         </Providers>
       </body>
     </html>

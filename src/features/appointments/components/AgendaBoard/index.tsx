@@ -1,0 +1,1 @@
+export { AgendaContainer as AgendaBoard } from './AgendaContainer';

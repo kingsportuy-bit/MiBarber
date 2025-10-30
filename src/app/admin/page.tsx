@@ -60,15 +60,12 @@ export default function AdminPage() {
     
     try {
       // Verificar conexión a Supabase
-      console.log("Verificando conexión a Supabase...");
       
       // Probar una consulta simple para verificar la conexión
-      const { data: connectionTest, error: connectionError } = await (supabase as any)
+      const { data: connectionTest, error: connectionError } = await supabase
         .from("mibarber_barberias")
         .select("id")
         .limit(1);
-      
-      console.log("Resultado de prueba de conexión:", { connectionTest, connectionError });
       
       if (connectionError) {
         console.error("Error de conexión:", connectionError);
@@ -79,28 +76,15 @@ export default function AdminPage() {
       const idBarberia = generateUUID();
       const idSucursal = generateUUID();
       
-      console.log("Creando barbería con ID:", idBarberia);
-      console.log("Datos de la barbería:", {
-        id: idBarberia,
-        nombre_barberia: formData.nombreBarberia
-      });
-      
       // 1. Crear la barbería en mibarber_barberias
-      const { data: barberiaData, error: barberiaError } = await (supabase as any)
+      const { data: barberiaData, error: barberiaError } = await supabase
         .from("mibarber_barberias")
-        .insert([{
+        .insert({
           id: idBarberia,
           nombre_barberia: formData.nombreBarberia
-        }])
+        } as any)
         .select()
         .single();
-      
-      console.log("Respuesta de creación de barbería:", { 
-        data: barberiaData, 
-        error: barberiaError,
-        typeofError: typeof barberiaError,
-        errorKeys: barberiaError ? Object.keys(barberiaError) : null
-      });
       
       if (barberiaError) {
         const errorDetails = {
@@ -114,23 +98,10 @@ export default function AdminPage() {
         throw new Error(`Error creando barbería: ${JSON.stringify(errorDetails, null, 2)}`);
       }
       
-      console.log("Barbería creada exitosamente:", barberiaData);
-      
       // 2. Crear la sucursal en mibarber_sucursales
-      console.log("Creando sucursal con ID:", idSucursal);
-      console.log("Datos de la sucursal:", {
-        id: idSucursal,
-        id_barberia: idBarberia,
-        numero_sucursal: 1,
-        nombre_sucursal: formData.nombreBarberia, // Cambiar de "Sucursal Principal" a formData.nombreBarberia
-        direccion: "",
-        telefono: formData.telefono,
-        celular: formData.telefono
-      });
-      
-      const { data: sucursalData, error: sucursalError } = await (supabase as any)
+      const { data: sucursalData, error: sucursalError } = await supabase
         .from("mibarber_sucursales")
-        .insert([{
+        .insert({
           id: idSucursal,
           id_barberia: idBarberia,
           numero_sucursal: 1,
@@ -138,20 +109,13 @@ export default function AdminPage() {
           direccion: "",
           telefono: formData.telefono,
           celular: formData.telefono
-        }])
+        } as any)
         .select()
         .single();
       
-      console.log("Respuesta de creación de sucursal:", { 
-        data: sucursalData, 
-        error: sucursalError,
-        typeofError: typeof sucursalError,
-        errorKeys: sucursalError ? Object.keys(sucursalError) : null
-      });
-      
       if (sucursalError) {
         // Si falla la creación de la sucursal, eliminar la barbería creada
-        await (supabase as any)
+        await supabase
           .from("mibarber_barberias")
           .delete()
           .eq("id", idBarberia);
@@ -167,10 +131,7 @@ export default function AdminPage() {
         throw new Error(`Error creando sucursal: ${JSON.stringify(errorDetails, null, 2)}`);
       }
       
-      console.log("Sucursal creada exitosamente:", sucursalData);
-      
       // 3. Crear el administrador asociado a la barbería
-      console.log("Creando administrador");
       
       // Generar nombre de usuario automáticamente basado en nombre y apellido
       const nameParts = formData.nombreAdministrador.trim().split(/\s+/);
@@ -198,23 +159,9 @@ export default function AdminPage() {
         username = username.substring(0, 20);
       }
       
-      console.log("Datos del administrador:", {
-        nombre: formData.nombreAdministrador,
-        email: formData.email,
-        telefono: formData.telefono,
-        password_hash: formData.password,
-        admin: true,
-        nivel_permisos: 1,
-        activo: true,
-        id_barberia: idBarberia,
-        id_sucursal: idSucursal,
-        especialidades: ["administrador"],
-        username: username
-      });
-      
-      const { data: adminData, error: adminError } = await (supabase as any)
+      const { data: adminData, error: adminError } = await supabase
         .from("mibarber_barberos")
-        .insert([{
+        .insert({
           id_barbero: generateUUID(),
           nombre: formData.nombreAdministrador,
           email: formData.email,
@@ -227,25 +174,18 @@ export default function AdminPage() {
           id_sucursal: idSucursal,
           especialidades: ["administrador"],
           username: username
-        }])
+        } as any)
         .select()
         .single();
       
-      console.log("Respuesta de creación de administrador:", { 
-        data: adminData, 
-        error: adminError,
-        typeofError: typeof adminError,
-        errorKeys: adminError ? Object.keys(adminError) : null
-      });
-      
       if (adminError) {
         // Si falla la creación del administrador, eliminar la sucursal y la barbería creadas
-        await (supabase as any)
+        await supabase
           .from("mibarber_sucursales")
           .delete()
           .eq("id", idSucursal);
         
-        await (supabase as any)
+        await supabase
           .from("mibarber_barberias")
           .delete()
           .eq("id", idBarberia);
@@ -260,8 +200,6 @@ export default function AdminPage() {
         console.error("Detalles del error de administrador:", errorDetails);
         throw new Error(`Error creando administrador: ${JSON.stringify(errorDetails, null, 2)}`);
       }
-      
-      console.log("Administrador creado exitosamente:", adminData);
       
       // Guardar credenciales para mostrar al usuario
       setCreatedCredentials({

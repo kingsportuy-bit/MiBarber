@@ -3,6 +3,7 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 interface UserDropdownMenuProps {
   userName: string;
@@ -32,19 +33,38 @@ function formatUserName(name: string): string {
 
 export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMenuProps) {
   const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
   
   // Formatear el nombre del usuario
   const formattedUserName = formatUserName(userName);
   
   return (
-    <DropdownMenu.Root>
+    <DropdownMenu.Root onOpenChange={setIsOpen}>
       <DropdownMenu.Trigger asChild>
         <button
-          className="hidden md:flex text-qoder-dark-text-primary hover:text-qoder-dark-accent-orange p-1 rounded-md hover:bg-qoder-dark-bg-hover items-center gap-1"
+          className="hidden md:flex text-qoder-dark-text-primary hover:text-qoder-dark-accent-orange p-1 rounded-md hover:bg-qoder-dark-bg-hover items-center gap-1 relative"
           title="Menú de usuario"
-          style={{ fontFamily: "'Roboto', 'Arial', sans-serif", color: '#ffffff' }}
+          style={{ 
+            fontFamily: "'Roboto', 'Arial', sans-serif", 
+            color: '#ffffff',
+            backgroundColor: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            background: 'transparent', // Sobrescribir el gradiente naranja
+            backgroundImage: 'none', // Eliminar cualquier imagen de fondo
+            padding: '0.25rem 0.5rem', // Ajustar padding
+            borderRadius: '0.375rem', // Ajustar border-radius
+            fontWeight: 'normal', // Ajustar fontWeight
+            textTransform: 'none', // Eliminar transformación de texto
+            letterSpacing: 'normal', // Eliminar espaciado de letras
+            fontSize: '0.875rem' // Ajustar tamaño de fuente
+          }}
         >
-          <span className="text-sm" style={{ color: '#ffffff', textTransform: 'none' }}>{formattedUserName}</span>
+          <span className="text-sm" style={{ 
+            color: '#ffffff', 
+            textTransform: 'none',
+            backgroundColor: 'transparent'
+          }}>{formattedUserName}</span>
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
             className="h-4 w-4" 
@@ -59,6 +79,15 @@ export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMe
               d="M19 9l-7 7-7-7" 
             />
           </svg>
+          {/* Barra inferior que aparece al pasar el mouse o cuando el menú está abierto */}
+          <span 
+            className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 h-1 bg-gradient-to-r from-orange-800 to-orange-500 transition-all duration-300 ${
+              isOpen ? 'w-4/5' : 'w-0'
+            }`}
+            style={{
+              background: 'linear-gradient(90deg, #cc5500, #ff7700)'
+            }}
+          />
         </button>
       </DropdownMenu.Trigger>
 
@@ -66,6 +95,12 @@ export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMe
         <DropdownMenu.Content
           className="dropdown-menu min-w-[200px]"
           sideOffset={5}
+          style={{
+            backgroundColor: 'rgba(30, 30, 30, 0.95)',
+            border: '1px solid rgba(255, 119, 0, 0.3)',
+            borderRadius: '6px',
+            padding: '5px 0'
+          }}
         >
           {isAdmin ? (
             <>
@@ -73,22 +108,37 @@ export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMe
                 <Link 
                   href="/mi-barberia" 
                   className={`dropdown-item ${pathname?.startsWith("/mi-barberia") ? "active" : ""}`}
+                  style={{
+                    padding: '12px 15px',
+                    color: '#ffffff',
+                    textDecoration: 'none',
+                    display: 'block',
+                    transition: 'all 0.2s ease',
+                    fontWeight: 500,
+                    backgroundColor: 'transparent',
+                    fontFamily: "'Roboto', 'Arial', sans-serif",
+                    fontSize: '1rem'
+                  }}
                 >
                   Mi Barbería
-                </Link>
-              </DropdownMenu.Item>
-              <DropdownMenu.Item asChild>
-                <Link 
-                  href="/estadisticas" 
-                  className={`dropdown-item ${pathname?.startsWith("/estadisticas") ? "active" : ""}`}
-                >
-                  Estadísticas
                 </Link>
               </DropdownMenu.Item>
               <DropdownMenu.Separator className="border-qoder-dark-border-primary my-1" />
               <DropdownMenu.Item 
                 className="dropdown-item text-red-400 hover:!bg-red-900/30 hover:!text-red-400"
                 onClick={onLogout}
+                style={{
+                  padding: '12px 15px',
+                  color: '#f87171',
+                  textDecoration: 'none',
+                  display: 'block',
+                  transition: 'all 0.2s ease',
+                  fontWeight: 500,
+                  backgroundColor: 'transparent',
+                  fontFamily: "'Roboto', 'Arial', sans-serif",
+                  fontSize: '1rem',
+                  cursor: 'pointer'
+                }}
               >
                 Cerrar Sesión
               </DropdownMenu.Item>
@@ -99,6 +149,17 @@ export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMe
                 <Link 
                   href="/mis-datos" 
                   className={`dropdown-item ${pathname?.startsWith("/mis-datos") ? "active" : ""}`}
+                  style={{
+                    padding: '12px 15px',
+                    color: '#ffffff',
+                    textDecoration: 'none',
+                    display: 'block',
+                    transition: 'all 0.2s ease',
+                    fontWeight: 500,
+                    backgroundColor: 'transparent',
+                    fontFamily: "'Roboto', 'Arial', sans-serif",
+                    fontSize: '1rem'
+                  }}
                 >
                   Mis Datos
                 </Link>
@@ -107,6 +168,18 @@ export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMe
               <DropdownMenu.Item 
                 className="dropdown-item text-red-400 hover:!bg-red-900/30 hover:!text-red-400"
                 onClick={onLogout}
+                style={{
+                  padding: '12px 15px',
+                  color: '#f87171',
+                  textDecoration: 'none',
+                  display: 'block',
+                  transition: 'all 0.2s ease',
+                  fontWeight: 500,
+                  backgroundColor: 'transparent',
+                  fontFamily: "'Roboto', 'Arial', sans-serif",
+                  fontSize: '1rem',
+                  cursor: 'pointer'
+                }}
               >
                 Cerrar Sesión
               </DropdownMenu.Item>

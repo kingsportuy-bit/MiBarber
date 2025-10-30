@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function EstadisticasPage() {
-  usePageTitle("Barberox | Estadísticas");
+  usePageTitle("Barberox | Panel de Estadísticas");
   
   const { isAuthenticated, isAdmin, barbero } = useBarberoAuth();
   const router = useRouter();
@@ -67,7 +67,7 @@ export default function EstadisticasPage() {
     <div className="flex flex-col h-full">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-qoder-dark-text-primary">
-          Estadísticas
+          Panel de Estadísticas
         </h1>
         
         <div className="flex gap-2 items-center">

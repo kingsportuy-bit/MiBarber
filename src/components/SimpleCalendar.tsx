@@ -2,8 +2,9 @@
 
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid"; // Importar el plugin de timeGrid
 import interactionPlugin from "@fullcalendar/interaction";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useCitas } from "@/hooks/useCitas";
 import { useHorariosSucursales } from "@/hooks/useHorariosSucursales";
 import type { Appointment } from "@/types/db";
@@ -67,10 +68,23 @@ const getUruguayDate = (date: Date = new Date()) => {
   return new Date(utc + (3600000 * -3)); // UTC-3 para Uruguay
 };
 
+// Función para convertir hora en formato HH:MM a minutos desde medianoche
+const timeToMinutes = (time: string) => {
+  const [hours, minutes] = time.split(':').map(Number);
+  return hours * 60 + minutes;
+};
+
+// Función para convertir minutos desde medianoche a formato HH:MM
+const minutesToTime = (minutes: number) => {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+};
+
 export function SimpleCalendar({ 
   barbero, 
   sucursalId,
-  initialView = "dayGridMonth",
+  initialView = "timeGridDay", // Cambiar vista inicial a día
   onEdit,
   onViewChange,
   onDateSelect
@@ -85,7 +99,10 @@ export function SimpleCalendar({
   console.log("Props recibidos en SimpleCalendar:", { barbero, sucursalId, initialView });
   
   // Usar barbero directamente como string
-  const { data, isLoading, updateMutation, refetch } = useCitas(sucursalId, undefined, barbero); // Filtrar por sucursal y barbero
+  const { data, isLoading, updateMutation, refetch } = useCitas({
+    sucursalId,
+    barberoId: barbero
+  }); // Filtrar por sucursal y barbero
   
   // Obtener horarios de la sucursal
   const { horarios: horariosSucursal } = useHorariosSucursales(sucursalId); // Añadir esta línea
@@ -142,6 +159,40 @@ export function SimpleCalendar({
   const currentDataRef = useRef(data);
   currentDataRef.current = data;
 
+  // Obtener horarios dinámicos para un día específico
+  const getDynamicHours = useCallback((date: Date) => {
+    if (!horariosSucursal || horariosSucursal.length === 0) {
+      // Valores por defecto si no hay horarios
+      return { minTime: "09:00:00", maxTime: "20:30:00", lunchBreaks: [] };
+    }
+    
+    // Obtener el día de la semana (0=Domingo, 1=Lunes, ..., 6=Sábado)
+    const dayOfWeek = date.getDay();
+    
+    // Buscar el horario para ese día
+    const horario = horariosSucursal.find(h => h.id_dia === dayOfWeek && h.activo);
+    
+    if (!horario) {
+      // Si no hay horario para ese día, usar valores por defecto
+      return { minTime: "09:00:00", maxTime: "20:30:00", lunchBreaks: [] };
+    }
+    
+    // Convertir horas a formato HH:MM:SS
+    const minTime = `${horario.hora_apertura}:00`;
+    const maxTime = `${horario.hora_cierre}:00`;
+    
+    // Manejar horas de almuerzo
+    const lunchBreaks = [];
+    if (horario.hora_inicio_almuerzo && horario.hora_fin_almuerzo) {
+      lunchBreaks.push({
+        start: `${horario.hora_inicio_almuerzo}:00`,
+        end: `${horario.hora_fin_almuerzo}:00`
+      });
+    }
+    
+    return { minTime, maxTime, lunchBreaks };
+  }, [horariosSucursal]);
+  
   const handleDateClick = (info: { date: Date, allDay: boolean }) => {
     console.log("Clic en fecha:", info.date);
     // Si se proporciona onDateSelect, llamar a esa función
@@ -150,7 +201,21 @@ export function SimpleCalendar({
     }
     // Si se proporciona onEdit, mantener la funcionalidad original
     else if (onEdit) {
-      // No hacer nada al hacer clic en una fecha ya que la vista diaria ha sido eliminada
+      // Cambiar a la vista de día cuando se hace clic en una fecha
+      const calendarApi = calendarRef.current?.getApi();
+      if (calendarApi) {
+        const currentView = calendarApi.view.type;
+        
+        // Si estamos en la vista mensual, cambiar a la vista diaria
+        if (currentView === 'dayGridMonth') {
+          calendarApi.changeView('timeGridDay', info.date);
+          
+          // Actualizar las horas dinámicas para ese día
+          const { minTime, maxTime, lunchBreaks } = getDynamicHours(info.date);
+          calendarApi.setOption('slotMinTime', minTime);
+          calendarApi.setOption('slotMaxTime', maxTime);
+        }
+      }
       console.log("Clic en fecha (sin onDateSelect):", info.date);
     }
   };
@@ -229,24 +294,48 @@ export function SimpleCalendar({
 
   return (
     <div className="bg-qoder-dark-bg-form rounded-lg p-2 md:p-4 border border-qoder-dark-border">
+      <style jsx>{`
+        :global(.fc .fc-toolbar-chunk .fc-button-group .fc-button:not(:last-child)) {
+          margin-right: 5px;
+        }
+        
+        :global(.fc .fc-toolbar-chunk .fc-button) {
+          font-size: 14px !important;
+          padding: 6px 12px !important;
+          min-width: 60px !important;
+          height: 36px !important;
+          box-sizing: border-box !important;
+        }
+        
+        /* Eliminar estilos responsivos para mantener tamaño fijo */
+        @media (max-width: 768px) {
+          :global(.fc .fc-toolbar-chunk .fc-button) {
+            font-size: 14px !important;
+            padding: 6px 12px !important;
+            min-width: 60px !important;
+            height: 36px !important;
+          }
+        }
+      `}</style>
       <FullCalendar
         ref={calendarRef}
-        plugins={[dayGridPlugin, interactionPlugin]}
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]} // Agregar timeGridPlugin
         initialView={initialView}
         locale="es"
         // Configurar la fecha actual según la zona horaria de Uruguay
         now={today}
         // Simplificar la barra de herramientas - responsive
         headerToolbar={{ 
-          left: "prev,next", 
+          left: "prev today next", 
           center: "title", 
-          right: "" 
+          right: "dayGridMonth,timeGridDay" // Agregar botones de vista
         }}
         buttonText={{
           today: "Hoy",
-          month: "Mes"
+          month: "Mes",
+          day: "Día" // Agregar texto para botón de día
         }}
-        // Configuración de horarios: 9 AM a 8:30 PM
+        // Configuración de horarios dinámicos: 9 AM a 8:30 PM (valores por defecto)
         slotMinTime="09:00:00"
         slotMaxTime="20:30:00"
         // Ocultar días según los horarios de la sucursal
@@ -271,8 +360,8 @@ export function SimpleCalendar({
         allDaySlot={false}
         // Limitar el calendario a 5 filas máximo
         fixedWeekCount={false}
-        // Desactivar navegación por días
-        navLinks={false}
+        // Activar navegación por días
+        navLinks={true}
         // No mostrar números de semana
         weekNumbers={false}
         // Mejorar la visualización de eventos
@@ -282,6 +371,16 @@ export function SimpleCalendar({
         // Hacer responsive el calendario
         windowResizeDelay={100}
         handleWindowResize={true}
+        // Desactivar selección de tiempo para evitar creación de eventos
+        selectable={false}
+        // Mostrar horas en intervalos de 30 minutos
+        slotDuration="00:30:00"
+        // Formato de etiquetas de tiempo
+        slotLabelFormat={{
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        }}
       />
     </div>
   );

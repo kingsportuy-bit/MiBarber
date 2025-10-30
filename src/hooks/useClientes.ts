@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 import type { Client } from "@/types/db";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
+import { AuthService } from "@/features/auth/services/AuthService";
 
 export type SortOption =
   | "ultimo_agregado"
@@ -21,6 +22,9 @@ export function useClientes(
   const supabase = getSupabaseClient();
   const qc = useQueryClient();
   const { idBarberia, isAdmin } = useBarberoAuth();
+
+  console.log('🔍 useClientes - idBarberia:', idBarberia);
+  console.log('🔍 useClientes - isAdmin:', isAdmin);
 
   const listQuery = useQuery({
     queryKey: ["clientes", { search, sortBy, idBarberia, idSucursal }],
@@ -149,12 +153,51 @@ export function useClientes(
     };
   }, [qc, supabase]);
 
+  // ✅ Obtener datos del barbero autenticado
+  const { idBarberia: authIdBarberia, idSucursal: authIdSucursal } = useBarberoAuth();
+  
+  console.log('🔍 useClientes - authIdBarberia:', authIdBarberia);
+  console.log('🔍 useClientes - authIdSucursal:', authIdSucursal);
+
   const createMutation = useMutation({
     mutationFn: async (payload: Partial<Client>) => {
       console.log("💾 useClientes.createMutation - Payload recibido:", payload);
 
-      // Establecer valores por defecto para nuevos clientes
-      // No incluimos id_cliente ya que se genera automáticamente en la base de datos
+      // ✅ Validar que tenemos id_barberia
+      let finalIdBarberia = authIdBarberia;
+
+      // ✅ Fallback: Si authIdBarberia es null, intentar obtenerlo
+      if (!finalIdBarberia) {
+        console.warn('⚠️ authIdBarberia es null, intentando obtenerlo de la sesión...');
+        
+        const session = AuthService.loadSession();
+        
+        // Intentar múltiples ubicaciones
+        finalIdBarberia = 
+          session?.user.id_barberia ||
+          null;
+        
+        if (!finalIdBarberia && session?.user.email) {
+          // Si aún es null, buscar en la base de datos
+          const { data: barberoData, error } = await supabase
+            .from('mibarber_barberos')
+            .select('id_barberia')
+            .eq('email', session.user.email)
+            .single();
+          
+          if (error) {
+            console.error("❌ Error obteniendo barbero por email:", error);
+          }
+          
+          finalIdBarberia = (barberoData as any)?.id_barberia || null;
+        }
+        
+        if (!finalIdBarberia) {
+          throw new Error('No se pudo obtener id_barberia. Por favor, cierre sesión y vuelva a iniciar.');
+        }
+      }
+
+      // ✅ Agregar id_barberia al objeto
       const newClient = {
         // Incluimos el teléfono en el campo correcto
         telefono: payload.telefono, // Usar el teléfono del payload
@@ -162,86 +205,30 @@ export function useClientes(
         notas: payload.notas,
         nivel_cliente: payload.nivel_cliente ?? 2, // Nivel 2 por defecto para clientes agregados desde la app
         puntaje: payload.puntaje ?? 0, // Puntaje inicial 0
-        id_barberia: payload.id_barberia || idBarberia, // Usar del payload o de la barbería actual
-        id_sucursal: payload.id_sucursal || idSucursal, // Usar del payload o de la sucursal actual
+        id_barberia: finalIdBarberia, // ✅ Usar finalIdBarberia
+        id_sucursal: payload.id_sucursal || idSucursal || authIdSucursal, // ✅ Usar authIdSucursal
         // Omitir id_conversacion para que use null por defecto
         fecha_creacion: new Date().toISOString(),
         ultima_interaccion: new Date().toISOString(),
       };
 
-      // Limpiar el objeto cliente para eliminar campos que no existen en la tabla
-      const cleanedClient = { ...newClient };
-
-      // Solo incluir id_barberia e id_sucursal si existen en el objeto
-      // y si el esquema ya ha sido actualizado
-      if (!cleanedClient.id_barberia) {
-        // @ts-ignore - Suppress TypeScript error for delete operator on optional property
-        delete cleanedClient.id_barberia;
-      }
-
-      if (!cleanedClient.id_sucursal) {
-        // @ts-ignore - Suppress TypeScript error for delete operator on optional property
-        delete cleanedClient.id_sucursal;
-      }
-
       console.log(
-        "💾 useClientes.createMutation - Datos a insertar (limpios):",
-        cleanedClient,
+        "💾 useClientes.createMutation - Datos a insertar:",
+        newClient,
       );
       console.log(
-        "💾 Tipos de datos (limpios):",
-        Object.entries(cleanedClient).map(
+        "💾 Tipos de datos:",
+        Object.entries(newClient).map(
           ([k, v]) => `${k}: ${typeof v} = ${v}`,
         ),
       );
 
-      // Intentar insertar directamente primero
       const { data, error } = await (supabase as any)
         .from("mibarber_clientes")
-        .insert(cleanedClient)
+        .insert(newClient)
         .select();
 
       if (error) {
-        // Si el error es por columnas que no existen, intentar de nuevo sin esas columnas
-        if (
-          error.message &&
-          (error.message.includes("id_barberia") ||
-            error.message.includes("id_sucursal"))
-        ) {
-          console.log("Reintentando sin columnas id_barberia e id_sucursal...");
-          const retryClient = { ...cleanedClient };
-          // @ts-ignore - Suppress TypeScript error for delete operator on optional property
-          delete retryClient.id_barberia;
-          // @ts-ignore - Suppress TypeScript error for delete operator on optional property
-          delete retryClient.id_sucursal;
-
-          const { data: retryData, error: retryError } = await (supabase as any)
-            .from("mibarber_clientes")
-            .insert(retryClient)
-            .select();
-
-          if (retryError) {
-            console.error(
-              "❌ useClientes.createMutation - Error de Supabase (reintento fallido):",
-              retryError,
-            );
-            console.error("❌ Error code:", retryError.code);
-            console.error("❌ Error message:", retryError.message);
-            console.error("❌ Error details:", retryError.details);
-            console.error("❌ Error hint:", retryError.hint);
-            throw new Error(
-              `Database error: ${retryError.message || retryError.code || "Unknown error"}`,
-            );
-          }
-
-          console.log(
-            "✅ useClientes.createMutation - Resultado exitoso en reintento:",
-            retryData,
-          );
-          return retryData as Client[];
-        }
-
-        // Para otros errores, mostrar el error y lanzar la excepción
         console.error(
           "❌ useClientes.createMutation - Error de Supabase:",
           error,

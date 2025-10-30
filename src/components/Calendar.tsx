@@ -106,11 +106,11 @@ export function Calendar({
   });
 
   // Usar barbero directamente como número
-  const { data, isLoading, updateMutation, refetch } = useCitas(
+  const { data, isLoading, updateMutation, refetch } = useCitas({
     sucursalId,
-    undefined,
-    barbero ? barbero.toString() : undefined,
-  ); // Filtrar por sucursal y barbero
+    fecha: undefined,
+    barberoId: barbero ? barbero.toString() : undefined,
+  }); // Filtrar por sucursal y barbero
 
   // Obtener horarios de la sucursal
   const { horarios: horariosSucursal } = useHorariosSucursales(sucursalId);

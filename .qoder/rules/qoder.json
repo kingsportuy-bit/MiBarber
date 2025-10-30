@@ -1,0 +1,38 @@
+{
+  "context": {
+    "include": [
+      "src/**/*.ts",
+      "src/**/*.tsx",
+      "package.json",
+      "tsconfig.json",
+      "tailwind.config.js",
+      "next.config.ts",
+      ".env.local.example",
+      ".qoder/project-context.md",
+      ".qoder/rules.md",
+      ".qoder/arquitectura-objetivo.md"
+    ],
+    "exclude": [
+      "node_modules/**",
+      ".next/**",
+      "dist/**",
+      "coverage/**",
+      ".git/**",
+      "public/**"
+    ]
+  },
+  "settings": {
+    "default_language": "typescript",
+    "strict_typing": true,
+    "style": "clean_modern",
+    "testing_framework": "vitest",
+    "ui_framework": "radix-ui",
+    "state_manager": "zustand_tanstack_query",
+    "lint_enabled": true,
+    "framework": "nextjs_15",
+    "backend": "supabase",
+    "deployment": "docker_vps",
+    "seo_optimization": true,
+    "accessibility_standard": "WCAG_AA"
+  }
+}

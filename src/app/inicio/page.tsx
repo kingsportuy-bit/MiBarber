@@ -4,7 +4,7 @@ import { useState } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { WindowLayout } from "@/components/WindowLayout";
 import { ProtectedDashboard } from "@/components/ProtectedDashboard";
-import { AppointmentModalWithSucursal } from "@/components/AppointmentModalWithSucursal";
+import { SingleFormAppointmentModalWithSucursal } from "@/components/SingleFormAppointmentModalWithSucursal";
 import { useCitas } from "@/hooks/useCitas";
 import type { Appointment } from "@/types/db";
 
@@ -92,7 +92,7 @@ export default function DashboardPage() {
       <ProtectedDashboard onEdit={handleEdit} onCreate={handleCreate} />
       
       {selectedAppointment && selectedAppointment.id_cita && (
-        <AppointmentModalWithSucursal
+        <SingleFormAppointmentModalWithSucursal
           open={isEditModalOpen}
           onOpenChange={setIsEditModalOpen}
           initial={selectedAppointment}
@@ -102,7 +102,7 @@ export default function DashboardPage() {
       )}
       
       {selectedAppointment && !selectedAppointment.id_cita && (
-        <AppointmentModalWithSucursal
+        <SingleFormAppointmentModalWithSucursal
           open={isCreateModalOpen}
           onOpenChange={setIsCreateModalOpen}
           initial={selectedAppointment}

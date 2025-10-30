@@ -279,10 +279,6 @@ export function WhatsAppChat() {
           <aside className="w-[450px] border-r border-qoder-dark-border-primary flex flex-col bg-qoder-dark-bg-form md:w-[400px] sm:w-[350px] xs:w-full min-w-0 relative" style={{ fontSize: '1.2705em' }}>
             {/* Header del panel de chats */}
             <div className="p-2 bg-qoder-dark-bg-header min-w-0 relative">
-              {/* Identificador de sección */}
-              <div className="absolute top-1 right-1 text-xs text-qoder-dark-text-muted font-bold bg-qoder-dark-bg-secondary px-1 rounded">
-                H
-              </div>
               <div className="flex items-center justify-between mb-2">
                 <h2 className="font-semibold text-qoder-dark-text-primary px-2" style={{ fontSize: '1.1em' }}>WhatsApp</h2>
                 <div className="flex items-center gap-1 ml-auto">
@@ -336,10 +332,6 @@ export function WhatsAppChat() {
             
             {/* Lista de conversaciones */}
             <div className="flex-1 overflow-y-auto custom-scrollbar border-b border-qoder-dark-border-primary bg-qoder-dark-bg-header scrollbar-styled min-w-0 relative" style={{ padding: '0 10px' }}>
-              {/* Identificador de sección */}
-              <div className="absolute top-1 right-1 text-xs text-qoder-dark-text-muted font-bold bg-qoder-dark-bg-secondary px-1 rounded">
-                C
-              </div>
               {isLoading && (
                 <div className="p-4 text-center">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-qoder-dark-accent-primary mx-auto mb-2"></div>
@@ -436,10 +428,6 @@ export function WhatsAppChat() {
 
           {/* Panel derecho - Ventana de chat */}
           <div className="flex-1 flex flex-col min-w-0 relative" style={{ backgroundColor: '#161717' }}>
-            {/* Identificador de sección */}
-            <div className="absolute top-2 right-2 text-xs text-qoder-dark-text-muted font-bold bg-qoder-dark-bg-secondary px-1 rounded z-10">
-              V
-            </div>
             
             {/* Contenedor con color #161717 y imagen de fondo detrás de M y E */}
             {showBackgroundImage && (
@@ -460,10 +448,6 @@ export function WhatsAppChat() {
             {/* Header del chat */}
             {activeConv ? (
               <div className="p-3 bg-qoder-dark-bg-header flex items-center justify-between min-w-0 relative">
-                {/* Identificador de sección */}
-                <div className="absolute top-1 right-1 text-xs text-qoder-dark-text-muted font-bold bg-qoder-dark-bg-secondary px-1 rounded">
-                  H2
-                </div>
                 <div className="flex items-center gap-3">
                   <button 
                     onClick={() => setActive(null)}
@@ -533,10 +517,6 @@ export function WhatsAppChat() {
             
             {/* Área de mensajes */}
             <div className="flex-1 overflow-y-auto p-12 custom-scrollbar scrollbar-styled bg-transparent bg-[url('/whatsapp-bg.png')] bg-repeat bg-[length:300px_500px] min-w-0 relative" id="messages-container">
-              {/* Identificador de sección */}
-              <div className="absolute top-1 right-1 text-xs text-qoder-dark-text-muted font-bold bg-qoder-dark-bg-secondary px-1 rounded">
-                M
-              </div>
               {activeConv ? (
                 <div className="space-y-2">
                   {activeConv.messages.map((msg: ChatMessage, index: number) => (
@@ -604,10 +584,6 @@ export function WhatsAppChat() {
             {/* Área de entrada de mensaje */}
             {activeConv && (
               <div className="p-3 bg-transparent min-w-0 relative">
-                {/* Identificador de sección */}
-                <div className="absolute top-1 right-1 text-xs text-qoder-dark-text-muted font-bold bg-qoder-dark-bg-secondary px-1 rounded">
-                  E
-                </div>
                 <div className="flex items-center gap-2 min-w-0">
                   <input
                     type="text"
@@ -618,10 +594,6 @@ export function WhatsAppChat() {
                     className="flex-1 py-4 px-4 focus:outline-none focus:ring-0 focus:ring-transparent focus:border-transparent bg-[#242626] relative pill-effect border-0"
                     style={{ backgroundColor: '#242626' }}
                   />
-                  {/* Identificador de burbuja de escribir mensaje - B */}
-                  <div className="absolute top-1 left-1 text-xs text-qoder-dark-text-muted font-bold bg-qoder-dark-bg-secondary px-1 rounded z-10">
-                    B
-                  </div>
                 </div>
               </div>
             )}

@@ -15,12 +15,13 @@ export interface Appointment {
   notificacion_cliente: string | null;
   ticket: number | null; // DECIMAL en SQL
   nro_factura: string | null;
-  barbero: string; // nombre del barbero (string) - TODO: debería ser id_barbero
+  barbero: string; // nombre del barbero (string) - DEPRECATED: usar id_barbero en su lugar
   metodo_pago?: string | null; // Método de pago opcional
   id_barberia: string | null; // UUID
   id_sucursal: string | null; // UUID
   id_barbero?: string | null; // UUID del barbero
   id_servicio?: string | null; // UUID del servicio
+  telefono?: string | null; // Número de teléfono del cliente
   created_at?: string; // timestamptz
   updated_at?: string; // timestamptz
 }

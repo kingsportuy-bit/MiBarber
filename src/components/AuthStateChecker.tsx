@@ -32,7 +32,8 @@ export function AuthStateChecker() {
     console.log("=== End AuthStateChecker ===");
     
     // Forzar una actualización si no estamos cargando y no hay datos
-    if (!isLoading && !isError && data === undefined) {
+    // Solo llamar a refetch si existe
+    if (!isLoading && !isError && data === undefined && refetch) {
       console.log("AuthStateChecker: Forzando actualización de datos");
       refetch();
     }

@@ -199,6 +199,10 @@ export function NavBar() {
         <Link
           href="/inicio"
           className={`nav-logo font-bold ${pathname?.startsWith("/inicio") ? 'active' : ''}`}
+          style={{ 
+            paddingLeft: '20px', 
+            paddingRight: '20px' 
+          }}
         >
           <span className="barberox-barbero">Barbero</span>
           <span className="barberox-x">x</span>

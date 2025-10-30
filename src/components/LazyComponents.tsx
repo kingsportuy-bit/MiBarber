@@ -45,7 +45,7 @@ export const LazyKanbanBoard = dynamic(
 );
 
 export const LazyAgendaBoard = dynamic(
-  () => import('@/components/AgendaBoard').then(mod => mod.AgendaBoard),
+  () => import('@/features/appointments/components/AgendaBoard').then(mod => mod.AgendaBoard),
   {
     loading: () => <TableSkeleton />,
     ssr: false,

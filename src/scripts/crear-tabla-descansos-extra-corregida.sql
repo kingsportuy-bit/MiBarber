@@ -1,0 +1,167 @@
+-- Script corregido para crear la tabla mibarber_descansos_extra
+-- Esta tabla almacena los descansos extra recurrentes de los barberos
+
+-- Primero verificar la estructura de las tablas relacionadas
+-- (Este paso se debe hacer manualmente o con un script separado)
+
+-- Crear la tabla si no existe
+CREATE TABLE IF NOT EXISTS public.mibarber_descansos_extra (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    id_barberia UUID NOT NULL,
+    id_sucursal UUID NOT NULL,
+    id_barbero UUID NOT NULL,
+    hora_inicio TIME NOT NULL,
+    hora_fin TIME NOT NULL,
+    dias_semana TEXT NOT NULL, -- Array de booleanos en formato JSON
+    motivo TEXT,
+    creado_por UUID NOT NULL,
+    creado_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- NOTA: Las restricciones de clave foránea se agregan después de verificar 
+-- que las columnas existen en las tablas relacionadas
+
+-- Agregar restricciones de clave foránea (después de verificar la estructura)
+-- Descomentar y ajustar según la estructura real de las tablas:
+/*
+ALTER TABLE public.mibarber_descansos_extra
+    ADD CONSTRAINT fk_descanso_barberia 
+        FOREIGN KEY (id_barberia) 
+        REFERENCES public.mibarber_barberias(id) 
+        ON DELETE CASCADE;
+
+ALTER TABLE public.mibarber_descansos_extra
+    ADD CONSTRAINT fk_descanso_sucursal 
+        FOREIGN KEY (id_sucursal) 
+        REFERENCES public.mibarber_sucursales(id) 
+        ON DELETE CASCADE;
+
+ALTER TABLE public.mibarber_descansos_extra
+    ADD CONSTRAINT fk_descanso_barbero 
+        FOREIGN KEY (id_barbero) 
+        REFERENCES public.mibarber_barberos(id) 
+        ON DELETE CASCADE;
+*/
+
+-- Agregar restricciones de validación
+ALTER TABLE public.mibarber_descansos_extra
+    ADD CONSTRAINT chk_horas_validas 
+        CHECK (hora_inicio < hora_fin);
+
+ALTER TABLE public.mibarber_descansos_extra
+    ADD CONSTRAINT chk_dias_semana_formato 
+        CHECK (dias_semana IS NOT NULL);
+
+-- Crear índices para mejorar el rendimiento
+CREATE INDEX IF NOT EXISTS idx_descansos_extra_barberia ON public.mibarber_descansos_extra(id_barberia);
+CREATE INDEX IF NOT EXISTS idx_descansos_extra_sucursal ON public.mibarber_descansos_extra(id_sucursal);
+CREATE INDEX IF NOT EXISTS idx_descansos_extra_barbero ON public.mibarber_descansos_extra(id_barbero);
+CREATE INDEX IF NOT EXISTS idx_descansos_extra_creado_at ON public.mibarber_descansos_extra(creado_at DESC);
+
+-- Habilitar Row Level Security
+ALTER TABLE public.mibarber_descansos_extra ENABLE ROW LEVEL SECURITY;
+
+-- Políticas de seguridad
+-- Los administradores pueden ver y modificar todos los descansos de su barbería
+CREATE POLICY "Admins pueden ver todos los descansos de su barbería" 
+ON public.mibarber_descansos_extra 
+FOR SELECT 
+TO authenticated 
+USING (
+    EXISTS (
+        SELECT 1 FROM public.mibarber_barberos b 
+        WHERE b.id_barberia = mibarber_descansos_extra.id_barberia 
+        AND b.id_usuario = auth.uid() 
+        AND b.rol = 'admin'
+    )
+);
+
+CREATE POLICY "Admins pueden crear descansos en su barbería" 
+ON public.mibarber_descansos_extra 
+FOR INSERT 
+TO authenticated 
+WITH CHECK (
+    EXISTS (
+        SELECT 1 FROM public.mibarber_barberos b 
+        WHERE b.id_barberia = mibarber_descansos_extra.id_barberia 
+        AND b.id_usuario = auth.uid() 
+        AND b.rol = 'admin'
+    )
+);
+
+CREATE POLICY "Admins pueden actualizar descansos en su barbería" 
+ON public.mibarber_descansos_extra 
+FOR UPDATE 
+TO authenticated 
+USING (
+    EXISTS (
+        SELECT 1 FROM public.mibarber_barberos b 
+        WHERE b.id_barberia = mibarber_descansos_extra.id_barberia 
+        AND b.id_usuario = auth.uid() 
+        AND b.rol = 'admin'
+    )
+);
+
+CREATE POLICY "Admins pueden eliminar descansos en su barbería" 
+ON public.mibarber_descansos_extra 
+FOR DELETE 
+TO authenticated 
+USING (
+    EXISTS (
+        SELECT 1 FROM public.mibarber_barberos b 
+        WHERE b.id_barberia = mibarber_descansos_extra.id_barberia 
+        AND b.id_usuario = auth.uid() 
+        AND b.rol = 'admin'
+    )
+);
+
+-- Los barberos pueden ver sus propios descansos
+CREATE POLICY "Barberos pueden ver sus propios descansos" 
+ON public.mibarber_descansos_extra 
+FOR SELECT 
+TO authenticated 
+USING (
+    id_barbero IN (
+        SELECT id_barbero FROM public.mibarber_barberos 
+        WHERE id_usuario = auth.uid()
+    )
+);
+
+-- Los barberos pueden crear sus propios descansos
+CREATE POLICY "Barberos pueden crear sus propios descansos" 
+ON public.mibarber_descansos_extra 
+FOR INSERT 
+TO authenticated 
+WITH CHECK (
+    id_barbero IN (
+        SELECT id_barbero FROM public.mibarber_barberos 
+        WHERE id_usuario = auth.uid()
+    )
+);
+
+-- Los barberos pueden actualizar sus propios descansos
+CREATE POLICY "Barberos pueden actualizar sus propios descansos" 
+ON public.mibarber_descansos_extra 
+FOR UPDATE 
+TO authenticated 
+USING (
+    id_barbero IN (
+        SELECT id_barbero FROM public.mibarber_barberos 
+        WHERE id_usuario = auth.uid()
+    )
+);
+
+-- Los barberos pueden eliminar sus propios descansos
+CREATE POLICY "Barberos pueden eliminar sus propios descansos" 
+ON public.mibarber_descansos_extra 
+FOR DELETE 
+TO authenticated 
+USING (
+    id_barbero IN (
+        SELECT id_barbero FROM public.mibarber_barberos 
+        WHERE id_usuario = auth.uid()
+    )
+);
+
+-- Conceder permisos a la tabla
+GRANT ALL ON TABLE public.mibarber_descansos_extra TO authenticated;

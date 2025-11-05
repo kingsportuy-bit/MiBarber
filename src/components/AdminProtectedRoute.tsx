@@ -8,10 +8,10 @@ interface AdminProtectedRouteProps {
   children: React.ReactNode;
 }
 
-export function AdminProtectedRoute({ children }: AdminProtectedRouteProps) {
+export function AdminProtectedRoute({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { isAuthenticated, isAdmin, isLoading } = useBarberoAuth();
   const [isClient, setIsClient] = useState(false);
+  const { isAuthenticated, isAdmin, isLoading } = useBarberoAuth();
 
   useEffect(() => {
     setIsClient(true);
@@ -22,7 +22,7 @@ export function AdminProtectedRoute({ children }: AdminProtectedRouteProps) {
     }
     // Si está autenticado pero no es admin, redirigir al dashboard
     else if (!isLoading && isAuthenticated && !isAdmin) {
-      router.push("/mibarber");
+      router.push("/dashboard");
     }
   }, [isAuthenticated, isAdmin, isLoading, router]);
 

@@ -10,7 +10,7 @@ import { useCreateCita } from '@/features/appointments/hooks/useCreateCita';
 import { useUpdateCita } from '@/features/appointments/hooks/useUpdateCita';
 import { useDeleteCita } from '@/features/appointments/hooks/useDeleteCita';
 import { useCitasPorRango } from '@/features/appointments/hooks/useCitasPorRango';
-import { useHorariosDisponibles } from '@/features/appointments/hooks/useHorariosDisponibles';
+import { useHorariosDisponiblesCompleto } from '@/hooks/useHorariosDisponiblesCompleto';
 
 interface UseCitasProps {
   sucursalId?: string;
@@ -33,7 +33,7 @@ export function useCitas(props?: UseCitasProps) {
     useCitasPorRango({ sucursalId, fechaInicio, fechaFin });
   
   const useHorariosDisponiblesFn = (sucursalId?: string, fecha?: string, barberoId?: string) => 
-    useHorariosDisponibles({ sucursalId, fecha, barberoId });
+    useHorariosDisponiblesCompleto({ idSucursal: sucursalId, idBarbero: barberoId, fecha });
 
   return {
     ...citasQuery,

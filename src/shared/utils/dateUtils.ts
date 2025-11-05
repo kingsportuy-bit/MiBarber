@@ -49,12 +49,10 @@ export function convertISOToLocalDate(isoString: string): string {
  * Ajustado para zona horaria local (UTC-3 para Uruguay)
  */
 export function getDayOfWeek(dateString: string): number {
-  // Crear fecha sin considerar la hora para evitar problemas de zona horaria
+  // Parsear la fecha manualmente para evitar problemas de zona horaria
   const [year, month, day] = dateString.split('-').map(Number);
-  const localDate = new Date(year, month - 1, day); // Mes es 0-indexado en Date
-  
-  // Ajustar manualmente a UTC-3 (Uruguay)
-  localDate.setMinutes(localDate.getMinutes() + localDate.getTimezoneOffset() + (-180));
+  // Crear una fecha en la zona horaria local (ajustando a mediodía para evitar problemas de DST)
+  const localDate = new Date(year, month - 1, day, 12, 0, 0);
   
   return localDate.getDay();
 }

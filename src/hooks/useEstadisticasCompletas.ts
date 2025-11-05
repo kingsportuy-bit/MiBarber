@@ -102,7 +102,11 @@ export function useEstadisticasCompletas(filtros: EstadisticasFiltros) {
     
     // Citas por día de la semana
     const citasPorDia = citasData.reduce((acc, cita) => {
-      const dia = new Date(cita.fecha).getDay();
+      // Parsear la fecha manualmente para evitar problemas de zona horaria
+      const [year, month, day] = cita.fecha.split('-').map(Number);
+      // Crear una fecha en la zona horaria local (ajustando a mediodía para evitar problemas de DST)
+      const date = new Date(year, month - 1, day, 12, 0, 0);
+      const dia = date.getDay();
       const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
       const nombreDia = dias[dia];
       acc[nombreDia] = (acc[nombreDia] || 0) + 1;

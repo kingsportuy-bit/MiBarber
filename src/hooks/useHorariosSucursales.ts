@@ -14,6 +14,7 @@ export function useHorariosSucursales(idSucursal?: string) {
     queryFn: async (): Promise<HorarioSucursal[]> => {
       // Si no hay idSucursal, devolver array vacío
       if (!idSucursal) {
+        console.log("useHorariosSucursales: No hay idSucursal, devolviendo array vacío");
         return [];
       }
       
@@ -61,7 +62,7 @@ export function useHorariosSucursales(idSucursal?: string) {
         return [];
       }
     },
-    enabled: !!idSucursal && idSucursal !== "",
+    enabled: !!idSucursal && idSucursal !== "", // Solo ejecutar si hay idSucursal válido
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
 

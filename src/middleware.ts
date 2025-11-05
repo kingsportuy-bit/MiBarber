@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextResponse } from 'next/server'
+import { type NextRequest } from 'next/server'
+import { updateSession } from '@/lib/supabase/middleware'
 
 // Función para obtener el valor de una cookie
 function getCookie(request: NextRequest, name: string) {
@@ -15,62 +16,97 @@ function getCookie(request: NextRequest, name: string) {
   return undefined;
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  // BLOQUEAR RUTAS DE TESTING Y DEBUG EN PRODUCCIÓN
-  const isProduction = process.env.NODE_ENV === "production";
-  const isTestingRoute =
-    pathname.startsWith("/test-") ||
-    pathname.startsWith("/debug-") ||
-    pathname.startsWith("/diagnostic");
-
-  if (isProduction && isTestingRoute) {
-    // En producción, redirigir rutas de testing a 404
-    return NextResponse.redirect(new URL("/404", request.url));
+  
+  // NO procesar rutas de API
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.next();
   }
-
-  // Rutas que siempre deben ser accesibles (públicas)
-  const isPublicRoute =
-    pathname.startsWith("/login") ||
-    pathname.startsWith("/admin") ||
-    pathname === "/" ||
-    pathname.includes(".") || // Archivos estáticos
-    pathname.includes("_next") || // Recursos de Next.js
-    pathname === "/favicon.ico" ||
-    pathname === "/404";
-
-  // Verificar si el usuario está autenticado usando cookies
-  const authCookie = getCookie(request, "barber_auth_session");
-  let isAuthenticated = false;
-
-  if (authCookie) {
-    try {
-      const sessionData = JSON.parse(decodeURIComponent(authCookie));
-      // Verificar si la sesión aún es válida
-      if (sessionData.expiresAt && Date.now() < sessionData.expiresAt) {
-        isAuthenticated = true;
-      }
-    } catch (error) {
-      // Datos inválidos, cookie corrupta
-      // No logueamos en producción para no llenar los logs
+  
+  // Actualizar la sesión de Supabase primero
+  const supabaseResponse = await updateSession(request);
+  
+  // Verificar autenticación
+  const isAuthenticated = await isAuthenticatedRequest(request);
+  
+  // Manejar la ruta raíz
+  if (pathname === "/") {
+    if (isAuthenticated) {
+      const response = NextResponse.redirect(new URL("/inicio", request.url));
+      return mergeResponses(supabaseResponse, response);
+    } else {
+      const response = NextResponse.redirect(new URL("/login", request.url));
+      return mergeResponses(supabaseResponse, response);
     }
   }
-
-  // Si no está autenticado y no es una ruta pública, redirigir a login
-  if (!isAuthenticated && !isPublicRoute) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  
+  // Si no está autenticado y trata de acceder a una ruta protegida, redirigir al login
+  if (!isAuthenticated && isProtectedRoute(pathname)) {
+    const response = NextResponse.redirect(new URL("/login", request.url));
+    return mergeResponses(supabaseResponse, response);
   }
 
-  // Si está autenticado y trata de acceder al login, redirigir al dashboard
+  // Si está autenticado y trata de acceder al login, redirigir al inicio
   if (isAuthenticated && pathname === "/login") {
-    return NextResponse.redirect(new URL("/mibarber", request.url));
+    const response = NextResponse.redirect(new URL("/inicio", request.url));
+    return mergeResponses(supabaseResponse, response);
   }
 
-  return NextResponse.next();
+  return supabaseResponse;
 }
 
 // Configurar qué rutas deben ser procesadas por el middleware
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
+
+// Rutas que requieren autenticación
+function isProtectedRoute(pathname: string): boolean {
+  const protectedRoutes = [
+    "/inicio",
+    "/agenda",
+    "/clientes",
+    "/whatsapp",
+    "/mi-barberia",
+    "/mis-datos",
+    "/admin",
+    "/caja",
+    "/bloqueos"
+  ];
+  
+  return protectedRoutes.some(route => pathname.startsWith(route));
+}
+
+async function isAuthenticatedRequest(request: NextRequest) {
+  const authCookie = getCookie(request, "barber_auth_session");
+  if (!authCookie) return false;
+
+  try {
+    const sessionData = JSON.parse(decodeURIComponent(authCookie));
+    // Verificar si la sesión aún es válida
+    if (sessionData.expiresAt && Date.now() < sessionData.expiresAt) {
+      return true;
+    }
+  } catch (error) {
+    // Datos inválidos, cookie corrupta
+  }
+
+  return false;
+}
+
+// Función para combinar respuestas y mantener las cookies de ambas
+function mergeResponses(supabaseResponse: NextResponse, appResponse: NextResponse) {
+  const response = new NextResponse(appResponse.body, {
+    status: appResponse.status,
+    headers: appResponse.headers,
+  });
+
+  // Copiar las cookies de la respuesta de Supabase
+  const supabaseCookies = supabaseResponse.cookies.getAll();
+  for (const cookie of supabaseCookies) {
+    response.cookies.set(cookie.name, cookie.value, cookie);
+  }
+
+  return response;
+}

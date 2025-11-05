@@ -1,0 +1,10 @@
+-- Verificar todas las columnas de la tabla mibarber_barberos
+SELECT 
+    column_name, 
+    data_type, 
+    is_nullable,
+    column_default
+FROM information_schema.columns 
+WHERE table_name = 'mibarber_barberos' 
+AND table_schema = 'public'
+ORDER BY ordinal_position;

@@ -1,17 +1,20 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, memo, useCallback } from "react";
 import {
   DndContext,
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
-  KeyboardSensor,
   PointerSensor,
+  MouseSensor,
+  TouchSensor,
+  KeyboardSensor,
   UniqueIdentifier,
   closestCorners,
   useSensor,
   useSensors,
+  useDroppable,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -20,16 +23,19 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCitas } from "@/hooks/useCitas";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
+import { useSucursales } from "@/hooks/useSucursales";
 import { useBarberosList } from "@/hooks/useBarberosList";
 import { useServiciosListPorSucursal } from "@/hooks/useServiciosListPorSucursal";
-import { useSucursales } from "@/hooks/useSucursales";
 import { useHorariosSucursales } from "@/hooks/useHorariosSucursales";
+import { useBloqueosPorDia } from "@/hooks/useBloqueosBarbero"; // Importar useBloqueosPorDia
 import { getSupabaseClient } from "@/lib/supabaseClient";
 import { getLocalDateString, getLocalDateTime } from "@/utils/dateUtils";
 import type { Appointment } from "@/types/db";
-import { useGlobalFilters } from "@/contexts/GlobalFiltersContext"; // Importar el hook de filtros globales
+import { useGlobalFilters } from "@/contexts/GlobalFiltersContext";
+import { toast } from "sonner";
 
 interface KanbanBoardDndKitProps {
   onEdit: (appointment: Appointment) => void;
@@ -63,15 +69,19 @@ const columnStates: Column[] = [
 ];
 
 // Componente para una tarjeta arrastrable
-function TaskCard({ 
+const TaskCard = memo(({ 
   task, 
   dragOverlay = false, 
-  onEdit 
+  onEdit,
+  isDiaBloqueado,
+  isHoraBloqueada
 }: { 
   task: Task; 
   dragOverlay?: boolean;
   onEdit?: (task: Appointment) => void;
-}) {
+  isDiaBloqueado?: boolean;
+  isHoraBloqueada?: (hora: string) => boolean;
+}) => {
   const lastClickTimeRef = useRef<number>(0);
   const clickCountRef = useRef<number>(0);
   const dragStartedRef = useRef<boolean>(false);
@@ -89,11 +99,19 @@ function TaskCard({
       type: "Task",
       task,
     },
+    // Optimizaciones para mejor rendimiento
+    animateLayoutChanges: () => false, // Desactivar animaciones de layout changes
+    transition: {
+      duration: 150, // Reducir duración de transiciones
+      easing: 'ease-out'
+    }
   });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    opacity: isDragging ? 0.5 : 1, // Reducir opacidad al arrastrar
+    cursor: isDragging ? 'grabbing' : 'grab',
   };
 
   const overlayStyle = dragOverlay ? {
@@ -106,6 +124,22 @@ function TaskCard({
     boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
   } : {};
 
+  // Definir colores según el estado de la tarjeta
+  const getTaskColorClasses = () => {
+    switch (task.columnId) {
+      case 'pendiente':
+        return 'border-l-4 border-l-orange-500'; // Naranja para pendientes
+      case 'confirmado':
+        return 'border-l-4 border-l-blue-500'; // Azul para confirmadas
+      case 'completado':
+        return 'border-l-4 border-l-green-500'; // Verde para completadas
+      case 'cancelado':
+        return 'border-l-4 border-l-gray-500'; // Gris para canceladas
+      default:
+        return 'border-l-4 border-l-gray-300'; // Gris por defecto
+    }
+  };
+
   const columnaOrigen = columnStates.find(col => col.id === task.columnId)?.title || "Desconocida";
 
   // Sistema de doble clic robusto que no interfiere con drag
@@ -115,7 +149,13 @@ function TaskCard({
 
   const handlePointerMove = (e: React.PointerEvent) => {
     // Si hay movimiento significativo, marcamos que comenzó el drag
-    dragStartedRef.current = true;
+    if (!dragStartedRef.current) {
+      const movementX = Math.abs(e.movementX);
+      const movementY = Math.abs(e.movementY);
+      if (movementX > 3 || movementY > 3) {
+        dragStartedRef.current = true;
+      }
+    }
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
@@ -128,24 +168,21 @@ function TaskCard({
     const currentTime = Date.now();
     const timeDiff = currentTime - lastClickTimeRef.current;
     
-    console.log('Click detectado:', {
-      currentTime,
-      lastClickTime: lastClickTimeRef.current,
-      timeDiff,
-      clickCount: clickCountRef.current
-    });
-    
     // Si el tiempo entre clicks es menor a 300ms, es doble click
     if (timeDiff < 300 && timeDiff > 0) {
-      console.log('Doble click detectado, abriendo modal para:', task);
       e.stopPropagation();
       e.preventDefault();
+      // Agregar log para verificar los datos que se pasan a onEdit
+      console.log('=== DEBUG TaskCard onEdit ===');
+      console.log('Editando cita:', task);
+      console.log('Fecha en task:', task.fecha);
+      console.log('Hora en task:', task.hora);
+      console.log('=== FIN DEBUG TaskCard onEdit ===');
       onEdit(task);
       lastClickTimeRef.current = 0;
       clickCountRef.current = 0;
     } else {
       // Primer click
-      console.log('Primer click registrado');
       lastClickTimeRef.current = currentTime;
       clickCountRef.current = 1;
     }
@@ -174,53 +211,53 @@ function TaskCard({
     },
   };
 
-  console.log('TaskCard render:', {
-    id: task.id,
-    servicio: task.servicio,
-    servicioDuracion: task.servicioDuracion,
-    servicioPrecio: task.servicioPrecio
-  });
-
   return (
-    <div
+    <div 
       ref={setNodeRef}
-      style={{
-        ...style, 
-        ...overlayStyle,
-        userSelect: 'none', // Evitar selección de texto
-        WebkitUserSelect: 'none', // Compatibilidad con Safari
-        MozUserSelect: 'none', // Compatibilidad con Firefox
-        msUserSelect: 'none', // Compatibilidad con IE
-        touchAction: 'none', // Evitar acciones táctiles que puedan interferir
-      }}
-      className={`bg-qoder-dark-bg-form rounded-lg p-3 transition-all duration-200 ease-in-out border border-qoder-dark-border ${
-        isDragging 
-          ? 'shadow-2xl scale-105 z-50 opacity-95 ring-4 ring-qoder-dark-accent-primary/50' 
-          : '' // Eliminar efectos hover para mantener las tarjetas estáticas
-      }`}
       {...attributes}
-      {...customListeners}
+      {...listeners}
+      style={dragOverlay ? { ...style, ...overlayStyle } : style}
+      className={`
+        qoder-dark-card rounded-xl p-3 md:p-4 shadow-sm transition-all duration-200
+        ${dragOverlay ? 'cursor-grabbing rotate-3 shadow-xl scale-105' : 'cursor-grab hover:shadow-md hover-lift'}
+        ${isDragging ? 'opacity-50' : 'opacity-100'}
+        ${isDiaBloqueado ? 'opacity-50' : ''}
+      `}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
     >
-      <div className="flex justify-between items-start">
+      {/* Indicador visual si la hora está bloqueada */}
+      {isHoraBloqueada && task.hora && isHoraBloqueada(task.hora.slice(0, 5)) && (
+        <div className="mb-2 flex items-center text-[10px] text-red-400 bg-red-500/20 px-2 py-1 rounded-md w-fit">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span className="font-medium">Hora bloqueada</span>
+        </div>
+      )}
+      
+      {/* Indicador visual si el día está bloqueado */}
+      {isDiaBloqueado && (
+        <div className="mb-2 flex items-center text-[10px] text-red-400 bg-red-500/20 px-2 py-1 rounded-md w-fit">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span className="font-medium">Día bloqueado</span>
+        </div>
+      )}
+      
+      <div className="flex justify-between items-start mb-2">
         <div className="flex-1 min-w-0">
-          <h4 className="font-bold text-qoder-dark-text-primary text-sm truncate">
+          <h4 className="font-bold text-qoder-dark-text-primary text-sm truncate md:text-base">
             {task.cliente_nombre}
           </h4>
-          <p className="text-qoder-dark-text-secondary text-xs mt-1 truncate">
+          <p className="text-xs text-qoder-dark-text-secondary truncate">
             {task.servicio}
           </p>
         </div>
-        <span className="text-base font-bold text-qoder-dark-accent-primary ml-2 flex-shrink-0 bg-qoder-dark-bg-primary/20 px-1.5 py-0.5 rounded-md">
-          ${task.servicioPrecio || task.ticket || 0}
-        </span>
-      </div>
-      
-      <div className="flex justify-between items-center mt-2">
-        <span className="text-[10px] text-qoder-dark-text-secondary bg-qoder-dark-bg-primary/30 px-2 py-0.5 rounded-full truncate max-w-[60%]">
-          {task.barberoNombre || task.barbero}
-        </span>
-        <span className="text-xs font-semibold text-qoder-dark-text-primary bg-qoder-dark-bg-primary/30 px-1.5 py-0.5 rounded-md">
-          {task.hora.slice(0, 5)}
+        <span className="text-xs font-mono text-qoder-dark-text-secondary ml-2">
+          {task.hora ? task.hora.slice(0, 5) : 'Sin hora'}
         </span>
       </div>
       
@@ -253,33 +290,56 @@ function TaskCard({
       )}
     </div>
   );
-}
+});
 
-// Componente para una columna droppable
-function ColumnContainer({ 
+TaskCard.displayName = 'TaskCard';
+
+// Componente para una columna droppable MEMOIZADO
+const ColumnContainer = memo(({ 
   column, 
   tasks,
   isOver = false,
-  onEdit
+  onEdit,
+  isDiaBloqueado,
+  bloqueos,
+  isHoraBloqueada,
 }: { 
   column: Column; 
   tasks: Task[];
   isOver?: boolean;
   onEdit: (task: Appointment) => void;
-}) {
-  const { setNodeRef } = useSortable({
+  isDiaBloqueado?: boolean;
+  bloqueos?: any[];
+  isHoraBloqueada?: (hora: string) => boolean;
+}) => {
+  const { setNodeRef: setSortableNodeRef } = useSortable({
     id: column.id,
     data: {
       type: "Column",
       column,
     },
   });
+  
+  // Hacer la columna droppable
+  const { setNodeRef: setDroppableNodeRef } = useDroppable({
+    id: column.id,
+  });
 
-  const columnItems = tasks.length > 0 ? tasks.map(t => t.id) : [column.id];
+  // Combinar refs
+  const setNodeRef = (node: HTMLDivElement) => {
+    setSortableNodeRef(node);
+    setDroppableNodeRef(node);
+  };
+
+  // Optimización: usar useMemo para evitar recrear el array innecesariamente
+  const columnItems = useMemo(() => {
+    return tasks.length > 0 ? tasks.map(t => t.id) : [];
+  }, [tasks]);
 
   return (
     <div 
       ref={setNodeRef}
+      data-column-id={column.id}
       className={`rounded-2xl p-4 md:p-5 h-full transition-all duration-200 ${
         isOver 
           ? `${column.bgColor} ring-4 ring-inset ring-qoder-dark-accent-primary/50 bg-opacity-30 shadow-lg` 
@@ -296,9 +356,15 @@ function ColumnContainer({
       </div>
       
       <div className="space-y-4 min-h-[150px]">
-        <SortableContext items={columnItems} strategy={verticalListSortingStrategy}>
+        <SortableContext id={column.id} items={columnItems} strategy={verticalListSortingStrategy}>
           {tasks.map((task) => (
-            <TaskCard key={task.id} task={task} onEdit={onEdit} />
+            <TaskCard 
+              key={task.id} 
+              task={task} 
+              onEdit={onEdit} 
+              isDiaBloqueado={isDiaBloqueado}
+              isHoraBloqueada={isHoraBloqueada}
+            />
           ))}
           
           {tasks.length === 0 && (
@@ -317,15 +383,57 @@ function ColumnContainer({
       </div>
     </div>
   );
-}
+});
+
+ColumnContainer.displayName = 'ColumnContainer';
 
 export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
-  console.log("KanbanBoardDndKit renderizado, onEdit:", typeof onEdit);
+  console.log("=== DEBUG KanbanBoardDndKit ===");
+  console.log("onEdit typeof:", typeof onEdit);
+  console.log("filters:", filters);
+  console.log("=== FIN DEBUG KanbanBoardDndKit ===");
   
+  const queryClient = useQueryClient();
   const { barbero: barberoActual, isAdmin, idBarberia } = useBarberoAuth();
   const { sucursales } = useSucursales(idBarberia || undefined);
   const { filters: globalFilters } = useGlobalFilters(); // Usar filtros globales
   const [isInitialSelectionDone, setIsInitialSelectionDone] = useState(false); // Bandera para controlar la preseleccion inicial
+  
+  // Tipos para estados válidos - WRAPPED IN useMemo
+  const validStates = useMemo(() => ["pendiente", "confirmado", "completado", "cancelado"] as const, []);
+  type Estado = (typeof validStates)[number];
+  
+  // Estado canónico local para las columnas
+  const [columns, setColumns] = useState<Record<Estado, Task[]>>(() => {
+    const initialColumns = {} as Record<Estado, Task[]>;
+    validStates.forEach(estado => {
+      initialColumns[estado] = [];
+    });
+    return initialColumns;
+  });
+  
+  // Función para encontrar el contenedor de una tarea - WRAPPED IN useCallback
+  const findContainer = useCallback((id: UniqueIdentifier | null): Estado | null => {
+    if (!id) return null;
+    const s = String(id);
+    
+    // Si el id es un estado válido, devolverlo directamente
+    if (validStates.includes(s as Estado)) {
+      console.log('findContainer: ID es un estado válido:', s);
+      return s as Estado;
+    }
+    
+    // Si no, buscar en qué columna está la tarea
+    for (const estado of validStates) {
+      if ((columns[estado] ?? []).some(t => String(t.id) === s)) {
+        console.log('findContainer: Encontrado en columna:', estado, 'para ID:', s);
+        return estado;
+      }
+    }
+    
+    console.log('findContainer: No se encontró contenedor para ID:', s);
+    return null;
+  }, [columns, validStates]);
   
   // Usar los filtros globales o los filtros pasados como props
   const effectiveFilters = filters || globalFilters;
@@ -354,8 +462,87 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
     return localDate;
   }); // Usar Date en lugar de string
   
+  // Convertir la fecha actual a string para usar en los hooks
+  const selectedDate = useMemo(() => {
+    // Usar la función de utilidad para obtener la fecha en formato correcto
+    return getLocalDateString(currentDate);
+  }, [currentDate]);
+  
   // Añadir el hook de horarios después de que selectedSucursal esté definida
   const { horarios } = useHorariosSucursales(selectedSucursal);
+  
+  // Determinar qué días están disponibles según los horarios de la sucursal
+  const diasDisponibles = useMemo(() => {
+    if (!horarios || horarios.length === 0) return [];
+    
+    // Crear un array con todos los días de la semana (0=Domingo, 1=Lunes, ..., 6=Sábado)
+    const allDays = [0, 1, 2, 3, 4, 5, 6];
+    
+    // Encontrar los días que tienen horarios activos
+    const activeDays = horarios
+      .filter(horario => horario.activo)
+      .map(horario => {
+        // Ahora JavaScript y la base de datos usan el mismo esquema:
+        // 0=Domingo, 1=Lunes, 2=Martes, ..., 6=Sábado
+        return horario.id_dia;
+      });
+    
+    return activeDays;
+  }, [horarios]);
+  
+  // Obtener bloqueos para el día actual
+  const { data: bloqueos } = useBloqueosPorDia({
+    idSucursal: selectedSucursal || '',
+    idBarbero: selectedBarbero,
+    fecha: selectedDate
+  });
+  
+  // Verificar si el día está bloqueado
+  const isDiaBloqueado = useMemo(() => {
+    if (!bloqueos || bloqueos.length === 0) return false;
+    
+    // Verificar si hay un bloqueo de día completo
+    return bloqueos.some((bloqueo: any) => bloqueo.tipo === 'bloqueo_dia');
+  }, [bloqueos]);
+  
+  // Verificar si el día actual está disponible
+  const isDiaDisponible = useMemo(() => {
+    if (!selectedSucursal) return true; // Si no hay sucursal seleccionada, permitir
+    
+    // Ajustar la fecha para mantener consistencia con dateUtils
+    const adjustedDate = new Date(currentDate);
+    adjustedDate.setMinutes(adjustedDate.getMinutes() + adjustedDate.getTimezoneOffset() + (-180));
+    const dayOfWeek = adjustedDate.getDay(); // 0 = Domingo, 1 = Lunes, etc.
+    return diasDisponibles.includes(dayOfWeek);
+  }, [currentDate, diasDisponibles, selectedSucursal]);
+  
+  // Combinar días disponibles con verificación de bloqueos
+  const isDiaDisponibleYNoBloqueado = useMemo(() => {
+    return isDiaDisponible && !isDiaBloqueado;
+  }, [isDiaDisponible, isDiaBloqueado]);
+  
+  // Función para verificar si una hora específica está bloqueada
+  const isHoraBloqueada = useCallback((hora: string) => {
+    if (!bloqueos || bloqueos.length === 0) return false;
+    
+    // Verificar si hay un bloqueo de día completo
+    if (isDiaBloqueado) return true;
+    
+    // Verificar si hay bloqueos de horas o descansos que afecten esta hora
+    return bloqueos.some((bloqueo: any) => {
+      // Solo considerar bloqueos de horas o descansos
+      if (bloqueo.tipo !== 'descanso' && bloqueo.tipo !== 'bloqueo_horas') {
+        return false;
+      }
+      
+      // Verificar si la hora cae dentro del rango del bloqueo
+      if (bloqueo.hora_inicio && bloqueo.hora_fin) {
+        return hora >= bloqueo.hora_inicio && hora < bloqueo.hora_fin;
+      }
+      
+      return false;
+    });
+  }, [bloqueos, isDiaBloqueado]);
   
   // Preseleccionar la sucursal cuando se carguen las sucursales
   // Solo preseleccionar si no se ha hecho la selección inicial
@@ -372,12 +559,6 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
       setIsInitialSelectionDone(true);
     }
   }, [sucursales, isInitialSelectionDone, isAdmin, barberoActual?.id_sucursal]);
-  
-  // Convertir la fecha actual a string para usar en los hooks
-  const selectedDate = useMemo(() => {
-    // Usar la función de utilidad para obtener la fecha en formato correcto
-    return getLocalDateString(currentDate);
-  }, [currentDate]);
   
   // Solo obtener barberos si hay una sucursal seleccionada
   const { data: barberos } = useBarberosList(idBarberia, selectedSucursal || undefined);
@@ -414,6 +595,7 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
       return a.hora.localeCompare(b.hora);
     });
     
+    
     return citasOrdenadas.map(cita => {
       // Encontrar el nombre del barbero
       const barbero = barberos?.find((b: any) => b.id_barbero === cita.barbero);
@@ -429,28 +611,91 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
         precio: servicio?.precio
       });
       
+      // Validar que el estado sea válido usando el mismo array de estados válido
+      const columnId = validStates.includes(cita.estado as Estado) ? cita.estado : 'pendiente';
+      
+      // Asegurarnos de que todos los campos requeridos estén presentes
       const task = {
         ...cita,
         id: cita.id_cita,
-        columnId: cita.estado,
+        columnId: columnId,
         barberoNombre: barbero?.nombre || cita.barbero,
         servicioPrecio: servicio?.precio ?? cita.ticket ?? 0,
-        servicioDuracion: servicio?.duracion_minutos
+        servicioDuracion: servicio?.duracion_minutos,
+        // Asegurarnos de que fecha y hora estén presentes y en el formato correcto
+        fecha: cita.fecha || '',
+        hora: cita.hora || '',
       };
       
-      console.log('Task creada:', task);
+      // Verificación adicional de campos críticos
+      if (!task.fecha) {
+        console.warn('Falta fecha en la cita:', cita);
+      }
+      if (!task.hora) {
+        console.warn('Falta hora en la cita:', cita);
+      }
+      
+      console.log('Task creada con todos los datos:', task);
       return task;
     });
   }, [citas, barberos, servicios]);
 
-  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  // Efecto para sincronizar el estado local con los datos remotos
+  useEffect(() => {
+    // Crear las nuevas columnas basadas en las tareas actuales
+    const newColumns = {} as Record<Estado, Task[]>;
+    validStates.forEach(estado => {
+      newColumns[estado] = tasks.filter(task => task.columnId === estado);
+    });
+    
+    // Solo actualizar si las columnas realmente cambiaron
+    setColumns(prevColumns => {
+      // Verificar si las columnas son diferentes
+      const hasChanged = validStates.some(estado => {
+        const prevTasks = prevColumns[estado] || [];
+        const newTasks = newColumns[estado] || [];
+        
+        // Si las longitudes son diferentes, definitivamente cambiaron
+        if (prevTasks.length !== newTasks.length) {
+          return true;
+        }
+        
+        // Si las longitudes son iguales, verificar si los IDs son los mismos
+        const prevIds = prevTasks.map(t => t.id).sort();
+        const newIds = newTasks.map(t => t.id).sort();
+        
+        return JSON.stringify(prevIds) !== JSON.stringify(newIds);
+      });
+      
+      // Solo actualizar si realmente cambiaron
+      if (hasChanged) {
+        return newColumns;
+      }
+      
+      // Retornar el estado anterior si no hubo cambios
+      return prevColumns;
+    });
+  }, [tasks, validStates]); // Añadido validStates como dependencia
+
+  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [overColumn, setOverColumn] = useState<string | null>(null);
+  // Estado para almacenar la columna de origen durante el drag
+  const [sourceColumn, setSourceColumn] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 10, // Distancia mínima para activar drag
-        delay: 100, // Pequeño delay para permitir clicks
+        distance: 8, // Previene drag accidental
+      },
+    }),
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250, // Delay para touch devices
         tolerance: 5,
       },
     }),
@@ -459,90 +704,339 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
     })
   );
 
-  const tasksByColumn = columnStates.reduce((acc, column) => {
-    acc[column.id] = tasks.filter(task => task.columnId === column.id);
-    return acc;
-  }, {} as Record<string, Task[]>);
+  // Optimización de las tareas por columna usando useMemo
+  const tasksByColumn = useMemo(() => {
+    return columnStates.reduce((acc, column) => {
+      acc[column.id] = tasks.filter(task => task.columnId === column.id);
+      return acc;
+    }, {} as Record<string, Task[]>);
+  }, [tasks]);
 
-  const handleDragStart = (event: DragStartEvent) => {
+  const handleDragStart = useCallback((event: DragStartEvent) => {
     const { active } = event;
     const task = tasks.find(t => t.id === active.id);
     if (task) {
-      setActiveTask(task);
+      setActiveId(task.id);
+      // Al iniciar el drag, almacenamos la columna de origen
+      const sourceCol = findContainer(active.id);
+      setSourceColumn(sourceCol);
+      console.log('DragStart - Columna de origen:', sourceCol);
     }
-  };
+    
+    document.body.style.overflow = 'hidden';
+  }, [tasks, findContainer]);
 
-  const handleDragOver = (event: any) => {
-    const { over } = event;
+  const handleDragOver = useCallback((event: any) => {
+    const { active, over } = event;
+    
+    // Registrar información para debugging
+    console.log('🔍 DEBUG DRAG OVER:', {
+      activeId: active.id,
+      overId: over?.id,
+      overData: over?.data,
+    });
+    
     if (!over) {
       setOverColumn(null);
       return;
     }
     
-    const column = columnStates.find(c => c.id === over.id);
-    if (column) {
-      setOverColumn(column.id);
+    const overColumnId = findContainer(over.id);
+    setOverColumn(overColumnId);
+    
+    // Si active y over están en la misma columna, no hacer nada
+    const activeContainer = findContainer(active.id);
+    const overContainer = findContainer(over.id);
+    
+    console.log('🔍 DEBUG CONTAINERS:', {
+      activeContainer,
+      overContainer,
+      isSameContainer: activeContainer === overContainer
+    });
+    
+    if (activeContainer === overContainer) {
       return;
     }
     
-    const overTask = tasks.find(t => t.id === over.id);
-    if (overTask) {
-      setOverColumn(overTask.columnId);
+    // Verificar si el día está bloqueado antes de permitir el movimiento
+    if (isDiaBloqueado) {
+      console.log('🚫 Movimiento bloqueado - Día bloqueado');
+      toast.error("No se pueden mover citas en un día bloqueado");
       return;
     }
     
-    setOverColumn(null);
+    // Verificar si la hora de la cita está bloqueada
+    const task = tasks.find(t => t.id === active.id);
+    if (task && task.hora && isHoraBloqueada && isHoraBloqueada(task.hora.slice(0, 5))) {
+      console.log('🚫 Movimiento bloqueado - Hora bloqueada');
+      toast.error("No se pueden mover citas en una hora bloqueada");
+      return;
+    }
+  }, [tasks, findContainer, isDiaBloqueado, isHoraBloqueada]);
+
+  // Función para validar transiciones de estado
+  const isValidStatusTransition = (currentStatus: string, targetStatus: string): boolean => {
+    // Implementar lógica de validación según las reglas de negocio
+    // Por ahora permitimos todas las transiciones
+    return true;
   };
 
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-    
-    setOverColumn(null);
-    const draggedTask = activeTask || tasks.find(t => t.id === active.id);
-    setActiveTask(null);
-    
-    if (!over || !draggedTask) {
-      return;
-    }
-    
-    let targetColumnId: string | null = null;
-    
-    const overColumn = columnStates.find(c => c.id === over.id);
-    if (overColumn) {
-      targetColumnId = overColumn.id;
-    }
-    
-    if (!targetColumnId) {
-      const overTask = tasks.find(t => t.id === over.id);
-      if (overTask) {
-        targetColumnId = overTask.columnId;
-      }
-    }
-    
-    if (!targetColumnId || draggedTask.columnId === targetColumnId) {
-      return;
-    }
-    
+  // Función para actualizar el estado de una cita
+  const updateCitaStatus = useCallback(async (citaId: string, newStatus: string) => {
     try {
-      const { data, error } = await (supabase as any)
+      console.log('Iniciando actualización de cita:', { citaId, newStatus });
+      
+      // Verificar que los parámetros sean válidos
+      if (!citaId || !newStatus) {
+        const errorMsg = `Parámetros inválidos: citaId=${citaId}, newStatus=${newStatus}`;
+        console.error('Error de validación en updateCitaStatus:', errorMsg);
+        throw new Error(errorMsg);
+      }
+      
+      // Verificar que el nuevo estado sea válido
+      if (!validStates.includes(newStatus as Estado)) {
+        const errorMsg = `Estado inválido: ${newStatus}. Estados válidos: ${validStates.join(', ')}`;
+        console.error('Error de validación de estado en updateCitaStatus:', errorMsg);
+        throw new Error(errorMsg);
+      }
+      
+      // Registrar el objeto supabase para verificar que esté correctamente inicializado
+      console.log('Supabase client:', supabase);
+      
+      // Registrar la operación antes de ejecutarla
+      console.log('Ejecutando actualización en Supabase:', {
+        table: "mibarber_citas",
+        updateData: { estado: newStatus },
+        condition: { id_cita: citaId }
+      });
+      
+      const result = await (supabase as any)
         .from("mibarber_citas")
-        .update({ estado: targetColumnId })
-        .eq("id_cita", draggedTask.id_cita)
+        .update({ estado: newStatus })
+        .eq("id_cita", citaId)
         .select()
         .single();
       
+      const { data, error } = result;
+      
+      console.log('Respuesta completa de Supabase:', { result, data, error });
+      
+      // Verificar si hay error de Supabase
       if (error) {
-        console.error("Error al actualizar cita:", error);
-        alert("Error al actualizar el estado de la cita. Por favor, inténtelo de nuevo.");
-      } else {
-        console.log(`Cita ${draggedTask.id_cita} actualizada a estado: ${targetColumnId}`);
-        refetch();
+        // Registrar el error tal como viene
+        console.error('Error directo de Supabase:', error);
+        
+        // Crear un objeto de error más detallado
+        const errorDetails = {
+          message: error.message || 'Error desconocido de Supabase',
+          code: error.code || 'UNKNOWN_ERROR',
+          details: error.details || 'No hay detalles adicionales',
+          hint: error.hint || 'No hay sugerencias disponibles',
+          citaId,
+          newStatus,
+          fullError: error // Registrar el error completo
+        };
+        
+        console.error('Error en updateCitaStatus - Detalles completos:', JSON.stringify(errorDetails, null, 2));
+        throw new Error(`Error al actualizar cita: ${errorDetails.message} (Código: ${errorDetails.code})`);
       }
-    } catch (error) {
-      console.error("Error al actualizar cita:", error);
-      alert("Error al actualizar el estado de la cita. Por favor, inténtelo de nuevo.");
+      
+      // Verificar si no se obtuvieron datos
+      if (!data) {
+        const warnMsg = `No se encontró la cita para actualizar: ${citaId}`;
+        console.warn(warnMsg);
+        throw new Error(warnMsg);
+      }
+      
+      console.log('Cita actualizada exitosamente:', { citaId, newStatus, data });
+      
+      // Verificar que la actualización realmente se haya realizado
+      if (data.estado !== newStatus) {
+        const warnMsg = `La cita no se actualizó correctamente. Estado esperado: ${newStatus}, Estado actual: ${data.estado}`;
+        console.warn(warnMsg);
+        throw new Error(warnMsg);
+      }
+      
+      return data;
+    } catch (error: any) {
+      // Manejo más robusto de errores
+      console.error('Excepción capturada en updateCitaStatus:', error);
+      
+      const errorMessage = error?.message || 'Error desconocido en la actualización';
+      const errorStack = error?.stack || 'No stack trace disponible';
+      
+      // Registrar error con más detalle
+      const errorInfo = {
+        message: errorMessage,
+        stack: errorStack,
+        citaId,
+        newStatus,
+        timestamp: new Date().toISOString(),
+        typeofError: typeof error,
+        errorKeys: error ? Object.keys(error) : [],
+        fullError: error // Registrar el error completo
+      };
+      
+      console.error('Excepción en updateCitaStatus - Detalles completos:', JSON.stringify(errorInfo, null, 2));
+      
+      // Lanzar un nuevo error con mensaje más claro
+      throw new Error(`Fallo en actualización de cita: ${errorMessage}`);
     }
-  };
+  }, [supabase, validStates]); // Añadido supabase y validStates como dependencias
+
+  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    // Limpiar estado de drag inmediatamente (UX más fluido)
+    setActiveId(null);
+    setOverColumn(null);
+    document.body.style.overflow = '';
+    
+    if (!over) {
+      console.log('No hay destino para el drag');
+      setSourceColumn(null);
+      return;
+    }
+    
+    // Usar la columna de origen almacenada
+    const sourceEstado = sourceColumn;
+    // Para el destino, usamos el over.id directamente ya que representa la columna de destino
+    const targetEstado = findContainer(over.id);
+    
+    console.log('🔍 DEBUG DRAG END:', {
+      activeId: active.id,
+      overId: over.id,
+      sourceEstado,
+      targetEstado,
+      sourceColumnStored: sourceColumn
+    });
+    
+    // Limpiar el estado de origen almacenado
+    setSourceColumn(null);
+    
+    // Validaciones
+    if (!sourceEstado || !targetEstado) {
+      console.log('No se pudo determinar origen o destino');
+      return;
+    }
+    
+    // Verificar que los estados sean válidos
+    if (!validStates.includes(sourceEstado as Estado) || !validStates.includes(targetEstado as Estado)) {
+      console.log('Estados inválidos:', sourceEstado, targetEstado);
+      return;
+    }
+    
+    // Verificar si el día está bloqueado antes de permitir el movimiento
+    if (isDiaBloqueado) {
+      console.log('🚫 Movimiento bloqueado - Día bloqueado');
+      toast.error("No se pueden mover citas en un día bloqueado");
+      return;
+    }
+    
+    // Verificar si la hora de la cita está bloqueada
+    const task = tasks.find(t => t.id === active.id);
+    if (task && task.hora && isHoraBloqueada && isHoraBloqueada(task.hora.slice(0, 5))) {
+      console.log('🚫 Movimiento bloqueado - Hora bloqueada');
+      toast.error("No se pueden mover citas en una hora bloqueada");
+      return;
+    }
+    
+    // Si es un reordenamiento dentro de la misma columna
+    if (sourceEstado === targetEstado) {
+      console.log('Movimiento dentro de la misma columna, no se actualiza BD');
+      const activeIndex = columns[sourceEstado as Estado].findIndex((task: Task) => task.id === active.id);
+      const overIndex = columns[targetEstado as Estado].findIndex((task: Task) => task.id === over.id);
+      
+      if (activeIndex !== overIndex && activeIndex !== -1 && overIndex !== -1) {
+        // Reordenar dentro de la misma columna
+        setColumns(prev => {
+          const newItems = [...prev[sourceEstado as Estado]];
+          const [movedItem] = newItems.splice(activeIndex, 1);
+          newItems.splice(overIndex, 0, movedItem);
+          
+          return {
+            ...prev,
+            [sourceEstado as Estado]: newItems
+          };
+        });
+      }
+      
+      return;
+    }
+    
+    // Movimiento entre columnas diferentes - actualizar en BD
+    try {
+      console.log('Iniciando movimiento entre columnas:', {
+        citaId: active.id,
+        from: sourceEstado,
+        to: targetEstado
+      });
+      
+      // Validar transición de estado si es necesario
+      if (!isValidStatusTransition(sourceEstado, targetEstado)) {
+        toast.error("Transición de estado no permitida");
+        return;
+      }
+      
+      // Actualizar el estado de la cita
+      const updatedCita = await updateCitaStatus(active.id as string, targetEstado);
+      
+      // Actualizar estado local inmediatamente para mejor UX
+      setColumns(prev => {
+        const sourceItems = [...prev[sourceEstado as Estado]];
+        const targetItems = [...prev[targetEstado as Estado]];
+        
+        // Encontrar y mover la tarea
+        const taskIndex = sourceItems.findIndex(t => t.id === active.id);
+        if (taskIndex !== -1) {
+          const [movedTask] = sourceItems.splice(taskIndex, 1);
+          targetItems.push({
+            ...movedTask,
+            columnId: targetEstado,
+            estado: targetEstado
+          });
+        }
+        
+        return {
+          ...prev,
+          [sourceEstado as Estado]: sourceItems,
+          [targetEstado as Estado]: targetItems
+        };
+      });
+      
+      // Refetch para sincronizar con el servidor
+      await refetch();
+      
+      toast.success("Cita movida correctamente");
+      console.log('Cita movida exitosamente:', updatedCita);
+    } catch (error: any) {
+      console.error('Error al mover cita:', error);
+      
+      // Manejar errores específicos
+      let errorMessage = "Error al mover la cita";
+      
+      if (error.message) {
+        if (error.message.includes('bloqueado')) {
+          errorMessage = "No se puede mover la cita a un día u hora bloqueada";
+        } else if (error.message.includes('transición')) {
+          errorMessage = "Transición de estado no permitida";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      toast.error(errorMessage);
+      
+      // Refetch para restaurar el estado anterior
+      await refetch();
+    }
+  }, [findContainer, sourceColumn, validStates, columns, isDiaBloqueado, isHoraBloqueada, tasks, isValidStatusTransition, updateCitaStatus, refetch]);
+
+  const handleDragCancel = useCallback(() => {
+    document.body.style.overflow = '';
+    setActiveId(null);
+    setOverColumn(null);
+  }, []);
 
   // Navegar a días anteriores/siguientes usando la misma lógica que la agenda
   const goToPreviousDay = () => {
@@ -563,37 +1057,6 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
     const localDate = getLocalDateTime();
     setCurrentDate(localDate);
   };
-
-  // Determinar qué días están disponibles según los horarios de la sucursal
-  const diasDisponibles = useMemo(() => {
-    if (!horarios || horarios.length === 0) return [];
-    
-    // Crear un array con todos los días de la semana (0=Domingo, 1=Lunes, ..., 6=Sábado)
-    const allDays = [0, 1, 2, 3, 4, 5, 6];
-    
-    // Encontrar los días que tienen horarios activos
-    const activeDays = horarios
-      .filter(horario => horario.activo)
-      .map(horario => {
-        // Ahora JavaScript y la base de datos usan el mismo esquema:
-        // 0=Domingo, 1=Lunes, 2=Martes, ..., 6=Sábado
-        return horario.id_dia;
-      });
-    
-    return activeDays;
-  }, [horarios]);
-  
-  
-  // Verificar si el día actual está disponible
-  const isDiaDisponible = useMemo(() => {
-    if (!selectedSucursal) return true; // Si no hay sucursal seleccionada, permitir
-    
-    // Ajustar la fecha para mantener consistencia con dateUtils
-    const adjustedDate = new Date(currentDate);
-    adjustedDate.setMinutes(adjustedDate.getMinutes() + adjustedDate.getTimezoneOffset() + (-180));
-    const dayOfWeek = adjustedDate.getDay(); // 0 = Domingo, 1 = Lunes, etc.
-    return diasDisponibles.includes(dayOfWeek);
-  }, [currentDate, diasDisponibles, selectedSucursal]);
 
   if (isLoading) {
     return (
@@ -662,7 +1125,11 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
           <h2 className="text-lg md:text-2xl font-bold text-qoder-dark-text-primary">
             {formatDate(currentDate)}
           </h2>
-          {!isDiaDisponible && selectedSucursal ? (
+          {isDiaBloqueado ? (
+            <p className="text-qoder-dark-text-error text-xs md:text-sm">
+              Día bloqueado - no se pueden crear citas
+            </p>
+          ) : !isDiaDisponible && selectedSucursal ? (
             <p className="text-qoder-dark-text-warning text-xs md:text-sm">
               Día no disponible - sin horario configurado
             </p>
@@ -735,14 +1202,18 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
         </div>
       )}
       
-      {/* Mostrar mensaje cuando el día no está disponible */}
-      {selectedSucursal && !isDiaDisponible ? (
+      {/* Mostrar mensaje cuando el día no está disponible o está bloqueado */}
+      {selectedSucursal && (!isDiaDisponible || isDiaBloqueado) ? (
         <div className="text-center py-8">
           <p className="text-qoder-dark-text-warning text-lg font-medium">
-            Este día no está disponible para la sucursal seleccionada
+            {isDiaBloqueado 
+              ? "Este día está bloqueado" 
+              : "Este día no está disponible para la sucursal seleccionada"}
           </p>
           <p className="text-qoder-dark-text-secondary text-sm mt-2">
-            No hay horario configurado para este día
+            {isDiaBloqueado
+              ? "No se pueden crear ni mover citas en un día bloqueado"
+              : "No hay horario configurado para este día"}
           </p>
         </div>
       ) : (
@@ -752,6 +1223,7 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
         >
           {/* Hacer las columnas responsive - 1 columna en móviles, 2 en tablets, 4 en escritorio */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -759,20 +1231,27 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
               <ColumnContainer 
                 key={column.id}
                 column={column} 
-                tasks={tasksByColumn[column.id]} 
+                tasks={columns[column.id as Estado] || []} 
                 isOver={overColumn === column.id}
                 onEdit={onEdit}
+                // Pasar información de bloqueos a las columnas
+                isDiaBloqueado={isDiaBloqueado}
+                bloqueos={bloqueos}
+                isHoraBloqueada={isHoraBloqueada}
               />
             ))}
           </div>
           
-          <DragOverlay 
-            dropAnimation={null}
-          >
-            {activeTask ? <TaskCard task={activeTask} dragOverlay={true} onEdit={onEdit} /> : null}
+          {/* Definir animación de drop suave */}
+          <DragOverlay dropAnimation={{
+            duration: 350,
+            easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+          }}>
+            {activeId ? <TaskCard task={tasks.find(t => t.id === activeId)!} dragOverlay={true} onEdit={onEdit} /> : null}
           </DragOverlay>
         </DndContext>
       )}
+
     </div>
   );
 }

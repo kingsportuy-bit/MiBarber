@@ -18,8 +18,11 @@ export function GraficaCitasSemana({ citas }: GraficaCitasSemanaProps) {
     
     // Contar citas por día de la semana
     citas.forEach(cita => {
-      const fecha = new Date(cita.fecha);
-      const diaSemana = fecha.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
+      // Parsear la fecha manualmente para evitar problemas de zona horaria
+      const [year, month, day] = cita.fecha.split("-").map(Number);
+      // Crear una fecha en la zona horaria local (ajustando a mediodía para evitar problemas de DST)
+      const date = new Date(year, month - 1, day, 12, 0, 0);
+      const diaSemana = date.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
       // Ajustar para que 0 = Lunes, 6 = Domingo
       const indice = diaSemana === 0 ? 6 : diaSemana - 1;
       citasPorDia[indice]++;
@@ -44,25 +47,22 @@ export function GraficaCitasSemana({ citas }: GraficaCitasSemanaProps) {
             <CartesianGrid strokeDasharray="3 3" stroke="#3c3c3c" />
             <XAxis 
               dataKey="dia" 
-              tick={{ fill: '#b0b0b0', fontSize: 12 }}
+              stroke="#888888"
             />
             <YAxis 
-              tick={{ fill: '#b0b0b0', fontSize: 12 }}
+              stroke="#888888"
             />
             <Tooltip 
-              formatter={(value) => [value, 'Citas']}
-              labelFormatter={(value) => `Día: ${value}`}
               contentStyle={{ 
-                backgroundColor: '#252525', 
-                border: '1px solid #3c3c3c', 
-                borderRadius: '8px',
-                color: '#f1f1f1'
+                backgroundColor: '#1a1a1a', 
+                borderColor: '#3c3c3c',
+                borderRadius: '0.5rem'
               }}
             />
             <Bar 
               dataKey="citas" 
-              fill="#60a5fa" 
-              name="Citas"
+              fill="#8b5cf6" 
+              radius={[4, 4, 0, 0]}
             />
           </BarChart>
         </ResponsiveContainer>

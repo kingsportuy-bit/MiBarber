@@ -16,6 +16,13 @@ export function useBarberosList(idBarberia?: string | null, idSucursal?: string 
       console.log('🔍 Tipo de idBarberia:', typeof idBarberia);
       console.log('🔍 Tipo de idSucursal:', typeof idSucursal);
 
+      // Si no tenemos idBarberia, devolver array vacío
+      if (!idBarberia) {
+        console.log('⚠️ No hay idBarberia, devolviendo array vacío');
+        console.log('═══════════════════════════════════════════');
+        return [];
+      }
+
       let query = (supabase as any)
         .from("mibarber_barberos")
         .select("*")
@@ -58,6 +65,7 @@ export function useBarberosList(idBarberia?: string | null, idSucursal?: string 
 
       return data as Barbero[];
     },
+    enabled: !!idBarberia, // Solo ejecutar si hay idBarberia
     staleTime: 0, // ← Cambiar de 5 * 60 * 1000 a 0
   });
 }

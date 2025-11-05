@@ -11,7 +11,7 @@ interface AdministrarBarberosProps {
 }
 
 export function AdministrarBarberos({ idBarberia, id_sucursal }: AdministrarBarberosProps) {
-  const barberosQuery = useBarberos();
+  const barberosQuery = useBarberos(id_sucursal);
   const { serviciosQuery } = useBarberiaInfo();
   const [modalOpen, setModalOpen] = useState(false);
 

@@ -92,7 +92,7 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
         setBarberoIdFilter(sucursales[0].id);
       }
     }
-  }, [sucursales && sucursales.length > 0, isAdmin, barbero?.id_sucursal]); // Dependencias actualizadas
+  }, [sucursales, isAdmin, barbero?.id_sucursal, filters.sucursalId]); // Añadido filters.sucursalId y sucursales como dependencias
 
   // Efecto para establecer el barbero por defecto - solo para barberos normales
   useEffect(() => {
@@ -102,7 +102,7 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
         barberoId: barbero.id_barbero
       }));
     }
-  }, [barbero?.id_barbero, isAdmin]); // Dependencias actualizadas
+  }, [barbero?.id_barbero, isAdmin, filters.barberoId]); // Añadido filters.barberoId como dependencia
 
   // Efecto para actualizar barberoIdFilter cuando cambia la sucursal
   useEffect(() => {

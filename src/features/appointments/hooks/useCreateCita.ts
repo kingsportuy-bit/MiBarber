@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 import type { Appointment } from '@/types/db';
 import type { CreateCitaData } from '../types';
+import { useBloqueosPorDia } from "@/hooks/useBloqueosBarbero";
 
 export interface CreateCitaResult {
   mutate: (newCita: Omit<Appointment, "id_cita">) => void;
@@ -37,6 +38,47 @@ export function useCreateCita(): CreateCitaResult {
       if (missingFields.length > 0) {
         const errorMsg = `Faltan campos requeridos para crear el turno: ${missingFields.join(", ")}`;
         throw new Error(errorMsg);
+      }
+      
+      // Verificar si la fecha y hora están bloqueadas
+      if (newCita.id_sucursal && newCita.fecha) {
+        // Obtener los bloqueos para el día
+        const { data: bloqueos } = await supabase
+          .from("mibarber_bloqueos_barbero")
+          .select("*")
+          .eq("id_sucursal", newCita.id_sucursal)
+          .eq("fecha", newCita.fecha)
+          .eq("id_barbero", newCita.id_barbero || '');
+        
+        // Verificar si hay un bloqueo de día completo
+        const bloqueoDiaCompleto = bloqueos?.some(bloqueo => bloqueo.tipo === 'bloqueo_dia');
+        
+        if (bloqueoDiaCompleto) {
+          throw new Error("No se puede crear una cita en un día bloqueado completo");
+        }
+        
+        // Verificar si la hora está dentro de un bloqueo de horas o descanso
+        if (bloqueos && bloqueos.length > 0 && newCita.hora) {
+          const horaCita = newCita.hora.slice(0, 5); // HH:mm
+          
+          const bloqueoHorario = bloqueos.some(bloqueo => {
+            // Solo considerar bloqueos de horas o descansos
+            if (bloqueo.tipo !== 'descanso' && bloqueo.tipo !== 'bloqueo_horas') {
+              return false;
+            }
+            
+            // Verificar si la cita cae dentro del rango del bloqueo
+            if (bloqueo.hora_inicio && bloqueo.hora_fin) {
+              return horaCita >= bloqueo.hora_inicio && horaCita < bloqueo.hora_fin;
+            }
+            
+            return false;
+          });
+          
+          if (bloqueoHorario) {
+            throw new Error("No se puede crear una cita en un horario bloqueado");
+          }
+        }
       }
       
       // Asegurar que el estado tenga un valor por defecto

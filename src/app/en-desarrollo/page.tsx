@@ -5,14 +5,13 @@ import { useEffect } from "react";
 
 export default function EnDesarrolloPage() {
   const router = useRouter();
-
-  // Efecto para redirigir automáticamente después de 5 segundos
+  
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.push("/mibarber");
-    }, 5000);
-
-    // Limpiar el temporizador si el componente se desmonta
+      // Redirigir a la página principal de la barbería en lugar de /mibarber
+      router.push("/mi-barberia");
+    }, 3000);
+    
     return () => clearTimeout(timer);
   }, [router]);
 
@@ -73,10 +72,10 @@ export default function EnDesarrolloPage() {
             Serás redirigido automáticamente en 5 segundos...
           </p>
           <button
-            onClick={() => router.push("/mibarber")}
-            className="qoder-dark-button px-6 py-3 rounded-lg font-medium"
+            onClick={() => router.push("/mi-barberia")}
+            className="mt-6 px-6 py-3 bg-qoder-dark-accent-orange text-white rounded-lg hover:bg-orange-600 transition-colors"
           >
-            Volver al Inicio
+            Ir a Mi Barbería Ahora
           </button>
         </div>
       </div>

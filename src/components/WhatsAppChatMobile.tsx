@@ -64,7 +64,7 @@ export function WhatsAppChatMobile() {
       }, 50);
       return () => clearTimeout(timer);
     }
-  }, [showChatList, activeConv?.session_id]);
+  }, [showChatList, activeConv?.session_id, activeConv]);
 
   // Función para verificar si un mensaje contiene una imagen
   const isImageUrl = (content: string) => {
@@ -453,7 +453,7 @@ export function WhatsAppChatMobile() {
               className="flex-1 relative overflow-hidden min-w-0"
               style={{ backgroundColor: '#161717' }}
             >
-              {/* Capa de fondo fija con patrón */}
+              {/* Capa de fondo fijo con patrón */}
               <div 
                 className="absolute inset-0 pointer-events-none"
                 style={{

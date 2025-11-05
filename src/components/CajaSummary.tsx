@@ -31,8 +31,10 @@ export function CajaSummary() {
     }
   }, [data]);
   
-  // Obtener la lista de barberos
-  const { data: barberos, isLoading: isLoadingBarberos } = useBarberos();
+  // Obtener la lista de barberos para la sucursal seleccionada
+  const { data: barberos, isLoading: isLoadingBarberos } = useBarberos(
+    sucursalId ? sucursalId.toString() : undefined
+  );
 
   // Establecer fechas predeterminadas al cargar el componente
   useEffect(() => {

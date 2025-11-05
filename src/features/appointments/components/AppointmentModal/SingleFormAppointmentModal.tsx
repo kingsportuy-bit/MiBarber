@@ -1,7 +1,7 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import type { Appointment, Client, Service, Barbero } from "@/types/db";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 import { useSucursales } from "@/hooks/useSucursales";
@@ -9,7 +9,8 @@ import { useClientes } from "@/hooks/useClientes";
 import { useServiciosListPorSucursal } from "@/hooks/useServiciosListPorSucursal";
 import { useBarberosList } from "@/hooks/useBarberosList";
 import { useCitas } from "@/hooks/useCitas";
-import { useHorariosSucursales } from "@/hooks/useHorariosSucursales"; // Importar useHorariosSucursales
+import { useHorariosDisponiblesCompleto } from "@/hooks/useHorariosDisponiblesCompleto";
+import { useHorariosSucursales } from "@/hooks/useHorariosSucursales";
 import { getLocalDateString } from "@/utils/dateUtils";
 
 interface SingleFormAppointmentModalProps {
@@ -23,10 +24,16 @@ interface SingleFormAppointmentModalProps {
 export function SingleFormAppointmentModal({
   open,
   onOpenChange,
-  initial,
   onSave,
-  sucursalId: propSucursalId,
+  initial,
+  sucursalId: propSucursalId
 }: SingleFormAppointmentModalProps) {
+  console.log("=== DEBUG SingleFormAppointmentModal ===");
+  console.log("initial recibido:", initial);
+  console.log("fecha en initial:", initial?.fecha);
+  console.log("hora en initial:", initial?.hora);
+  console.log("=== FIN DEBUG SingleFormAppointmentModal ===");
+
   const { idBarberia, isAdmin, barbero: barberoActual } = useBarberoAuth();
   const { sucursales: allSucursales, isLoading: isLoadingSucursales } = useSucursales(idBarberia || undefined);
   
@@ -37,6 +44,7 @@ export function SingleFormAppointmentModal({
   const [clientName, setClientName] = useState<string>(initial?.cliente_nombre || "");
   const [serviceId, setServiceId] = useState<string | null>(initial?.id_servicio || null);
   const [serviceName, setServiceName] = useState<string>(initial?.servicio || "");
+  const [duration, setDuration] = useState<string>(initial?.duracion || ""); // Nuevo estado para duración
   const [barberId, setBarberId] = useState<string | null>(initial?.id_barbero || null);
   const [barberName, setBarberName] = useState<string>(initial?.barbero || "");
   const [date, setDate] = useState<string>(initial?.fecha || getLocalDateString(new Date()));
@@ -49,6 +57,27 @@ export function SingleFormAppointmentModal({
     telefono: "",
   });
   
+  // Efecto para reiniciar los estados cuando se abre el modal o cambia la cita
+  useEffect(() => {
+    if (open) {
+      console.log("=== DEBUG Reiniciando estados con initial ===");
+      console.log("initial:", initial);
+      console.log("initial?.id_cita:", initial?.id_cita);
+      setClientId(initial?.id_cliente || null);
+      setClientName(initial?.cliente_nombre || "");
+      setServiceId(initial?.id_servicio || null);
+      setServiceName(initial?.servicio || "");
+      setDuration(initial?.duracion || ""); // Inicializar duración
+      setBarberId(initial?.id_barbero || null);
+      setBarberName(initial?.barbero || "");
+      setDate(initial?.fecha || getLocalDateString(new Date()));
+      setTime(initial?.hora || "");
+      setNote(initial?.nota || "");
+      setClientPhone(initial?.telefono || null);
+      console.log("=== FIN DEBUG Reiniciando estados con initial ===");
+    }
+  }, [open, initial]); // Eliminado initial?.id_cita y usado initial completo
+
   // Preseleccionar la sucursal cuando se carguen las sucursales
   useEffect(() => {
     if (allSucursales && allSucursales.length > 0 && !isInitialSelectionDone && !propSucursalId) {
@@ -81,11 +110,12 @@ export function SingleFormAppointmentModal({
   const { data: serviciosData, isLoading: isLoadingServicios } = useServiciosListPorSucursal(selectedSucursalId);
   const { data: barberosData, isLoading: isLoadingBarberos } = useBarberosList(idBarberia || undefined, selectedSucursalId);
   
-  // Obtener citas existentes para verificar disponibilidad
-  const { data: citasData, isLoading: isLoadingCitas } = useCitas({
-    sucursalId: selectedSucursalId,
+  // Obtener horarios disponibles usando el nuevo hook
+  const { horariosDisponibles, isLoading: isLoadingHorarios } = useHorariosDisponiblesCompleto({
+    idSucursal: selectedSucursalId,
+    idBarbero: barberId || undefined,
     fecha: date,
-    barberoId: barberId || undefined,
+    idCitaEditando: initial?.id_cita,
   });
   
   // Obtener horarios de la sucursal
@@ -101,525 +131,51 @@ export function SingleFormAppointmentModal({
     return true; // Por ahora mostramos todos
   }) || [];
 
-  // Generar horas disponibles basadas en la sucursal, barbero, servicio y citas existentes
-  const generateAvailableTimes = () => {
-    console.log("=== INICIO GENERATE AVAILABLE TIMES (REAL) ===");
+  // Reemplazar la función generateAvailableTimes con una versión simplificada
+  const generateAvailableTimes = useCallback(() => {
+    console.log("=== INICIO GENERATE AVAILABLE TIMES (NUEVA LÓGICA) ===");
     console.log("selectedSucursalId:", selectedSucursalId);
-    console.log("serviciosData length:", serviciosData?.length);
     console.log("date:", date);
-    console.log("serviceName:", serviceName);
-    console.log("barberName:", barberName);
-    console.log("isAdmin:", isAdmin);
-    console.log("barberoActual:", barberoActual);
-    console.log("barberoActual?.id_barbero:", barberoActual?.id_barbero);
+    console.log("barberId:", barberId);
     console.log("initial?.id_cita:", initial?.id_cita);
-    console.log("time (de la cita existente):", time);
 
     // Verificar que tengamos todos los datos necesarios
-    // Para barberos no administradores, el barbero ya está establecido automáticamente
-    const tieneBarbero =
-      barberName || (!isAdmin && barberoActual?.id_barbero);
-    console.log("tieneBarbero:", tieneBarbero);
-
-    // Requerir sucursal y fecha como mínimo
-    if (!selectedSucursalId || !date) {
+    if (!selectedSucursalId || !date || !barberId) {
       console.log("=== FALTAN DATOS MÍNIMOS PARA GENERAR HORARIOS ===");
-      console.log("Datos mínimos:", {
-        selectedSucursalId,
-        fecha: date,
-      });
-      console.log("=== FIN FALTAN DATOS MÍNIMOS ===");
       return [];
     }
 
-    // Si tenemos servicios pero no hay ninguno, devolver array vacío
-    if (serviciosData && serviciosData.length === 0) {
-      console.log("No hay servicios disponibles");
+    // Si estamos cargando los horarios, devolver array vacío
+    if (isLoadingHorarios) {
       return [];
     }
 
-    // Si no hay barbero seleccionado, devolver array vacío
-    if (!tieneBarbero) {
-      console.log("No hay barbero seleccionado");
-      return [];
-    }
-
-    // Obtener el servicio seleccionado para obtener su duración
-    const servicioSeleccionado = serviciosData?.find(
-      (s) => s.nombre === serviceName,
-    );
-    const duracionServicio = servicioSeleccionado
-      ? servicioSeleccionado.duracion_minutos
-      : 30; // Por defecto 30 minutos
-
-    console.log("Servicio seleccionado:", servicioSeleccionado);
-    console.log("Duración del servicio:", duracionServicio);
-
-    // Si no se puede determinar la duración del servicio, usar 30 minutos por defecto
-    const duracionReal =
-      duracionServicio && duracionServicio > 0 ? duracionServicio : 30;
-
-    console.log("Generando horarios con duración:", duracionReal);
-
-    // Obtener horario de la sucursal desde los horarios de sucursal
-    let horaInicio = 9;
-    let horaFin = 20;
-    let horaInicioTarde = 13; // Hora de inicio de la tarde (por defecto)
-    let horaFinManana = 12; // Hora de fin de la mañana (por defecto)
-    let diasAbierto = true; // Por defecto asumir que está abierto
-
-    // Verificar si tenemos horarios de sucursal
-    if (horariosSucursal && horariosSucursal.length > 0) {
-      // Obtener el día de la semana de la fecha seleccionada (0 = Domingo, 1 = Lunes, etc.)
-      // Usar el mismo método que en dateUtils para mantener consistencia
-      const [year, month, day] = date.split("-").map(Number);
-      const selectedDateObj = new Date(year, month - 1, day); // Mes es 0-indexado en Date
-      // Ajustar manualmente a UTC-3 (Uruguay) para mantener consistencia con dateUtils
-      selectedDateObj.setMinutes(
-        selectedDateObj.getMinutes() +
-          selectedDateObj.getTimezoneOffset() +
-          -180,
-      );
-      const dayOfWeek = selectedDateObj.getDay();
-
-      // Ahora JavaScript y la base de datos usan el mismo esquema:
-      // 0=Domingo, 1=Lunes, 2=Martes, 3=Miércoles, 4=Jueves, 5=Viernes, 6=Sábado
-      const diaId = dayOfWeek;
-
-      console.log("Día de la semana seleccionado:", dayOfWeek);
-      console.log("ID del día para la base de datos:", diaId);
-
-      // Buscar el horario para el día correcto
-      const horarioDelDia = horariosSucursal.find(
-        (h) => h.id_dia === diaId && h.activo,
-      );
-
-      console.log("Horario del día encontrado:", horarioDelDia);
-
-      // Verificar si la sucursal está cerrada ese día
-      if (!horarioDelDia) {
-        diasAbierto = false;
-      } else {
-        // Parsear las horas de apertura y cierre
-        try {
-          // Extraer horas y minutos de apertura
-          const [horaApertura, minutoApertura] = horarioDelDia.hora_apertura
-            .split(":")
-            .map(Number);
-          horaInicio = horaApertura;
-
-          // Extraer horas y minutos de cierre
-          const [horaCierre, minutoCierre] = horarioDelDia.hora_cierre
-            .split(":")
-            .map(Number);
-          horaFin = horaCierre;
-
-          // Verificar si hay horario de almuerzo
-          if (
-            horarioDelDia.hora_inicio_almuerzo &&
-            horarioDelDia.hora_fin_almuerzo
-          ) {
-            const [horaInicioAlmuerzo, minutoInicioAlmuerzo] =
-              horarioDelDia.hora_inicio_almuerzo.split(":").map(Number);
-            const [horaFinAlmuerzo, minutoFinAlmuerzo] =
-              horarioDelDia.hora_fin_almuerzo.split(":").map(Number);
-
-            horaFinManana = horaInicioAlmuerzo;
-            horaInicioTarde = horaFinAlmuerzo;
-          } else {
-            // No hay descanso
-            horaFinManana = horaFin;
-            horaInicioTarde = horaFin;
-          }
-        } catch (e) {
-          console.warn("Error al parsear horario de sucursal:", e);
-        }
-      }
-    } else {
-      // Si no hay horarios definidos, asumir que está cerrado
-      diasAbierto = false;
-    }
-
-    console.log("Horario de sucursal:", {
-      horaInicio,
-      horaFin,
-      horaInicioTarde,
-      horaFinManana,
-      diasAbierto,
-    });
-
-    // Si la sucursal no está abierta ese día, devolver array vacío
-    if (!diasAbierto) {
-      console.log("La sucursal no está abierta ese día");
-      return [];
-    }
-
-    const times: string[] = [];
-
-    // Función para verificar si un horario está ocupado considerando la duración del servicio
-    const isTimeSlotOccupied = (hour: number, minute: number): boolean => {
-      // Si no hay datos de citas, no marcar como ocupado
-      if (!citasData || citasData.length === 0) {
-        return false;
-      }
-
-      // Convertir a string con formato HH:mm
-      const timeString = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
-
-      // Verificar si hay alguna cita que se solape con este horario
-      const occupied = citasData.some((cita: Appointment) => {
-        // Solo considerar citas del mismo barbero
-        // Para barberos no administradores, usar el ID del barbero actual
-        const idBarberoActual =
-          !isAdmin && barberoActual?.id_barbero
-            ? barberoActual.id_barbero
-            : barberId;
-        if (cita.id_barbero !== idBarberoActual) {
-          return false;
-        }
-
-        // Solo considerar citas de la misma fecha
-        if (cita.fecha !== date) {
-          return false;
-        }
-
-        // Si estamos editando una cita, ignorar la propia cita que estamos editando
-        if (initial?.id_cita && cita.id_cita === initial?.id_cita) {
-          console.log(`Ignorando cita propia durante edición: ${cita.id_cita}`);
-          return false;
-        }
-
-        // Obtener la hora de la cita
-        const citaHora = cita.hora?.slice(0, 5);
-        if (!citaHora) return false;
-
-        // Encontrar el servicio de la cita para obtener su duración
-        const servicioCita = serviciosData?.find((s) => s.nombre === cita.servicio);
-        const duracionCita = servicioCita ? servicioCita.duracion_minutos : 30; // Por defecto 30 minutos
-
-        // Convertir la hora de la cita a minutos desde medianoche
-        const [citaHour, citaMinute] = citaHora.split(":").map(Number);
-        const citaStartMinutes = citaHour * 60 + citaMinute;
-        const citaEndMinutes = citaStartMinutes + (duracionCita || 30);
-
-        // Convertir la hora que estamos verificando a minutos desde medianoche
-        const checkMinutes = hour * 60 + minute;
-        const checkEndMinutes = checkMinutes + duracionReal;
-
-        // Verificar si hay solapamiento
-        // Hay solapamiento si el inicio de uno es menor que el fin del otro y viceversa
-        const isOverlapping =
-          checkMinutes < citaEndMinutes && checkEndMinutes > citaStartMinutes;
-        if (isOverlapping) {
-          console.log(
-            `Horario ${timeString} solapado con cita de ${citaHora} (duración ${duracionCita} min)`,
-          );
-        }
-        return isOverlapping;
-      });
-
-      return occupied;
-    };
-
-    // Calcular la hora mínima para el día actual (hora actual + 30 minutos de gracia)
-    let minHour = 0;
-    let minMinute = 0;
-    const todayStr = getLocalDateString();
-    const isToday = date === todayStr;
-
-    console.log("=== DEBUG FECHA ===");
-    console.log("date:", date);
-    console.log("todayStr:", todayStr);
-    console.log("isToday:", isToday);
-    console.log("=== FIN DEBUG FECHA ===");
-
-    // Para el día actual, calcular la hora mínima (hora actual + 30 minutos de gracia)
-    if (isToday) {
-      const now = new Date();
-      // Ajustar a la zona horaria local
-      now.setMinutes(now.getMinutes() + now.getTimezoneOffset() + -180);
-
-      // Sumar 30 minutos de gracia
-      const minTime = now.getHours() * 60 + now.getMinutes() + 30;
-      minHour = Math.floor(minTime / 60);
-      minMinute = minTime % 60;
-
-      // Redondear al siguiente bloque de 30 minutos (:00 o :30)
-      if (minMinute > 0 && minMinute <= 30) {
-        minMinute = 30;
-      } else if (minMinute > 30) {
-        minMinute = 0;
-        minHour += 1;
-      }
-
-      // Asegurarse de que la hora mínima no exceda el horario de la sucursal
-      if (minHour < horaInicio) {
-        minHour = horaInicio;
-        minMinute = 0;
-      }
-
-      // Si la hora mínima excede el horario de la sucursal, ajustar para permitir mostrar horarios
-      // pero solo los que estén dentro del horario de la sucursal
-      if (minHour > horaFin) {
-        console.log("Hora mínima excede el horario de la sucursal");
-        // Ajustar la hora mínima para permitir mostrar horarios dentro del horario de la sucursal
-        minHour = horaFin;
-        minMinute = 0;
-      } else if (minHour === horaFin && minMinute > 30) {
-        // Si la hora mínima es exactamente la hora de cierre pero los minutos exceden 30,
-        // ajustar para permitir mostrar el último horario disponible (20:30)
-        minHour = horaFin;
-        minMinute = 30;
-      }
-
-      console.log(
-        "Hora mínima para hoy (redondeada):",
-        minHour,
-        ":",
-        minMinute,
-      );
-    }
-
-    console.log("Citas obtenidas:", citasData?.length);
-    console.log(
-      "Citas para este barbero y fecha:",
-      citasData?.filter(
-        (c) =>
-          c.id_barbero === barberId &&
-          c.fecha === date,
-      ).length,
-    );
-
-    // Generar horarios dentro del rango de la sucursal (mañana)
-    let morningSlotsGenerated = 0;
-    let morningSlotsAvailable = 0;
-    for (let hour = horaInicio; hour < horaFinManana; hour++) {
-      // Generar bloques de 30 minutos (:00 y :30) - siempre en bloques de 30 minutos
-      for (let minute = 0; minute < 60; minute += 30) {
-        morningSlotsGenerated++;
-        // Verificar que el horario más la duración del servicio no exceda el horario de descanso
-        const slotStartMinutes = hour * 60 + minute;
-        const slotEndMinutes = slotStartMinutes + duracionReal;
-        const finMananaMinutes = horaFinManana * 60;
-        
-        // Si el fin del servicio excede el inicio del descanso, no ofrecer este horario
-        if (slotEndMinutes > finMananaMinutes) {
-          console.log(`Horario mañana ${hour}:${minute} excede horario de descanso`);
-          continue;
-        }
-        
-        // Si es hoy, solo mostrar horas futuras (hora actual + 30 minutos de gracia, redondeada)
-        if (isToday) {
-          // Solo agregar horas futuras o iguales al tiempo mínimo
-          if (hour > minHour || (hour === minHour && minute >= minMinute)) {
-            // Verificar si este slot está ocupado considerando la duración real del servicio seleccionado
-            if (!isTimeSlotOccupied(hour, minute)) {
-              const timeString = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
-              times.push(timeString);
-              morningSlotsAvailable++;
-              console.log(`Agregado horario mañana: ${timeString}`);
-            } else {
-              console.log(`Horario mañana ocupado: ${hour}:${minute}`);
-            }
-          } else {
-            console.log(
-              `Horario mañana pasado: ${hour}:${minute} (mínimo: ${minHour}:${minMinute})`,
-            );
-          }
-        } else {
-          // Para fechas futuras, mostrar todos los horarios que no estén ocupados
-          if (!isTimeSlotOccupied(hour, minute)) {
-            const timeString = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
-            times.push(timeString);
-            morningSlotsAvailable++;
-            console.log(`Agregado horario mañana futuro: ${timeString}`);
-          } else {
-            console.log(`Horario mañana futuro ocupado: ${hour}:${minute}`);
-          }
-        }
-      }
-    }
-    console.log(
-      "Slots generados en la mañana:",
-      morningSlotsGenerated,
-      "disponibles:",
-      morningSlotsAvailable,
-    );
-
-    // Generar horarios dentro del rango de la sucursal (tarde)
-    // Verificar si hay un descanso real (más de 30 minutos de diferencia)
-    const tieneDescanso = horaInicioTarde - horaFinManana > 0.5;
-    console.log(
-      "Tiene descanso:",
-      tieneDescanso,
-      "horaInicioTarde:",
-      horaInicioTarde,
-      "horaFinManana:",
-      horaFinManana,
-    );
-
-    let afternoonSlotsGenerated = 0;
-    let afternoonSlotsAvailable = 0;
-    if (tieneDescanso) {
-      for (let hour = horaInicioTarde; hour <= horaFin; hour++) {
-        // Para la última hora, generar horarios hasta el límite de cierre menos la duración del servicio
-        const maxMinutes = hour === horaFin ? 60 - duracionReal : 59;
-
-        // Generar bloques de 30 minutos (:00 y :30) - siempre en bloques de 30 minutos
-        for (
-          let minute = 0;
-          minute <= maxMinutes &&
-          hour * 60 + minute <= horaFin * 60 - duracionReal;
-          minute += 30
-        ) {
-          afternoonSlotsGenerated++;
-          // Verificar que el horario más la duración del servicio no exceda el horario de cierre
-          const slotStartMinutes = hour * 60 + minute;
-          const slotEndMinutes = slotStartMinutes + duracionReal;
-          const finDiaMinutes = horaFin * 60;
-          
-          // Si el fin del servicio excede el cierre, no ofrecer este horario
-          if (slotEndMinutes > finDiaMinutes) {
-            console.log(`Horario tarde ${hour}:${minute} excede horario de cierre`);
-            continue;
-          }
-          
-          // Si es hoy, solo mostrar horas futuras (hora actual + 30 minutos de gracia, redondeada)
-          if (isToday) {
-            // Solo agregar horas futuras o iguales al tiempo mínimo
-            if (hour > minHour || (hour === minHour && minute >= minMinute)) {
-              // Verificar si este slot está ocupado considerando la duración real del servicio seleccionado
-              if (!isTimeSlotOccupied(hour, minute)) {
-                const timeString = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
-                times.push(timeString);
-                afternoonSlotsAvailable++;
-                console.log(
-                  `Agregado horario tarde con descanso: ${timeString}`,
-                );
-              } else {
-                console.log(
-                  `Horario tarde con descanso ocupado: ${hour}:${minute}`,
-                );
-              }
-            } else {
-              console.log(
-                `Horario tarde con descanso pasado: ${hour}:${minute} (mínimo: ${minHour}:${minMinute})`,
-              );
-            }
-          } else {
-            // Para fechas futuras, mostrar todos los horarios que no estén ocupados
-            if (!isTimeSlotOccupied(hour, minute)) {
-              const timeString = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
-              times.push(timeString);
-              afternoonSlotsAvailable++;
-              console.log(
-                `Agregado horario tarde con descanso futuro: ${timeString}`,
-              );
-            } else {
-              console.log(
-                `Horario tarde con descanso futuro ocupado: ${hour}:${minute}`,
-              );
-            }
-          }
-        }
-      }
-    } else {
-      // Si no hay descanso real, continuar generando horarios desde la mañana hasta la tarde
-      for (let hour = horaFinManana; hour <= horaFin; hour++) {
-        // Para la última hora, generar horarios hasta el límite de cierre menos la duración del servicio
-        const maxMinutes = hour === horaFin ? 60 - duracionReal : 59;
-
-        // Generar bloques de 30 minutos (:00 y :30) - siempre en bloques de 30 minutos
-        for (
-          let minute = 0;
-          minute <= maxMinutes &&
-          hour * 60 + minute <= horaFin * 60 - duracionReal;
-          minute += 30
-        ) {
-          afternoonSlotsGenerated++;
-          // Verificar que el horario más la duración del servicio no exceda el horario de cierre
-          const slotStartMinutes = hour * 60 + minute;
-          const slotEndMinutes = slotStartMinutes + duracionReal;
-          const finDiaMinutes = horaFin * 60;
-          
-          // Si el fin del servicio excede el cierre, no ofrecer este horario
-          if (slotEndMinutes > finDiaMinutes) {
-            console.log(`Horario tarde ${hour}:${minute} excede horario de cierre`);
-            continue;
-          }
-          
-          // Si es hoy, solo mostrar horas futuras (hora actual + 30 minutos de gracia, redondeada)
-          if (isToday) {
-            // Solo agregar horas futuras o iguales al tiempo mínimo
-            if (hour > minHour || (hour === minHour && minute >= minMinute)) {
-              // Verificar si este slot está ocupado considerando la duración real del servicio seleccionado
-              if (!isTimeSlotOccupied(hour, minute)) {
-                const timeString = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
-                times.push(timeString);
-                afternoonSlotsAvailable++;
-                console.log(
-                  `Agregado horario tarde sin descanso: ${timeString}`,
-                );
-              } else {
-                console.log(
-                  `Horario tarde sin descanso ocupado: ${hour}:${minute}`,
-                );
-              }
-            } else {
-              console.log(
-                `Horario tarde sin descanso pasado: ${hour}:${minute} (mínimo: ${minHour}:${minMinute})`,
-              );
-            }
-          } else {
-            // Para fechas futuras, mostrar todos los horarios que no estén ocupados
-            if (!isTimeSlotOccupied(hour, minute)) {
-              const timeString = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
-              times.push(timeString);
-              afternoonSlotsAvailable++;
-              console.log(
-                `Agregado horario tarde sin descanso futuro: ${timeString}`,
-              );
-            } else {
-              console.log(
-                `Horario tarde sin descanso futuro ocupado: ${hour}:${minute}`,
-              );
-            }
-          }
-        }
-      }
-    }
-    console.log(
-      "Slots generados en la tarde:",
-      afternoonSlotsGenerated,
-      "disponibles:",
-      afternoonSlotsAvailable,
-    );
-
-    // Si estamos editando una cita, asegurarse de que la hora de la cita existente esté disponible
-    if (initial?.id_cita && time) {
-      const horaExistente = time.slice(0, 5); // Formato HH:MM
-      console.log("Asegurando hora existente para edición:", horaExistente);
-
-      // Verificar si la hora ya está en la lista
-      if (!times.includes(horaExistente)) {
-        console.log("Agregando hora existente a la lista:", horaExistente);
-        // Agregar la hora existente al principio de la lista
-        times.unshift(horaExistente);
-      }
-    }
-
-    // Eliminar el código que agregaba forzosamente el horario 20:30
-    // El último horario ahora se calcula automáticamente según la hora de cierre de la sucursal
-
-    console.log("Horarios generados finales:", times);
-    console.log("=== FIN GENERATE AVAILABLE TIMES (REAL) ===");
-    return times;
-  };
+    console.log("Horarios disponibles:", horariosDisponibles);
+    console.log("=== FIN GENERATE AVAILABLE TIMES (NUEVA LÓGICA) ===");
+    
+    return horariosDisponibles || [];
+  }, [selectedSucursalId, date, barberId, initial?.id_cita, isLoadingHorarios, horariosDisponibles]);
 
   // Generar las horas disponibles
   const availableTimes = useMemo(() => {
     return generateAvailableTimes();
-  }, [selectedSucursalId, date, serviceName, barberName, citasData, initial?.id_cita, time, serviciosData, horariosSucursal, isAdmin, barberoActual?.id_barbero, barberId]);
+  }, [generateAvailableTimes]);
+
+  // Efecto para asegurar que el valor seleccionado en el dropdown coincida con el estado
+  useEffect(() => {
+    if (time && availableTimes.length > 0) {
+      const horaFormateada = time.slice(0, 5); // Formato HH:MM
+      if (!availableTimes.includes(horaFormateada)) {
+        // Si la hora no está en la lista, agregarla
+        console.log("Agregando hora al estado de availableTimes:", horaFormateada);
+      }
+    }
+  }, [time, availableTimes]);
+
+  // Función para obtener el valor formateado de la hora
+  const getFormattedTimeValue = useMemo(() => {
+    return time ? time.slice(0, 5) : ""; // Formato HH:MM
+  }, [time]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -688,9 +244,17 @@ export function SingleFormAppointmentModal({
         return;
       }
 
-      // Obtener el servicio seleccionado para obtener duración y precio
+      // Si no se ha especificado una duración, usar la del servicio seleccionado
+      let finalDuration = duration;
+      if (!duration && serviceId) {
+        const selectedService = serviciosData?.find((s: Service) => s.id_servicio === serviceId);
+        if (selectedService) {
+          finalDuration = selectedService.duracion_minutos.toString();
+        }
+      }
+
+      // Obtener el servicio seleccionado para obtener precio
       const selectedService = serviciosData?.find((s: Service) => s.id_servicio === serviceId);
-      const duration = selectedService?.duracion_minutos ? selectedService.duracion_minutos.toString() : null;
       const ticket = selectedService?.precio || null;
 
       // Construir el objeto completo con todos los campos requeridos
@@ -712,7 +276,7 @@ export function SingleFormAppointmentModal({
         id_barberia: idBarberia || undefined,
         ticket: ticket || undefined,
         nro_factura: initial?.nro_factura || undefined,
-        duracion: duration || undefined, // Solo el número sin la "m"
+        duracion: finalDuration || undefined, // Guardar solo el número sin "m"
         notificacion_barbero: initial?.notificacion_barbero || undefined,
         notificacion_cliente: initial?.notificacion_cliente || undefined,
         metodo_pago: initial?.metodo_pago || undefined,
@@ -728,6 +292,7 @@ export function SingleFormAppointmentModal({
       setClientName("");
       setServiceId(null);
       setServiceName("");
+      setDuration(""); // Resetear duración
       setBarberId(null);
       setBarberName("");
       setDate(getLocalDateString(new Date()));
@@ -824,7 +389,7 @@ export function SingleFormAppointmentModal({
                   <div className="absolute z-10 w-full mt-1 max-h-40 overflow-y-auto border border-qoder-dark-border rounded-lg bg-qoder-dark-bg-primary">
                     {clientesData
                       ?.filter((cliente: Client) => 
-                        cliente.nombre.toLowerCase().includes(clientName.toLowerCase()) ||
+                        (cliente.nombre && cliente.nombre.toLowerCase().includes(clientName.toLowerCase())) ||
                         (cliente.telefono && cliente.telefono.includes(clientName))
                       )
                       .map((cliente: Client) => (
@@ -907,28 +472,47 @@ export function SingleFormAppointmentModal({
               )}
             </div>
             
-            {/* Servicio */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
-                Servicio
-              </label>
-              <select
-                value={serviceId || ""}
-                onChange={(e) => {
-                  const selectedService = serviciosData?.find((s: Service) => s.id_servicio === e.target.value);
-                  setServiceId(e.target.value || null);
-                  setServiceName(selectedService?.nombre || "");
-                }}
-                className="qoder-dark-select w-full px-3 py-2 rounded-lg"
-                disabled={isLoadingServicios}
-              >
-                <option value="">Seleccione un servicio</option>
-                {serviciosData?.map((servicio: Service) => (
-                  <option key={servicio.id_servicio} value={servicio.id_servicio}>
-                    {servicio.nombre} - ${servicio.precio}
-                  </option>
-                ))}
-              </select>
+            {/* Servicio y Duración (en la misma línea) */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
+                  Servicio
+                </label>
+                <select
+                  value={serviceId || ""}
+                  onChange={(e) => {
+                    const selectedService = serviciosData?.find((s: Service) => s.id_servicio === e.target.value);
+                    setServiceId(e.target.value || null);
+                    setServiceName(selectedService?.nombre || "");
+                    // Actualizar la duración cuando se selecciona un servicio
+                    if (selectedService) {
+                      setDuration(selectedService.duracion_minutos.toString());
+                    }
+                  }}
+                  className="qoder-dark-select w-full px-3 py-2 rounded-lg"
+                  disabled={isLoadingServicios}
+                >
+                  <option value="">Seleccione un servicio</option>
+                  {serviciosData?.map((servicio: Service) => (
+                    <option key={servicio.id_servicio} value={servicio.id_servicio}>
+                      {servicio.nombre} - ${servicio.precio}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
+                  Duración (minutos)
+                </label>
+                <input
+                  type="number"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  className="qoder-dark-input w-full px-3 py-2 rounded-lg"
+                  placeholder="Ej: 30"
+                  min="1"
+                />
+              </div>
             </div>
             
             {/* Barbero */}
@@ -973,7 +557,7 @@ export function SingleFormAppointmentModal({
                   Hora
                 </label>
                 <select
-                  value={time}
+                  value={getFormattedTimeValue}
                   onChange={(e) => setTime(e.target.value)}
                   className="qoder-dark-select w-full px-3 py-2 rounded-lg"
                   disabled={!serviceId || !barberId}

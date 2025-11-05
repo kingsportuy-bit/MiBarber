@@ -20,8 +20,11 @@ export function GraficaCitasSemanaDashboard({ citas }: GraficaCitasSemanaDashboa
   // Contar citas por día
   citas.forEach(cita => {
     if (cita.fecha) {
-      const fecha = new Date(cita.fecha);
-      const diaSemana = fecha.getDay(); // 0 = Domingo, 1 = Lunes, etc.
+      // Parsear la fecha manualmente para evitar problemas de zona horaria
+      const [year, month, day] = cita.fecha.split("-").map(Number);
+      // Crear una fecha en la zona horaria local (ajustando a mediodía para evitar problemas de DST)
+      const date = new Date(year, month - 1, day, 12, 0, 0);
+      const diaSemana = date.getDay(); // 0 = Domingo, 1 = Lunes, etc.
       const indiceDia = diaSemana === 0 ? 6 : diaSemana - 1; // Ajustar para que 0 = Lunes
       const nombreDia = nombresDias[indiceDia];
       citasPorDia[nombreDia] = (citasPorDia[nombreDia] || 0) + 1;

@@ -32,6 +32,7 @@ export function useServiciosListPorSucursal(idSucursal?: string | null) {
       
       return data as Service[];
     },
+    enabled: !!idSucursal, // Solo ejecutar si hay idSucursal
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
 }

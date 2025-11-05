@@ -3,36 +3,41 @@
     "include": [
       "src/**/*.ts",
       "src/**/*.tsx",
+      "src/app/**/*",
+      "src/components/**/*",
+      "src/features/**/*",
+      "src/hooks/**/*",
+      "src/lib/**/*",
+      "src/types/**/*",
+      "src/utils/**/*",
+      "next.config.*",
       "package.json",
-      "tsconfig.json",
-      "tailwind.config.js",
-      "next.config.ts",
-      ".env.local.example",
+      "tsconfig*.json",
+      "postcss.config.*",
+      "tailwind.config.*",
+      ".eslintrc.*",
+      ".prettierrc*",
       ".qoder/project-context.md",
-      ".qoder/rules.md",
-      ".qoder/arquitectura-objetivo.md"
+      ".qoder/rules.md"
     ],
     "exclude": [
       "node_modules/**",
       ".next/**",
+      ".vercel/**",
       "dist/**",
-      "coverage/**",
-      ".git/**",
-      "public/**"
+      "build/**",
+      "coverage/**"
     ]
   },
   "settings": {
     "default_language": "typescript",
     "strict_typing": true,
-    "style": "clean_modern",
-    "testing_framework": "vitest",
-    "ui_framework": "radix-ui",
-    "state_manager": "zustand_tanstack_query",
-    "lint_enabled": true,
-    "framework": "nextjs_15",
+    "style": "tailwind_shadcn",
+    "ui_framework": "tailwind",
+    "router": "next-app-router",
+    "data_layer": "tanstack-query",
     "backend": "supabase",
-    "deployment": "docker_vps",
-    "seo_optimization": true,
-    "accessibility_standard": "WCAG_AA"
+    "lint_enabled": true,
+    "testing_framework": "jest"
   }
 }

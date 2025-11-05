@@ -1,0 +1,17 @@
+// Versión de debugging para verificar que la ruta funciona
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  console.log('🔵 GET /api/bloqueos - Debug endpoint called');
+  return NextResponse.json({ status: 'ok', message: 'API funciona - GET' });
+}
+
+export async function POST() {
+  console.log('🔵 POST /api/bloqueos - Debug endpoint called');
+  return NextResponse.json({ status: 'ok', message: 'API funciona - POST' });
+}
+
+export async function DELETE() {
+  console.log('🔵 DELETE /api/bloqueos - Debug endpoint called');
+  return NextResponse.json({ status: 'ok', message: 'API funciona - DELETE' });
+}

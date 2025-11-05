@@ -6,7 +6,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { useCitas } from "@/hooks/useCitas";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 import { SingleFormAppointmentModalWithSucursal } from "@/components/SingleFormAppointmentModalWithSucursal";
-import { SimpleCalendar } from "@/components/SimpleCalendar"; // Importar SimpleCalendar
+import { CalendarWithBloqueos } from "@/components/CalendarWithBloqueos"; // Importar CalendarWithBloqueos
 import { GlobalFilters } from "@/components/shared/GlobalFilters"; // Importar GlobalFilters
 import type { Appointment } from "@/types/db"; // Importar el tipo Barbero
 import { toast } from "sonner";
@@ -31,6 +31,13 @@ export default function AgendaPage() {
     const safeAppointment = { ...appointment };
     setSelectedAppointment(safeAppointment as Appointment);
     setIsEditModalOpen(true);
+  };
+  
+  // Verificar si una hora está bloqueada
+  const isTimeBlocked = (fecha: string, hora: string, sucursalId?: string, barberoId?: string) => {
+    // En una implementación completa, aquí se verificaría contra los bloqueos
+    // Por ahora, retornamos false para no bloquear la creación
+    return false;
   };
   
   // Función para abrir el modal de creación
@@ -83,6 +90,12 @@ export default function AgendaPage() {
     } else {
       // Crear nuevo turno
       try {
+        // Verificar si la hora está bloqueada
+        if (values.fecha && values.hora && isTimeBlocked(values.fecha, values.hora, filters.sucursalId || undefined, filters.barberoId || undefined)) {
+          toast.error("No se puede crear un turno en un horario bloqueado");
+          return;
+        }
+        
         // Asegurarse de que los campos requeridos estén presentes
         const appointmentToCreate: Omit<Appointment, "id_cita"> = {
           fecha: values.fecha || "",
@@ -165,7 +178,7 @@ export default function AgendaPage() {
         <GlobalFilters showDateFilters={false} />
         
         <div className="flex-grow mt-4">
-          <SimpleCalendar 
+          <CalendarWithBloqueos 
             sucursalId={filters.sucursalId || undefined}
             barbero={filters.barberoId || undefined}
             onEdit={handleEdit}

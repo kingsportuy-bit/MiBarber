@@ -91,7 +91,7 @@ export function WhatsAppChat() {
       clearTimeout(timer2);
       clearTimeout(timer3);
     };
-  }, [activeConv?.session_id, active, activeConv]);
+  }, [activeConv?.session_id, active]);
 
   // Efecto adicional para asegurar el scroll al final cuando cambian los mensajes
   useEffect(() => {

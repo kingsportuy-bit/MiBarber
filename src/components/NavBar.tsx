@@ -24,6 +24,9 @@ export function NavBar() {
     isChecking: true,
   });
 
+  // Estado del menú móvil
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   // Verificar autenticación desde localStorage
   useEffect(() => {
     const checkAuth = () => {
@@ -144,12 +147,14 @@ export function NavBar() {
   if (authState.isAuthenticated) {
     if (authState.isAdmin) {
       tabs = [
+        { href: "/inicio", label: "Inicio" },
         { href: "/agenda", label: "Agenda" },
         { href: "/clientes", label: "Clientes" },
         { href: "/whatsapp", label: "WhatsApp" },
       ];
     } else {
       tabs = [
+        { href: "/inicio", label: "Inicio" },
         { href: "/agenda", label: "Agenda" },
         { href: "/whatsapp", label: "WhatsApp" },
       ];
@@ -170,6 +175,8 @@ export function NavBar() {
       userName: "",
       isChecking: false,
     });
+
+    setIsMobileMenuOpen(false);
 
     // Disparar evento personalizado para notificar el cambio
     window.dispatchEvent(
@@ -249,7 +256,10 @@ export function NavBar() {
           )}
           
           {/* Menú móvil */}
-          <MobileMenu />
+          <MobileMenu 
+            isOpen={isMobileMenuOpen}
+            onClose={() => setIsMobileMenuOpen(false)}
+          />
           
           {/* Botón de logout para móviles */}
           {authState.isAuthenticated && (

@@ -123,6 +123,25 @@ export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMe
                   Mi Barbería
                 </Link>
               </DropdownMenu.Item>
+              <DropdownMenu.Item asChild>
+                <Link 
+                  href="/mis-datos" 
+                  className={`dropdown-item ${pathname?.startsWith("/mis-datos") ? "active" : ""}`}
+                  style={{
+                    padding: '12px 15px',
+                    color: '#ffffff',
+                    textDecoration: 'none',
+                    display: 'block',
+                    transition: 'all 0.2s ease',
+                    fontWeight: 500,
+                    backgroundColor: 'transparent',
+                    fontFamily: "'Roboto', 'Arial', sans-serif",
+                    fontSize: '1rem'
+                  }}
+                >
+                  Mis Datos
+                </Link>
+              </DropdownMenu.Item>
               <DropdownMenu.Separator className="border-qoder-dark-border-primary my-1" />
               <DropdownMenu.Item 
                 className="dropdown-item text-red-400 hover:!bg-red-900/30 hover:!text-red-400"

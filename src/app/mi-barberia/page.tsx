@@ -669,47 +669,6 @@ function MiBarberiaContent() {
                         />
                       </div>
 
-                      {/* Sección de Bloqueos y Descansos */}
-                      <div className="mb-6">
-                        <div className="flex justify-between items-center mb-4">
-                          <div className="flex items-center">
-                            <div className="bg-qoder-dark-accent-primary/10 p-2 rounded-lg mr-3">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-5 w-5 text-qoder-dark-accent-primary"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                              </svg>
-                            </div>
-                            <h3 className="text-lg font-semibold text-qoder-dark-text-primary">
-                              Bloqueos y Descansos
-                            </h3>
-                          </div>
-                        </div>
-                        <div className="bg-qoder-dark-bg-form rounded-lg p-4">
-                          <p className="text-qoder-dark-text-primary mb-4">
-                            Gestiona tus tiempos de descanso, bloqueos de horas y días completos.
-                          </p>
-                          <button
-                            onClick={() => {
-                              // Redirigir a la página de bloqueos
-                              window.location.href = '/mis-datos/bloqueos';
-                            }}
-                            className="qoder-dark-button-primary px-4 py-2 rounded-lg"
-                          >
-                            Gestionar Bloqueos
-                          </button>
-                        </div>
-                      </div>
-
                       {/* Sección de Información Adicional */}
                       <div className="mb-6">
                         <div className="flex justify-between items-center mb-4">

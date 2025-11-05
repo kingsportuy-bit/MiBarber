@@ -27,6 +27,39 @@ export function useDescansosExtra() {
     });
   }
 
+  // Listar todos los descansos extra
+  function useListAll({ idSucursal, idBarbero }: { idSucursal?: string; idBarbero?: string }) {
+    return useQuery({
+      queryKey: ["descansos-extra-all", idBarberia, idSucursal, idBarbero || "self"],
+      queryFn: async () => {
+        if (!idBarberia) {
+          return [];
+        }
+
+        // Construir URL con parámetros
+        const params = new URLSearchParams({
+          table: 'descansos_extra',
+          idBarberia
+        });
+        
+        if (idSucursal) {
+          params.append('idSucursal', idSucursal);
+        }
+        
+        if (idBarbero) {
+          params.append('idBarbero', idBarbero);
+        }
+
+        const response = await fetch(`/api/bloqueos?${params.toString()}`);
+        if (!response.ok) {
+          throw new Error('Error al obtener todos los descansos extra');
+        }
+        return response.json();
+      },
+      enabled: !!idBarberia,
+    });
+  }
+
   // Crear un descanso extra
   const create = useMutation({
     mutationFn: async (payload: CreateDescansoExtraPayload) => {
@@ -79,6 +112,7 @@ export function useDescansosExtra() {
     onSuccess: () => {
       // Invalidar las queries relacionadas para refrescar los datos
       queryClient.invalidateQueries({ queryKey: ["descansos-extra"] });
+      queryClient.invalidateQueries({ queryKey: ["descansos-extra-all"] });
       queryClient.invalidateQueries({ queryKey: ["horarios-disponibles"] });
     },
   });
@@ -118,12 +152,14 @@ export function useDescansosExtra() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["descansos-extra"] });
+      queryClient.invalidateQueries({ queryKey: ["descansos-extra-all"] });
       queryClient.invalidateQueries({ queryKey: ["horarios-disponibles"] });
     },
   });
 
   return {
     useList,
+    useListAll,
     create,
     remove,
   };

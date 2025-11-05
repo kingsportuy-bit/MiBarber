@@ -48,6 +48,39 @@ export function useBloqueosBarbero() {
     });
   }
 
+  // Listar todos los bloqueos (sin filtrar por fecha)
+  function useListAll({ idSucursal, idBarbero }: { idSucursal?: string; idBarbero?: string }) {
+    return useQuery({
+      queryKey: ["bloqueos-all", idBarberia, idSucursal, idBarbero || "self"],
+      queryFn: async () => {
+        if (!idBarberia) {
+          return [];
+        }
+
+        // Construir URL con parámetros
+        const params = new URLSearchParams({
+          table: 'bloqueos',
+          idBarberia
+        });
+        
+        if (idSucursal) {
+          params.append('idSucursal', idSucursal);
+        }
+        
+        if (idBarbero) {
+          params.append('idBarbero', idBarbero);
+        }
+
+        const response = await fetch(`/api/bloqueos?${params.toString()}`);
+        if (!response.ok) {
+          throw new Error('Error al obtener todos los bloqueos');
+        }
+        return response.json();
+      },
+      enabled: !!idBarberia,
+    });
+  }
+
   // Crear un bloqueo
   const create = useMutation({
     mutationFn: async (payload: CreateBloqueoPayload) => {
@@ -96,6 +129,7 @@ export function useBloqueosBarbero() {
     onSuccess: () => {
       // Invalidar las queries relacionadas para refrescar los datos
       queryClient.invalidateQueries({ queryKey: ["bloqueos"] });
+      queryClient.invalidateQueries({ queryKey: ["bloqueos-all"] });
       queryClient.invalidateQueries({ queryKey: ["horarios-disponibles"] });
     },
   });
@@ -136,6 +170,7 @@ export function useBloqueosBarbero() {
     onSuccess: () => {
       // Invalidar las queries relacionadas para refrescar los datos
       queryClient.invalidateQueries({ queryKey: ["bloqueos"] });
+      queryClient.invalidateQueries({ queryKey: ["bloqueos-all"] });
       queryClient.invalidateQueries({ queryKey: ["horarios-disponibles"] });
     },
   });
@@ -143,6 +178,7 @@ export function useBloqueosBarbero() {
   return {
     list: useList,
     listRango: useListRango,
+    listAll: useListAll,
     create,
     remove,
   };
@@ -189,5 +225,40 @@ export function useBloqueosPorRango({ idSucursal, idBarbero, fechaInicio, fechaF
       return response.json();
     },
     enabled: !!idBarberia && !!idSucursal && !!fechaInicio && !!fechaFin,
+  });
+}
+
+// Hook específico para listar todos los bloqueos
+export function useTodosLosBloqueos({ idSucursal, idBarbero }: { idSucursal?: string; idBarbero?: string }) {
+  const { idBarberia, barbero, isAdmin } = useBarberoAuth();
+
+  return useQuery({
+    queryKey: ["bloqueos-all", idBarberia, idSucursal, idBarbero || "self"],
+    queryFn: async () => {
+      if (!idBarberia) {
+        return [];
+      }
+
+      // Construir URL con parámetros
+      const params = new URLSearchParams({
+        table: 'bloqueos',
+        idBarberia
+      });
+      
+      if (idSucursal) {
+        params.append('idSucursal', idSucursal);
+      }
+      
+      if (idBarbero) {
+        params.append('idBarbero', idBarbero);
+      }
+
+      const response = await fetch(`/api/bloqueos?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error('Error al obtener todos los bloqueos');
+      }
+      return response.json();
+    },
+    enabled: !!idBarberia,
   });
 }

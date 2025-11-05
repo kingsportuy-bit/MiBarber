@@ -147,14 +147,12 @@ export function NavBar() {
   if (authState.isAuthenticated) {
     if (authState.isAdmin) {
       tabs = [
-        { href: "/inicio", label: "Inicio" },
         { href: "/agenda", label: "Agenda" },
         { href: "/clientes", label: "Clientes" },
         { href: "/whatsapp", label: "WhatsApp" },
       ];
     } else {
       tabs = [
-        { href: "/inicio", label: "Inicio" },
         { href: "/agenda", label: "Agenda" },
         { href: "/whatsapp", label: "WhatsApp" },
       ];

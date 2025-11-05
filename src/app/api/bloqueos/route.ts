@@ -2,18 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
-// Cliente admin con service_role_key que bypasea RLS
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
-);
-
 // Validar sesión desde cookie custom
 async function validateSession() {
   try {
@@ -46,10 +34,145 @@ async function validateSession() {
   }
 }
 
+export async function GET(request: NextRequest) {
+  console.log('\n🔍 ===== GET /api/bloqueos =====');
+  
+  try {
+    // Crear cliente Supabase en runtime
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    );
+    
+    // Validar sesión
+    const session = await validateSession();
+    
+    if (!session?.idBarberia) {
+      console.log('🚫 Sesión inválida o sin idBarberia');
+      return NextResponse.json(
+        { error: 'No autenticado' },
+        { status: 401 }
+      );
+    }
+
+    // Leer parámetros
+    const { searchParams } = new URL(request.url);
+    const table = searchParams.get('table');
+    const idSucursal = searchParams.get('idSucursal');
+    const idBarbero = searchParams.get('idBarbero');
+
+    console.log('📋 Params:', { table, idSucursal, idBarbero });
+
+    if (!table) {
+      return NextResponse.json(
+        { error: 'Campo "table" es requerido (debe ser "bloqueos" o "descansos_extra")' },
+        { status: 400 }
+      );
+    }
+
+    // ========== LISTAR BLOQUEOS ==========
+    if (table === 'bloqueos') {
+      console.log('🔄 Listando bloqueos...');
+
+      let query = supabaseAdmin
+        .from('mibarber_bloqueos_barbero')
+        .select('*')
+        .eq('id_barberia', session.idBarberia);
+
+      // Filtrar por sucursal si se proporciona
+      if (idSucursal) {
+        query = query.eq('id_sucursal', idSucursal);
+      }
+
+      // Filtrar por barbero si se proporciona
+      if (idBarbero) {
+        query = query.eq('id_barbero', idBarbero);
+      }
+
+      const { data, error } = await query.order('creado_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ Error de Supabase:', error);
+        return NextResponse.json(
+          { error: error.message, code: error.code },
+          { status: 500 }
+        );
+      }
+
+      console.log('✅ Bloqueos encontrados:', data?.length || 0);
+      return NextResponse.json(data || []);
+    }
+
+    // ========== LISTAR DESCANSOS EXTRA ==========
+    if (table === 'descansos_extra') {
+      console.log('🔄 Listando descansos extra...');
+
+      let query = supabaseAdmin
+        .from('mibarber_descansos_extra')
+        .select('*')
+        .eq('id_barberia', session.idBarberia);
+
+      // Filtrar por sucursal si se proporciona
+      if (idSucursal) {
+        query = query.eq('id_sucursal', idSucursal);
+      }
+
+      // Filtrar por barbero si se proporciona
+      if (idBarbero) {
+        query = query.eq('id_barbero', idBarbero);
+      }
+
+      const { data, error } = await query.order('creado_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ Error de Supabase:', error);
+        return NextResponse.json(
+          { error: error.message, code: error.code },
+          { status: 500 }
+        );
+      }
+
+      console.log('✅ Descansos extra encontrados:', data?.length || 0);
+      return NextResponse.json(data || []);
+    }
+
+    // Tipo de operación inválido
+    return NextResponse.json(
+      { error: 'Tipo de operación inválido (table debe ser "bloqueos" o "descansos_extra")' },
+      { status: 400 }
+    );
+
+  } catch (error: any) {
+    console.error('💥 Error general en GET /api/bloqueos:', error);
+    return NextResponse.json(
+      { error: error.message || 'Error interno del servidor' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   console.log('\n🚀 ===== POST /api/bloqueos =====');
   
   try {
+    // Crear cliente Supabase en runtime
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    );
+    
     // Validar sesión
     const session = await validateSession();
     
@@ -246,6 +369,18 @@ export async function DELETE(request: NextRequest) {
   console.log('\n🗑️ ===== DELETE /api/bloqueos =====');
   
   try {
+    // Crear cliente Supabase en runtime
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    );
+    
     // Validar sesión
     const session = await validateSession();
     

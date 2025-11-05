@@ -3,13 +3,14 @@
 
 import React, { useState, useEffect } from "react";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
-import { useBloqueosPorDia, useBloqueosBarbero } from "@/hooks/useBloqueosBarbero";
+import { useBloqueosBarbero, useBloqueosPorDia, useTodosLosBloqueos } from "@/hooks/useBloqueosBarbero";
 import { useDescansosExtra } from "@/hooks/useDescansosExtra";
 import { useGlobalFilters } from "@/contexts/GlobalFiltersContext";
 import { CustomDatePicker } from "@/components/CustomDatePicker";
 import { toast } from "sonner";
 import type { TipoBloqueo } from "@/types/bloqueos";
 import { createBloqueoSchema, createDescansoExtraSchema } from "@/features/bloqueos/utils/validations";
+import { GlobalFilters } from "@/components/shared/GlobalFilters";
 
 interface BloqueosManagerProps {
   mode: "admin" | "barbero";
@@ -17,7 +18,7 @@ interface BloqueosManagerProps {
 
 export function BloqueosManager({ mode }: BloqueosManagerProps) {
   const { idBarberia, barbero, isAdmin } = useBarberoAuth();
-  const { filters, setFilters } = useGlobalFilters();
+  const { filters, setFilters, barberos } = useGlobalFilters();
   
   const [fecha, setFecha] = useState<string>(new Date().toISOString().split("T")[0]);
   const [tipo, setTipo] = useState<TipoBloqueo>("descanso");
@@ -37,6 +38,16 @@ export function BloqueosManager({ mode }: BloqueosManagerProps) {
     fecha
   });
 
+  // Obtener todos los bloqueos (sin filtrar por fecha)
+  const {
+    data: todosLosBloqueos,
+    isLoading: isLoadingTodosLosBloqueos,
+    refetch: refetchTodosLosBloqueos
+  } = useTodosLosBloqueos({
+    idSucursal: mode === "admin" ? (filters.sucursalId || undefined) : (barbero?.id_sucursal || undefined),
+    idBarbero: mode === "admin" ? (filters.barberoId || undefined) : (barbero?.id_barbero || undefined)
+  });
+
   // Obtener descansos extra
   const {
     data: descansosExtra,
@@ -45,6 +56,16 @@ export function BloqueosManager({ mode }: BloqueosManagerProps) {
   } = useDescansosExtra().useList({
     idSucursal: filters.sucursalId || "",
     idBarbero: mode === "admin" ? (filters.barberoId || "") : (barbero?.id_barbero || "")
+  });
+
+  // Obtener todos los descansos extra (sin filtrar)
+  const {
+    data: todosLosDescansosExtra,
+    isLoading: isLoadingTodosLosDescansosExtra,
+    refetch: refetchTodosLosDescansosExtra
+  } = useDescansosExtra().useListAll({
+    idSucursal: mode === "admin" ? (filters.sucursalId || undefined) : (barbero?.id_sucursal || undefined),
+    idBarbero: mode === "admin" ? (filters.barberoId || undefined) : (barbero?.id_barbero || undefined)
   });
 
   const { create: createBloqueo, remove: removeBloqueo } = useBloqueosBarbero();
@@ -220,6 +241,8 @@ export function BloqueosManager({ mode }: BloqueosManagerProps) {
       // Refetch bloqueos y descansos
       refetchBloqueos();
       refetchDescansosExtra();
+      refetchTodosLosBloqueos();
+      refetchTodosLosDescansosExtra();
 
     } catch (error: any) {
       console.error("Error al crear bloqueo/descanso:", JSON.stringify({
@@ -280,6 +303,8 @@ export function BloqueosManager({ mode }: BloqueosManagerProps) {
       // Refetch bloqueos y descansos
       refetchBloqueos();
       refetchDescansosExtra();
+      refetchTodosLosBloqueos();
+      refetchTodosLosDescansosExtra();
     } catch (error) {
       console.error("Error al eliminar bloqueo:", error);
       toast.error("Error al eliminar bloqueo");
@@ -334,10 +359,10 @@ export function BloqueosManager({ mode }: BloqueosManagerProps) {
     }
   };
 
-  // Combinar bloqueos y descansos extra para mostrar en la lista
+  // Combinar todos los bloqueos y descansos extra para mostrar en la lista
   const allItems = [
-    ...(bloqueos || []).map((b: any) => ({ ...b, isDescanso: false })),
-    ...(descansosExtra || []).map((d: any) => ({ ...d, isDescanso: true, tipo: "descanso" as TipoBloqueo }))
+    ...(todosLosBloqueos || []).map((b: any) => ({ ...b, isDescanso: false })),
+    ...(todosLosDescansosExtra || []).map((d: any) => ({ ...d, isDescanso: true, tipo: "descanso" as TipoBloqueo }))
   ].sort((a, b) => {
     // Ordenar por fecha de creación descendente
     return new Date(b.creado_at).getTime() - new Date(a.creado_at).getTime();
@@ -345,6 +370,13 @@ export function BloqueosManager({ mode }: BloqueosManagerProps) {
 
   return (
     <div className="space-y-6">
+      {/* Filtros globales (solo para administradores) */}
+      {mode === "admin" && (
+        <div className="bg-qoder-dark-bg-form rounded-lg p-4 border border-qoder-dark-border">
+          <GlobalFilters showDateFilters={false} />
+        </div>
+      )}
+
       {/* Formulario para crear bloqueo */}
       <div className="bg-qoder-dark-bg-form rounded-lg p-4 border border-qoder-dark-border">
         <h3 className="text-lg font-semibold text-qoder-dark-text-primary mb-4">Crear bloqueo</h3>
@@ -493,9 +525,9 @@ export function BloqueosManager({ mode }: BloqueosManagerProps) {
       
       {/* Lista de bloqueos y descansos extra */}
       <div className="bg-qoder-dark-bg-form rounded-lg p-4 border border-qoder-dark-border">
-        <h3 className="text-lg font-semibold text-qoder-dark-text-primary mb-4">Bloqueos y descansos</h3>
+        <h3 className="text-lg font-semibold text-qoder-dark-text-primary mb-4">Lista de Bloqueos y Descansos</h3>
         
-        {(isLoadingBloqueos || isLoadingDescansosExtra) ? (
+        {(isLoadingTodosLosBloqueos || isLoadingTodosLosDescansosExtra) ? (
           <div className="text-center py-8">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-qoder-dark-primary"></div>
             <p className="mt-2 text-qoder-dark-text-secondary">Cargando bloqueos...</p>
@@ -507,6 +539,9 @@ export function BloqueosManager({ mode }: BloqueosManagerProps) {
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
                     Tipo
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
+                    Fecha
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
                     Rango
@@ -536,6 +571,13 @@ export function BloqueosManager({ mode }: BloqueosManagerProps) {
                       </span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-qoder-dark-text-primary">
+                      {item.isDescanso ? (
+                        <span>-</span>
+                      ) : (
+                        <span>{item.fecha}</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-qoder-dark-text-primary">
                       {item.tipo === "bloqueo_dia" ? (
                         <span>Todo el día</span>
                       ) : item.isDescanso ? (
@@ -554,17 +596,23 @@ export function BloqueosManager({ mode }: BloqueosManagerProps) {
                     </td>
                     {mode === "admin" && (
                       <td className="px-4 py-3 text-sm text-qoder-dark-text-primary">
-                        {/* Aquí deberías obtener el nombre del barbero */}
-                        {item.id_barbero}
+                        {/* Mostrar el nombre del barbero en lugar del ID */}
+                        {filters.barberoId === item.id_barbero 
+                          ? barbero?.nombre 
+                          : barberos?.find((b: any) => b.id_barbero === item.id_barbero)?.nombre || item.id_barbero}
                       </td>
                     )}
                     <td className="px-4 py-3 whitespace-nowrap text-sm">
                       <button
                         onClick={() => handleDelete(item.id, item.isDescanso)}
                         disabled={removeBloqueo.isPending || removeDescanso.isPending}
-                        className="text-red-500 hover:text-red-700 disabled:opacity-50"
+                        className="text-red-500 hover:text-red-300 bg-transparent !bg-none border-none p-1"
+                        style={{ backgroundColor: 'transparent', border: 'none', padding: '4px' }}
+                        title="Eliminar"
                       >
-                        Eliminar
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
                       </button>
                     </td>
                   </tr>

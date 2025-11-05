@@ -5,12 +5,6 @@ import type { HorarioSucursal } from "@/types/db";
 import type { DescansoExtra, Bloqueo as BloqueosBarbero } from "@/types/bloqueos";
 import type { Appointment as Cita } from "@/types/db";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
-
 // Funciones auxiliares
 function horaAMinutos(hora: string): number {
   const [h, m] = hora.split(":").map(Number);
@@ -57,6 +51,13 @@ function generarIntervalosTiempos(horaInicio: string, horaFin: string): string[]
 
 export async function GET(request: NextRequest) {
   try {
+    // Crear cliente Supabase en runtime
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+    
     const { searchParams } = new URL(request.url);
     const idSucursal = searchParams.get("idSucursal");
     const idBarbero = searchParams.get("idBarbero");

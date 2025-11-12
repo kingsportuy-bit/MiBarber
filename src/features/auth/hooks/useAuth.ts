@@ -183,6 +183,7 @@ export function useAuth(): UseAuthReturn {
     especialidades: [],
     activo: true,
     password_hash: null,
+    conf_inicial: null, // Valor por defecto para la nueva columna
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   } : null;

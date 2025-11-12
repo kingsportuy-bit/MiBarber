@@ -12,6 +12,12 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
+
+# Variables de entorno para el build
+ENV NEXT_PUBLIC_SUPABASE_URL=https://supapers.itmconsulting.es
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogImFub24iLAogICJpc3MiOiAic3VwYWJhc2UiLAogICJpYXQiOiAxNzE1MDUwODAwLAogICJleHAiOiAxODcyODE3MjAwCn0.qPYvk4GYIxKU-fVHDbTD3TYHo5eTsGp17EszifM2n2Q
+ENV SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogImFub24iLAogICJpc3MiOiAic3VwYWJhc2UiLAogICJpYXQiOiAxNzE1MDUwODAwLAogICJleHAiOiAxODcyODE3MjAwCn0.qPYvk4GYIxKU-fVHDbTD3TYHo5eTsGp17EszifM2n2Q
+
 RUN npm run build
 
 # Stage 3: Production runner
@@ -21,6 +27,7 @@ WORKDIR /app
 # Variables de entorno
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copiar dependencias
 COPY --from=deps /app/node_modules ./node_modules
@@ -32,4 +39,5 @@ COPY --from=builder /app/package*.json ./
 
 EXPOSE 3000
 
+# COMANDO IMPORTANTE
 CMD ["node", "server.js"]

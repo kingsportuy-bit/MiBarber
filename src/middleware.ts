@@ -70,7 +70,6 @@ function isProtectedRoute(pathname: string): boolean {
     "/whatsapp",
     "/mi-barberia",
     "/mis-datos",
-    "/admin",
     "/caja",
     "/bloqueos"
   ];

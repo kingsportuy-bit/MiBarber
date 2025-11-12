@@ -40,7 +40,6 @@ export function useCrearBarberia() {
           nombre_sucursal: "Sucursal Principal",
           direccion: "",
           telefono: "",
-          celular: "",
           horario: ""
         }])
         .select()

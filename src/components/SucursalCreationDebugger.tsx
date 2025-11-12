@@ -49,7 +49,6 @@ export function SucursalCreationDebugger() {
         nombre_sucursal: 'Sucursal de Prueba',
         direccion: 'Dirección de prueba',
         telefono: '123456789',
-        celular: '987654321',
         horario: 'Lun-Vie: 9:00-18:00'
       };
       

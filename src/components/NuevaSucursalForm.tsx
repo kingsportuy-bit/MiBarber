@@ -25,7 +25,6 @@ export function NuevaSucursalForm({
   // Estados para nueva sucursal
   const [newSucursal, setNewSucursal] = useState({
     nombre_sucursal: "",
-    celular: "",
     telefono: "",
     direccion: "",
     info: ""
@@ -81,18 +80,7 @@ export function NuevaSucursalForm({
                 placeholder="Nombre de la sucursal"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-2">
-                Celular
-              </label>
-              <input 
-                type="text" 
-                value={newSucursal.celular} 
-                onChange={(e) => handleSucursalChange("celular", e.target.value)} 
-                className="qoder-dark-input w-full p-3 rounded-lg"
-                placeholder="Celular"
-              />
-            </div>
+
             <div>
               <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-2">
                 Teléfono

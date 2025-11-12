@@ -191,7 +191,6 @@ export const createSucursalSchema = z.object({
   nombre_sucursal: z.string().max(100).optional(),
   direccion: z.string().max(200).optional(),
   telefono: phoneSchema,
-  celular: phoneSchema,
   horario: z.string().max(500).optional(),
 });
 

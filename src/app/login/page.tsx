@@ -58,11 +58,12 @@ export default function LoginPage() {
     setError("");
     
     try {
-      // Buscar al usuario en la tabla mibarber_barberos por username
+      // Buscar al usuario en la tabla mibarber_barberos por username (normalizado a minúsculas)
+      const normalizedUsername = username.toLowerCase();
       const { data, error: userError } = await supabase
         .from('mibarber_barberos')
         .select('*')
-        .eq('username', username)
+        .eq('username', normalizedUsername)
         .single();
       
       if (userError || !data) {
@@ -86,7 +87,7 @@ export default function LoginPage() {
           id: user.id_barbero,
           email: user.email,
           name: user.nombre,
-          username: user.username,
+          username: user.username ? user.username.toLowerCase() : '', // Normalizar a minúsculas
           nivel_permisos: user.nivel_permisos, // Incluir nivel_permisos en la sesión
           admin: user.admin, // Incluir admin en la sesión
           id_barberia: user.id_barberia, // Incluir id_barberia en la sesión
@@ -110,8 +111,14 @@ export default function LoginPage() {
       // Esperar un momento para que los listeners actualicen su estado
       // antes de redirigir
       setTimeout(() => {
-        // Redirigir a la página protegida
-        router.replace("/inicio");
+        // Verificar si el usuario necesita configuración inicial
+        if (user.conf_inicial === "0" || user.conf_inicial === null) {
+          // Redirigir a la página de configuración inicial
+          router.replace("/configuracion-inicial");
+        } else {
+          // Redirigir a la página protegida
+          router.replace("/inicio");
+        }
       }, 100); // Pequeño retraso para asegurar la actualización del estado
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Error al iniciar sesión";

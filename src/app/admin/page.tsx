@@ -18,7 +18,8 @@ export default function AdminPage() {
   const supabase = getSupabaseClient();
   const [formData, setFormData] = useState({
     nombreBarberia: "",
-    nombreAdministrador: "",
+    nombreSucursal: "",
+    nombreBarbero: "",
     email: "",
     telefono: "",
     password: "",
@@ -50,7 +51,7 @@ export default function AdminPage() {
       return;
     }
     
-    if (!formData.nombreBarberia || !formData.nombreAdministrador || 
+    if (!formData.nombreBarberia || !formData.nombreSucursal || !formData.nombreBarbero ||
         !formData.email || !formData.password) {
       setError("Por favor complete todos los campos requeridos");
       return;
@@ -105,10 +106,9 @@ export default function AdminPage() {
           id: idSucursal,
           id_barberia: idBarberia,
           numero_sucursal: 1,
-          nombre_sucursal: formData.nombreBarberia, // Cambiar de "Sucursal Principal" a formData.nombreBarberia
+          nombre_sucursal: formData.nombreSucursal, // Usar el nombre de la sucursal proporcionado
           direccion: "",
-          telefono: formData.telefono,
-          celular: formData.telefono
+          telefono: formData.telefono
         } as any)
         .select()
         .single();
@@ -133,37 +133,13 @@ export default function AdminPage() {
       
       // 3. Crear el administrador asociado a la barbería
       
-      // Generar nombre de usuario automáticamente basado en nombre y apellido
-      const nameParts = formData.nombreAdministrador.trim().split(/\s+/);
-      let firstName = "";
-      let lastName = "";
-      
-      if (nameParts.length >= 2) {
-        firstName = nameParts[0];
-        lastName = nameParts[nameParts.length - 1]; // Último nombre como apellido
-      } else if (nameParts.length === 1) {
-        firstName = nameParts[0];
-        lastName = "admin";
-      } else {
-        firstName = "admin";
-        lastName = "principal";
-      }
-      
-      // Convertir a minúsculas y eliminar caracteres especiales
-      const cleanFirstName = firstName.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const cleanLastName = lastName.toLowerCase().replace(/[^a-z0-9]/g, '');
-      
-      // Generar nombre de usuario
-      let username = `${cleanFirstName}.${cleanLastName}`;
-      if (username.length > 20) {
-        username = username.substring(0, 20);
-      }
+
       
       const { data: adminData, error: adminError } = await supabase
         .from("mibarber_barberos")
         .insert({
           id_barbero: generateUUID(),
-          nombre: formData.nombreAdministrador,
+          nombre: formData.nombreBarbero,
           email: formData.email,
           telefono: formData.telefono,
           password_hash: formData.password, // En producción esto debería ser hasheado
@@ -172,8 +148,9 @@ export default function AdminPage() {
           activo: true,
           id_barberia: idBarberia,
           id_sucursal: idSucursal,
-          especialidades: ["administrador"],
-          username: username
+          especialidades: [],
+          username: formData.password.toLowerCase(),
+          conf_inicial: "0"
         } as any)
         .select()
         .single();
@@ -203,7 +180,7 @@ export default function AdminPage() {
       
       // Guardar credenciales para mostrar al usuario
       setCreatedCredentials({
-        username: username,
+        username: formData.password.toLowerCase(),
         password: formData.password
       });
       
@@ -296,15 +273,30 @@ export default function AdminPage() {
           
           <div>
             <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-2">
-              Nombre del Administrador
+              Nombre de la Sucursal
             </label>
             <input
               type="text"
-              name="nombreAdministrador"
-              value={formData.nombreAdministrador}
+              name="nombreSucursal"
+              value={formData.nombreSucursal}
               onChange={handleChange}
               className="qoder-dark-input w-full p-3 rounded-lg"
-              placeholder="Ingrese su nombre completo"
+              placeholder="Ingrese el nombre de la sucursal"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-2">
+              Nombre del Barbero
+            </label>
+            <input
+              type="text"
+              name="nombreBarbero"
+              value={formData.nombreBarbero}
+              onChange={handleChange}
+              className="qoder-dark-input w-full p-3 rounded-lg"
+              placeholder="Ingrese el nombre del barbero"
               required
             />
           </div>

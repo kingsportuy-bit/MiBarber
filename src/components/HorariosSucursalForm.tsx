@@ -31,8 +31,16 @@ export function HorariosSucursalForm({ idSucursal, onClose }: HorariosSucursalFo
     const horariosIniciales: Record<number, HorarioSucursal> = {};
     const almuerzoFlags: Record<number, boolean> = {};
     
+    // Crear una versión estable de los horarios para evitar referencias cambiantes
+    const horariosEstables = horarios.map(h => ({
+      ...h,
+      // Asegurarse de que las propiedades existan
+      hora_inicio_almuerzo: h.hora_inicio_almuerzo || null,
+      hora_fin_almuerzo: h.hora_fin_almuerzo || null
+    }));
+    
     diasSemana.forEach(dia => {
-      const horarioExistente = horarios.find(h => h.id_dia === dia.id);
+      const horarioExistente = horariosEstables.find(h => h.id_dia === dia.id);
       
       if (horarioExistente) {
         // Usar el horario existente completo
@@ -59,13 +67,13 @@ export function HorariosSucursalForm({ idSucursal, onClose }: HorariosSucursalFo
     });
     
     return { horariosIniciales, almuerzoFlags };
-  }, [horarios, idSucursal]);
+  }, [JSON.stringify(horarios), idSucursal]);
 
   // Inicializar horarios del formulario con los datos existentes
   useEffect(() => {
     setHorariosForm(initialValues.horariosIniciales);
     setTieneAlmuerzo(initialValues.almuerzoFlags);
-  }, [initialValues]);
+  }, [initialValues.horariosIniciales, initialValues.almuerzoFlags]);
 
   const handleInputChange = (
     idDia: number,

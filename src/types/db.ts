@@ -60,6 +60,7 @@ export interface Barbero {
   nivel_permisos: number; // 1 = Admin, 2 = Barbero normal
   username: string | null; // Nombre de usuario para login
   password_hash: string | null; // Hash bcrypt de la contraseña
+  conf_inicial: string | null; // 0 = necesita configuración inicial, 1 = configuración completada
   created_at: string; // timestamptz
   updated_at: string; // timestamptz
 }

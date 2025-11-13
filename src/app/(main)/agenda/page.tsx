@@ -19,6 +19,9 @@ export default function AgendaPage() {
   const { idBarberia, barbero, isAdmin } = useBarberoAuth();
   const { filters } = useGlobalFilters();
   
+  console.log('📅 AgendaPage - Datos de autenticación:', { idBarberia, barbero: barbero?.id_barbero, isAdmin });
+  console.log('📅 AgendaPage - Filtros globales:', filters);
+  
   // Estado para controlar el modal de edición
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);

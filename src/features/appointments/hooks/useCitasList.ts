@@ -33,29 +33,36 @@ export function useCitasList({
   const queryResult = useQuery({
     queryKey: ["citas", sucursalId, fecha, barberoId, barberoActual?.id_barbero, isAdmin, idBarberia, page, pageSize],
     queryFn: async () => {
+      console.log('🔍 Parámetros de consulta de citas:', { sucursalId, fecha, barberoId, isAdmin, barberoActual: barberoActual?.id_barbero, idBarberia });
+      
       let q = (supabase as any).from("mibarber_citas").select("*", { count: "exact" });
       
       // Si se proporciona una sucursal, filtrar por ella
       if (sucursalId) {
+        console.log('🔍 Filtrando por sucursal:', sucursalId);
         q = q.eq("id_sucursal", sucursalId);
       }
       
       // Si se proporciona una fecha, filtrar por ella
       if (fecha) {
+        console.log('🔍 Filtrando por fecha:', fecha);
         q = q.eq("fecha", fecha);
       }
       
       // Si se proporciona un barbero específico para filtrar, usarlo
       if (barberoId) {
+        console.log('🔍 Filtrando por barbero ID:', barberoId);
         q = q.eq("id_barbero", barberoId);
       } 
       // Si el usuario no es administrador y no se especificó un barbero, solo mostrar sus propias citas
       else if (!isAdmin && barberoActual?.id_barbero) {
+        console.log('🔍 Filtrando por barbero actual:', barberoActual.id_barbero);
         q = q.eq("id_barbero", barberoActual.id_barbero);
       }
       
       // Si tenemos un idBarberia, filtrar por él
       if (idBarberia) {
+        console.log('🔍 Filtrando por barbería:', idBarberia);
         q = q.eq("id_barberia", idBarberia);
       }
       

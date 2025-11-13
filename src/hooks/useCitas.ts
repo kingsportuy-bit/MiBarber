@@ -23,6 +23,8 @@ interface UseCitasProps {
 export function useCitas(props?: UseCitasProps) {
   const { sucursalId, fecha, barberoId, page, pageSize } = props || {};
   
+  console.log('📅 useCitas - Parámetros recibidos:', { sucursalId, fecha, barberoId, page, pageSize });
+  
   const citasQuery = useCitasList({ sucursalId, fecha, barberoId, page, pageSize });
   const createMutation = useCreateCita();
   const updateMutation = useUpdateCita();

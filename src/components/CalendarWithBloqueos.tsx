@@ -145,11 +145,15 @@ export function CalendarWithBloqueos({
 }) {
   console.log("Props recibidos en CalendarWithBloqueos:", { barbero, sucursalId, initialView });
   
+  console.log('📅 CalendarWithBloqueos - Parámetros recibidos:', { sucursalId, barbero });
+  
   // Usar barbero directamente como string
   const { data, isLoading, updateMutation, refetch } = useCitas({
     sucursalId,
     barberoId: barbero
   });
+  
+  console.log('📅 CalendarWithBloqueos - Datos obtenidos:', { data: data?.length, isLoading });
   
   // Obtener horarios de la sucursal
   const { horarios: horariosSucursal } = useHorariosSucursales(sucursalId);

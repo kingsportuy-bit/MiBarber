@@ -2,6 +2,28 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
+  // Validar variables de entorno
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  
+  if (!supabaseUrl) {
+    console.error('❌ Variable de entorno NEXT_PUBLIC_SUPABASE_URL no está definida');
+    return NextResponse.next({
+      request: {
+        headers: request.headers,
+      },
+    });
+  }
+  
+  if (!supabaseAnonKey) {
+    console.error('❌ Variable de entorno NEXT_PUBLIC_SUPABASE_ANON_KEY no está definida');
+    return NextResponse.next({
+      request: {
+        headers: request.headers,
+      },
+    });
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -9,8 +31,8 @@ export async function updateSession(request: NextRequest) {
   })
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         get(name: string) {

@@ -205,7 +205,7 @@ export function WhatsAppChat() {
           timestamp: new Date().toISOString()
         };
 
-        await fetch("https://webhookn8npers.itmconsulting.es/webhook/manual", {
+        await fetch("https://webhookn8ncodexa.codexa.uy/webhook/manual", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -370,7 +370,9 @@ export function WhatsAppChat() {
                                 onError={(e) => {
                                   // Si la imagen no carga, mostrar el avatar con inicial
                                   e.currentTarget.onerror = null;
-                                  e.currentTarget.parentElement!.innerHTML = `<span class="text-white font-semibold">${clientName.charAt(0).toUpperCase()}</span>`;
+                                  if (e.currentTarget.parentElement) {
+                                    e.currentTarget.parentElement.innerHTML = `<span class="text-white font-semibold">${clientName.charAt(0).toUpperCase()}</span>`;
+                                  }
                                 }}
                               />
                             );
@@ -472,7 +474,9 @@ export function WhatsAppChat() {
                             onError={(e) => {
                               // Si la imagen no carga, mostrar el avatar con inicial
                               e.currentTarget.onerror = null;
-                              e.currentTarget.parentElement!.innerHTML = `<span class="text-white font-semibold">${clientName.charAt(0).toUpperCase()}</span>`;
+                              if (e.currentTarget.parentElement) {
+                                e.currentTarget.parentElement.innerHTML = `<span class="text-white font-semibold">${clientName.charAt(0).toUpperCase()}</span>`;
+                              }
                             }}
                           />
                         );

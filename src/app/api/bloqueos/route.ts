@@ -38,10 +38,30 @@ export async function GET(request: NextRequest) {
   console.log('\n🔍 ===== GET /api/bloqueos =====');
   
   try {
+    // Validar variables de entorno
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    if (!supabaseUrl) {
+      console.error('❌ Variable de entorno NEXT_PUBLIC_SUPABASE_URL no está definida');
+      return NextResponse.json(
+        { error: 'Error de configuración: URL de Supabase no definida' },
+        { status: 500 }
+      );
+    }
+    
+    if (!supabaseKey) {
+      console.error('❌ Variable de entorno SUPABASE_SERVICE_ROLE_KEY no está definida');
+      return NextResponse.json(
+        { error: 'Error de configuración: Clave de servicio de Supabase no definida' },
+        { status: 500 }
+      );
+    }
+    
     // Crear cliente Supabase en runtime
     const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      supabaseUrl,
+      supabaseKey,
       {
         auth: {
           autoRefreshToken: false,
@@ -161,10 +181,30 @@ export async function POST(request: NextRequest) {
   console.log('\n🚀 ===== POST /api/bloqueos =====');
   
   try {
+    // Validar variables de entorno
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    if (!supabaseUrl) {
+      console.error('❌ Variable de entorno NEXT_PUBLIC_SUPABASE_URL no está definida');
+      return NextResponse.json(
+        { error: 'Error de configuración: URL de Supabase no definida' },
+        { status: 500 }
+      );
+    }
+    
+    if (!supabaseKey) {
+      console.error('❌ Variable de entorno SUPABASE_SERVICE_ROLE_KEY no está definida');
+      return NextResponse.json(
+        { error: 'Error de configuración: Clave de servicio de Supabase no definida' },
+        { status: 500 }
+      );
+    }
+    
     // Crear cliente Supabase en runtime
     const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      supabaseUrl,
+      supabaseKey,
       {
         auth: {
           autoRefreshToken: false,
@@ -369,10 +409,30 @@ export async function DELETE(request: NextRequest) {
   console.log('\n🗑️ ===== DELETE /api/bloqueos =====');
   
   try {
+    // Validar variables de entorno
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    if (!supabaseUrl) {
+      console.error('❌ Variable de entorno NEXT_PUBLIC_SUPABASE_URL no está definida');
+      return NextResponse.json(
+        { error: 'Error de configuración: URL de Supabase no definida' },
+        { status: 500 }
+      );
+    }
+    
+    if (!supabaseKey) {
+      console.error('❌ Variable de entorno SUPABASE_SERVICE_ROLE_KEY no está definida');
+      return NextResponse.json(
+        { error: 'Error de configuración: Clave de servicio de Supabase no definida' },
+        { status: 500 }
+      );
+    }
+    
     // Crear cliente Supabase en runtime
     const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      supabaseUrl,
+      supabaseKey,
       {
         auth: {
           autoRefreshToken: false,

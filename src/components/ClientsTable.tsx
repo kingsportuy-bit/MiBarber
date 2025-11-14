@@ -603,7 +603,7 @@ export function ClientsTable() {
 
       {/* Popup de confirmación para eliminar */}
       {deleteConfirm.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 qoder-dark-modal-overlay">
           <div className="qoder-dark-card w-[90vw] max-w-md">
             <h3 className="text-lg font-semibold mb-2 text-qoder-dark-text-primary">
               Confirmar eliminación

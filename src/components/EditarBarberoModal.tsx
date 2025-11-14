@@ -98,7 +98,7 @@ export function EditarBarberoModal({
 
   return (
     <div className={`fixed inset-0 z-50 ${open ? "block" : "hidden"}`}>
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose}></div>
+      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm qoder-dark-modal-overlay" onClick={handleClose}></div>
       
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <div 

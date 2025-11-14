@@ -29,6 +29,9 @@ export function NavBar() {
 
   // Verificar autenticación desde localStorage
   useEffect(() => {
+    // Solo ejecutar en el cliente
+    if (typeof window === 'undefined') return;
+    
     const checkAuth = () => {
       try {
         const sessionStr = localStorage.getItem("barber_auth_session");

@@ -2,6 +2,7 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { CustomDatePicker } from "@/components/CustomDatePicker";
 import type { Appointment, Client, Service, Barbero } from "@/types/db";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 import { useSucursales } from "@/hooks/useSucursales";
@@ -314,11 +315,11 @@ export function SingleFormAppointmentModal({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
-        <Dialog.Content 
-          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-[95vw] max-w-md md:max-w-lg max-h-[90vh] overflow-y-auto rounded-xl p-4 md:p-6 bg-qoder-dark-bg-form border border-qoder-dark-border shadow-2xl focus:outline-none"
-        >
-          <div className="flex justify-between items-center mb-4">
+        <Dialog.Overlay className="fixed inset-0 qoder-dark-modal-overlay-global" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
+          <div className="qoder-dark-client-modal">
+            <div className="content">
+              <div className="flex justify-between items-center mb-4">
             <Dialog.Title className="text-lg font-bold text-qoder-dark-text-primary">
               {initial?.id_cita ? "Editar Turno" : "Crear Nuevo Turno"}
             </Dialog.Title>
@@ -545,12 +546,13 @@ export function SingleFormAppointmentModal({
                 <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
                   Fecha
                 </label>
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="qoder-dark-input w-full px-3 py-2 rounded-lg"
-                />
+                <div className="w-full">
+                  <CustomDatePicker
+                    value={date}
+                    onChange={setDate}
+                    placeholder="Seleccionar fecha"
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
@@ -609,8 +611,10 @@ export function SingleFormAppointmentModal({
               >
                 {isSubmitting ? "Guardando..." : "Guardar Turno"}
               </button>
+              </div>
             </div>
           </div>
+        </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

@@ -116,7 +116,7 @@ export function CrearBarberoModal({ open, onOpenChange, idBarberia, id_sucursal,
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-4 qoder-dark-modal-overlay">
       <div className="qoder-dark-card w-full max-w-md max-h-[90vh] overflow-y-auto">
         <h3 className="text-lg font-semibold mb-4 text-qoder-dark-text-primary">
           Crear Nuevo Barbero

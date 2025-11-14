@@ -20,7 +20,7 @@ body {
   --color-background: #000000; /* Negro puro */
   --color-background-transparent: rgba(0, 0, 0, 0.8); /* Negro con transparencia */
   --color-text: rgba(255, 255, 255, 0.87); /* Texto blanco */
-  --color-text-secondary: rgba(255, 255, 255, 0.6); /* Texto blanco secundario */
+  --color-text-secondary: rgba(255, 255, 255, 0.2); /* Texto blanco secundario */
   --color-accent: #00CCC2; /* Azul turquesa para acentos */
   
   /* Variables existentes */
@@ -29,6 +29,7 @@ body {
   --qoder-dark-bg-tertiary: #2a2a2a;       /* Alternativa para paneles */
   --qoder-dark-bg-quaternary: #3a3a3a;     /* Barras superiores, menús o sidebars */
   --qoder-dark-bg-form: #1a1a1a;           /* Formularios y modales */
+  --qoder-dark-bg-modal: rgba(0, 0, 0, 0.95); /* Modales con 90% de opacidad */
   --qoder-dark-bg-hover: #2a2a2a;          /* Hover states */
   --qoder-dark-bg-header: #161717;         /* Color para headers de chat */
   --qoder-dark-bg-black: #000000;          /* Negro puro para área de mensajes */
@@ -693,6 +694,19 @@ main {
   color: var(--qoder-dark-accent-orange);
 }
 
+/* Estilo para overlays de modales con 20% de opacidad */
+.qoder-dark-modal-overlay,
+[data-radix-portal] .qoder-dark-modal-overlay,
+.DialogOverlay.qoder-dark-modal-overlay {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Estilo global para overlay de modales */
+.qoder-dark-modal-overlay-global {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+  z-index: 50;
+}
+
 /* Qoder Dark menu styles - Modernizado */
 .qoder-dark-menu {
   background-color: var(--qoder-dark-bg-form);
@@ -1236,6 +1250,50 @@ main {
   overflow: hidden;
 }
 
+/* Estilo para fondo de modales con 20% de opacidad */
+.bg-qoder-dark-bg-modal {
+  background-color: var(--qoder-dark-bg-modal);
+}
+
+/* Estilo específico para modales de cliente */
+.qoder-dark-client-modal {
+  background-color: var(--qoder-dark-bg-modal);
+  border-radius: 12px;
+  padding: 0;
+  width: 100%;
+  max-width: 28rem;
+  max-height: 90vh;
+  overflow: hidden;
+  border: 1px solid transparent;
+  transition: border-color 0.3s ease;
+  position: relative;
+  z-index: 50;
+  margin: 1px;
+}
+
+.qoder-dark-client-modal:hover {
+  border-color: var(--qoder-dark-accent-orange);
+}
+
+.qoder-dark-client-modal.with-shadow {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+}
+
+.qoder-dark-client-modal .qoder-dark-window-header {
+  background-color: transparent !important;
+  border-bottom: 1px solid var(--qoder-dark-border-primary);
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.qoder-dark-client-modal .content {
+  padding: 1.5rem;
+  overflow-y: auto;
+  max-height: calc(90vh - 80px);
+}
+
 .qoder-dark-table th {
   background-color: var(--qoder-dark-bg-tertiary);
   color: var(--qoder-dark-text-primary);
@@ -1403,6 +1461,24 @@ main {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--qoder-dark-text-secondary);
+}
+
+/* Scrollbar global para toda la web */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--qoder-dark-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--qoder-dark-border-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
   background: var(--qoder-dark-text-secondary);
 }
 
@@ -1577,4 +1653,26 @@ main {
 .dropdown-menu *,
 .dropdown-item * {
   background-color: transparent !important;
+}
+/* Override para botones del calendario - sin fondo naranja */
+button[class*="rounded"][class*="transition"] {
+  background-color: transparent !important;
+}
+
+button[class*="rounded"][class*="transition"]:hover {
+  background-color: rgba(55, 65, 81, 0.5) !important;
+}
+
+button[class*="rounded"][class*="transition"]:disabled {
+  background-color: transparent !important;
+  opacity: 0.3;
+}
+
+/* Quitar fondos naranjas heredados de estilos globales */
+.qoder-dark-button:not(.action-button):not(.cancel-button) {
+  background-color: var(--qoder-dark-button-secondary) !important;
+}
+
+.qoder-dark-button:hover:not(.action-button):not(.cancel-button) {
+  background-color: var(--qoder-dark-button-hover) !important;
 }

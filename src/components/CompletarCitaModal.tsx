@@ -121,7 +121,7 @@ export function CompletarCitaModal({ citaId, onClose, onCompletado }: CompletarC
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 qoder-dark-modal-overlay">
       <div className="qoder-dark-window w-full max-w-md p-6">
         <h3 className="text-lg font-semibold mb-4">Completar Cita</h3>
         

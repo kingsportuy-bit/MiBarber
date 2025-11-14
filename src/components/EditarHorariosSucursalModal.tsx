@@ -193,7 +193,7 @@ export function EditarHorariosSucursalModal({
     return (
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" />
+          <Dialog.Overlay className="fixed inset-0 qoder-dark-modal-overlay-global" />
           <Dialog.Content className="fixed left-1/2 top-1/2 w-[95vw] max-w-md md:max-w-2xl -translate-x-1/2 -translate-y-1/2 z-50">
             <div className="qoder-dark-card">
               <div className="p-6 text-qoder-dark-text-primary text-center">Cargando horarios...</div>
@@ -218,9 +218,10 @@ export function EditarHorariosSucursalModal({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 w-[95vw] max-w-md md:max-w-2xl -translate-x-1/2 -translate-y-1/2 z-50">
-          <div className="qoder-dark-card max-h-[90vh] overflow-y-auto">
+        <Dialog.Overlay className="fixed inset-0 qoder-dark-modal-overlay-global" />
+        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
+          <div className="qoder-dark-client-modal">
+            <div className="content">
             <div className="qoder-dark-window-header">
               <div>
                 <Dialog.Title className="text-2xl font-bold text-qoder-dark-text-primary">
@@ -352,6 +353,7 @@ export function EditarHorariosSucursalModal({
 
             </form>
           </div>
+        </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

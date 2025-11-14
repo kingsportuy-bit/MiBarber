@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={inter.variable}>
-      <body className="min-h-screen flex flex-col min-w-0 font-sans" style={{ backgroundColor: 'transparent' }}>
+      <body className="min-h-screen flex flex-col min-w-0 font-sans custom-scrollbar" style={{ backgroundColor: 'transparent' }}>
         {/* Contenedor de fondo fijo con destellos naranjas intermitentes */}
         <div className="background-container">
           <div className="sparkle-1"></div>

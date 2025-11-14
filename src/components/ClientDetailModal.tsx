@@ -24,7 +24,7 @@ export function ClientDetailModal({ open, onOpenChange, client }: Props) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/80 z-50" />
+        <Dialog.Overlay className="fixed inset-0 bg-black/20 z-50 qoder-dark-modal-overlay" />
         <Dialog.Content className="fixed left-1/2 top-1/2 w-[92vw] max-w-lg -translate-x-1/2 -translate-y-1/2 z-50 h-[90vh] max-h-[600px]">
           <div className="qoder-dark-card h-full flex flex-col">
             <div className="qoder-dark-window-header">

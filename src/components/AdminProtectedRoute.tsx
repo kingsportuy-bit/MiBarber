@@ -21,6 +21,9 @@ export function AdminProtectedRoute({ children }: { children: React.ReactNode })
   }), [isAuthenticated, isAdmin, isLoading]);
 
   useEffect(() => {
+    // Solo ejecutar en el cliente
+    if (typeof window === 'undefined') return;
+    
     setIsClient(true);
     
     // Si no está autenticado, redirigir al login

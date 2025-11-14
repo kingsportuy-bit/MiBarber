@@ -83,6 +83,9 @@ export function useAuth(): UseAuthReturn {
 
   // Cargar sesión al iniciar
   useEffect(() => {
+    // Solo ejecutar en el cliente
+    if (typeof window === 'undefined') return;
+    
     console.log('useAuth - Iniciando carga de sesión...');
     
     // Listener para cambios de autenticación
@@ -95,15 +98,11 @@ export function useAuth(): UseAuthReturn {
     loadSession();
 
     // Agregar listener para eventos de cambio de autenticación
-    if (typeof window !== 'undefined') {
-      window.addEventListener('barberAuthChange', handleAuthChange as EventListener);
-    }
+    window.addEventListener('barberAuthChange', handleAuthChange as EventListener);
 
     // Limpiar listener
     return () => {
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('barberAuthChange', handleAuthChange as EventListener);
-      }
+      window.removeEventListener('barberAuthChange', handleAuthChange as EventListener);
     };
   }, [loadSession]);
 
@@ -142,6 +141,9 @@ export function useAuth(): UseAuthReturn {
 
   // Verificar periódicamente que la sesión sigue activa
   useEffect(() => {
+    // Solo ejecutar en el cliente
+    if (typeof window === 'undefined') return;
+    
     if (authState.isAuthenticated && authState.session) {
       const interval = setInterval(() => {
         console.log('useAuth - Verificando sesión periódicamente...');

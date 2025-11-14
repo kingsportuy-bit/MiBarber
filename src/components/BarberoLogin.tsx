@@ -45,7 +45,7 @@ export function BarberoLogin({ onLogin }: BarberoLoginProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 qoder-dark-modal-overlay">
       <div className="qoder-dark-card w-[90vw] max-w-md">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-qoder-dark-text-primary mb-2">

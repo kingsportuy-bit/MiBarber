@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useGlobalFilters } from "@/contexts/GlobalFiltersContext";
+import { CustomDatePicker } from "@/components/CustomDatePicker";
 
 interface GlobalFiltersProps {
   className?: string;
@@ -137,13 +138,13 @@ export function GlobalFilters({
           <label htmlFor="fecha-inicio-filter" className="block text-xs font-medium text-qoder-dark-text-primary mb-1">
             Fecha Inicio
           </label>
-          <input
-            type="date"
-            id="fecha-inicio-filter"
-            value={filters.fechaInicio || ""}
-            onChange={(e) => handleFechaInicioChange(e.target.value)}
-            className="qoder-dark-input w-full py-2 px-3 text-sm"
-          />
+          <div className="w-full">
+            <CustomDatePicker
+              value={filters.fechaInicio || ""}
+              onChange={handleFechaInicioChange}
+              placeholder="Seleccionar fecha"
+            />
+          </div>
         </div>
       )}
 
@@ -153,13 +154,13 @@ export function GlobalFilters({
           <label htmlFor="fecha-fin-filter" className="block text-xs font-medium text-qoder-dark-text-primary mb-1">
             Fecha Fin
           </label>
-          <input
-            type="date"
-            id="fecha-fin-filter"
-            value={filters.fechaFin || ""}
-            onChange={(e) => handleFechaFinChange(e.target.value)}
-            className="qoder-dark-input w-full py-2 px-3 text-sm"
-          />
+          <div className="w-full">
+            <CustomDatePicker
+              value={filters.fechaFin || ""}
+              onChange={handleFechaFinChange}
+              placeholder="Seleccionar fecha"
+            />
+          </div>
         </div>
       )}
     </div>

@@ -14,6 +14,9 @@ export class AuthService {
 
   // Guardar sesión en localStorage y cookie
   static saveSession(session: AuthSession): void {
+    // Solo ejecutar en el cliente
+    if (typeof window === 'undefined') return;
+    
     try {
       console.log('AuthService.saveSession - Guardando sesión:', session);
       
@@ -33,6 +36,9 @@ export class AuthService {
 
   // Leer sesión de localStorage o cookie
   static loadSession(): AuthSession | null {
+    // Solo ejecutar en el cliente
+    if (typeof window === 'undefined') return null;
+    
     try {
       console.log('AuthService.loadSession - Intentando cargar sesión...');
       
@@ -79,6 +85,9 @@ export class AuthService {
 
   // Limpiar sesión de localStorage y cookie
   static clearSession(): void {
+    // Solo ejecutar en el cliente
+    if (typeof window === 'undefined') return;
+    
     try {
       console.log('AuthService.clearSession - Limpiando sesión...');
       

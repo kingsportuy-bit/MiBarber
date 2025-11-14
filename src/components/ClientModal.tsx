@@ -26,15 +26,16 @@ export function ClientModal({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/80 z-50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 w-[92vw] max-w-lg -translate-x-1/2 -translate-y-1/2 z-50 h-[90vh] max-h-[600px]">
-          <div className="qoder-dark-card h-full flex flex-col">
+        <Dialog.Overlay className="fixed inset-0 qoder-dark-modal-overlay-global" />
+        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
+          <div className="qoder-dark-client-modal">
             <div className="qoder-dark-window-header">
               <Dialog.Title className="text-lg font-semibold text-qoder-dark-text-primary">
                 {isEdit ? "Editar cliente" : "Nuevo cliente"}
               </Dialog.Title>
             </div>
-            <div className="grid grid-cols-2 gap-3 p-4 flex-grow overflow-y-auto">
+            <div className="content">
+              <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
                 <label className="text-xs text-qoder-dark-text-secondary">
                   Celular
@@ -133,6 +134,7 @@ export function ClientModal({
               </button>
             </div>
           </div>
+        </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

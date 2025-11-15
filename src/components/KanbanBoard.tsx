@@ -1,0 +1,384 @@
+"use client";
+
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { DragDropContext, DropResult } from "@hello-pangea/dnd";
+import { KanbanColumn } from "@/components/KanbanColumn";
+import { SingleFormAppointmentModalWithSucursal } from "@/components/SingleFormAppointmentModalWithSucursal";
+import type { Appointment } from "@/types/db";
+import { useCitas } from "@/hooks/useCitas";
+import { useGlobalFilters } from "@/contexts/GlobalFiltersContext";
+import { useUpdateCita } from "@/features/appointments/hooks/useUpdateCita";
+import { toast } from "sonner";
+import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
+
+// Definir tipos para las columnas del tablero Kanban
+type ColumnId = "pendientes" | "completadas" | "canceladas";
+type EstadoCita = "pendiente" | "confirmado" | "completado" | "cancelado";
+
+interface Column {
+  id: ColumnId;
+  title: string;
+  color: string;
+  taskIds: string[];
+}
+
+// Tipo de tarea compatible con TaskCard
+interface Task {
+  id: string;
+  content: string;
+  cita?: Appointment;
+}
+
+interface KanbanTask extends Appointment {
+  id: string;
+  columnId: ColumnId;
+}
+
+// Props para el componente KanbanBoard
+interface KanbanBoardProps {
+  isCreateModalOpen?: boolean;
+  setIsCreateModalOpen?: (open: boolean) => void;
+  selectedAppointment?: Partial<Appointment> | null;
+  setSelectedAppointment?: (appointment: Partial<Appointment> | null) => void;
+}
+
+// Definir las columnas del tablero
+const COLUMNS: Record<ColumnId, Column> = {
+  pendientes: {
+    id: "pendientes",
+    title: "Pendientes",
+    color: "orange",
+    taskIds: [],
+  },
+  completadas: {
+    id: "completadas",
+    title: "Completadas",
+    color: "green",
+    taskIds: [],
+  },
+  canceladas: {
+    id: "canceladas",
+    title: "Canceladas",
+    color: "gray",
+    taskIds: [],
+  },
+};
+
+export function KanbanBoard({ 
+  isCreateModalOpen, 
+  setIsCreateModalOpen,
+  selectedAppointment,
+  setSelectedAppointment
+}: KanbanBoardProps) {
+  const { filters } = useGlobalFilters();
+  const [currentDate, setCurrentDate] = useState<Date>(() => {
+    // Usar la fecha ajustada a la zona horaria local
+    const localDate = getLocalDateTime();
+    return localDate;
+  });
+  
+  // Estados locales para el modal si no se pasan como props
+  const [localIsCreateModalOpen, localSetIsCreateModalOpen] = useState(false);
+  const [localSelectedAppointment, localSetSelectedAppointment] = useState<Partial<Appointment> | null>(null);
+  
+  // Usar props si se pasan, de lo contrario usar estados locales
+  const modalOpen = isCreateModalOpen !== undefined ? isCreateModalOpen : localIsCreateModalOpen;
+  const setModalOpen = setIsCreateModalOpen !== undefined ? setIsCreateModalOpen : localSetIsCreateModalOpen;
+  const appointment = selectedAppointment !== undefined ? selectedAppointment : localSelectedAppointment;
+  const setAppointment = setSelectedAppointment !== undefined ? setSelectedAppointment : localSetSelectedAppointment;
+  
+  // Obtener citas para la fecha actual
+  const { data: citas = [], isLoading, isError, refetch } = useCitas({
+    sucursalId: filters.sucursalId || undefined,
+    fecha: getLocalDateString(currentDate), // Usar nuestra función unificada
+    barberoId: filters.barberoId || undefined,
+  });
+  
+  const { mutateAsync: updateCita } = useUpdateCita();
+  
+  // Convertir citas a tareas para el tablero Kanban
+  const kanbanTasks = useMemo(() => {
+    const taskMap: Record<string, KanbanTask> = {};
+    
+    citas.forEach(cita => {
+      // Mapear el estado de la cita a una columna del tablero
+      let columnId: ColumnId = "pendientes";
+      if (cita.estado === "completado") {
+        columnId = "completadas";
+      } else if (cita.estado === "cancelado") {
+        columnId = "canceladas";
+      }
+      
+      taskMap[cita.id_cita] = {
+        ...cita,
+        id: cita.id_cita,
+        columnId,
+      };
+    });
+    
+    return taskMap;
+  }, [citas]);
+  
+  // Organizar tareas por columnas
+  const columns = useMemo(() => {
+    const columnTasks: Record<ColumnId, string[]> = {
+      pendientes: [],
+      completadas: [],
+      canceladas: [],
+    };
+    
+    Object.values(kanbanTasks).forEach(task => {
+      columnTasks[task.columnId].push(task.id);
+    });
+    
+    // Crear columnas con las tareas asignadas
+    const updatedColumns: Record<ColumnId, Column> = {
+      pendientes: {
+        ...COLUMNS.pendientes,
+        taskIds: columnTasks.pendientes,
+      },
+      completadas: {
+        ...COLUMNS.completadas,
+        taskIds: columnTasks.completadas,
+      },
+      canceladas: {
+        ...COLUMNS.canceladas,
+        taskIds: columnTasks.canceladas,
+      },
+    };
+    
+    return updatedColumns;
+  }, [kanbanTasks]);
+  
+  // Convertir tareas de Kanban a tareas compatibles con TaskCard
+  const convertToTaskCardFormat = (kanbanTask: KanbanTask): Task => {
+    return {
+      id: kanbanTask.id,
+      content: `${kanbanTask.cliente_nombre || 'Cliente'} - ${kanbanTask.servicio || 'Servicio'} (${kanbanTask.hora?.slice(0, 5) || 'Sin hora'})`,
+      cita: kanbanTask // Pasar los datos completos de la cita
+    };
+  };
+  
+  // Handlers de navegación - usando la misma forma que la agenda
+  const goToPreviousDay = useCallback(() => {
+    setCurrentDate(prev => {
+      const newDate = new Date(prev);
+      newDate.setDate(newDate.getDate() - 1);
+      return newDate;
+    });
+  }, []);
+  
+  const goToNextDay = useCallback(() => {
+    setCurrentDate(prev => {
+      const newDate = new Date(prev);
+      newDate.setDate(newDate.getDate() + 1);
+      return newDate;
+    });
+  }, []);
+  
+  const goToToday = useCallback(() => {
+    setCurrentDate(getLocalDateTime());
+  }, []);
+  
+  // Manejar cambio de fecha desde el componente de navegación
+  const handleDateChange = (date: string) => {
+    // Convertir string a Date
+    const [year, month, day] = date.split('-').map(Number);
+    const newDate = new Date(year, month - 1, day);
+    setCurrentDate(newDate);
+  };
+  
+  const handleCreateNewAppointment = () => {
+    const newAppointment: Partial<Appointment> = {
+      fecha: getLocalDateString(currentDate),
+      hora: "",
+      servicio: "",
+      barbero: ""
+    };
+    
+    setAppointment(newAppointment);
+    setModalOpen(true);
+  };
+  
+  const handleSaveAppointment = async (values: Partial<Appointment>) => {
+    // Aquí iría la lógica para guardar la cita
+    console.log("Guardando cita:", values);
+    setModalOpen(false);
+    setAppointment(null);
+  };
+  
+  // Función para manejar la edición de una cita
+  const handleEditAppointment = (cita: Appointment) => {
+    setAppointment(cita);
+    setModalOpen(true);
+  };
+  
+  const onDragEnd = async (result: DropResult) => {
+    const { destination, source, draggableId } = result;
+    
+    if (!destination) {
+      return;
+    }
+    
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+    
+    // Encontrar la tarea que se está moviendo
+    const task = kanbanTasks[draggableId];
+    if (!task) {
+      return;
+    }
+    
+    // Determinar el nuevo estado basado en la columna de destino
+    let newEstado: EstadoCita = "pendiente";
+    switch (destination.droppableId) {
+      case "pendientes":
+        newEstado = "pendiente";
+        break;
+      case "completadas":
+        newEstado = "completado";
+        break;
+      case "canceladas":
+        newEstado = "cancelado";
+        break;
+    }
+    
+    try {
+      // Actualizar el estado de la cita en la base de datos
+      await updateCita({
+        id_cita: task.id_cita,
+        estado: newEstado
+      });
+      
+      // Refrescar los datos
+      await refetch();
+      
+      toast.success("Cita actualizada correctamente");
+    } catch (error) {
+      console.error("Error al actualizar la cita:", error);
+      toast.error("Error al actualizar la cita");
+      // Refrescar para restaurar el estado anterior
+      await refetch();
+    }
+  };
+  
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-qoder-dark-accent-primary"></div>
+      </div>
+    );
+  }
+  
+  if (isError) {
+    return (
+      <div className="qoder-dark-card p-6 text-center">
+        <h3 className="text-lg font-medium text-red-500">Error al cargar las citas</h3>
+        <p className="text-qoder-dark-text-secondary">No se pudieron cargar las citas. Intente refrescar la página.</p>
+        <button 
+          onClick={() => refetch()}
+          className="mt-4 qoder-dark-button-primary px-4 py-2 rounded-lg hover-lift smooth-transition"
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full">
+      {/* Navegación de fechas */}
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex space-x-2">
+            <button 
+              onClick={goToPreviousDay}
+              className="p-2 rounded-full qoder-dark-button"
+              title="Día anterior"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+            </button>
+            
+            {getLocalDateString(currentDate) !== getLocalDateString(new Date()) && (
+              <button 
+                onClick={goToToday}
+                className="px-3 py-2 rounded-lg qoder-dark-button text-sm font-medium"
+              >
+                Hoy
+              </button>
+            )}
+          </div>
+          
+          <div className="text-center">
+            <h2 className="text-lg md:text-xl font-bold text-qoder-dark-text-primary">
+              {currentDate.toLocaleDateString('es-UY', { 
+                weekday: 'long', 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+              })}
+            </h2>
+            <p className="text-qoder-dark-text-secondary text-sm">
+              {citas?.length || 0} citas programadas
+            </p>
+          </div>
+          
+          <div className="flex space-x-2">
+            <button 
+              onClick={goToNextDay}
+              className="p-2 rounded-full qoder-dark-button"
+              title="Día siguiente"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      {/* Tablero Kanban principal */}
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {Object.values(columns).map((column) => {
+            const columnTasks = column.taskIds.map(taskId => {
+              const kanbanTask = kanbanTasks[taskId];
+              return convertToTaskCardFormat(kanbanTask);
+            });
+
+            return (
+              <KanbanColumn
+                key={column.id}
+                column={column}
+                tasks={columnTasks}
+                onEdit={handleEditAppointment}
+              />
+            );
+          })}
+        </div>
+      </DragDropContext>
+      
+      {/* Modal de nuevo turno */}
+      {appointment && (
+        <SingleFormAppointmentModalWithSucursal
+          open={modalOpen}
+          onOpenChange={(open) => {
+            setModalOpen(open);
+            if (!open) {
+              setAppointment(null);
+            }
+          }}
+          initial={appointment}
+          onSave={handleSaveAppointment}
+          sucursalId={filters.sucursalId || undefined}
+        />
+      )}
+    </div>
+  );
+}

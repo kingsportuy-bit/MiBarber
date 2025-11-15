@@ -1264,7 +1264,7 @@ main {
   max-width: 28rem;
   max-height: 90vh;
   overflow: hidden;
-  border: 1px solid transparent;
+  border: 1px solid var(--qoder-dark-border-primary);
   transition: border-color 0.3s ease;
   position: relative;
   z-index: 50;
@@ -1675,4 +1675,106 @@ button[class*="rounded"][class*="transition"]:disabled {
 
 .qoder-dark-button:hover:not(.action-button):not(.cancel-button) {
   background-color: var(--qoder-dark-button-hover) !important;
+}
+
+/* Estilo específico para el botón de limpieza del buscador de WhatsApp */
+.whatsapp-clear-button {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--qoder-dark-text-secondary);
+  transition: none !important;
+  transform: none !important;
+  text-decoration: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  z-index: 10;
+}
+
+.whatsapp-clear-button:hover {
+  background: transparent !important;
+  border: none !important;
+  color: var(--qoder-dark-text-primary);
+  transition: none !important;
+  transform: none !important;
+  text-decoration: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.whatsapp-clear-button:focus {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  transition: none !important;
+  transform: none !important;
+  text-decoration: none !important;
+}
+
+.whatsapp-clear-button *,
+.whatsapp-clear-button *:hover,
+.whatsapp-clear-button *:focus {
+  background: transparent !important;
+  border: none !important;
+  transition: none !important;
+  transform: none !important;
+  text-decoration: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Estilo para botones simples - sin fondo, solo icono */
+.boton-simple {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--qoder-dark-text-secondary);
+  transition: none !important;
+  transform: none !important;
+  text-decoration: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  z-index: 10;
+}
+
+.boton-simple:hover {
+  background: transparent !important;
+  border: none !important;
+  color: var(--qoder-dark-text-primary);
+  transition: none !important;
+  transform: none !important;
+  text-decoration: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.boton-simple:focus {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  transition: none !important;
+  transform: none !important;
+  text-decoration: none !important;
+}
+
+.boton-simple *,
+.boton-simple *:hover,
+.boton-simple *:focus {
+  background: transparent !important;
+  border: none !important;
+  transition: none !important;
+  transform: none !important;
+  text-decoration: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }

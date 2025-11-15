@@ -13,6 +13,39 @@ import { useCitas } from "@/hooks/useCitas";
 import { useHorariosDisponiblesCompleto } from "@/hooks/useHorariosDisponiblesCompleto";
 import { useHorariosSucursales } from "@/hooks/useHorariosSucursales";
 import { getLocalDateString } from "@/utils/dateUtils";
+import { useBarberias } from "@/hooks/useBarberias";
+
+// Función para normalizar números de teléfono
+const normalizePhoneNumber = (phone: string): string => {
+  // Eliminar todos los caracteres que no sean dígitos
+  const cleaned = phone.replace(/\D/g, '');
+  
+  // Si el número comienza con 0, reemplazarlo con +598
+  if (cleaned.startsWith('0')) {
+    return '+598' + cleaned.substring(1);
+  }
+  
+  // Si ya tiene el código de país, devolverlo tal cual
+  if (cleaned.startsWith('598')) {
+    return '+' + cleaned;
+  }
+  
+  // En otros casos, agregar el código de país
+  return '+598' + cleaned;
+};
+
+// Función para validar el formato del número de teléfono
+const isValidPhoneNumber = (phone: string): boolean => {
+  // Eliminar espacios y caracteres especiales para la validación
+  const cleaned = phone.replace(/\D/g, '');
+  
+  // Validar formato uruguayo: 09xxxxxxx (8 dígitos) o +5989xxxxxxx (11 dígitos)
+  return (
+    (cleaned.startsWith('0') && cleaned.length === 8) || // 09xxxxxxx
+    (cleaned.startsWith('598') && cleaned.length === 11) || // +5989xxxxxxx
+    (cleaned.startsWith('9') && cleaned.length === 7) // 9xxxxxxx (sin el 0 inicial)
+  );
+};
 
 interface SingleFormAppointmentModalProps {
   open: boolean;
@@ -186,16 +219,25 @@ export function SingleFormAppointmentModal({
       return;
     }
 
+    // Validar el formato del número de teléfono si se ingresó uno
+    if (quickClientData.telefono && !isValidPhoneNumber(quickClientData.telefono)) {
+      alert("El formato del número de celular debe ser: 09xxxxxxx o +5989xxxxxxx");
+      return;
+    }
+
     if (!selectedSucursalId) {
       alert("No se ha seleccionado una sucursal");
       return;
     }
 
     try {
+      // Normalizar el número de teléfono antes de crear el cliente
+      const normalizedPhone = quickClientData.telefono ? normalizePhoneNumber(quickClientData.telefono) : undefined;
+      
       // Crear el cliente con los datos proporcionados
       const newClientArray: Client[] = (await createClientMutation.mutateAsync({
         nombre: quickClientData.nombre,
-        telefono: quickClientData.telefono || undefined,
+        telefono: normalizedPhone || undefined,
         id_sucursal: selectedSucursalId,
       })) as Client[];
 
@@ -419,7 +461,7 @@ export function SingleFormAppointmentModal({
               <button
                 type="button"
                 onClick={() => setShowQuickClientForm(!showQuickClientForm)}
-                className="mt-2 text-sm text-qoder-dark-accent-primary hover:underline"
+                className="mt-2 text-xs text-qoder-dark-accent-primary boton-simple"
               >
                 + Crear cliente rápido
               </button>
@@ -456,18 +498,19 @@ export function SingleFormAppointmentModal({
                   <div className="flex gap-2 mt-2">
                     <button
                       type="button"
-                      onClick={handleCreateQuickClient}
-                      className="qoder-dark-button px-3 py-1 text-sm rounded"
-                    >
-                      Crear
-                    </button>
-                    <button
-                      type="button"
                       onClick={() => setShowQuickClientForm(false)}
                       className="cancel-button px-3 py-1 text-sm rounded"
                     >
                       Cancelar
                     </button>
+                    <button
+                      type="button"
+                      onClick={handleCreateQuickClient}
+                      className="qoder-dark-button px-3 py-1 text-sm rounded"
+                    >
+                      Crear
+                    </button>
+                    
                   </div>
                 </div>
               )}

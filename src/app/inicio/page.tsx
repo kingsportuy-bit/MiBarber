@@ -1,115 +1,81 @@
 "use client";
 
-import { useState } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { WindowLayout } from "@/components/WindowLayout";
-import { ProtectedDashboard } from "@/components/ProtectedDashboard";
-import { SingleFormAppointmentModalWithSucursal } from "@/components/SingleFormAppointmentModalWithSucursal";
-import { useCitas } from "@/hooks/useCitas";
+import { KanbanBoard } from "@/components/KanbanBoard";
+import { useState, useCallback } from "react";
 import type { Appointment } from "@/types/db";
+import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
+import { GlobalFilters } from "@/components/shared/GlobalFilters";
 
 export default function DashboardPage() {
   usePageTitle("Barberox | Inicio");
   
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
-  const { updateMutation, createMutation, refetch } = useCitas();
-
-  const handleEdit = (appointment: Appointment) => {
-    console.log("Editar turno:", appointment);
-    console.log("handleEdit llamado con appointment:", appointment);
-    const safeAppointment = { ...appointment };
-    console.log("safeAppointment creado:", safeAppointment);
-    setSelectedAppointment(safeAppointment as Appointment);
-    console.log("setSelectedAppointment llamado, abriendo modal");
-    setIsEditModalOpen(true);
-  };
+  const [selectedAppointment, setSelectedAppointment] = useState<Partial<Appointment> | null>(null);
   
-  const handleCreate = () => {
-    console.log("Crear nuevo turno");
-    const today = new Date().toISOString().split('T')[0];
-    
+  const handleCreateNewAppointment = useCallback(() => {
+    // Crear una nueva cita con la fecha actual
+    const currentDate = getLocalDateTime();
     const newAppointment: Partial<Appointment> = {
-      fecha: today,
+      fecha: getLocalDateString(currentDate),
       hora: "",
       servicio: "",
       barbero: ""
     };
     
-    console.log("newAppointment:", newAppointment);
-    setSelectedAppointment(newAppointment as Appointment);
+    setSelectedAppointment(newAppointment);
     setIsCreateModalOpen(true);
-  };
-
-  const handleSave = async (values: Partial<Appointment>) => {
-    if (!selectedAppointment) return;
-    
-    try {
-      console.log("Guardando cambios:", values);
-      
-      if (selectedAppointment.id_cita) {
-        await updateMutation.mutateAsync({
-          id_cita: selectedAppointment.id_cita,
-          ...values
-        });
-      } else {
-        const filteredValues: any = {};
-        Object.keys(values).forEach(key => {
-          if (values[key as keyof typeof values] !== undefined) {
-            filteredValues[key] = values[key as keyof typeof values];
-          }
-        });
-        
-        console.log("Valores filtrados para crear:", filteredValues);
-        await createMutation.mutateAsync(filteredValues);
-      }
-      
-      console.log("Cita guardada exitosamente");
-      refetch();
-      if (selectedAppointment.id_cita) {
-        setIsEditModalOpen(false);
-      } else {
-        setIsCreateModalOpen(false);
-      }
-      setSelectedAppointment(null);
-    } catch (error: any) {
-      console.error("Error al guardar la cita:", error);
-      let errorMessage = "Error al guardar la cita. Por favor, inténtelo de nuevo.";
-      
-      if (error.message) {
-        errorMessage = error.message;
-      } else if (error.error) {
-        errorMessage = error.error.message || errorMessage;
-      }
-      
-      alert(errorMessage);
-    }
-  };
-
+  }, []);
+  
   return (
-    <div className="flex flex-col h-full">
-      <ProtectedDashboard onEdit={handleEdit} onCreate={handleCreate} />
+    // Contenedor principal para el tablero Kanban
+    // Este contenedor será transparente y se adaptará al contenido
+    <div 
+      className="w-full flex flex-col flex-1"
+      style={{ 
+        backgroundColor: 'transparent'
+      }}
+    >
+      {/* Título del tablero Kanban con filtros y botón de nuevo turno en la misma línea */}
+      <div className="w-full max-w-[1800px] mx-auto px-4 md:px-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-white">
+            Tablero de Turnos
+          </h1>
+          <div className="flex items-center gap-4 flex-1 justify-end">
+            {/* Filtros globales de sucursales y barberos con botón nuevo turno en la misma línea */}
+            <div className="flex items-center gap-4">
+              {/* Filtros con 10px más de ancho */}
+              <div className="w-[566px]">
+                <GlobalFilters 
+                  showSucursalFilter={true}
+                  showBarberoFilter={true}
+                  showDateFilters={false}
+                />
+              </div>
+              <button
+                onClick={handleCreateNewAppointment}
+                className="px-6 py-3 bg-qoder-dark-button-primary hover:bg-qoder-dark-button-hover text-qoder-dark-button-primary-text rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap text-lg font-medium"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
+                Nuevo Turno
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
       
-      {selectedAppointment && selectedAppointment.id_cita && (
-        <SingleFormAppointmentModalWithSucursal
-          open={isEditModalOpen}
-          onOpenChange={setIsEditModalOpen}
-          initial={selectedAppointment}
-          onSave={handleSave}
-          sucursalId={selectedAppointment.id_sucursal || undefined}
+      {/* Contenedor del tablero Kanban */}
+      <div className="w-full max-w-[1800px] mx-auto px-4 py-4 md:px-6 md:py-6 flex-1">
+        <KanbanBoard 
+          isCreateModalOpen={isCreateModalOpen} 
+          setIsCreateModalOpen={setIsCreateModalOpen}
+          selectedAppointment={selectedAppointment}
+          setSelectedAppointment={setSelectedAppointment}
         />
-      )}
-      
-      {selectedAppointment && !selectedAppointment.id_cita && (
-        <SingleFormAppointmentModalWithSucursal
-          open={isCreateModalOpen}
-          onOpenChange={setIsCreateModalOpen}
-          initial={selectedAppointment}
-          onSave={handleSave}
-          sucursalId={undefined}
-        />
-      )}
+      </div>
     </div>
   );
 }

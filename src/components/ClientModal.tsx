@@ -5,6 +5,38 @@ import { useFormData } from "@/hooks/useFormData";
 import type { Client } from "@/types/db";
 import { CustomDatePicker } from "@/components/CustomDatePicker";
 
+// Función para normalizar números de teléfono
+const normalizePhoneNumber = (phone: string): string => {
+  // Eliminar todos los caracteres que no sean dígitos
+  const cleaned = phone.replace(/\D/g, '');
+  
+  // Si el número comienza con 0, reemplazarlo con +598
+  if (cleaned.startsWith('0')) {
+    return '+598' + cleaned.substring(1);
+  }
+  
+  // Si ya tiene el código de país, devolverlo tal cual
+  if (cleaned.startsWith('598')) {
+    return '+' + cleaned;
+  }
+  
+  // En otros casos, agregar el código de país
+  return '+598' + cleaned;
+};
+
+// Función para validar el formato del número de teléfono
+const isValidPhoneNumber = (phone: string): boolean => {
+  // Eliminar espacios y caracteres especiales para la validación
+  const cleaned = phone.replace(/\D/g, '');
+  
+  // Validar formato uruguayo: 09xxxxxxx (8 dígitos) o +5989xxxxxxx (11 dígitos)
+  return (
+    (cleaned.startsWith('0') && cleaned.length === 8) || // 09xxxxxxx
+    (cleaned.startsWith('598') && cleaned.length === 11) || // +5989xxxxxxx
+    (cleaned.startsWith('9') && cleaned.length === 7) // 9xxxxxxx (sin el 0 inicial)
+  );
+};
+
 type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -22,6 +54,11 @@ export function ClientModal({
 }: Props) {
   const isEdit = Boolean(initial?.id_cliente);
   const { values, update } = useFormData<Client>(initial, open, !isEdit);
+
+  // Función para manejar el cambio en el campo de teléfono
+  const handlePhoneChange = (value: string) => {
+    update("telefono", value);
+  };
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -43,8 +80,8 @@ export function ClientModal({
                 <input
                   className="w-full qoder-dark-input p-3 rounded-lg"
                   value={values.telefono || ""}
-                  onChange={(e) => update("telefono", e.target.value)}
-                  placeholder="Ej: 091608727"
+                  onChange={(e) => handlePhoneChange(e.target.value)}
+                  placeholder="Ej: 099123456"
                 />
               </div>
               <div className="col-span-2">
@@ -126,7 +163,18 @@ export function ClientModal({
               <button
                 type="button"
                 onClick={async () => {
-                  await onSave(values);
+                  // Validar el formato del número de teléfono si se ingresó uno
+                  if (values.telefono && !isValidPhoneNumber(values.telefono)) {
+                    alert("El formato del número de celular debe ser: 09xxxxxxx o +5989xxxxxxx");
+                    return;
+                  }
+                  
+                  // Normalizar el número de teléfono antes de guardar
+                  const normalizedValues = {
+                    ...values,
+                    telefono: values.telefono ? normalizePhoneNumber(values.telefono) : undefined
+                  };
+                  await onSave(normalizedValues);
                 }}
                 className="action-button"
               >

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useWhatsAppChats } from "@/hooks/useWhatsAppChats";
 import { useClientes } from "@/hooks/useClientes";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
@@ -17,6 +17,7 @@ export function WhatsAppChat() {
   const { sucursales } = useSucursales(idBarberia || undefined);
   const [selectedSucursal, setSelectedSucursal] = useState<string | undefined>(undefined);
   const [showAllSucursales, setShowAllSucursales] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>(''); // Agregar estado para el término de búsqueda
   const supabase: any = getSupabaseClient();
   
   // Para barberos comunes, usar la sucursal asociada
@@ -44,8 +45,19 @@ export function WhatsAppChat() {
     return clients?.find((c: Client) => c.telefono === sessionId || c.id_cliente === sessionId);
   };
 
-  // Mostrar todas las conversaciones sin filtrar (eliminamos la búsqueda)
-  const filteredConversations = grouped || [];
+  // Filtrar conversaciones según el término de búsqueda
+  const filteredConversations = useMemo(() => {
+    if (!grouped || !searchTerm) return grouped || [];
+    
+    const term = searchTerm.toLowerCase().trim();
+    return grouped.filter((conversation: ChatConversation) => {
+      const clientName = getClientName(conversation.session_id).toLowerCase();
+      const clientInfo = getClientInfo(conversation.session_id);
+      const phoneNumber = clientInfo?.telefono?.toLowerCase() || '';
+      
+      return clientName.includes(term) || phoneNumber.includes(term);
+    });
+  }, [grouped, searchTerm, clients]);
 
   // Efecto para manejar el evento de tecla Escape y deseleccionar el chat
   useEffect(() => {
@@ -300,6 +312,7 @@ export function WhatsAppChat() {
                 </div>
               </div>
               
+              
               {/* Filtros para administradores */}
               {isAdmin && sucursales && sucursales.length > 0 && (
                 <div className="px-3 py-2">
@@ -328,6 +341,41 @@ export function WhatsAppChat() {
                   </div>
                 </div>
               )}
+              
+              {/* Campo de búsqueda */}
+              <div className="px-3 py-2 relative">
+                <input
+                  type="text"
+                  placeholder="Buscar por nombre o teléfono..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-lg pr-10 bg-qoder-dark-bg-form border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
+                />
+                {searchTerm && (
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="boton-simple"
+                      style={{ 
+                        background: 'transparent',
+                        border: 'none',
+                        padding: '0.25rem',
+                        cursor: 'pointer',
+                        transition: 'none',
+                        height: '1.5rem',
+                        width: '1.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
             
             {/* Lista de conversaciones */}
@@ -449,7 +497,7 @@ export function WhatsAppChat() {
             
             {/* Header del chat */}
             {activeConv ? (
-              <div className="p-3 bg-qoder-dark-bg-header flex items-center justify-between min-w-0 relative">
+              <div className="p-33 bg-qoder-dark-bg-header flex items-center justify-between min-w-0 relative">
                 <div className="flex items-center gap-3">
                   <button 
                     onClick={() => setActive(null)}

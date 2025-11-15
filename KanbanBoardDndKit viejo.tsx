@@ -110,19 +110,19 @@ const TaskCard = memo(({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.5 : 1, // Reducir opacidad al arrastrar
     cursor: isDragging ? 'grabbing' : 'grab',
   };
 
   const overlayStyle = dragOverlay ? {
     zIndex: 1000,
-    width: '290px',
+    width: '300px',
     cursor: 'grabbing',
     position: 'fixed' as const,
     pointerEvents: 'none' as const,
-    // transform: 'rotate(3deg)', // Eliminada la rotación que causaba el efecto visual
+    transform: 'rotate(3deg)',
     boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
-  } : undefined;
+  } : {};
 
   // Definir colores según el estado de la tarjeta
   const getTaskColorClasses = () => {
@@ -212,24 +212,82 @@ const TaskCard = memo(({
   };
 
   return (
-    <div
+    <div 
       ref={setNodeRef}
       {...attributes}
       {...listeners}
       style={dragOverlay ? { ...style, ...overlayStyle } : style}
       className={`
-        rounded-xl shadow-md transition-all duration-200 select-none 
-        ${dragOverlay
-          ? "m-0 p-3 min-w-[290px] w-[290px] max-w-[320px] shadow-2xl bg-neutral-800 pointer-events-none"
-          : "mb-3 w-full p-3 bg-neutral-800 pointer-events-auto"
-        }
+        qoder-dark-card rounded-xl p-3 md:p-4 shadow-sm transition-all duration-200
+        ${dragOverlay ? 'cursor-grabbing rotate-3 shadow-xl scale-105' : 'cursor-grab hover:shadow-md hover-lift'}
+        ${isDragging ? 'opacity-50' : 'opacity-100'}
+        ${isDiaBloqueado ? 'opacity-50' : ''}
       `}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
     >
-      <div className="font-bold text-white">{task.cliente_nombre}</div>
-      <div className="text-neutral-100 text-sm">{task.servicio}</div>
-      <div className="text-xs text-neutral-400 mt-2">
-        {dragOverlay ? "Arrastrando..." : "Doble click para editar"}
+      {/* Indicador visual si la hora está bloqueada */}
+      {isHoraBloqueada && task.hora && isHoraBloqueada(task.hora.slice(0, 5)) && (
+        <div className="mb-2 flex items-center text-[10px] text-red-400 bg-red-500/20 px-2 py-1 rounded-md w-fit">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span className="font-medium">Hora bloqueada</span>
+        </div>
+      )}
+      
+      {/* Indicador visual si el día está bloqueado */}
+      {isDiaBloqueado && (
+        <div className="mb-2 flex items-center text-[10px] text-red-400 bg-red-500/20 px-2 py-1 rounded-md w-fit">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span className="font-medium">Día bloqueado</span>
+        </div>
+      )}
+      
+      <div className="flex justify-between items-start mb-2">
+        <div className="flex-1 min-w-0">
+          <h4 className="font-bold text-qoder-dark-text-primary text-sm truncate md:text-base">
+            {task.cliente_nombre}
+          </h4>
+          <p className="text-xs text-qoder-dark-text-secondary truncate">
+            {task.servicio}
+          </p>
+        </div>
+        <span className="text-xs font-mono text-qoder-dark-text-secondary ml-2">
+          {task.hora ? task.hora.slice(0, 5) : 'Sin hora'}
+        </span>
       </div>
+      
+      {dragOverlay && (
+        <div className="mt-1 text-[10px] text-qoder-dark-text-secondary italic">
+          Arrastrando desde: {columnaOrigen}
+        </div>
+      )}
+      
+      {/* Mostrar duración del servicio - responsive */}
+      {task.duracion && (
+        <div className="mt-2 flex items-center text-[10px] text-qoder-dark-text-secondary bg-qoder-dark-bg-primary/30 px-2 py-0.5 rounded-md w-fit">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 text-qoder-dark-accent-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="font-medium">{task.duracion}</span>
+        </div>
+      )}
+      
+      {task.nota && (
+        <div className="mt-2 text-[10px] text-qoder-dark-text-muted italic p-2 bg-qoder-dark-bg-primary/20 rounded-md border-l border-qoder-dark-accent-primary/30">
+          "{task.nota}"
+        </div>
+      )}
+      
+      {!dragOverlay && (
+        <div className="mt-2 text-[9px] text-qoder-dark-text-muted text-center opacity-70 bg-qoder-dark-bg-primary/10 py-0.5 rounded-md">
+          Doble click para editar
+        </div>
+      )}
     </div>
   );
 });
@@ -279,14 +337,25 @@ const ColumnContainer = memo(({
   }, [tasks]);
 
   return (
-    <div
+    <div 
       ref={setNodeRef}
       data-column-id={column.id}
-      className={`flex flex-col bg-[#232324] rounded-xl min-w-[320px] min-h-[400px] flex-1 p-4 transition-all duration-200 ${isOver ? "ring-4 ring-orange-500" : ""}`}
-      style={{ margin: 8 }}
+      className={`rounded-2xl p-4 md:p-5 h-full transition-all duration-200 ${
+        isOver 
+          ? `${column.bgColor} ring-4 ring-inset ring-qoder-dark-accent-primary/50 bg-opacity-30 shadow-lg` 
+          : 'bg-black shadow-md'
+      }`}
     >
-      <div className="mb-3 text-white font-bold text-xl">{column.title}</div>
-      <div className="flex-1 flex flex-col gap-2">
+      <div className="flex items-center justify-between mb-4 pb-2 border-b border-qoder-dark-border">
+        <h3 className={`font-bold text-lg ${column.color}`}>
+          {column.title}
+        </h3>
+        <span className="bg-qoder-dark-bg-primary text-qoder-dark-text-primary text-sm font-bold px-3 py-1 rounded-full">
+          {tasks.length}
+        </span>
+      </div>
+      
+      <div className="space-y-4 min-h-[150px]">
         <SortableContext id={column.id} items={columnItems} strategy={verticalListSortingStrategy}>
           {tasks.map((task) => (
             <TaskCard 
@@ -298,11 +367,18 @@ const ColumnContainer = memo(({
             />
           ))}
           
-          {tasks.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center border-2 border-dashed border-neutral-700 rounded-lg min-h-[120px] text-neutral-400 text-center pointer-events-none">
-              Suelta aquí para mover la cita
+          {tasks.length === 0 && (
+            <div 
+              className="w-full min-h-[120px] flex items-center justify-center text-center py-6 text-qoder-dark-text-secondary text-sm rounded-xl border-2 border-dashed border-qoder-dark-border/50 bg-qoder-dark-bg-primary/10 backdrop-blur-sm"
+            >
+              <div>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mx-auto text-qoder-dark-text-secondary/30 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                <span className="block font-medium">Suelta aquí para mover la cita</span>
+              </div>
             </div>
-          ) : null}
+          )}
         </SortableContext>
       </div>
     </div>
@@ -614,13 +690,13 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
     }),
     useSensor(MouseSensor, {
       activationConstraint: {
-        distance: 5, // Reducir distancia para mejor respuesta
+        distance: 10,
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 150, // Reducir delay para mejor UX
-        tolerance: 8,
+        delay: 250, // Delay para touch devices
+        tolerance: 5,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -808,91 +884,153 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
     }
   }, [supabase, validStates]); // Añadido supabase y validStates como dependencias
 
-  const handleDragEnd = useCallback(
-    async (event: DragEndEvent) => {
-      const { active, over } = event;
-
-      setActiveId(null);
-      setOverColumn(null);
-      document.body.style.overflow = "";
-
-      if (!over) {
-        setSourceColumn(null);
-        return;
-      }
-
-      const activeTask = tasks.find((t) => t.id === active.id);
-      if (!activeTask) {
-        setSourceColumn(null);
-        return;
-      }
-
-      const sourceEstado = activeTask.columnId;
-      const targetEstado = findContainer(over.id);
-      
-      // Verificar que targetEstado no sea null
-      if (!targetEstado) {
-        console.log('No se pudo determinar la columna de destino');
-        setSourceColumn(null);
-        return;
-      }
-
+  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    // Limpiar estado de drag inmediatamente (UX más fluido)
+    setActiveId(null);
+    setOverColumn(null);
+    document.body.style.overflow = '';
+    
+    if (!over) {
+      console.log('No hay destino para el drag');
       setSourceColumn(null);
-
-      if (sourceEstado === targetEstado) {
-        const columnTasks = columns[sourceEstado as Estado];
-        const activeIndex = columnTasks.findIndex((task) => task.id === active.id);
-        const overIndex = columnTasks.findIndex((task) => task.id === over.id);
-
-        if (activeIndex !== overIndex && activeIndex !== -1 && overIndex !== -1) {
-          setColumns((prev) => {
-            const newList = [...prev[sourceEstado as Estado]];
-            const [moved] = newList.splice(activeIndex, 1);
-            newList.splice(overIndex, 0, moved);
-
-            return {
-              ...prev,
-              [sourceEstado as Estado]: newList,
-            };
+      return;
+    }
+    
+    // Usar la columna de origen almacenada
+    const sourceEstado = sourceColumn;
+    // Para el destino, usamos el over.id directamente ya que representa la columna de destino
+    const targetEstado = findContainer(over.id);
+    
+    console.log('🔍 DEBUG DRAG END:', {
+      activeId: active.id,
+      overId: over.id,
+      sourceEstado,
+      targetEstado,
+      sourceColumnStored: sourceColumn
+    });
+    
+    // Limpiar el estado de origen almacenado
+    setSourceColumn(null);
+    
+    // Validaciones
+    if (!sourceEstado || !targetEstado) {
+      console.log('No se pudo determinar origen o destino');
+      return;
+    }
+    
+    // Verificar que los estados sean válidos
+    if (!validStates.includes(sourceEstado as Estado) || !validStates.includes(targetEstado as Estado)) {
+      console.log('Estados inválidos:', sourceEstado, targetEstado);
+      return;
+    }
+    
+    // Verificar si el día está bloqueado antes de permitir el movimiento
+    if (isDiaBloqueado) {
+      console.log('🚫 Movimiento bloqueado - Día bloqueado');
+      toast.error("No se pueden mover citas en un día bloqueado");
+      return;
+    }
+    
+    // Verificar si la hora de la cita está bloqueada
+    const task = tasks.find(t => t.id === active.id);
+    if (task && task.hora && isHoraBloqueada && isHoraBloqueada(task.hora.slice(0, 5))) {
+      console.log('🚫 Movimiento bloqueado - Hora bloqueada');
+      toast.error("No se pueden mover citas en una hora bloqueada");
+      return;
+    }
+    
+    // Si es un reordenamiento dentro de la misma columna
+    if (sourceEstado === targetEstado) {
+      console.log('Movimiento dentro de la misma columna, no se actualiza BD');
+      const activeIndex = columns[sourceEstado as Estado].findIndex((task: Task) => task.id === active.id);
+      const overIndex = columns[targetEstado as Estado].findIndex((task: Task) => task.id === over.id);
+      
+      if (activeIndex !== overIndex && activeIndex !== -1 && overIndex !== -1) {
+        // Reordenar dentro de la misma columna
+        setColumns(prev => {
+          const newItems = [...prev[sourceEstado as Estado]];
+          const [movedItem] = newItems.splice(activeIndex, 1);
+          newItems.splice(overIndex, 0, movedItem);
+          
+          return {
+            ...prev,
+            [sourceEstado as Estado]: newItems
+          };
+        });
+      }
+      
+      return;
+    }
+    
+    // Movimiento entre columnas diferentes - actualizar en BD
+    try {
+      console.log('Iniciando movimiento entre columnas:', {
+        citaId: active.id,
+        from: sourceEstado,
+        to: targetEstado
+      });
+      
+      // Validar transición de estado si es necesario
+      if (!isValidStatusTransition(sourceEstado, targetEstado)) {
+        toast.error("Transición de estado no permitida");
+        return;
+      }
+      
+      // Actualizar el estado de la cita
+      const updatedCita = await updateCitaStatus(active.id as string, targetEstado);
+      
+      // Actualizar estado local inmediatamente para mejor UX
+      setColumns(prev => {
+        const sourceItems = [...prev[sourceEstado as Estado]];
+        const targetItems = [...prev[targetEstado as Estado]];
+        
+        // Encontrar y mover la tarea
+        const taskIndex = sourceItems.findIndex(t => t.id === active.id);
+        if (taskIndex !== -1) {
+          const [movedTask] = sourceItems.splice(taskIndex, 1);
+          targetItems.push({
+            ...movedTask,
+            columnId: targetEstado,
+            estado: targetEstado
           });
         }
-        return;
+        
+        return {
+          ...prev,
+          [sourceEstado as Estado]: sourceItems,
+          [targetEstado as Estado]: targetItems
+        };
+      });
+      
+      // Refetch para sincronizar con el servidor
+      await refetch();
+      
+      toast.success("Cita movida correctamente");
+      console.log('Cita movida exitosamente:', updatedCita);
+    } catch (error: any) {
+      console.error('Error al mover cita:', error);
+      
+      // Manejar errores específicos
+      let errorMessage = "Error al mover la cita";
+      
+      if (error.message) {
+        if (error.message.includes('bloqueado')) {
+          errorMessage = "No se puede mover la cita a un día u hora bloqueada";
+        } else if (error.message.includes('transición')) {
+          errorMessage = "Transición de estado no permitida";
+        } else {
+          errorMessage = error.message;
+        }
       }
-
-      if (isDiaBloqueado) {
-        toast.error("No se pueden mover citas en un día bloqueado");
-        return;
-      }
-
-      if (activeTask.hora && isHoraBloqueada(activeTask.hora.slice(0, 5))) {
-        toast.error("No se pueden mover citas en una hora bloqueada");
-        return;
-      }
-
-      try {
-        setColumns((prev) => {
-          const sourceItems = [...prev[sourceEstado as Estado]];
-          const targetItems = [...prev[targetEstado as Estado]];
-
-          const taskIndex = sourceItems.findIndex((t) => t.id === active.id);
-          if (taskIndex !== -1) {
-            const [movedTask] = sourceItems.splice(taskIndex, 1);
-            targetItems.push({ ...movedTask, columnId: targetEstado, estado: targetEstado });
-          }
-
-          return { ...prev, [sourceEstado]: sourceItems, [targetEstado]: targetItems };
-        });
-
-        await updateCitaStatus(active.id as string, targetEstado);
-        await refetch();
-        toast.success("Cita movida correctamente");
-      } catch (error: any) {
-        toast.error(error.message || "Error al mover cita");
-        await refetch();
-      }
-    },
-    [tasks, columns, findContainer, isDiaBloqueado, isHoraBloqueada, updateCitaStatus, refetch]
-  );
+      
+      toast.error(errorMessage);
+      
+      // Refetch para restaurar el estado anterior
+      await refetch();
+    }
+  }, [findContainer, sourceColumn, validStates, columns, isDiaBloqueado, isHoraBloqueada, tasks, isValidStatusTransition, updateCitaStatus, refetch]);
 
   const handleDragCancel = useCallback(() => {
     document.body.style.overflow = '';
@@ -1080,19 +1218,15 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
         </div>
       ) : (
         <DndContext
-          collisionDetection={closestCorners}
           sensors={sensors}
-          onDragStart={({ active }) => setActiveId(active.id)}
-          onDragEnd={({ active, over }) => {
-            setActiveId(null);
-            if (over && over.id !== active.id) {
-              // Aquí se manejaría el movimiento de tareas
-              console.log('Mover tarea:', active.id, 'a columna:', over.id);
-            }
-          }}
-          onDragCancel={() => setActiveId(null)}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
         >
-          <div className="flex gap-5 w-full min-h-[450px] overflow-x-auto px-3">
+          {/* Hacer las columnas responsive - 1 columna en móviles, 2 en tablets, 4 en escritorio */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {columnStates.map((column) => (
               <ColumnContainer 
                 key={column.id}
@@ -1100,6 +1234,7 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
                 tasks={columns[column.id as Estado] || []} 
                 isOver={overColumn === column.id}
                 onEdit={onEdit}
+                // Pasar información de bloqueos a las columnas
                 isDiaBloqueado={isDiaBloqueado}
                 bloqueos={bloqueos}
                 isHoraBloqueada={isHoraBloqueada}
@@ -1107,16 +1242,12 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
             ))}
           </div>
           
-          <DragOverlay>
-            {activeId ? (
-              <TaskCard
-                task={tasks.find((t) => t.id === activeId)!}
-                dragOverlay={true}
-                onEdit={onEdit}
-                isDiaBloqueado={isDiaBloqueado}
-                isHoraBloqueada={isHoraBloqueada}
-              />
-            ) : null}
+          {/* Definir animación de drop suave */}
+          <DragOverlay dropAnimation={{
+            duration: 350,
+            easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+          }}>
+            {activeId ? <TaskCard task={tasks.find(t => t.id === activeId)!} dragOverlay={true} onEdit={onEdit} /> : null}
           </DragOverlay>
         </DndContext>
       )}

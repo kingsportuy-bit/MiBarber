@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 import { useRouter } from "next/navigation";
-import { KanbanBoardDndKit } from "@/components/KanbanBoardDndKit";
+import KanbanBoardDndKit from "@/components/KanbanBoardDndKit";
 import { ResponsiveNewAppointmentButton } from "@/components/ResponsiveNewAppointmentButton";
 import type { Appointment } from "@/types/db";
 

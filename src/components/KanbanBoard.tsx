@@ -452,7 +452,6 @@ export function KanbanBoard({
             }
           }}
           initial={appointment}
-          onSave={handleSaveAppointment}
           sucursalId={filters.sucursalId || undefined}
         />
       )}

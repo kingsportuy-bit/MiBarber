@@ -3,6 +3,7 @@
 import { QoderFooter } from "@/components/QoderFooter";
 import { ConfiguracionWrapper } from "@/components/ConfiguracionWrapper";
 import { usePathname } from "next/navigation";
+import { PullToRefresh } from "@/components/PullToRefresh";
 
 export function GeneralLayout({
   children,
@@ -20,9 +21,14 @@ export function GeneralLayout({
   // Para la página de WhatsApp, usar un layout especial
   const isWhatsAppPage = pathname?.startsWith('/whatsapp');
   
+  const handleRefresh = () => {
+    // Recargar la página actual
+    window.location.reload();
+  };
+  
   if (isLoginPage) {
     return (
-      <div className="flex flex-col" style={{ minHeight: '100vh' }}>
+      <div className="flex flex-col pb-16 md:pb-0" style={{ minHeight: '100vh' }}>
         <div className="flex-grow flex flex-col justify-center" style={{ minHeight: 'calc(100vh - 80px)' }}>
           {children}
         </div>
@@ -34,7 +40,9 @@ export function GeneralLayout({
   if (isAdminPage) {
     return (
       <>
-        {children}
+        <div className="flex-grow pb-16 md:pb-0">
+          {children}
+        </div>
         <QoderFooter />
       </>
     );
@@ -42,22 +50,24 @@ export function GeneralLayout({
   
   if (isWhatsAppPage) {
     return (
-      <div className="flex flex-col h-screen w-full min-w-0">
+      <div className="flex flex-col h-screen w-full min-w-0 pb-16 md:pb-0">
         {children}
       </div>
     );
   }
   
   return (
-    <div className="dashboard">
-      <div className="dashboard-content">
-        <ConfiguracionWrapper>
-          <div className="flex-grow flex flex-col flex-1 min-w-0">
-            {children}
-          </div>
-        </ConfiguracionWrapper>
+    <PullToRefresh onRefresh={handleRefresh}>
+      <div className="dashboard pb-16 md:pb-0">
+        <div className="dashboard-content">
+          <ConfiguracionWrapper>
+            <div className="flex-grow flex flex-col flex-1 min-w-0">
+              {children}
+            </div>
+          </ConfiguracionWrapper>
+        </div>
+        <QoderFooter />
       </div>
-      <QoderFooter />
-    </div>
+    </PullToRefresh>
   );
 }

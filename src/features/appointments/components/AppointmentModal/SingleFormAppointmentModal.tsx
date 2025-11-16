@@ -14,37 +14,16 @@ import { useHorariosDisponiblesCompleto } from "@/hooks/useHorariosDisponiblesCo
 import { useHorariosSucursales } from "@/hooks/useHorariosSucursales";
 import { getLocalDateString } from "@/utils/dateUtils";
 import { useBarberias } from "@/hooks/useBarberias";
-
-// Función para normalizar números de teléfono
-const normalizePhoneNumber = (phone: string): string => {
-  // Eliminar todos los caracteres que no sean dígitos
-  const cleaned = phone.replace(/\D/g, '');
-  
-  // Si el número comienza con 0, reemplazarlo con +598
-  if (cleaned.startsWith('0')) {
-    return '+598' + cleaned.substring(1);
-  }
-  
-  // Si ya tiene el código de país, devolverlo tal cual
-  if (cleaned.startsWith('598')) {
-    return '+' + cleaned;
-  }
-  
-  // En otros casos, agregar el código de país
-  return '+598' + cleaned;
-};
+import { normalizePhoneNumber, isValidPhoneNumber } from "@/shared/utils/phoneUtils";
 
 // Función para validar el formato del número de teléfono
-const isValidPhoneNumber = (phone: string): boolean => {
-  // Eliminar espacios y caracteres especiales para la validación
-  const cleaned = phone.replace(/\D/g, '');
-  
-  // Validar formato uruguayo: 09xxxxxxx (8 dígitos) o +5989xxxxxxx (11 dígitos)
-  return (
-    (cleaned.startsWith('0') && cleaned.length === 8) || // 09xxxxxxx
-    (cleaned.startsWith('598') && cleaned.length === 11) || // +5989xxxxxxx
-    (cleaned.startsWith('9') && cleaned.length === 7) // 9xxxxxxx (sin el 0 inicial)
-  );
+const isValidPhoneNumberLocal = (phone: string): boolean => {
+  return isValidPhoneNumber(phone);
+};
+
+// Función para normalizar números de teléfono
+const normalizePhoneNumberLocal = (phone: string): string => {
+  return normalizePhoneNumber(phone);
 };
 
 interface SingleFormAppointmentModalProps {
@@ -114,9 +93,13 @@ export function SingleFormAppointmentModal({
 
   // Preseleccionar la sucursal cuando se carguen las sucursales
   useEffect(() => {
-    if (allSucursales && allSucursales.length > 0 && !isInitialSelectionDone && !propSucursalId) {
+    if (allSucursales && allSucursales.length > 0 && !isInitialSelectionDone) {
+      // Si se proporciona una sucursalId como prop, usarla
+      if (propSucursalId) {
+        setSelectedSucursalId(propSucursalId);
+      } 
       // Para barberos normales, seleccionar automáticamente su sucursal
-      if (!isAdmin && barberoActual?.id_sucursal) {
+      else if (!isAdmin && barberoActual?.id_sucursal) {
         setSelectedSucursalId(barberoActual.id_sucursal);
       } else {
         // Para administradores, seleccionar la primera sucursal por defecto
@@ -131,8 +114,12 @@ export function SingleFormAppointmentModal({
   useEffect(() => {
     if (propSucursalId && propSucursalId !== selectedSucursalId) {
       setSelectedSucursalId(propSucursalId);
+      // Marcar que se ha hecho la selección inicial si aún no se ha hecho
+      if (!isInitialSelectionDone) {
+        setIsInitialSelectionDone(true);
+      }
     }
-  }, [propSucursalId, selectedSucursalId]);
+  }, [propSucursalId, selectedSucursalId, isInitialSelectionDone]);
 
   // Hooks para obtener datos
   const { data: clientesData, isLoading: isLoadingClientes, createMutation: createClientMutation } = useClientes(
@@ -214,15 +201,27 @@ export function SingleFormAppointmentModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCreateQuickClient = async () => {
+    console.log('=== DEBUG handleCreateQuickClient ===');
+    console.log('Datos del cliente rápido:', quickClientData);
+    console.log('Teléfono ingresado:', quickClientData.telefono);
+    
     if (!quickClientData.nombre.trim()) {
       alert("Por favor ingrese el nombre del cliente");
       return;
     }
 
     // Validar el formato del número de teléfono si se ingresó uno
-    if (quickClientData.telefono && !isValidPhoneNumber(quickClientData.telefono)) {
-      alert("El formato del número de celular debe ser: 09xxxxxxx o +5989xxxxxxx");
-      return;
+    if (quickClientData.telefono) {
+      console.log('Validando teléfono...');
+      
+      // Usar la función compartida de validación
+      const isValid = isValidPhoneNumberLocal(quickClientData.telefono);
+      console.log('Resultado de validación:', isValid);
+      
+      if (!isValid) {
+        alert("El formato del número de celular debe ser: 09xxxxxxx o +5989xxxxxxx");
+        return;
+      }
     }
 
     if (!selectedSucursalId) {
@@ -232,12 +231,12 @@ export function SingleFormAppointmentModal({
 
     try {
       // Normalizar el número de teléfono antes de crear el cliente
-      const normalizedPhone = quickClientData.telefono ? normalizePhoneNumber(quickClientData.telefono) : undefined;
+      const normalizedPhone = quickClientData.telefono ? normalizePhoneNumber(quickClientData.telefono) : null;
       
       // Crear el cliente con los datos proporcionados
       const newClientArray: Client[] = (await createClientMutation.mutateAsync({
         nombre: quickClientData.nombre,
-        telefono: normalizedPhone || undefined,
+        telefono: normalizedPhone !== null ? normalizedPhone : undefined,
         id_sucursal: selectedSucursalId,
       })) as Client[];
 
@@ -259,96 +258,142 @@ export function SingleFormAppointmentModal({
     }
   };
 
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    try {
-      // Validar campos requeridos
-      if (!clientName) {
-        alert("Por favor seleccione un cliente");
-        setIsSubmitting(false);
-        return;
-      }
-      
-      if (!serviceName) {
-        alert("Por favor seleccione un servicio");
-        setIsSubmitting(false);
-        return;
-      }
-      
-      if (!barberName) {
-        alert("Por favor seleccione un barbero");
-        setIsSubmitting(false);
-        return;
-      }
-      
-      if (!date || !time) {
-        alert("Por favor seleccione fecha y hora");
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Si no se ha especificado una duración, usar la del servicio seleccionado
-      let finalDuration = duration;
-      if (!duration && serviceId) {
-        const selectedService = serviciosData?.find((s: Service) => s.id_servicio === serviceId);
-        if (selectedService) {
-          finalDuration = selectedService.duracion_minutos.toString();
-        }
-      }
-
-      // Obtener el servicio seleccionado para obtener precio
-      const selectedService = serviciosData?.find((s: Service) => s.id_servicio === serviceId);
-      const ticket = selectedService?.precio || null;
-
-      // Construir el objeto completo con todos los campos requeridos
-      const appointmentData: Partial<Appointment> = {
-        // Campos básicos
-        fecha: date,
-        hora: time,
-        cliente_nombre: clientName,
-        servicio: serviceName,
-        barbero: barberName,
-        telefono: clientPhone || null,
-        nota: note || null,
-        // Campos adicionales con valores por defecto si no están presentes
-        estado: initial?.estado || "pendiente",
-        id_cliente: clientId || null,
-        id_servicio: serviceId || null,
-        id_barbero: barberId || null,
-        id_sucursal: selectedSucursalId,
-        id_barberia: idBarberia || undefined,
-        ticket: ticket || undefined,
-        nro_factura: initial?.nro_factura || undefined,
-        duracion: finalDuration || undefined, // Guardar solo el número sin "m"
-        notificacion_barbero: initial?.notificacion_barbero || undefined,
-        notificacion_cliente: initial?.notificacion_cliente || undefined,
-        metodo_pago: initial?.metodo_pago || undefined,
-        created_at: initial?.created_at || undefined,
-        updated_at: initial?.updated_at || undefined,
-      };
-
-      await onSave(appointmentData);
-      onOpenChange(false);
-      
-      // Resetear el formulario
-      setClientId(null);
-      setClientName("");
-      setServiceId(null);
-      setServiceName("");
-      setDuration(""); // Resetear duración
-      setBarberId(null);
-      setBarberName("");
-      setDate(getLocalDateString(new Date()));
-      setTime("");
-      setNote("");
-      setClientPhone(null);
-    } catch (error) {
-      console.error("Error al guardar el turno:", error);
-      alert("Error al guardar el turno. Por favor intente nuevamente.");
-    } finally {
+const handleSubmit = async () => {
+  setIsSubmitting(true);
+  
+  try {
+    // Validaciones básicas
+    if (!clientName) {
+      alert("Por favor seleccione un cliente");
       setIsSubmitting(false);
+      return;
     }
-  };
+    
+    if (!serviceName) {
+      alert("Por favor seleccione un servicio");
+      setIsSubmitting(false);
+      return;
+    }
+    
+    if (!barberName) {
+      alert("Por favor seleccione un barbero");
+      setIsSubmitting(false);
+      return;
+    }
+    
+    if (!date || !time) {
+      alert("Por favor seleccione fecha y hora");
+      setIsSubmitting(false);
+      return;
+    }
+    
+    // ✅ OBTENER Y VALIDAR DURACIÓN
+    let finalDuration = duration || '';
+    
+    if (!finalDuration && serviceId) {
+      const selectedService = serviciosData?.find((s: Service) => s.id_servicio === serviceId);
+      if (selectedService && selectedService.duracion_minutos) {
+        finalDuration = selectedService.duracion_minutos.toString();
+      }
+    }
+    
+    if (!finalDuration) {
+      alert("No se pudo determinar la duración del servicio");
+      setIsSubmitting(false);
+      return;
+    }
+    
+    // ✅ OBTENER Y VALIDAR TELÉFONO
+    let finalPhone = clientPhone;
+    
+    if (clientId && !clientPhone) {
+      const selectedClient = clientesData?.find((c: Client) => c.id_cliente === clientId);
+      if (selectedClient?.telefono) {
+        finalPhone = selectedClient.telefono;
+        setClientPhone(selectedClient.telefono);
+      } else {
+        alert("El cliente seleccionado no tiene teléfono registrado. Por favor actualice sus datos.");
+        setIsSubmitting(false);
+        return;
+      }
+    }
+    
+    if (!finalPhone || finalPhone.trim() === '') {
+      alert("El teléfono del cliente es obligatorio");
+      setIsSubmitting(false);
+      return;
+    }
+    
+    if (!isValidPhoneNumberLocal(finalPhone)) {
+      alert("El formato del teléfono debe ser: 09xxxxxxx, 9xxxxxxx o +5989xxxxxxx");
+      setIsSubmitting(false);
+      return;
+    }
+    
+    const normalizedPhone = normalizePhoneNumberLocal(finalPhone);
+    
+    // ✅ OBTENER PRECIO DEL SERVICIO
+    const selectedService = serviciosData?.find((s: Service) => s.id_servicio === serviceId);
+    const ticket = selectedService?.precio || null;
+    
+    // ✅ CONSTRUIR OBJETO COMPLETO
+    const appointmentData: Partial<Appointment> = {
+      fecha: date,
+      hora: time,
+      cliente_nombre: clientName,
+      servicio: serviceName,
+      barbero: barberName,
+      telefono: normalizedPhone,
+      id_barbero: barberId || '',
+      id_sucursal: selectedSucursalId || '',
+      id_barberia: idBarberia || '',
+      duracion: finalDuration,  // ✅ Ahora está definido
+      estado: initial?.estado || "pendiente",
+      nota: note?.trim() || null,
+      id_cliente: clientId || null,
+      id_servicio: serviceId || null,
+      ticket: ticket || undefined,
+      nro_factura: initial?.nro_factura || undefined,
+      notificacion_barbero: initial?.notificacion_barbero || undefined,
+      notificacion_cliente: initial?.notificacion_cliente || undefined,
+      metodo_pago: initial?.metodo_pago || undefined,
+      created_at: initial?.created_at || undefined,
+      updated_at: initial?.updated_at || undefined,
+    };
+    
+    console.log('📤 appointmentData con teléfono:', appointmentData);
+    
+    await onSave(appointmentData);
+    onOpenChange(false);
+    
+    // Resetear formulario
+    setClientId(null);
+    setClientName("");
+    setServiceId(null);
+    setServiceName("");
+    setDuration("");
+    setBarberId(null);
+    setBarberName("");
+    setDate(getLocalDateString(new Date()));
+    setTime("");
+    setNote("");
+    setClientPhone(null);
+    
+  } catch (error) {
+    console.error("Error al guardar el turno:", error);
+    alert("Error al guardar el turno. Por favor intente nuevamente.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+
+
+
+
+
+
+
 
   const handleClose = () => {
     onOpenChange(false);

@@ -400,3 +400,120 @@ a:hover {
 .nav-logo.font-bold {
   font-weight: 700 !important;
 }
+
+/* Estilos para el Bottom Navigation */
+.bottom-nav {
+  height: 64px;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 165, 0, 0.2);
+}
+
+.bottom-nav-item {
+  transition: all 0.2s ease;
+  padding: 8px 0;
+}
+
+.bottom-nav-item:hover {
+  transform: scale(1.05);
+}
+
+.bottom-nav-item.active {
+  color: #ff7700;
+  transform: scale(1.05);
+}
+
+/* Media queries for mobile devices (≤768px) */
+@media (max-width: 768px) {
+  /* Ajustes para móviles */
+  .dashboard {
+    padding: 15px;
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  /* Ajustes de tipografía para móviles */
+  h1 {
+    font-size: 1.5rem;
+  }
+  
+  h2 {
+    font-size: 1.25rem;
+  }
+  
+  /* Reducción de espaciado en móviles */
+  .qoder-dark-container {
+    padding: 0.75rem;
+  }
+  
+  .qoder-dark-card {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .qoder-dark-window-content {
+    padding: 0.75rem;
+  }
+  
+  /* Ajustes para inputs en móviles */
+  .qoder-dark-input,
+  .qoder-dark-select,
+  .qoder-dark-search-box,
+  .qoder-dark-filter-box {
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+  
+  /* Ajustes para botones en móviles */
+  .qoder-dark-button,
+  .qoder-dark-button-primary,
+  .action-button,
+  .cancel-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  /* Ajustes para tablas en móviles */
+  .qoder-dark-table th,
+  .qoder-dark-table td {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Media queries for tablet and desktop devices (>768px) */
+@media (min-width: 769px) {
+  .dashboard {
+    padding: 25px;
+  }
+  
+  .dashboard-grid {
+    gap: 20px;
+  }
+  
+  /* Ajustes de tipografía para tablets y desktop */
+  h1 {
+    font-size: 1.75rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  /* Ajustes para contenedores en tablets y desktop */
+  .qoder-dark-container {
+    padding: 1.25rem;
+  }
+  
+  .qoder-dark-card {
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .qoder-dark-window-content {
+    padding: 1.25rem;
+  }
+}

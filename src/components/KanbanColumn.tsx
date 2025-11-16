@@ -43,14 +43,14 @@ export function KanbanColumn({ column, tasks, onEdit }: KanbanColumnProps) {
 
   return (
     // Contenedor principal de la columna que ocupa todo el alto disponible
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full w-full">
       {/* 
         Encabezado de la columna con:
         - Título de la columna
         - Número de tareas en la columna
         - Color de fondo según el tipo de columna
       */}
-      <h2 className={`text-lg font-bold p-2 rounded-t-lg ${getColumnColorClasses(column.color)} bg-opacity-20`}>
+      <h2 className={`text-lg font-bold p-2 rounded-t-lg ${getColumnColorClasses(column.color)} bg-opacity-40`}>
         {column.title} ({column.taskIds.length})
       </h2>
       
@@ -72,11 +72,11 @@ export function KanbanColumn({ column, tasks, onEdit }: KanbanColumnProps) {
             // Props necesarios para la funcionalidad de droppable
             {...provided.droppableProps}
             // Estilos condicionales según si hay un drag en progreso sobre esta columna
-            className={`flex-grow p-2 min-h-[100px] rounded-b-lg ${
+            className={`flex-grow p-2 min-h-[100px] rounded-b-lg w-full ${
               snapshot.isDraggingOver 
                 ? "bg-gray-700" 
                 : "bg-gray-800"
-            } bg-opacity-10`}
+            } bg-opacity-40`}
           >
             {/* 
               Mapeamos y renderizamos las tareas de la columna

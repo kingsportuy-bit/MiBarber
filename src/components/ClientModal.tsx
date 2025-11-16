@@ -5,37 +5,7 @@ import { useFormData } from "@/hooks/useFormData";
 import type { Client } from "@/types/db";
 import { CustomDatePicker } from "@/components/CustomDatePicker";
 
-// Función para normalizar números de teléfono
-const normalizePhoneNumber = (phone: string): string => {
-  // Eliminar todos los caracteres que no sean dígitos
-  const cleaned = phone.replace(/\D/g, '');
-  
-  // Si el número comienza con 0, reemplazarlo con +598
-  if (cleaned.startsWith('0')) {
-    return '+598' + cleaned.substring(1);
-  }
-  
-  // Si ya tiene el código de país, devolverlo tal cual
-  if (cleaned.startsWith('598')) {
-    return '+' + cleaned;
-  }
-  
-  // En otros casos, agregar el código de país
-  return '+598' + cleaned;
-};
-
-// Función para validar el formato del número de teléfono
-const isValidPhoneNumber = (phone: string): boolean => {
-  // Eliminar espacios y caracteres especiales para la validación
-  const cleaned = phone.replace(/\D/g, '');
-  
-  // Validar formato uruguayo: 09xxxxxxx (8 dígitos) o +5989xxxxxxx (11 dígitos)
-  return (
-    (cleaned.startsWith('0') && cleaned.length === 8) || // 09xxxxxxx
-    (cleaned.startsWith('598') && cleaned.length === 11) || // +5989xxxxxxx
-    (cleaned.startsWith('9') && cleaned.length === 7) // 9xxxxxxx (sin el 0 inicial)
-  );
-};
+import { normalizePhoneNumber, isValidPhoneNumber } from "@/shared/utils/phoneUtils";
 
 type Props = {
   open: boolean;

@@ -70,6 +70,7 @@ export function KanbanBoard({
   selectedAppointment,
   setSelectedAppointment
 }: KanbanBoardProps) {
+  console.log('KanbanBoard props:', { isCreateModalOpen, selectedAppointment });
   const { filters } = useGlobalFilters();
   const [currentDate, setCurrentDate] = useState<Date>(() => {
     // Usar la fecha ajustada a la zona horaria local
@@ -92,6 +93,12 @@ export function KanbanBoard({
     sucursalId: filters.sucursalId || undefined,
     fecha: getLocalDateString(currentDate), // Usar nuestra función unificada
     barberoId: filters.barberoId || undefined,
+  });
+  
+  // Hook para crear citas
+  const { createMutation } = useCitas({
+    sucursalId: filters.sucursalId || undefined,
+    barberoId: filters.barberoId || undefined
   });
   
   const { mutateAsync: updateCita } = useUpdateCita();
@@ -201,10 +208,63 @@ export function KanbanBoard({
   };
   
   const handleSaveAppointment = async (values: Partial<Appointment>) => {
-    // Aquí iría la lógica para guardar la cita
-    console.log("Guardando cita:", values);
-    setModalOpen(false);
-    setAppointment(null);
+    try {
+      // Verificar si es una actualización o creación
+      if (values.id_cita) {
+        // Actualizar turno existente
+        await updateCita({
+          id_cita: values.id_cita,
+          ...values
+        });
+        toast.success("Turno actualizado correctamente");
+      } else {
+        // Crear nuevo turno
+        // Asegurarse de que los campos requeridos estén presentes
+        const appointmentToCreate: Omit<Appointment, "id_cita"> = {
+          fecha: values.fecha || "",
+          hora: values.hora || "",
+          cliente_nombre: values.cliente_nombre || "",
+          servicio: values.servicio || "",
+          estado: values.estado || "pendiente",
+          nota: values.nota || null,
+          creado: values.creado || new Date().toISOString(),
+          id_cliente: values.id_cliente || null,
+          duracion: values.duracion || "30m",
+          notificacion_barbero: values.notificacion_barbero || null,
+          notificacion_cliente: values.notificacion_cliente || null,
+          ticket: values.ticket || null,
+          nro_factura: values.nro_factura || null,
+          barbero: values.barbero || "",
+          metodo_pago: values.metodo_pago || null,
+          id_barberia: values.id_barberia || null,
+          id_sucursal: values.id_sucursal || filters.sucursalId || "",
+          id_barbero: values.id_barbero || filters.barberoId || null,
+          created_at: values.created_at || new Date().toISOString(),
+          updated_at: values.updated_at || new Date().toISOString()
+        };
+        
+        await createMutation.mutateAsync(appointmentToCreate);
+        toast.success("Turno creado correctamente");
+      }
+      
+      // Cerrar el modal y limpiar la cita seleccionada
+      setModalOpen(false);
+      setAppointment(null);
+      
+      // Refrescar los datos
+      await refetch();
+    } catch (error) {
+      console.error("Error al guardar el turno:", error);
+      console.error("Tipo de error:", typeof error);
+      console.error("Error detallado:", JSON.stringify(error, null, 2));
+      if (error instanceof Error) {
+        toast.error(`Error al guardar el turno: ${error.message}`);
+      } else if (typeof error === 'object' && error !== null && 'message' in error) {
+        toast.error(`Error al guardar el turno: ${(error as { message: string }).message}`);
+      } else {
+        toast.error("Error al guardar el turno");
+      }
+    }
   };
   
   // Función para manejar la edición de una cita
@@ -343,9 +403,9 @@ export function KanbanBoard({
         </div>
       </div>
       
-      {/* Tablero Kanban principal */}
+      {/* Tablero Kanban principal - visible solo en pantallas medianas y grandes */}
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="hidden md:grid md:grid-cols-3 gap-6 w-full">
           {Object.values(columns).map((column) => {
             const columnTasks = column.taskIds.map(taskId => {
               const kanbanTask = kanbanTasks[taskId];
@@ -363,6 +423,23 @@ export function KanbanBoard({
           })}
         </div>
       </DragDropContext>
+      
+      {/* Mensaje para dispositivos móviles */}
+      <div className="md:hidden text-center py-8">
+        <div className="bg-qoder-dark-bg-secondary rounded-lg p-6 max-w-md mx-auto">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-qoder-dark-text-secondary mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+          </svg>
+          <h3 className="text-xl font-bold text-qoder-dark-text-primary mb-2">Vista de Tablero No Disponible</h3>
+          <p className="text-qoder-dark-text-secondary mb-4">
+            El tablero Kanban está optimizado para pantallas más grandes. 
+            Para una mejor experiencia, accede desde una tablet o computadora.
+          </p>
+          <p className="text-sm text-qoder-dark-text-muted">
+            En dispositivos móviles, utiliza la vista de agenda para gestionar tus turnos.
+          </p>
+        </div>
+      </div>
       
       {/* Modal de nuevo turno */}
       {appointment && (

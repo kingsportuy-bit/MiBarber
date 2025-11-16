@@ -256,11 +256,13 @@ export function NavBar() {
             </Link>
           )}
           
-          {/* Menú móvil */}
-          <MobileMenu 
-            isOpen={isMobileMenuOpen}
-            onClose={() => setIsMobileMenuOpen(false)}
-          />
+          {/* Menú móvil - ocultar en pantallas pequeñas donde aparece BottomNav */}
+          <div className="md:hidden">
+            <MobileMenu 
+              isOpen={isMobileMenuOpen}
+              onClose={() => setIsMobileMenuOpen(false)}
+            />
+          </div>
           
           {/* Botón de logout para móviles */}
           {authState.isAuthenticated && (

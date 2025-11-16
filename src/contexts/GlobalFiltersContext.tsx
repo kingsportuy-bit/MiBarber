@@ -73,41 +73,53 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
     }
   }, [filters]);
 
+  // Estado para controlar si los filtros por defecto ya se han aplicado
+  const [defaultFiltersApplied, setDefaultFiltersApplied] = useState(false);
+
   // Efecto para establecer la sucursal por defecto - solo una vez cuando se cargan las sucursales
   useEffect(() => {
-    if (sucursales && sucursales.length > 0 && !filters.sucursalId) {
-      // Para barberos normales, seleccionar automáticamente su sucursal
+    // Solo aplicar filtros por defecto si no se han aplicado aún
+    if (!defaultFiltersApplied) {
+      // Para barberos normales, seleccionar automáticamente su sucursal y barbero
       if (!isAdmin && barbero?.id_sucursal) {
         setFilters(prev => ({
           ...prev,
-          sucursalId: barbero.id_sucursal
+          sucursalId: barbero.id_sucursal,
+          barberoId: barbero.id_barbero || null
         }));
         setBarberoIdFilter(barbero.id_sucursal);
-      } else if (isAdmin && sucursales[0]) {
-        // Para administradores, seleccionar la primera sucursal por defecto
+      } else if (isAdmin && sucursales && sucursales.length > 0) {
+        // Para administradores, seleccionar la primera sucursal por defecto (sin barbero específico)
         setFilters(prev => ({
           ...prev,
           sucursalId: sucursales[0].id
         }));
         setBarberoIdFilter(sucursales[0].id);
       }
+      
+      // Marcar que se han aplicado los filtros por defecto
+      setDefaultFiltersApplied(true);
     }
-  }, [sucursales, isAdmin, barbero?.id_sucursal, filters.sucursalId]); // Añadido filters.sucursalId y sucursales como dependencias
+  }, [sucursales, isAdmin, barbero, defaultFiltersApplied]);
 
   // Efecto para establecer el barbero por defecto - solo para barberos normales
+  // Este efecto se ejecuta cuando se carga el barbero y no hay barbero seleccionado aún
   useEffect(() => {
-    if (!isAdmin && barbero?.id_barbero && !filters.barberoId) {
+    if (!isAdmin && barbero?.id_barbero && !filters.barberoId && defaultFiltersApplied) {
       setFilters(prev => ({
         ...prev,
         barberoId: barbero.id_barbero
       }));
     }
-  }, [barbero?.id_barbero, isAdmin, filters.barberoId]); // Añadido filters.barberoId como dependencia
+  }, [barbero?.id_barbero, isAdmin, filters.barberoId, defaultFiltersApplied]);
 
   // Efecto para actualizar barberoIdFilter cuando cambia la sucursal
   useEffect(() => {
     if (filters.sucursalId) {
       setBarberoIdFilter(filters.sucursalId);
+    } else {
+      // Cuando no hay sucursal seleccionada (Todas las sucursales), cargar todos los barberos
+      setBarberoIdFilter(undefined);
     }
   }, [filters.sucursalId]);
 
@@ -134,6 +146,9 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
     }
     
     setFilters(newFilters);
+    
+    // Reiniciar el estado de filtros por defecto aplicados
+    setDefaultFiltersApplied(false);
   };
 
   // Valor del contexto

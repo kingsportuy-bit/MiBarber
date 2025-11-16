@@ -86,7 +86,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
       {/* Menú desplegable */}
       {menuOpen && (
-        <div className="dropdown-menu absolute top-12 left-0 right-0 z-50">
+        <div className="dropdown-menu absolute top-12 left-0 right-0 z-50 animate-fadeInDown">
           <div className="px-2 pt-2 pb-3 space-y-1">
             {tabs.map((tab) => {
               const active = pathname === tab.href;

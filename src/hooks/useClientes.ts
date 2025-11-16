@@ -78,9 +78,7 @@ export function useClientes(
         const s = search.trim().toLowerCase();
         console.log("🔍 Aplicando búsqueda:", s);
         
-        // Usar la misma lógica que en el modal de citas
-        // Filtrar clientes localmente después de obtener todos los datos
-        // Esto es más confiable que las consultas OR complejas
+        // Primero ejecutar la consulta con los filtros existentes
         const { data, error } = await q;
         
         if (error) {
@@ -97,11 +95,54 @@ export function useClientes(
         // Filtrar los resultados localmente
         if (data && data.length > 0) {
           const filteredData = data.filter(
-            (cliente: Client) =>
-              cliente.nombre.toLowerCase().includes(s) ||
-              (cliente.telefono && cliente.telefono.toLowerCase().includes(s)) ||
-              (cliente.id_cliente && cliente.id_cliente.toLowerCase().includes(s)) ||
-              (cliente.notas && cliente.notas.toLowerCase().includes(s))
+            (cliente: Client) => {
+              try {
+                // Verificar que cliente tenga los campos necesarios
+                if (!cliente) return false;
+                
+                // Buscar en nombre (coincidencia parcial)
+                if (cliente.nombre && cliente.nombre.toLowerCase().includes(s)) {
+                  console.log("✅ Coincidencia en nombre:", cliente.nombre);
+                  return true;
+                }
+                
+                // Buscar en teléfono (solo si la búsqueda contiene números)
+                if (cliente.telefono && /\d/.test(s)) {
+                  // Normalizar solo si la búsqueda contiene dígitos
+                  const normalizedSearch = s.replace(/\D/g, ''); // Eliminar caracteres no numéricos
+                  if (normalizedSearch) {
+                    const normalizedPhone = cliente.telefono.replace(/\D/g, '');
+                    if (normalizedPhone.includes(normalizedSearch)) {
+                      console.log("✅ Coincidencia en teléfono:", cliente.telefono);
+                      return true;
+                    }
+                  }
+                }
+                
+                // Buscar en teléfono (coincidencia parcial para búsquedas que no son solo números)
+                if (cliente.telefono && !/\d/.test(s) && cliente.telefono.toLowerCase().includes(s)) {
+                  console.log("✅ Coincidencia en teléfono (texto):", cliente.telefono);
+                  return true;
+                }
+                
+                // Buscar en id_cliente
+                if (cliente.id_cliente && cliente.id_cliente.toLowerCase().includes(s)) {
+                  console.log("✅ Coincidencia en ID:", cliente.id_cliente);
+                  return true;
+                }
+                
+                // Buscar en notas
+                if (cliente.notas && cliente.notas.toLowerCase().includes(s)) {
+                  console.log("✅ Coincidencia en notas:", cliente.notas);
+                  return true;
+                }
+                
+                return false;
+              } catch (filterError) {
+                console.error("❌ Error filtrando cliente:", filterError);
+                return false;
+              }
+            }
           );
           console.log("✅ Clientes obtenidos y filtrados:", filteredData.length);
           return filteredData as Client[];

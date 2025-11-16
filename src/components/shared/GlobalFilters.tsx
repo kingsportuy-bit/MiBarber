@@ -33,10 +33,19 @@ export function GlobalFilters({
     return null;
   }
 
+  // Filtrar barberos por sucursal seleccionada
+  // Si no hay sucursal seleccionada (Todas las sucursales), mostrar todos los barberos
+  // Si hay una sucursal seleccionada, mostrar solo los barberos de esa sucursal
+  const barberosFiltrados = filters.sucursalId 
+    ? barberos?.filter((b: any) => b.id_sucursal === filters.sucursalId)
+    : barberos;
+
   const handleSucursalChange = (value: string | undefined) => {
     setFilters(prev => ({
       ...prev,
-      sucursalId: value || null
+      sucursalId: value || null,
+      // Resetear el filtro de barbero cuando cambia la sucursal
+      barberoId: null
     }));
   };
 
@@ -69,14 +78,14 @@ export function GlobalFilters({
   ].filter(Boolean).length;
 
   const gridColsClass = visibleFilters > 0 
-    ? `grid grid-cols-1 ${visibleFilters >= 2 ? 'md:grid-cols-2' : ''} ${visibleFilters >= 3 ? 'lg:grid-cols-4' : visibleFilters >= 2 ? 'lg:grid-cols-2' : ''} gap-4`
+    ? `grid grid-cols-1 ${visibleFilters >= 2 ? 'md:grid-cols-2' : ''} ${visibleFilters >= 3 ? 'lg:grid-cols-4' : visibleFilters >= 2 ? 'lg:grid-cols-2' : ''} gap-4 w-full`
     : 'hidden';
 
   return (
     <div className={`${gridColsClass} ${className}`}>
       {/* Filtro por sucursal */}
       {showSucursalFilter && (
-        <div>
+        <div className="w-full">
           <label htmlFor="sucursal-filter" className="block text-xs font-medium text-qoder-dark-text-primary mb-1">
             Sucursal
           </label>
@@ -105,7 +114,7 @@ export function GlobalFilters({
 
       {/* Filtro por barbero */}
       {showBarberoFilter && (
-        <div>
+        <div className="w-full">
           <label htmlFor="barbero-filter" className="block text-xs font-medium text-qoder-dark-text-primary mb-1">
             Barbero
           </label>
@@ -121,7 +130,7 @@ export function GlobalFilters({
             ) : (
               <>
                 <option value="">Todos los barberos</option>
-                {barberos?.map((barbero: any) => (
+                {barberosFiltrados?.map((barbero: any) => (
                   <option key={barbero.id_barbero} value={barbero.id_barbero}>
                     {barbero.nombre}
                   </option>

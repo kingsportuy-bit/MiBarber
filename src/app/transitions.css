@@ -1,0 +1,332 @@
+/* Transitions and animations for smooth mobile experience */
+
+/* Page transition animations */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.page-transition-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* Fade in animation */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Slide up animation */
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Scale animation for touch feedback */
+.scale-animation {
+  transition: transform 0.2s ease;
+}
+
+.scale-animation:active {
+  transform: scale(0.95);
+}
+
+/* Smooth hover transitions */
+.hover-smooth {
+  transition: all 0.2s ease;
+}
+
+.hover-smooth:hover {
+  transform: translateY(-2px);
+}
+
+/* Bottom navigation item animation */
+.bottom-nav-item {
+  transition: all 0.2s ease;
+}
+
+.bottom-nav-item:active {
+  transform: scale(0.95);
+}
+
+/* Button press effect */
+.button-press {
+  transition: all 0.1s ease;
+}
+
+.button-press:active {
+  transform: scale(0.98);
+  opacity: 0.8;
+}
+
+/* Card hover effect */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Modal entrance animation */
+.modal-enter {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.modal-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.modal-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.modal-exit-active {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* Loading spinner animation */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Pulse animation for loading states */
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Bounce animation for notifications */
+.bounce {
+  animation: bounce 0.5s ease infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Shake animation for errors */
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* Fade in up animation */
+.fade-in-up {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade in down animation */
+.fade-in-down {
+  animation: fadeInDown 0.3s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade in left animation */
+.fade-in-left {
+  animation: fadeInLeft 0.3s ease-out;
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Fade in right animation */
+.fade-in-right {
+  animation: fadeInRight 0.3s ease-out;
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Staggered animations */
+.staggered-animation {
+  animation: staggeredFadeIn 0.5s ease-out;
+}
+
+@keyframes staggeredFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Delayed animations */
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+.delay-300 {
+  animation-delay: 0.3s;
+}
+
+.delay-400 {
+  animation-delay: 0.4s;
+}
+
+.delay-500 {
+  animation-delay: 0.5s;
+}
+
+/* Mobile-specific animations */
+@media (max-width: 768px) {
+  /* Disable hover effects on mobile */
+  .hover-smooth:hover {
+    transform: none;
+  }
+  
+  /* Touch-friendly animations */
+  .touch-scale:active {
+    transform: scale(0.98);
+  }
+  
+  /* Faster animations on mobile */
+  .page-transition-enter-active {
+    transition: opacity 200ms, transform 200ms;
+  }
+  
+  .page-transition-exit-active {
+    transition: opacity 200ms, transform 200ms;
+  }
+  
+  .modal-enter-active {
+    transition: opacity 200ms, transform 200ms;
+  }
+  
+  .modal-exit-active {
+    transition: opacity 200ms, transform 200ms;
+  }
+}
+
+/* Tablet animations */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .page-transition-enter-active {
+    transition: opacity 250ms, transform 250ms;
+  }
+  
+  .page-transition-exit-active {
+    transition: opacity 250ms, transform 250ms;
+  }
+}
+
+/* Desktop animations */
+@media (min-width: 1025px) {
+  .hover-smooth:hover {
+    transform: translateY(-2px);
+  }
+}

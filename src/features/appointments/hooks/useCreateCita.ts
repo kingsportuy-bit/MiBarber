@@ -2,8 +2,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 import type { Appointment } from '@/types/db';
-import type { CreateCitaData } from '../types';
-import { useBloqueosPorDia } from "@/hooks/useBloqueosBarbero";
 
 export interface CreateCitaResult {
   mutate: (newCita: Omit<Appointment, "id_cita">) => void;
@@ -20,54 +18,57 @@ export function useCreateCita(): CreateCitaResult {
 
   const mutation = useMutation({
     mutationFn: async (newCita: Omit<Appointment, "id_cita">) => {
-      // Validar que los campos requeridos estén presentes
-      const requiredFields: (keyof Omit<Appointment, "id_cita">)[] = [
+      // TODOS los campos son requeridos EXCEPTO 'nota'
+      const requiredFields: (keyof Omit<Appointment, "id_cita" | "nota">)[] = [
         "fecha", 
         "hora", 
         "cliente_nombre", 
         "servicio", 
         "barbero",
-        "id_sucursal",
-        "id_barberia"
+        "telefono",        // ✅ OBLIGATORIO
+        "id_barbero",      // ✅ OBLIGATORIO
+        "id_sucursal",     // ✅ OBLIGATORIO
+        "id_barberia",     // ✅ OBLIGATORIO
+        "duracion"         // ✅ OBLIGATORIO
       ];
       
       const missingFields = requiredFields.filter(field => {
-        return newCita[field] === undefined || newCita[field] === null || newCita[field] === "";
+        const value = newCita[field];
+        return value === undefined || value === null || value === "";
       });
       
       if (missingFields.length > 0) {
         const errorMsg = `Faltan campos requeridos para crear el turno: ${missingFields.join(", ")}`;
+        console.error('❌ Campos faltantes:', missingFields);
+        console.error('📋 Datos recibidos:', newCita);
         throw new Error(errorMsg);
       }
       
       // Verificar si la fecha y hora están bloqueadas
-      if (newCita.id_sucursal && newCita.fecha) {
-        // Obtener los bloqueos para el día
+      if (newCita.id_sucursal && newCita.fecha && newCita.id_barbero) {
         const { data: bloqueos } = await supabase
           .from("mibarber_bloqueos_barbero")
           .select("*")
           .eq("id_sucursal", newCita.id_sucursal)
           .eq("fecha", newCita.fecha)
-          .eq("id_barbero", newCita.id_barbero || '');
+          .eq("id_barbero", newCita.id_barbero);
         
-        // Verificar si hay un bloqueo de día completo
+        // Verificar bloqueo de día completo
         const bloqueoDiaCompleto = bloqueos?.some(bloqueo => bloqueo.tipo === 'bloqueo_dia');
         
         if (bloqueoDiaCompleto) {
           throw new Error("No se puede crear una cita en un día bloqueado completo");
         }
         
-        // Verificar si la hora está dentro de un bloqueo de horas o descanso
+        // Verificar bloqueo de horario
         if (bloqueos && bloqueos.length > 0 && newCita.hora) {
           const horaCita = newCita.hora.slice(0, 5); // HH:mm
           
           const bloqueoHorario = bloqueos.some(bloqueo => {
-            // Solo considerar bloqueos de horas o descansos
             if (bloqueo.tipo !== 'descanso' && bloqueo.tipo !== 'bloqueo_horas') {
               return false;
             }
             
-            // Verificar si la cita cae dentro del rango del bloqueo
             if (bloqueo.hora_inicio && bloqueo.hora_fin) {
               return horaCita >= bloqueo.hora_inicio && horaCita < bloqueo.hora_fin;
             }
@@ -81,100 +82,71 @@ export function useCreateCita(): CreateCitaResult {
         }
       }
       
-      // Asegurar que el estado tenga un valor por defecto
-      const citaToInsert = {
-        ...newCita,
-        estado: newCita.estado || "pendiente"
+      // Construir el objeto para insertar - TODOS los campos menos 'nota'
+      const citaToInsert: any = {
+        // Campos obligatorios básicos
+        fecha: newCita.fecha,
+        hora: newCita.hora,
+        cliente_nombre: newCita.cliente_nombre,
+        servicio: newCita.servicio,
+        barbero: newCita.barbero,
+        estado: newCita.estado || "pendiente",
+        
+        // IDs obligatorios
+        id_barberia: newCita.id_barberia,
+        id_sucursal: newCita.id_sucursal,
+        id_barbero: newCita.id_barbero,
+        
+        // Datos del cliente obligatorios
+        telefono: newCita.telefono,
+        
+        // Servicio obligatorio
+        duracion: newCita.duracion,
+        id_servicio: newCita.id_servicio || null,
+        
+        // Pago (si viene)
+        ticket: newCita.ticket || null,
+        metodo_pago: newCita.metodo_pago || null,
+        
+        // Cliente (si existe)
+        id_cliente: newCita.id_cliente || null,
+        
+        // Notificaciones
+        notificacion_barbero: newCita.notificacion_barbero || "no",
+        notificacion_cliente: newCita.notificacion_cliente || "no",
+        
+        // ÚNICO CAMPO OPCIONAL
+        nota: newCita.nota || null
       };
       
-      // Limpiar campos que pueden no existir en la tabla
-      let cleanedCita: any = { ...citaToInsert };
-      
-      // Eliminar campos que pueden no existir en la tabla
-      delete cleanedCita.creado;
-      delete cleanedCita.duracion;
-      delete cleanedCita.id_barbero;
-      delete cleanedCita.id_servicio;
-      delete cleanedCita.metodo_pago;
-      
-      // Solo incluir campos que existen en newCita y tienen valor
-      if (newCita.creado) {
-        cleanedCita.creado = newCita.creado;
-      }
-      
-      if (newCita.duracion) {
-        cleanedCita.duracion = newCita.duracion;
-      }
-      
-      if (newCita.id_barbero) {
-        cleanedCita.id_barbero = newCita.id_barbero;
-      }
-      
-      if (newCita.id_servicio) {
-        cleanedCita.id_servicio = newCita.id_servicio;
-      }
-      
-      if (newCita.metodo_pago) {
-        cleanedCita.metodo_pago = newCita.metodo_pago;
-      }
+      console.log('📤 Datos a insertar en BD:', citaToInsert);
       
       try {
-        const { data, error } = await (supabase as any)
+        const { data, error } = await supabase
           .from("mibarber_citas")
-          .insert([cleanedCita])
+          .insert([citaToInsert])
           .select()
           .single();
         
         if (error) {
-          // Si el error es por columnas que no existen, intentar de nuevo con solo los campos básicos
-          if (error.message && (
-            error.message.includes("creado") || 
-            error.message.includes("duracion") || 
-            error.message.includes("id_barbero") || 
-            error.message.includes("id_servicio") || 
-            error.message.includes("metodo_pago")
-          )) {
-            const basicCita: any = { 
-              fecha: cleanedCita.fecha,
-              hora: cleanedCita.hora,
-              cliente_nombre: cleanedCita.cliente_nombre,
-              servicio: cleanedCita.servicio,
-              barbero: cleanedCita.barbero,
-              estado: cleanedCita.estado || "pendiente"
-            };
-            
-            // Solo incluir campos que existen en cleanedCita
-            if (cleanedCita.id_sucursal) basicCita.id_sucursal = cleanedCita.id_sucursal;
-            if (cleanedCita.id_barberia) basicCita.id_barberia = cleanedCita.id_barberia;
-            if (cleanedCita.id_cliente) basicCita.id_cliente = cleanedCita.id_cliente;
-            if (cleanedCita.ticket) basicCita.ticket = cleanedCita.ticket;
-            if (cleanedCita.nota) basicCita.nota = cleanedCita.nota;
-            
-            const { data: retryData, error: retryError } = await (supabase as any)
-              .from("mibarber_citas")
-              .insert([basicCita])
-              .select()
-              .single();
-              
-            if (retryError) {
-              throw retryError;
-            }
-            
-            return retryData as Appointment;
-          }
-          
-          throw error;
+          console.error('❌ Error de Supabase:', error);
+          throw new Error(`Error en la base de datos: ${error.message}`);
         }
         
+        console.log('✅ Cita creada exitosamente:', data);
         return data as Appointment;
-      } catch (dbError) {
-        throw dbError;
+      } catch (dbError: any) {
+        console.error('💥 Error en la base de datos:', dbError);
+        throw new Error(dbError.message || 'Error desconocido al crear la cita');
       }
     },
     onSuccess: () => {
       // Invalidar todas las consultas de citas
       queryClient.invalidateQueries({ queryKey: ["citas"] });
     },
+    onError: (error: Error) => {
+      console.error('🔴 Error en mutation:', error.message);
+    }
   });
 
   return {

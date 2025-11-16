@@ -1,21 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useClientes, type SortOption } from "@/hooks/useClientes";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
-import { useSucursales } from "@/hooks/useSucursales";
+import { useGlobalFilters } from "@/contexts/GlobalFiltersContext";
+import { GlobalFilters } from "@/components/shared/GlobalFilters";
 import type { Client } from "@/types/db";
 import { ClientModal } from "./ClientModal";
 import { ClientDetailModal } from "./ClientDetailModal";
 import { toast } from "sonner";
 
 export function ClientsTable() {
-  const { idBarberia } = useBarberoAuth();
-  const { sucursales } = useSucursales(idBarberia || undefined);
-  const [selectedSucursal, setSelectedSucursal] = useState<string | undefined>(
-    undefined,
-  );
-  const { barbero: barberoActual, isAdmin } = useBarberoAuth(); // Obtener información del barbero actual
+  const { idBarberia, isAdmin } = useBarberoAuth();
+  const { 
+    filters, 
+    sucursales, 
+    barberos 
+  } = useGlobalFilters();
 
   // Función para convertir puntaje a estrellas con borde dorado y sin relleno
   const getStarsFromScore = (puntaje: number) => {
@@ -72,8 +73,17 @@ export function ClientsTable() {
   const [q, setQ] = useState("");
   // Establecer el orden predeterminado como "último agregado"
   const [sortBy, setSortBy] = useState<SortOption>("ultimo_agregado");
+  
+  // Agregar efecto para verificar cambios en el estado de búsqueda
+  useEffect(() => {
+    console.log("🔍 Estado de búsqueda actualizado:", q);
+  }, [q]);
+  
   const { data, isLoading, createMutation, updateMutation, deleteMutation } =
-    useClientes(q, sortBy, selectedSucursal);
+    useClientes(q, sortBy, filters.sucursalId || undefined); // Usar q para la búsqueda y sucursalId del filtro global
+
+  // Usar todos los clientes filtrados por sucursal
+  const filteredClients = data || [];
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Partial<Client> | undefined>();
@@ -126,7 +136,7 @@ export function ClientsTable() {
           direccion: (values as any).direccion || null,
           // Agregar el ID de barbería y sucursal del usuario actual
           id_barberia: idBarberia || undefined,
-          id_sucursal: selectedSucursal || barberoActual?.id_sucursal || undefined,
+          id_sucursal: filters.sucursalId || undefined,
         };
 
         console.log("Creando nuevo cliente:", newClientData);
@@ -192,61 +202,72 @@ export function ClientsTable() {
     <>
       {/* Implementación directa sin TableLayout */}
       <div className="space-y-4 h-full flex flex-col">
-        {/* Barra de búsqueda y acciones - responsive */}
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-4">
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Buscar por nombre, id o notas"
-              className="qoder-dark-search-box w-full max-w-md py-2 px-3 text-sm md:py-3 md:px-4"
-            />
-            {/* Selector de sucursal - responsive */}
-            {sucursales && sucursales.length > 1 && (
-              <select
-                value={selectedSucursal || ""}
-                onChange={(e) =>
-                  setSelectedSucursal(e.target.value || undefined)
-                }
-                className="qoder-dark-select py-2 px-3 text-sm md:py-3 md:px-4 w-full sm:w-auto"
-              >
-                <option value="">Todas las sucursales</option>
-                {sucursales.map((sucursal) => (
-                  <option key={sucursal.id} value={sucursal.id}>
-                    {sucursal.nombre_sucursal ||
-                      `Sucursal ${sucursal.numero_sucursal}`}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                setEditing(undefined);
-                setOpen(true);
-              }}
-              className="qoder-dark-button-primary px-3 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition text-sm md:px-4 md:py-2 md:text-base"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                />
-              </svg>
-              <span className="hidden sm:inline">Nuevo</span>
-              <span className="sm:hidden">+</span>
-            </button>
-          </div>
+        {/* Filtros globales - solo mostrar filtro de sucursal */}
+        <GlobalFilters showDateFilters={false} showBarberoFilter={false} />
+        
+
+{/* Barra de búsqueda y acciones - responsive */}
+<div className="flex flex-wrap items-center justify-between gap-4">
+  <div className="flex gap-2">
+    <div className="relative">
+      <input
+        type="text"
+        placeholder="Buscar por nombre o teléfono..."
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        className={`qoder-dark-input py-2 px-4 text-sm md:py-3 md:px-5 md:text-base w-full sm:w-64 ${q ? 'pr-10' : 'pr-4'}`}
+      />
+      {q && (
+        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+          <button
+            onClick={() => setQ('')}
+            className="boton-simple"
+            style={{ 
+              background: 'transparent',
+              border: 'none',
+              padding: '0.25rem',
+              cursor: 'pointer',
+              transition: 'none',
+              height: '1.5rem',
+              width: '1.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
+      )}
+    </div>
+    <button
+      onClick={() => {
+        setEditing(undefined);
+        setOpen(true);
+      }}
+      className="qoder-dark-button-primary px-3 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition text-sm md:px-4 md:py-2 md:text-base"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-4 w-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+        />
+      </svg>
+      <span className="hidden sm:inline">Nuevo</span>
+      <span className="sm:hidden">+</span>
+    </button>
+  </div>
+</div>
 
         {/* Contenedor de la tabla con altura responsiva */}
         <div className="bg-qoder-dark-bg-secondary flex-grow flex flex-col h-full overflow-hidden rounded-xl">
@@ -324,26 +345,30 @@ export function ClientsTable() {
                       </td>
                     </tr>
                   )}
-                  {(data || []).map((c, index) => (
+                  {(filteredClients || []).map((c, index) => (
                     <tr
                       key={c.id_cliente}
-                      className={`border-t border-qoder-dark-border-primary hover:bg-qoder-dark-bg-hover transition-all duration-200 ease-in-out transform hover:-translate-y-0.5 ${
-                        index === 0 ? 'first:border-t-0' : ''
-                      }`}
+                      className={`border-t border-qoder-dark-border-primary hover:bg-qoder-dark-bg-hover transition-all duration-150`}
                     >
-                      <td className={`px-3 py-2 font-mono text-xs text-qoder-dark-text-primary bg-qoder-dark-bg-secondary md:px-4 md:py-3 md:text-sm ${
-                        index === 0 ? 'rounded-tl-xl' : ''
-                      } ${
-                        index === (data || []).length - 1 ? 'rounded-bl-xl' : ''
-                      }`}>
-                        {c.telefono || "-"}
+                      <td className="px-3 py-2 max-w-xs bg-qoder-dark-bg-secondary md:px-4 md:py-3">
+                        <div
+                          className="truncate text-xs opacity-80 text-qoder-dark-text-primary md:text-sm"
+                          title={c.telefono || ""}
+                        >
+                          {c.telefono || "-"}
+                        </div>
                       </td>
-                      <td className="px-3 py-2 font-medium text-qoder-dark-text-primary bg-qoder-dark-bg-secondary md:px-4 md:py-3">
-                        {c.nombre}
+                      <td className="px-3 py-2 max-w-xs bg-qoder-dark-bg-secondary md:px-4 md:py-3">
+                        <div
+                          className="truncate text-xs opacity-80 text-qoder-dark-text-primary md:text-sm"
+                          title={c.nombre || ""}
+                        >
+                          {c.nombre || "-"}
+                        </div>
                       </td>
-                      <td className="px-3 py-2 bg-qoder-dark-bg-secondary md:px-4 md:py-3">
+                      <td className="px-3 py-2 text-xs text-qoder-dark-text-secondary bg-qoder-dark-bg-secondary md:px-4 md:py-3 md:text-sm">
                         <div className="flex items-center gap-2">
-                          <span className="text-base md:text-lg">
+                          <span className="text-base">
                             {getStarsFromScore(c.puntaje ?? 0)}
                           </span>
                           <span className="text-xs text-qoder-dark-text-secondary">
@@ -362,11 +387,7 @@ export function ClientsTable() {
                       <td className="px-3 py-2 text-xs text-qoder-dark-text-secondary bg-qoder-dark-bg-secondary md:px-4 md:py-3 md:text-sm">
                         {formatLastInteraction(c.ultima_interaccion)}
                       </td>
-                      <td className={`px-3 py-2 bg-qoder-dark-bg-secondary md:px-4 md:py-3 ${
-                        index === 0 ? 'rounded-tr-xl' : ''
-                      } ${
-                        index === (data || []).length - 1 ? 'rounded-br-xl' : ''
-                      }`}>
+                      <td className={`px-3 py-2 bg-qoder-dark-bg-secondary md:px-4 md:py-3 ${index === 0 ? 'rounded-tr-xl' : ''} ${index === (filteredClients || []).length - 1 ? 'rounded-br-xl' : ''}`}>
                         <div className="flex space-x-2">
                           <button
                             onClick={() => showClientDetails(c)}
@@ -441,7 +462,7 @@ export function ClientsTable() {
                       </td>
                     </tr>
                   ))}
-                  {!isLoading && (data?.length ?? 0) === 0 && (
+                  {!isLoading && (filteredClients?.length ?? 0) === 0 && (
                     <tr>
                       <td
                         className="px-3 py-4 text-center opacity-60 text-qoder-dark-text-primary rounded-b-xl text-sm md:px-4 md:py-6 md:text-base"
@@ -461,7 +482,7 @@ export function ClientsTable() {
                     Cargando…
                   </div>
                 )}
-                {(data || []).map((c) => (
+                {(filteredClients || []).map((c) => (
                   <div 
                     key={c.id_cliente} 
                     className="qoder-dark-card p-4 rounded-lg border border-qoder-dark-border-primary"
@@ -573,7 +594,7 @@ export function ClientsTable() {
                     </div>
                   </div>
                 ))}
-                {!isLoading && (data?.length ?? 0) === 0 && (
+                {!isLoading && (filteredClients?.length ?? 0) === 0 && (
                   <div className="text-center py-6 text-qoder-dark-text-secondary">
                     Sin resultados
                   </div>

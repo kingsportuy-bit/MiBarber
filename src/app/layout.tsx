@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import "./custom-styles.css";
-import { Providers } from "@/components/Providers";
-import { GeneralLayout } from "@/components/GeneralLayout";
-import { ConditionalNavBar } from "@/components/ConditionalNavBar";
-import { GlobalFiltersProvider } from "@/contexts/GlobalFiltersContext";
+import "./responsive.css";
+import "./transitions.css";
+import ClientLayout from "./client-layout";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -15,6 +14,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Barberox",
   description: "Barber shop management system",
+  viewport: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
 };
 
 export default function RootLayout({
@@ -30,14 +30,9 @@ export default function RootLayout({
           <div className="sparkle-1"></div>
           <div className="sparkle-2"></div>
         </div>
-        <Providers>
-          <GlobalFiltersProvider>
-            <ConditionalNavBar />
-            <GeneralLayout>
-              {children}
-            </GeneralLayout>
-          </GlobalFiltersProvider>
-        </Providers>
+        <ClientLayout>
+          {children}
+        </ClientLayout>
       </body>
     </html>
   );

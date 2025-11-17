@@ -264,30 +264,7 @@ export function NavBar() {
             />
           </div>
           
-          {/* Botón de logout para móviles */}
-          {authState.isAuthenticated && (
-            <button
-              onClick={handleLogout}
-              className="md:hidden p-2 rounded-md text-qoder-dark-text-primary hover:text-qoder-dark-accent-orange hover:bg-qoder-dark-bg-hover"
-              title="Cerrar sesión"
-              style={{ fontFamily: "'Roboto', 'Arial', sans-serif", color: '#ffffff' }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
-              </svg>
-            </button>
-          )}
+          {/* Eliminar el botón de logout para móviles ya que ahora está en el menú desplegable */}
         </div>
       </div>
     </nav>

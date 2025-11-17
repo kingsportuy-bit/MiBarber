@@ -2,6 +2,7 @@
 
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { KanbanBoard } from "@/components/KanbanBoard";
+import { MobileAppointmentList } from "@/components/MobileAppointmentList";
 import { useState, useCallback, useEffect } from "react";
 import type { Appointment } from "@/types/db";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
@@ -52,6 +53,11 @@ export default function DashboardPage() {
     };
   }, []);
   
+  const handleEditAppointment = (cita: Appointment) => {
+    setSelectedAppointment(cita);
+    setIsCreateModalOpen(true);
+  };
+  
   return (
     // Contenedor principal para el tablero Kanban
     // Este contenedor será transparente y se adaptará al contenido
@@ -64,12 +70,20 @@ export default function DashboardPage() {
       {/* Contenedor del tablero Kanban */}
       <div className="w-full max-w-[1800px] mx-auto px-4 py-4 md:px-6 md:py-6 flex-1">
         <div className="h-full w-full overflow-x-auto md:overflow-x-visible">
-          <KanbanBoard 
-            isCreateModalOpen={isCreateModalOpen} 
-            setIsCreateModalOpen={setIsCreateModalOpen}
-            selectedAppointment={selectedAppointment}
-            setSelectedAppointment={setSelectedAppointment}
-          />
+          {/* Vista de escritorio - Tablero Kanban */}
+          <div className="hidden md:block">
+            <KanbanBoard 
+              isCreateModalOpen={isCreateModalOpen} 
+              setIsCreateModalOpen={setIsCreateModalOpen}
+              selectedAppointment={selectedAppointment}
+              setSelectedAppointment={setSelectedAppointment}
+            />
+          </div>
+          
+          {/* Vista móvil - Lista de citas */}
+          <div className="md:hidden">
+            <MobileAppointmentList onEdit={handleEditAppointment} />
+          </div>
         </div>
       </div>
       

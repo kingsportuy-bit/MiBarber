@@ -34,8 +34,6 @@ export function GlobalFilters({
   }
 
   // Filtrar barberos por sucursal seleccionada
-  // Si no hay sucursal seleccionada (Todas las sucursales), mostrar todos los barberos
-  // Si hay una sucursal seleccionada, mostrar solo los barberos de esa sucursal
   const barberosFiltrados = filters.sucursalId 
     ? barberos?.filter((b: any) => b.id_sucursal === filters.sucursalId)
     : barberos;
@@ -44,7 +42,6 @@ export function GlobalFilters({
     setFilters(prev => ({
       ...prev,
       sucursalId: value || null,
-      // Resetear el filtro de barbero cuando cambia la sucursal
       barberoId: null
     }));
   };
@@ -70,22 +67,11 @@ export function GlobalFilters({
     }));
   };
 
-  // Calcular el número de columnas según los filtros visibles
-  const visibleFilters = [
-    showSucursalFilter,
-    showBarberoFilter,
-    showDateFilters
-  ].filter(Boolean).length;
-
-  const gridColsClass = visibleFilters > 0 
-    ? `grid grid-cols-1 ${visibleFilters >= 2 ? 'md:grid-cols-2' : ''} ${visibleFilters >= 3 ? 'lg:grid-cols-4' : visibleFilters >= 2 ? 'lg:grid-cols-2' : ''} gap-4 w-full`
-    : 'hidden';
-
   return (
-    <div className={`${gridColsClass} ${className}`}>
+    <div className={`flex flex-wrap gap-3 items-end ${className}`}>
       {/* Filtro por sucursal */}
       {showSucursalFilter && (
-        <div className="w-full">
+        <div className="flex-1 min-w-[200px] max-w-[250px]">
           <label htmlFor="sucursal-filter" className="block text-xs font-medium text-qoder-dark-text-primary mb-1">
             Sucursal
           </label>
@@ -114,7 +100,7 @@ export function GlobalFilters({
 
       {/* Filtro por barbero */}
       {showBarberoFilter && (
-        <div className="w-full">
+        <div className="flex-1 min-w-[200px] max-w-[250px]">
           <label htmlFor="barbero-filter" className="block text-xs font-medium text-qoder-dark-text-primary mb-1">
             Barbero
           </label>
@@ -143,33 +129,29 @@ export function GlobalFilters({
 
       {/* Filtro por fecha de inicio */}
       {showDateFilters && (
-        <div>
+        <div className="flex-1 min-w-[180px] max-w-[220px]">
           <label htmlFor="fecha-inicio-filter" className="block text-xs font-medium text-qoder-dark-text-primary mb-1">
             Fecha Inicio
           </label>
-          <div className="w-full">
-            <CustomDatePicker
-              value={filters.fechaInicio || ""}
-              onChange={handleFechaInicioChange}
-              placeholder="Seleccionar fecha"
-            />
-          </div>
+          <CustomDatePicker
+            value={filters.fechaInicio || ""}
+            onChange={handleFechaInicioChange}
+            placeholder="Seleccionar fecha"
+          />
         </div>
       )}
 
       {/* Filtro por fecha de fin */}
       {showDateFilters && (
-        <div>
+        <div className="flex-1 min-w-[180px] max-w-[220px]">
           <label htmlFor="fecha-fin-filter" className="block text-xs font-medium text-qoder-dark-text-primary mb-1">
             Fecha Fin
           </label>
-          <div className="w-full">
-            <CustomDatePicker
-              value={filters.fechaFin || ""}
-              onChange={handleFechaFinChange}
-              placeholder="Seleccionar fecha"
-            />
-          </div>
+          <CustomDatePicker
+            value={filters.fechaFin || ""}
+            onChange={handleFechaFinChange}
+            placeholder="Seleccionar fecha"
+          />
         </div>
       )}
     </div>

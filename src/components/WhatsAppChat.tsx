@@ -284,7 +284,7 @@ export function WhatsAppChat() {
   return (
     <>
       {/* Versión desktop */}
-      <div className="hidden sm:block h-screen w-full">
+      <div className="hidden md:block h-screen w-full">
         {/* Contenedor principal del chat */}
         <div className="flex h-[calc(100vh-60px)] w-full bg-qoder-dark-bg-secondary overflow-hidden min-w-0 mt-[60px]">
           {/* Panel izquierdo - Lista de chats estilo WhatsApp */}
@@ -654,7 +654,7 @@ export function WhatsAppChat() {
       </div>
 
       {/* Versión móvil */}
-      <div className="block sm:hidden h-screen w-full mt-16 fixed top-0 left-0 z-10">
+      <div className="block md:hidden h-screen w-full mt-16 fixed top-0 left-0 z-10">
         <WhatsAppChatMobile />
       </div>
 

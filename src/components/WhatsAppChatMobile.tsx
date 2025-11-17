@@ -38,12 +38,26 @@ export function WhatsAppChatMobile() {
       if (!showChatList) {
         // Estamos en la vista de chat individual
         window.location.hash = '#chat-view';
+        // Emitir un evento personalizado para notificar que estamos en la vista de chat
+        window.dispatchEvent(new CustomEvent('whatsappChatViewChange', { detail: { showChatList: false } }));
       } else {
         // Estamos en la lista de chats
         window.location.hash = '#chat-list';
+        // Emitir un evento personalizado para notificar que estamos en la lista de chats
+        window.dispatchEvent(new CustomEvent('whatsappChatViewChange', { detail: { showChatList: true } }));
       }
     }
   }, [showChatList]);
+
+  // Limpiar el evento al desmontar el componente
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined') {
+        // Limpiar el estado al salir del componente
+        window.dispatchEvent(new CustomEvent('whatsappChatViewChange', { detail: { showChatList: true } }));
+      }
+    };
+  }, []);
 
   // Función para obtener el nombre del cliente por su ID
   const getClientName = (sessionId: string) => {

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MobileMenu } from "@/components/MobileMenu";
 import { UserDropdownMenu } from "@/components/UserDropdownMenu";
 
@@ -15,6 +15,83 @@ interface Tab {
 export function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [isNavbarHidden, setIsNavbarHidden] = useState(false);
+  const [shouldHideCompletely, setShouldHideCompletely] = useState(false);
+  const scrollPositionRef = useRef(0);
+
+  // Efecto para ocultar completamente el NavBar cuando se está en la vista de chat individual
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (typeof window !== 'undefined' && pathname?.startsWith("/whatsapp")) {
+        // Solo ocultar completamente en dispositivos móviles
+        const isMobile = window.innerWidth < 768;
+        if (isMobile) {
+          // Ocultar el NavBar tanto en la lista de chats como en la vista individual (solo en móvil)
+          setShouldHideCompletely(window.location.hash === '#chat-view' || window.location.hash === '#chat-list');
+        } else {
+          // En desktop, no ocultar completamente
+          setShouldHideCompletely(false);
+        }
+      }
+    };
+
+    // Verificar el hash inicial
+    handleHashChange();
+
+    // Escuchar cambios en el hash
+    window.addEventListener('hashchange', handleHashChange);
+    
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, [pathname]);
+
+  // Efecto para detectar el scroll y ocultar/mostrar la barra de navegación
+  useEffect(() => {
+    const handleScroll = () => {
+      if (typeof window === 'undefined') return;
+      
+      // Solo aplicar el comportamiento de ocultar en dispositivos móviles
+      const isMobile = window.innerWidth < 768;
+      if (!isMobile) {
+        // En desktop, siempre mostrar la barra
+        setIsNavbarHidden(false);
+        return;
+      }
+      
+      // Si estamos ocultando completamente el NavBar, no hacer nada
+      if (shouldHideCompletely) return;
+      
+      const currentScrollPosition = window.scrollY;
+      
+      // Si el usuario está cerca de la parte superior, siempre mostrar la barra
+      if (currentScrollPosition < 60) {
+        setIsNavbarHidden(false);
+        scrollPositionRef.current = currentScrollPosition;
+        return;
+      }
+      
+      // Comparar la posición actual con la anterior para determinar la dirección del scroll
+      if (currentScrollPosition > scrollPositionRef.current) {
+        // Scroll hacia abajo - ocultar la barra
+        setIsNavbarHidden(true);
+      } else {
+        // Scroll hacia arriba - mostrar la barra
+        setIsNavbarHidden(false);
+      }
+      
+      // Actualizar la posición de referencia
+      scrollPositionRef.current = currentScrollPosition;
+    };
+
+    // Agregar el event listener para el scroll
+    window.addEventListener('scroll', handleScroll);
+    
+    // Limpiar el event listener al desmontar el componente
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [shouldHideCompletely]);
 
   // Estado local para la autenticación
   const [authState, setAuthState] = useState({
@@ -140,8 +217,11 @@ export function NavBar() {
 
   // Mostrar la barra de navegación incluso si hay problemas con la autenticación
   const shouldHideNavBar = pathname?.startsWith("/login");
+  
+  // Ocultar el NavBar cuando se está en la vista de chat individual de WhatsApp
+  const shouldHideNavBarCompletely = shouldHideCompletely;
 
-  if (shouldHideNavBar) {
+  if (shouldHideNavBar || shouldHideNavBarCompletely) {
     return null;
   }
 
@@ -193,8 +273,8 @@ export function NavBar() {
   // Mostrar estado de carga
   if (authState.isChecking) {
     return (
-      <nav className="sticky top-0 z-40 w-full border-b border-qoder-dark-border-primary bg-qoder-dark-bg-quaternary">
-        <div className="mx-auto max-w-6xl px-4 h-12 flex items-center">
+      <nav className={`navbar ${isNavbarHidden ? 'navbar-hidden' : ''}`}>
+        <div className="nav-container min-w-0">
           <div className="animate-pulse">Cargando...</div>
         </div>
       </nav>
@@ -202,7 +282,7 @@ export function NavBar() {
   }
 
   return (
-    <nav className="navbar">
+    <nav className={`navbar ${isNavbarHidden ? 'navbar-hidden' : ''}`}>
       <div className="nav-container min-w-0">
         <Link
           href="/inicio"

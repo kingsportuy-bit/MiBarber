@@ -87,14 +87,12 @@ export default function AgendaPageClient() {
       <div className="p-4 md:p-6 lg:p-8 space-y-6">
         <GlobalFilters showDateFilters={false} />
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
-          <CalendarWithBloqueos
-            sucursalId={filters.sucursalId || undefined}
-            barbero={filters.barberoId || undefined}
-            onEdit={handleAppointmentClick}
-            onDateSelect={(date) => console.log("Fecha seleccionada:", date)}
-          />
-        </div>
+        <CalendarWithBloqueos
+          sucursalId={filters.sucursalId || undefined}
+          barbero={filters.barberoId || undefined}
+          onEdit={handleAppointmentClick}
+          onDateSelect={(date) => console.log("Fecha seleccionada:", date)}
+        />
 
         <SingleFormAppointmentModalWithSucursal
           open={isModalOpen}

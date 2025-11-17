@@ -52,7 +52,11 @@ export function ExportarDatos({ datos, nombreArchivo, columnas }: ExportarDatosP
       link.style.visibility = "hidden";
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      
+      // Verificar que el elemento aún esté en el DOM antes de intentar eliminarlo
+      if (document.body.contains(link)) {
+        document.body.removeChild(link);
+      }
       
       // Limpiar URL
       URL.revokeObjectURL(url);

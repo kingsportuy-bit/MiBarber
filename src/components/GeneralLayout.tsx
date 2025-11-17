@@ -33,6 +33,8 @@ export function GeneralLayout({
           {children}
         </div>
         <QoderFooter />
+        {/* Espacio transparente para el menú inferior en móviles */}
+        <div className="h-16 md:hidden bg-transparent"></div>
       </div>
     );
   }
@@ -44,6 +46,8 @@ export function GeneralLayout({
           {children}
         </div>
         <QoderFooter />
+        {/* Espacio transparente para el menú inferior en móviles */}
+        <div className="h-16 md:hidden bg-transparent"></div>
       </>
     );
   }
@@ -52,6 +56,8 @@ export function GeneralLayout({
     return (
       <div className="flex flex-col h-screen w-full min-w-0 pb-16 md:pb-0">
         {children}
+        {/* Espacio transparente para el menú inferior en móviles */}
+        <div className="h-16 md:hidden bg-transparent"></div>
       </div>
     );
   }
@@ -67,6 +73,8 @@ export function GeneralLayout({
           </ConfiguracionWrapper>
         </div>
         <QoderFooter />
+        {/* Espacio transparente para el menú inferior en móviles */}
+        <div className="h-16 md:hidden bg-transparent"></div>
       </div>
     </PullToRefresh>
   );

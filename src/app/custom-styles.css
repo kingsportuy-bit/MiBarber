@@ -26,6 +26,11 @@
   width: 100%;
   box-sizing: border-box;
   font-family: 'Roboto', 'Arial', sans-serif; /* Fuente consistente para todo el navbar */
+  transition: transform 300ms ease-in-out;
+}
+
+.navbar.navbar-hidden {
+  transform: translateY(-100%);
 }
 
 .nav-container {
@@ -404,7 +409,7 @@ a:hover {
 /* Estilos para el Bottom Navigation */
 .bottom-nav {
   height: 64px;
-  background: rgba(0, 0, 0, 0.95);
+  background: rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(10px);
   border-top: 1px solid rgba(255, 165, 0, 0.2);
 }

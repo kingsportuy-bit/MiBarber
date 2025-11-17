@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect, useMemo } from "react";
 import { useWhatsAppChats } from "@/hooks/useWhatsAppChats";
 import { useClientes } from "@/hooks/useClientes";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
@@ -15,6 +15,7 @@ export function WhatsAppChatMobile() {
   const { sucursales } = useSucursales(idBarberia || undefined);
   const [selectedSucursal, setSelectedSucursal] = useState<string | undefined>(undefined);
   const [showAllSucursales, setShowAllSucursales] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>(''); // Agregar estado para el término de búsqueda
   const supabase: any = getSupabaseClient();
   
   // Para barberos comunes, usar la sucursal asociada
@@ -31,6 +32,19 @@ export function WhatsAppChatMobile() {
   // Cambiar para que no seleccione automáticamente el primer chat
   const activeConv = grouped?.find((g: ChatConversation) => g.session_id === active) || null;
 
+  // Efecto para notificar al padre cuando cambia la vista
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (!showChatList) {
+        // Estamos en la vista de chat individual
+        window.location.hash = '#chat-view';
+      } else {
+        // Estamos en la lista de chats
+        window.location.hash = '#chat-list';
+      }
+    }
+  }, [showChatList]);
+
   // Función para obtener el nombre del cliente por su ID
   const getClientName = (sessionId: string) => {
     const cliente = clients?.find((c: Client) => c.telefono === sessionId || c.id_cliente === sessionId);
@@ -42,8 +56,19 @@ export function WhatsAppChatMobile() {
     return clients?.find((c: Client) => c.telefono === sessionId || c.id_cliente === sessionId);
   };
 
-  // Mostrar todas las conversaciones sin filtrar (eliminamos la búsqueda)
-  const filteredConversations = grouped || [];
+  // Filtrar conversaciones según el término de búsqueda
+  const filteredConversations = useMemo(() => {
+    if (!grouped || !searchTerm) return grouped || [];
+    
+    const term = searchTerm.toLowerCase().trim();
+    return grouped.filter((conversation: ChatConversation) => {
+      const clientName = getClientName(conversation.session_id).toLowerCase();
+      const clientInfo = getClientInfo(conversation.session_id);
+      const phoneNumber = clientInfo?.telefono?.toLowerCase() || '';
+      
+      return clientName.includes(term) || phoneNumber.includes(term);
+    });
+  }, [grouped, searchTerm, clients]);
 
   // Efecto principal para hacer scroll al final usando ref
   useLayoutEffect(() => {
@@ -145,7 +170,7 @@ export function WhatsAppChatMobile() {
           timestamp: new Date().toISOString()
         };
 
-        await fetch("https://webhookn8npers.itmconsulting.es/webhook/manual", {
+        await fetch("https://webhookn8ncodexa.codexa.uy/webhook/manual", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -230,7 +255,7 @@ export function WhatsAppChatMobile() {
             {/* Header del panel de chats */}
             <div className="p-3 bg-[#161717] min-w-0">
               <div className="flex items-center justify-between mb-2">
-                <h2 className="font-semibold text-qoder-dark-text-primary">Chats de WhatsApp</h2>
+                <h2 className="font-semibold text-qoder-dark-text-primary">WhatsApp</h2>
                 <div className="flex items-center gap-1 ml-auto">
                   {isRefreshing && (
                     <div className="flex items-center gap-1 text-xs text-qoder-dark-text-secondary">
@@ -240,7 +265,7 @@ export function WhatsAppChatMobile() {
                   <button 
                     onClick={refreshChats}
                     disabled={isRefreshing}
-                    className="p-2 rounded-full hover:bg-qoder-dark-bg-hover transition-colors disabled:opacity-50"
+                    className="boton-simple p-2 rounded-full hover:bg-qoder-dark-bg-hover transition-colors disabled:opacity-50"
                     title="Refrescar chats"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-qoder-dark-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -250,36 +275,90 @@ export function WhatsAppChatMobile() {
                 </div>
               </div>
               
-              {/* Filtros para administradores */}
-              {isAdmin && sucursales && sucursales.length > 0 && (
+              {/* Filtros para administradores y campo de búsqueda en la misma línea */}
+              {isAdmin && sucursales && sucursales.length > 0 ? (
                 <div className="px-2 py-2">
-                  <div className="text-sm text-qoder-dark-text-secondary">
-                    <label className="block mb-1">Filtrar por sucursal:</label>
-                    <select
-                      value={showAllSucursales ? "todas" : (selectedSucursal || "")}
-                      onChange={(e) => {
-                        if (e.target.value === "todas") {
-                          setShowAllSucursales(true);
-                          setSelectedSucursal(undefined);
-                        } else {
-                          setShowAllSucursales(false);
-                          setSelectedSucursal(e.target.value || undefined);
-                        }
-                      }}
-                      className="w-full qoder-dark-search-box py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-lg"
-                    >
-                      <option value="todas">Todos los chats</option>
-                      {sucursales?.map((sucursal: any) => (
-                        <option key={sucursal.id} value={sucursal.id}>
-                          {sucursal.nombre_sucursal || `Sucursal ${sucursal.numero_sucursal}`}
-                        </option>
-                      ))}
-                    </select>
+                  <div className="flex items-end gap-3">
+                    {/* Filtro de sucursales */}
+                    <div className="flex-1 min-w-0">
+                      <label className="block text-xs text-qoder-dark-text-secondary mb-1.5">
+                        Filtrar por sucursal:
+                      </label>
+                      <select
+                        value={showAllSucursales ? "todas" : (selectedSucursal || "")}
+                        onChange={(e) => {
+                          if (e.target.value === "todas") {
+                            setShowAllSucursales(true);
+                            setSelectedSucursal(undefined);
+                          } else {
+                            setShowAllSucursales(false);
+                            setSelectedSucursal(e.target.value || undefined);
+                          }
+                        }}
+                        className="w-full h-10 qoder-dark-search-box py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-lg border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
+                      >
+                        <option value="todas">Todos los chats</option>
+                        {sucursales?.map((sucursal: any) => (
+                          <option key={sucursal.id} value={sucursal.id}>
+                            {sucursal.nombre_sucursal || `Sucursal ${sucursal.numero_sucursal}`}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    
+                    {/* Campo de búsqueda */}
+                    <div className="flex-1 min-w-0">
+                      <label className="block text-xs text-qoder-dark-text-secondary mb-1.5">
+                        Buscar:
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="Buscar..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="w-full h-10 py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-lg pr-10 bg-qoder-dark-bg-form border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
+                        />
+                        {searchTerm && (
+                          <button
+                            onClick={() => setSearchTerm('')}
+                            className="boton-simple absolute inset-y-0 right-0 flex items-center justify-center w-10 text-gray-400 hover:text-gray-300 transition-colors"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // Solo campo de búsqueda para usuarios no administradores
+                <div className="px-2 py-2">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Buscar por nombre o teléfono..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full h-10 py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-lg pr-10 bg-qoder-dark-bg-form border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
+                    />
+                    {searchTerm && (
+                      <button
+                        onClick={() => setSearchTerm('')}
+                        className="boton-simple absolute inset-y-0 right-0 flex items-center justify-center w-10 text-gray-400 hover:text-gray-300 transition-colors"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
             </div>
-            
+
             {/* Lista de conversaciones */}
             <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#161717] scrollbar-styled min-w-0">
               {isLoading && (
@@ -384,7 +463,7 @@ export function WhatsAppChatMobile() {
                 <div className="flex items-center gap-3">
                   <button 
                     onClick={handleBackToChats}
-                    className="p-2 rounded-full hover:bg-qoder-dark-bg-hover transition-colors"
+                    className="boton-simple p-2 rounded-full hover:bg-qoder-dark-bg-hover transition-colors"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-qoder-dark-text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -457,19 +536,18 @@ export function WhatsAppChatMobile() {
               <div 
                 className="absolute inset-0 pointer-events-none"
                 style={{
-                  backgroundImage: "url('/whatsapp-bg.png')",
+                  backgroundImage: "url('https://i.postimg.cc/bwtp831q/m5BEg2K4OR4.png')",
                   backgroundRepeat: 'repeat',
-                  backgroundSize: '300px 500px',
+                  backgroundSize: 'auto 100%',
                   backgroundPosition: 'center',
                   backgroundAttachment: 'fixed',
-                  mixBlendMode: 'overlay',
-                  opacity: 0.1
+                  mixBlendMode: 'overlay'
                 }}
               />
               
               {/* Contenido scrollable sobre el fondo */}
               <div 
-                className="relative h-full overflow-y-auto p-4 custom-scrollbar scrollbar-styled"
+                className="relative h-full overflow-y-auto p-4 custom-scrollbar scrollbar-styled bg-transparent min-w-0"
                 id="messages-container"
                 style={{ 
                   overscrollBehavior: 'contain',
@@ -543,11 +621,10 @@ export function WhatsAppChatMobile() {
                 </div>
               )}
             </div>
-          </div>
-            
+            </div>
             {/* Área de entrada de mensaje */}
             {activeConv && (
-              <div className="p-3 bg-[#161717] min-w-0">
+              <div className="p-3 bg-transparent min-w-0 relative">
                 <div className="flex items-center gap-2 min-w-0">
                   <input
                     type="text"
@@ -555,12 +632,14 @@ export function WhatsAppChatMobile() {
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Escribe un mensaje..."
-                    className="flex-1 qoder-dark-input py-3 px-4 rounded-full focus:outline-none"
+                    className="flex-1 py-4 px-4 focus:outline-none focus:ring-0 focus:ring-transparent focus:border-transparent bg-[#242626] relative pill-effect border-0"
+                    style={{ backgroundColor: '#242626' }}
                   />
                   <button
                     onClick={handleSendMessage}
                     disabled={!message.trim()}
                     className="p-3 bg-green-600 rounded-full hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ transform: 'rotate(90deg)' }}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

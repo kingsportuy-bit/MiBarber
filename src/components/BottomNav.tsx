@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 interface NavItem {
   href: string;
@@ -43,6 +44,12 @@ const GearIcon = ({ className }: { className?: string }) => (
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { isAuthenticated } = useAuth();
+  
+  // Si no hay un barbero logueado o estamos en la página de admin, no mostrar el menú inferior
+  if (!isAuthenticated || pathname?.startsWith('/admin')) {
+    return null;
+  }
   
   const navItems: NavItem[] = [
     { href: "/inicio", label: "Inicio", icon: <HomeIcon className="h-5 w-5" /> },

@@ -184,7 +184,12 @@ export function MobileAppointmentList({ onEdit }: MobileAppointmentListProps) {
       {/* Lista de citas en formato de tarjetas */}
       <div className="space-y-3 w-full">
         {citas.length > 0 ? (
-          citas.map((cita) => {
+          citas
+            .sort((a, b) => {
+              // Ordenar por hora
+              return a.hora.localeCompare(b.hora);
+            })
+            .map((cita) => {
             // Obtener información del cliente del mapa
             const clientData = cita.id_cliente ? clientesMap[cita.id_cliente] : undefined;
             

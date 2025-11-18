@@ -433,6 +433,10 @@ export function DesktopAgenda() {
                     const selectedFecha = selectedDate.toISOString().split('T')[0];
                     return citaFecha === selectedFecha;
                   })
+                  .sort((a, b) => {
+                    // Ordenar por hora
+                    return a.hora.localeCompare(b.hora);
+                  })
                   .map((appointment) => {
                     // Obtener información del cliente del mapa
                     const clientData = appointment.id_cliente ? clientesMap[appointment.id_cliente] : undefined;

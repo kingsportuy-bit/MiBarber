@@ -13,12 +13,16 @@ import { toast } from "sonner";
 import { useGlobalFilters } from "@/hooks/useGlobalFilters";
 import { FloatingNewAppointmentButton } from "@/components/FloatingNewAppointmentButton";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
+import { useIsMobile } from "@/hooks/useMediaQuery";
+import { MobileAgenda } from "@/components/MobileAgenda";
+import { DesktopAgenda } from "@/components/DesktopAgenda";
 
 export default function AgendaPageClient() {
   usePageTitle("Barberox | Agenda");
 
   const { idBarberia, barbero, isAdmin } = useBarberoAuth();
   const { filters } = useGlobalFilters();
+  const isMobile = useIsMobile();
 
   console.log('Datos de autenticacion:', { idBarberia, barbero, isAdmin });
 
@@ -78,31 +82,25 @@ export default function AgendaPageClient() {
     return <div>Error al cargar las citas: {error.message}</div>;
   }
 
+  // On mobile, use the new mobile agenda component
+  if (isMobile) {
+    return (
+      <>
+        <Head>
+          <title>Barberox | Agenda</title>
+        </Head>
+        <MobileAgenda />
+      </>
+    );
+  }
+
+  // On desktop, use the new desktop agenda component
   return (
     <>
       <Head>
         <title>Barberox | Agenda</title>
       </Head>
-
-      <div className="p-4 md:p-6 lg:p-8 space-y-6">
-        <GlobalFilters showDateFilters={false} />
-
-        <CalendarWithBloqueos
-          sucursalId={filters.sucursalId || undefined}
-          barbero={filters.barberoId || undefined}
-          onEdit={handleAppointmentClick}
-          onDateSelect={(date) => console.log("Fecha seleccionada:", date)}
-        />
-
-        <SingleFormAppointmentModalWithSucursal
-          open={isModalOpen}
-          onOpenChange={handleCloseModal}
-          initial={selectedAppointment || undefined}
-        />
-      </div>
-      
-      {/* Botón flotante de nuevo turno */}
-      <FloatingNewAppointmentButton />
+      <DesktopAgenda />
     </>
   );
 }

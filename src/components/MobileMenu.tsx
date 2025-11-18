@@ -107,6 +107,13 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       {menuOpen && (
         <div ref={menuRef} className="dropdown-menu absolute top-12 left-0 right-0 z-50 animate-fadeInDown">
           <div className="px-2 pt-2 pb-3 space-y-1">
+            {/* Nombre del barbero logueado */}
+            {barbero && (
+              <div className="px-3 py-2 text-qoder-dark-text-primary font-medium border-b border-qoder-dark-border">
+                {barbero.nombre}
+              </div>
+            )}
+            
             {tabs.map((tab) => {
               const active = pathname === tab.href;
               return (
@@ -144,12 +151,12 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               </>
             )}
             
-            {/* Botón de salir */}
+            {/* Botón de cerrar sesión */}
             <button
               onClick={handleLogout}
               className="dropdown-item flex items-center w-full text-left"
             >
-              Salir
+              Cerrar Sesión
             </button>
           </div>
         </div>

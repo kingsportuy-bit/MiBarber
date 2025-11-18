@@ -29,6 +29,8 @@ export function useDeleteCita(): DeleteCitaResult {
     onSuccess: () => {
       // Invalidar todas las consultas de citas
       queryClient.invalidateQueries({ queryKey: ["citas"] });
+      // Invalidar también las consultas de horarios disponibles
+      queryClient.invalidateQueries({ queryKey: ["horarios-disponibles-completo"] });
     },
   });
 

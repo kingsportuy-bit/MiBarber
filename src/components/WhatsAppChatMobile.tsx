@@ -2,13 +2,33 @@
 
 import { useState, useRef, useEffect, useLayoutEffect, useMemo } from "react";
 import { useWhatsAppChats } from "@/hooks/useWhatsAppChats";
-import { useClientes } from "@/hooks/useClientes";
+import { useClientes, useClientesByIds } from "@/hooks/useClientes";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 import { useSucursales } from "@/hooks/useSucursales";
 import { formatWhatsAppTimestamp } from "@/utils/formatters";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 import type { ChatConversation, ChatMessage, Client } from "@/types/db";
 import Image from "next/image";
+
+// Función para convertir puntaje a estrellas con borde dorado y sin relleno
+const getStarsFromScore = (puntaje: number) => {
+  // Para puntaje 0 y 1, mostrar 1 estrella
+  // Para puntajes mayores, mostrar la cantidad correspondiente
+  const starCount =
+    puntaje <= 1 ? 1 : Math.min(5, Math.max(0, Math.floor(puntaje)));
+
+  // Añadir solo estrellas vacías con borde dorado según el puntaje
+  const stars = [];
+  for (let i = 0; i < starCount; i++) {
+    stars.push(
+      <span key={`star-${i}`} className="text-amber-400 text-sm">
+        ☆
+      </span>,
+    );
+  }
+
+  return <span className="tracking-wide">{stars}</span>;
+};
 
 export function WhatsAppChatMobile() {
   const { idBarberia, isAdmin, barbero } = useBarberoAuth();
@@ -38,23 +58,21 @@ export function WhatsAppChatMobile() {
       if (!showChatList) {
         // Estamos en la vista de chat individual
         window.location.hash = '#chat-view';
-        // Emitir un evento personalizado para notificar que estamos en la vista de chat
-        window.dispatchEvent(new CustomEvent('whatsappChatViewChange', { detail: { showChatList: false } }));
       } else {
         // Estamos en la lista de chats
         window.location.hash = '#chat-list';
-        // Emitir un evento personalizado para notificar que estamos en la lista de chats
-        window.dispatchEvent(new CustomEvent('whatsappChatViewChange', { detail: { showChatList: true } }));
       }
     }
   }, [showChatList]);
 
-  // Limpiar el evento al desmontar el componente
+  // Limpiar el hash al desmontar el componente
   useEffect(() => {
     return () => {
       if (typeof window !== 'undefined') {
-        // Limpiar el estado al salir del componente
-        window.dispatchEvent(new CustomEvent('whatsappChatViewChange', { detail: { showChatList: true } }));
+        // Limpiar el hash al salir del componente
+        if (window.location.hash === '#chat-view' || window.location.hash === '#chat-list') {
+          window.location.hash = '';
+        }
       }
     };
   }, []);
@@ -69,6 +87,35 @@ export function WhatsAppChatMobile() {
   const getClientInfo = (sessionId: string) => {
     return clients?.find((c: Client) => c.telefono === sessionId || c.id_cliente === sessionId);
   };
+  
+  // Obtener IDs únicos de clientes de las conversaciones
+  const clienteIds = useMemo(() => {
+    if (!grouped) return [];
+    return Array.from(
+      new Set(
+        grouped
+          .map(conv => {
+            const client = getClientInfo(conv.session_id);
+            return client?.id_cliente;
+          })
+          .filter((id): id is string => id !== null && id !== undefined)
+      )
+    );
+  }, [grouped, clients]);
+
+  // Obtener información de todos los clientes necesarios
+  const { data: clientesData } = useClientesByIds(clienteIds);
+
+  // Crear un mapa de clientes por ID para acceso rápido
+  const clientesMap = useMemo(() => {
+    if (!clientesData) return {};
+    return clientesData.reduce((acc, cliente) => {
+      if (cliente.id_cliente) {
+        acc[cliente.id_cliente] = cliente;
+      }
+      return acc;
+    }, {} as Record<string, Client>);
+  }, [clientesData]);
 
   // Filtrar conversaciones según el término de búsqueda
   const filteredConversations = useMemo(() => {
@@ -432,7 +479,18 @@ export function WhatsAppChatMobile() {
                       <div className="flex-1 min-w-0">
                         {/* Nombre del cliente y timestamp */}
                         <div className="flex items-center justify-between mb-1">
-                          <h3 className="font-semibold text-qoder-dark-text-primary truncate">{clientName}</h3>
+                          <h3 className="font-semibold text-qoder-dark-text-primary truncate flex items-center">
+                            {clientName}
+                            {(() => {
+                              const clientInfo = getClientInfo(conversation.session_id);
+                              const clientData = clientInfo?.id_cliente ? clientesMap[clientInfo.id_cliente] : undefined;
+                              return clientData && clientData.puntaje !== null && clientData.puntaje !== undefined ? (
+                                <span className="ml-2">
+                                  {getStarsFromScore(clientData.puntaje)}
+                                </span>
+                              ) : null;
+                            })()}
+                          </h3>
                           <span className="text-xs text-qoder-dark-text-secondary flex-shrink-0">
                             {lastMessage ? formatWhatsAppTimestamp(lastMessage.timestamp) : ""}
                           </span>
@@ -515,7 +573,18 @@ export function WhatsAppChatMobile() {
                     })()}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-qoder-dark-text-primary">{getClientName(activeConv.session_id)}</h3>
+                    <h3 className="font-semibold text-qoder-dark-text-primary flex items-center">
+                      {getClientName(activeConv.session_id)}
+                      {(() => {
+                        const clientInfo = getClientInfo(activeConv.session_id);
+                        const clientData = clientInfo?.id_cliente ? clientesMap[clientInfo.id_cliente] : undefined;
+                        return clientData && clientData.puntaje !== null && clientData.puntaje !== undefined ? (
+                          <span className="ml-2">
+                            {getStarsFromScore(clientData.puntaje)}
+                          </span>
+                        ) : null;
+                      })()}
+                    </h3>
                     <p className="text-xs text-qoder-dark-text-secondary">
                       {getClientInfo(activeConv.session_id)?.telefono || 'Número no disponible'}
                     </p>

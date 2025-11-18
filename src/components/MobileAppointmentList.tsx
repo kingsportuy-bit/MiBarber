@@ -1,10 +1,32 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { Appointment } from "@/types/db";
 import { useCitas } from "@/hooks/useCitas";
 import { useGlobalFilters } from "@/contexts/GlobalFiltersContext";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
+import { useClientesByIds } from "@/hooks/useClientes";
+import { Client } from "@/types/db";
+
+// Función para convertir puntaje a estrellas con borde dorado y sin relleno
+const getStarsFromScore = (puntaje: number) => {
+  // Para puntaje 0 y 1, mostrar 1 estrella
+  // Para puntajes mayores, mostrar la cantidad correspondiente
+  const starCount =
+    puntaje <= 1 ? 1 : Math.min(5, Math.max(0, Math.floor(puntaje)));
+
+  // Añadir solo estrellas vacías con borde dorado según el puntaje
+  const stars = [];
+  for (let i = 0; i < starCount; i++) {
+    stars.push(
+      <span key={`star-${i}`} className="text-amber-400 text-sm">
+        ☆
+      </span>,
+    );
+  }
+
+  return <span className="tracking-wide">{stars}</span>;
+};
 
 interface Task {
   id: string;
@@ -30,6 +52,29 @@ export function MobileAppointmentList({ onEdit }: MobileAppointmentListProps) {
     fecha: getLocalDateString(currentDate), // Usar nuestra función unificada
     barberoId: filters.barberoId || undefined,
   });
+
+  // Obtener IDs únicos de clientes de las citas
+  const clienteIds = useMemo(() => {
+    return Array.from(
+      new Set(
+        citas
+          .map(cita => cita.id_cliente)
+          .filter((id): id is string => id !== null && id !== undefined)
+      )
+    );
+  }, [citas]);
+
+  // Obtener información de todos los clientes necesarios
+  const { data: clientesData } = useClientesByIds(clienteIds);
+
+  // Crear un mapa de clientes por ID para acceso rápido
+  const clientesMap = useMemo(() => {
+    if (!clientesData) return {};
+    return clientesData.reduce((acc, cliente) => {
+      acc[cliente.id_cliente] = cliente;
+      return acc;
+    }, {} as Record<string, Client>);
+  }, [clientesData]);
 
   // Handlers de navegación
   const goToPreviousDay = () => {
@@ -139,46 +184,56 @@ export function MobileAppointmentList({ onEdit }: MobileAppointmentListProps) {
       {/* Lista de citas en formato de tarjetas */}
       <div className="space-y-3 w-full">
         {citas.length > 0 ? (
-          citas.map((cita) => (
-            <div
-              key={cita.id_cita}
-              className="p-3 rounded-lg shadow-md bg-qoder-dark-bg-form cursor-pointer"
-              onClick={() => handleEditAppointment(cita)}
-            >
-              <div className="flex justify-between items-center">
-                <div className="flex-1 min-w-0">
-                  {/* Hora y nombre - tamaño y color blanco */}
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-white font-medium">
-                      {cita.hora?.slice(0, 5) || 'Sin hora'}
-                    </span>
-                    <span className="text-white font-medium truncate">
-                      {cita.cliente_nombre || 'Cliente'}
-                    </span>
+          citas.map((cita) => {
+            // Obtener información del cliente del mapa
+            const clientData = cita.id_cliente ? clientesMap[cita.id_cliente] : undefined;
+            
+            return (
+              <div
+                key={cita.id_cita}
+                className="p-3 rounded-lg shadow-md bg-qoder-dark-bg-form cursor-pointer"
+                onClick={() => handleEditAppointment(cita)}
+              >
+                <div className="flex justify-between items-center">
+                  <div className="flex-1 min-w-0">
+                    {/* Hora y nombre - tamaño y color blanco */}
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-white font-medium">
+                        {cita.hora?.slice(0, 5) || 'Sin hora'}
+                      </span>
+                      <span className="text-white font-medium truncate flex items-center">
+                        {cita.cliente_nombre || 'Cliente'}
+                        {clientData && clientData.puntaje !== null && clientData.puntaje !== undefined && (
+                          <span className="ml-2">
+                            {getStarsFromScore(clientData.puntaje)}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    
+                    {/* Servicio y duración - 50% opacidad */}
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-white text-opacity-50 truncate">
+                        {cita.servicio || 'Sin servicio'}
+                      </span>
+                      {cita.duracion && (
+                        <span className="text-white text-opacity-50">
+                          {cita.duracion}min
+                        </span>
+                      )}
+                    </div>
                   </div>
                   
-                  {/* Servicio y duración - 50% opacidad */}
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-white text-opacity-50 truncate">
-                      {cita.servicio || 'Sin servicio'}
+                  {/* Precio al extremo derecho - menor tamaño, 50% opacidad */}
+                  <div className="text-right ml-2">
+                    <span className="text-white text-opacity-50 text-sm font-medium">
+                      ${cita.ticket || 0}
                     </span>
-                    {cita.duracion && (
-                      <span className="text-white text-opacity-50">
-                        {cita.duracion}min
-                      </span>
-                    )}
                   </div>
                 </div>
-                
-                {/* Precio al extremo derecho - menor tamaño, 50% opacidad */}
-                <div className="text-right ml-2">
-                  <span className="text-white text-opacity-50 text-sm font-medium">
-                    ${cita.ticket || 0}
-                  </span>
-                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <div className="text-center py-8 text-qoder-dark-text-secondary">
             No hay citas programadas para este día

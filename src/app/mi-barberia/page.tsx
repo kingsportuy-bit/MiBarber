@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Fragment, useEffect } from "react";
 import { WindowLayout } from "@/components/WindowLayout";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useBarberiaInfo } from "@/hooks/useBarberiaInfo";
@@ -31,6 +31,9 @@ function MiBarberiaContent() {
   
   // Estado para el modo de edición de datos personales (debe estar aquí para evitar errores de hooks)
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Estado para la sucursal seleccionada
+  const [sucursalSeleccionada, setSucursalSeleccionada] = useState<any>(null);
 
   // Hook para la información de la barbería y servicios
   const {
@@ -53,13 +56,6 @@ function MiBarberiaContent() {
   // Estados para modales
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sucursalToEdit, setSucursalToEdit] = useState<any>(null);
-  
-  // Estados para el modal de horarios
-  const [isHorariosModalOpen, setIsHorariosModalOpen] = useState(false); // Estado para el modal de horarios
-  const [sucursalParaHorarios, setSucursalParaHorarios] = useState<{
-    id: string;
-    nombre: string;
-  } | null>(null); // Sucursal para editar horarios
   
   // Estados para el modal de información adicional
   const [isInfoAdicionalModalOpen, setIsInfoAdicionalModalOpen] = useState(false);
@@ -84,8 +80,26 @@ function MiBarberiaContent() {
     console.log("Guardar cambios del barbero");
   };
 
-  const sucursales = sucursalesQuery.data || [];
+  // Filtrar sucursales para asegurarnos de que solo pertenecen a la barbería actual
+  const sucursales = (sucursalesQuery.data || []).filter((sucursal: any) => 
+    sucursal.id_barberia === idBarberia
+  );
   const servicios = serviciosQuery.data || [];
+
+  // Efecto para seleccionar automáticamente la sucursal principal cuando los datos estén disponibles
+  useEffect(() => {
+    // Solo ejecutar cuando hay sucursales cargadas y no hay una ya seleccionada
+    if (sucursales && sucursales.length > 0 && !sucursalSeleccionada) {
+      // Buscar la sucursal principal (número 1)
+      const sucursalPrincipal = sucursales.find((s: any) => s.numero_sucursal === 1);
+      if (sucursalPrincipal) {
+        setSucursalSeleccionada(sucursalPrincipal);
+      } else {
+        // Si no hay sucursal principal, seleccionar la primera disponible
+        setSucursalSeleccionada(sucursales[0]);
+      }
+    }
+  }, [sucursales, sucursalSeleccionada]);
 
   // Manejar agregar nueva sucursal
   const handleAddSucursal = () => {
@@ -190,16 +204,6 @@ function MiBarberiaContent() {
     }
   };
 
-  // Función para abrir el modal de edición de horarios
-  const handleEditHorarios = (sucursal: Sucursal) => {
-    setSucursalParaHorarios({
-      id: sucursal.id,
-      nombre:
-        sucursal.nombre_sucursal || `Sucursal ${sucursal.numero_sucursal}`,
-    });
-    setIsHorariosModalOpen(true);
-  };
-
   // Función para abrir el modal de edición de información adicional
   const handleEditInfoAdicional = (sucursal: any) => {
     setSucursalParaInfoAdicional(sucursal);
@@ -283,7 +287,7 @@ function MiBarberiaContent() {
                   <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-2">
                     Nombre
                   </label>
-                  <div className="w-full qoder-dark-bg-form p-3 rounded-lg text-qoder-dark-text-primary">
+                  <div className="w-full qoder-dark-bg-form p-33 rounded-lg text-qoder-dark-text-primary">
                     {barbero.nombre}
                   </div>
                 </div>
@@ -379,385 +383,342 @@ function MiBarberiaContent() {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="space-y-8">
-        <section className="bg-qoder-dark-bg-secondary p-6 rounded-xl">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-qoder-dark-text-primary">
-              Gestión de Sucursales
-            </h2>
-            <button
-              onClick={handleAddSucursal}
-              className="qoder-dark-button-primary px-4 py-2 rounded-lg flex items-center gap-2"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                />
-              </svg>
-              <span>Agregar Sucursal</span>
-            </button>
-          </div>
+    <div className="bg-transparent rounded-xl space-y-8">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-qoder-dark-text-primary">
+          Gestión de Sucursales
+        </h2>
+        <button
+          onClick={handleAddSucursal}
+          className="qoder-dark-button-primary px-4 py-2 rounded-lg flex items-center gap-2"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+            />
+          </svg>
+          <span>Agregar Sucursal</span>
+        </button>
+      </div>
 
-          {sucursales.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6">
-              {/* Ordenar las sucursales para que la principal (número 1) aparezca primero */}
-              {[...sucursales]
-                .sort((a, b) => {
-                  // La sucursal número 1 (principal) debe ir primero
-                  if (a.numero_sucursal === 1) return -1;
-                  if (b.numero_sucursal === 1) return 1;
-                  return a.numero_sucursal - b.numero_sucursal;
-                })
-                .map((sucursal) => (
-                  <div
+      {/* Pestañas de sucursales */}
+      {sucursales.length > 0 && (
+        <div className="mx-4">
+          <div className="flex overflow-x-auto pb-0 -mb-px">
+            {[...sucursales]
+              .sort((a, b) => {
+                // La sucursal número 1 (principal) debe ir primero
+                if (a.numero_sucursal === 1) return -1;
+                if (b.numero_sucursal === 1) return 1;
+                return a.numero_sucursal - b.numero_sucursal;
+              })
+              .map((sucursal) => {
+                const isActive = sucursalSeleccionada?.id === sucursal.id;
+
+                return (
+                  <button
                     key={sucursal.id}
-                    className="bg-qoder-dark-bg-primary rounded-xl border border-qoder-dark-border-primary overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
+                    onClick={() => setSucursalSeleccionada(sucursal)}
+                    className={`qoder-dark-sucursal-tab ${isActive ? "active" : "inactive"}`}
                   >
-                    {/* Encabezado de la sucursal con mejor diseño visual */}
-                    <div className="bg-gradient-to-r from-qoder-dark-bg-secondary to-qoder-dark-bg-hover p-6 border-b border-qoder-dark-border-primary">
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center space-x-3">
-                          <div className="bg-qoder-dark-accent-primary/10 p-3 rounded-lg">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-6 w-6 text-qoder-dark-accent-primary"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                              />
-                            </svg>
-                          </div>
-                          <div>
-                            <h3 className="text-2xl font-bold text-qoder-dark-text-primary">
-                              {sucursal.nombre_sucursal || "Sin nombre"}
-                            </h3>
-                            <div className="flex items-center mt-1">
-                              <span className="text-qoder-dark-text-secondary">
-                                {sucursal.nombre_sucursal
-                                  ? "Sucursal"
-                                  : "Sin nombre"}
-                              </span>
-                              {sucursal.numero_sucursal === 1 && (
-                                <span className="ml-3 bg-qoder-dark-accent-primary/20 text-qoder-dark-accent-primary text-xs px-3 py-1 rounded-full font-semibold">
-                                  Principal
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex space-x-2 items-center">
-                          <button
-                            onClick={() => handleEditHorarios(sucursal)}
-                            className="px-3 py-1 bg-qoder-dark-bg-secondary hover:bg-qoder-dark-accent-primary/20 text-qoder-dark-text-primary rounded-lg transition-colors duration-200 text-sm flex items-center"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4 mr-1"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                            Editar horarios
-                          </button>
-                          <button
-                            onClick={() => handleEditSucursal(sucursal)}
-                            className="px-3 py-1 bg-qoder-dark-bg-secondary hover:bg-qoder-dark-accent-primary/20 text-qoder-dark-text-primary rounded-lg transition-colors duration-200 text-sm flex items-center"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4 mr-1"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                              />
-                            </svg>
-                            Editar sucursal
-                          </button>
-
+                    <span className="mr-2">•</span>
+                    <span>
+                      {sucursal.nombre_sucursal || `Sucursal ${sucursal.numero_sucursal}`}
+                    </span>
+                  </button>
+                );
+              })}
+            <div className="flex-grow border-b border-qoder-dark-border-primary"></div>
+          </div>
+          {/* Contenido de la sucursal seleccionada */}
+          {sucursalSeleccionada ? (
+            <div key={sucursalSeleccionada.id}>
+              <div
+                className="bg-black/50 rounded-b-xl border-x border-b border-qoder-dark-border-primary overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
+              >
+                {/* Encabezado de la sucursal con mejor diseño visual */}
+                <div className="bg-transparent p-6 border-b border-qoder-dark-border-primary">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center space-x-3">
+                      <div className="bg-qoder-dark-accent-primary/10 p-3 rounded-lg">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-6 w-6 text-qoder-dark-accent-primary"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-qoder-dark-text-primary">
+                          {sucursalSeleccionada.nombre_sucursal || "Sin nombre"}
+                        </h3>
+                        <div className="flex items-center mt-1">
+                          <span className="text-qoder-dark-text-secondary">
+                            {sucursalSeleccionada.nombre_sucursal
+                              ? "Sucursal"
+                              : "Sin nombre"}
+                          </span>
+                          {sucursalSeleccionada.numero_sucursal === 1 && (
+                            <span className="ml-3 bg-qoder-dark-accent-primary/20 text-qoder-dark-accent-primary text-xs px-3 py-1 rounded-full font-semibold">
+                              Principal
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
-
-                    {/* Información de contacto y horarios con mejor diseño */}
-                    <div className="p-6 bg-qoder-dark-bg-secondary/50">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                        {/* Sección de Contacto */}
-                        <div className="bg-qoder-dark-bg-primary p-4 rounded-lg border border-qoder-dark-border-primary">
-                          <div className="flex items-center mb-3">
-                            <div className="bg-qoder-dark-accent-primary/10 p-2 rounded-lg mr-3">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-5 w-5 text-qoder-dark-accent-primary"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2h1C9.716 21 3 14.284 3 6V5z"
-                                />
-                              </svg>
-                            </div>
-                            <h4 className="text-lg font-semibold text-qoder-dark-text-primary">
-                              Contacto
-                            </h4>
-                          </div>
-                          <div className="space-y-2">
-                            <div className="flex items-center">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4 text-qoder-dark-text-secondary mr-3"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2h1C9.716 21 3 14.284 3 6V5z"
-                                />
-                              </svg>
-                              <span className="text-qoder-dark-text-primary">
-                                {sucursal.telefono || "No especificado"}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Sección de Dirección */}
-                        <div className="bg-qoder-dark-bg-primary p-4 rounded-lg border border-qoder-dark-border-primary">
-                          <div className="flex items-center mb-3">
-                            <div className="bg-qoder-dark-accent-primary/10 p-2 rounded-lg mr-3">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-5 w-5 text-qoder-dark-accent-primary"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                />
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                />
-                              </svg>
-                            </div>
-                            <h4 className="text-lg font-semibold text-qoder-dark-text-primary">
-                              Dirección
-                            </h4>
-                          </div>
-                          <div className="flex items-start">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4 text-qoder-dark-text-secondary mr-3 mt-1"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                              />
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                              />
-                            </svg>
-                            <span className="text-qoder-dark-text-primary">
-                              {sucursal.direccion || "No especificada"}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Sección de Horarios */}
-                        <div className="bg-qoder-dark-bg-primary p-4 rounded-lg border border-qoder-dark-border-primary">
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center">
-                              <div className="bg-qoder-dark-accent-primary/10 p-2 rounded-lg mr-3">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className="h-5 w-5 text-qoder-dark-accent-primary"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                  />
-                                </svg>
-                              </div>
-                              <h4 className="text-lg font-semibold text-qoder-dark-text-primary">
-                                Horarios
-                              </h4>
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <SucursalHorarioDisplay idSucursal={sucursal.id} />
-                          </div>
-                        </div>
-
-                      </div>
-
-                      {/* Sección de Barberos */}
-                      <div className="mb-6">
-                        <SucursalBarberosSection
-                          sucursalId={sucursal.numero_sucursal}
-                          sucursalUuid={sucursal.id}
-                          sucursalNombre={sucursal.nombre_sucursal || undefined}
-                          isAdmin={isAdmin || false}
-                        />
-                      </div>
-
-                      {/* Sección de Servicios */}
-                      <div className="mb-6">
-                        <SucursalServiciosSection
-                          sucursalId={sucursal.id}
-                          idBarberia={idBarberia}
-                          servicios={servicios}
-                          isLoading={serviciosQuery.isLoading}
-                          onCreateService={createServiceMutation.mutateAsync}
-                          onUpdateService={(id, service) =>
-                            updateServiceMutation.mutateAsync({ id, service })
-                          }
-                          onDeleteService={deleteServiceMutation.mutateAsync}
-                        />
-                      </div>
-
-                      {/* Sección de Información Adicional */}
-                      <div className="mb-6">
-                        <div className="flex justify-between items-center mb-4">
-                          <div className="flex items-center">
-                            <div className="bg-qoder-dark-accent-primary/10 p-2 rounded-lg mr-3">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-5 w-5 text-qoder-dark-accent-primary"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                              </svg>
-                            </div>
-                            <h3 className="text-lg font-semibold text-qoder-dark-text-primary">
-                              Información Adicional
-                            </h3>
-                          </div>
-                          <button
-                            onClick={() => handleEditInfoAdicional(sucursal)}
-                            className="px-3 py-1 bg-qoder-dark-bg-secondary hover:bg-qoder-dark-accent-primary/20 text-qoder-dark-text-primary rounded-lg transition-colors duration-200 text-sm flex items-center"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4 mr-1"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                              />
-                            </svg>
-                            Editar
-                          </button>
-                        </div>
-                        <div className="bg-qoder-dark-bg-form rounded-lg p-4">
-                          <p className="text-qoder-dark-text-primary whitespace-pre-line">
-                            {sucursal.info || "No se ha proporcionado información adicional para esta sucursal."}
-                          </p>
-                        </div>
-                      </div>
-
+                    <div className="flex space-x-2 items-center">
+                      <button
+                        onClick={() => handleEditSucursal(sucursalSeleccionada)}
+                        className="px-3 py-1 bg-qoder-dark-bg-secondary hover:bg-qoder-dark-accent-primary/20 text-qoder-dark-text-primary rounded-lg transition-colors duration-200 text-sm flex items-center"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4 mr-1"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                          />
+                        </svg>
+                        Editar sucursal
+                      </button>
                     </div>
                   </div>
-                ))}
+                </div>
+
+                {/* Información de contacto y horarios con mejor diseño */}
+                <div className="p-6 bg-transparent">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    {/* Sección de Contacto */}
+                    <div className="mb-6">
+                      <div className="flex items-center mb-3">
+                        <div className="bg-qoder-dark-accent-primary/10 p-2 rounded-lg mr-3">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-qoder-dark-accent-primary"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2h1C9.716 21 3 14.284 3 6V5z"
+                            />
+                          </svg>
+                        </div>
+                        <h4 className="text-lg font-semibold text-qoder-dark-text-primary">
+                          Contacto
+                        </h4>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 text-qoder-dark-text-secondary mr-3"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2h1C9.716 21 3 14.284 3 6V5z"
+                            />
+                          </svg>
+                          <span className="text-qoder-dark-text-primary">
+                            {sucursalSeleccionada.telefono || "No especificado"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Separador entre contacto y dirección */}
+                    <div className="border-t qoder-dark-separator mx-6 md:col-span-2"></div>
+
+                    {/* Sección de Dirección */}
+                    <div className="mb-6">
+                      <div className="flex items-center mb-3">
+                        <div className="bg-qoder-dark-accent-primary/10 p-2 rounded-lg mr-3">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-qoder-dark-accent-primary"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                          </svg>
+                        </div>
+                        <h4 className="text-lg font-semibold text-qoder-dark-text-primary">
+                          Dirección
+                        </h4>
+                      </div>
+                      <div className="flex items-start">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4 text-qoder-dark-text-secondary mr-3 mt-1"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
+                        <span className="text-qoder-dark-text-primary">
+                          {sucursalSeleccionada.direccion || "No especificada"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Separador entre dirección y horarios */}
+                    <div className="border-t qoder-dark-separator mx-6 md:col-span-2"></div>
+
+                    {/* Sección de Horarios */}
+                    <div className="mb-6">
+                      <SucursalHorariosSection 
+                        idSucursal={sucursalSeleccionada.id} 
+                        nombreSucursal={sucursalSeleccionada.nombre_sucursal || `Sucursal ${sucursalSeleccionada.numero_sucursal}`} 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Separador entre secciones */}
+                <div className="border-t qoder-dark-separator mx-6"></div>
+
+                {/* Sección de Barberos */}
+                <div className="mb-6 mx-6 pt-6">
+                  <SucursalBarberosSection
+                    sucursalId={sucursalSeleccionada.numero_sucursal}
+                    sucursalUuid={sucursalSeleccionada.id}
+                    sucursalNombre={sucursalSeleccionada.nombre_sucursal || undefined}
+                    isAdmin={isAdmin || false}
+                  />
+                </div>
+
+                {/* Separador entre secciones */}
+                <div className="border-t qoder-dark-separator mx-6"></div>
+
+                {/* Sección de Servicios */}
+                <div className="mb-6 mx-6 pt-6">
+                  <SucursalServiciosSection
+                    sucursalId={sucursalSeleccionada.id}
+                    idBarberia={idBarberia}
+                    servicios={servicios}
+                    isLoading={serviciosQuery.isLoading}
+                    onCreateService={createServiceMutation.mutateAsync}
+                    onUpdateService={(id, service) =>
+                      updateServiceMutation.mutateAsync({ id, service })
+                    }
+                    onDeleteService={deleteServiceMutation.mutateAsync}
+                  />
+                </div>
+
+                {/* Separador entre secciones */}
+                <div className="border-t qoder-dark-separator mx-6"></div>
+
+                {/* Sección de Información Adicional */}
+                <div className="mb-6 mx-6 pt-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center">
+                      <div className="bg-qoder-dark-accent-primary/10 p-2 rounded-lg mr-3">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 text-qoder-dark-accent-primary"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-semibold text-qoder-dark-text-primary">
+                        Información Adicional
+                      </h3>
+                    </div>
+                    <button
+                      onClick={() => handleEditInfoAdicional(sucursalSeleccionada)}
+                      className="px-3 py-1 bg-qoder-dark-bg-secondary hover:bg-qoder-dark-accent-primary/20 text-qoder-dark-text-primary rounded-lg transition-colors duration-200 text-sm flex items-center"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 mr-1"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                        />
+                      </svg>
+                      Editar
+                    </button>
+                  </div>
+                  <div className="bg-qoder-dark-bg-form rounded-lg p-4 opacity-50">
+                    <p className="text-white whitespace-pre-line">
+                      {sucursalSeleccionada.info || "No se ha proporcionado información adicional para esta sucursal."}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-16 w-16 mx-auto text-qoder-dark-text-secondary mb-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                />
-              </svg>
-              <h3 className="text-lg font-medium text-qoder-dark-text-primary mb-2">
-                No hay sucursales registradas
-              </h3>
-              <p className="text-qoder-dark-text-secondary mb-6">
-                Comienza agregando tu primera sucursal para gestionar barberos y
-                servicios.
-              </p>
-              <button
-                onClick={handleAddSucursal}
-                className="qoder-dark-button-primary px-4 py-2 rounded-lg"
-              >
-                Agregar Primera Sucursal
-              </button>
-            </div>
-          )}
-        </section>
-      </div>
+          ) : null}
+        </div>
+      )}
 
       {/* Modal para crear/editar sucursal */}
       <EditarSucursalModal
@@ -766,17 +727,7 @@ function MiBarberiaContent() {
         initial={sucursalToEdit || undefined}
         onSave={handleSaveSucursal}
       />
-
-      {/* Modal para editar horarios de sucursal */}
-      {sucursalParaHorarios && (
-        <EditarHorariosSucursalModal
-          open={isHorariosModalOpen}
-          onOpenChange={setIsHorariosModalOpen}
-          idSucursal={sucursalParaHorarios.id}
-          nombreSucursal={sucursalParaHorarios.nombre}
-        />
-      )}
-
+      
       {/* Modal para editar información adicional */}
       <EditarInfoAdicionalModal
         open={isInfoAdicionalModalOpen}

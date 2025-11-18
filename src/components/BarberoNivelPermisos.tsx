@@ -9,9 +9,10 @@ interface BarberoNivelPermisosProps {
   barbero: Barbero;
   onUpdate: () => void;
   disabled?: boolean; // Nueva propiedad para deshabilitar la edición
+  readonly?: boolean; // Propiedad para modo solo lectura
 }
 
-export function BarberoNivelPermisos({ barbero, onUpdate, disabled }: BarberoNivelPermisosProps) {
+export function BarberoNivelPermisos({ barbero, onUpdate, disabled, readonly }: BarberoNivelPermisosProps) {
   // Verificar si el barbero está protegido (nivel_permisos = 1)
   const isProtected = barbero.nivel_permisos === 1;
   

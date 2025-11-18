@@ -31,13 +31,13 @@ export function KanbanColumn({ column, tasks, onEdit }: KanbanColumnProps) {
   const getColumnColorClasses = (color: string) => {
     switch (color) {
       case "orange":
-        return "bg-orange-500"; // Color para columnas de tareas pendientes
+        return "bg-orange-800"; // Color para columnas de tareas pendientes
       case "green":
-        return "bg-green-500";  // Color para columnas de tareas completadas
+        return "bg-green-800";  // Color para columnas de tareas completadas
       case "gray":
-        return "bg-gray-500";   // Color para columnas de tareas canceladas
+        return "bg-gray-800";   // Color para columnas de tareas canceladas
       default:
-        return "bg-gray-500";   // Color por defecto
+        return "bg-gray-800";   // Color por defecto
     }
   };
 
@@ -50,7 +50,7 @@ export function KanbanColumn({ column, tasks, onEdit }: KanbanColumnProps) {
         - Número de tareas en la columna
         - Color de fondo según el tipo de columna
       */}
-      <h2 className={`text-lg font-bold p-2 rounded-t-lg ${getColumnColorClasses(column.color)} bg-opacity-40`}>
+      <h2 className={`text-lg font-bold p-2 rounded-t-lg ${getColumnColorClasses(column.color)} bg-opacity-50`}>
         {column.title} ({column.taskIds.length})
       </h2>
       
@@ -71,12 +71,8 @@ export function KanbanColumn({ column, tasks, onEdit }: KanbanColumnProps) {
             ref={provided.innerRef}
             // Props necesarios para la funcionalidad de droppable
             {...provided.droppableProps}
-            // Estilos condicionales según si hay un drag en progreso sobre esta columna
-            className={`flex-grow p-2 min-h-[100px] rounded-b-lg w-full ${
-              snapshot.isDraggingOver 
-                ? "bg-gray-700" 
-                : "bg-gray-800"
-            } bg-opacity-40`}
+            className="flex-1 rounded-b-xl px-4 py-4 space-y-4"
+            style={{ backgroundColor: 'rgba(30, 31, 31, 0.3)' }}
           >
             {/* 
               Mapeamos y renderizamos las tareas de la columna

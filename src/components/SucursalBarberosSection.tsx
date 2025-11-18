@@ -6,6 +6,7 @@ import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 import { useServiciosList } from "@/hooks/useServiciosList";
 import { BarberoModal } from "@/components/BarberoModal";
 import { BarberoNivelPermisos } from "@/components/BarberoNivelPermisos";
+import { BarberoFichaModal } from "@/components/BarberoFichaModal";
 import type { Barbero } from "@/types/db";
 import type { Service } from "@/types/db";
 import { toast } from "sonner";
@@ -29,6 +30,8 @@ export function SucursalBarberosSection({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [barberoToEdit, setBarberoToEdit] = useState<Barbero | null>(null);
   const [barberoToDelete, setBarberoToDelete] = useState<Barbero | null>(null);
+  const [isFichaModalOpen, setIsFichaModalOpen] = useState(false);
+  const [barberoToShow, setBarberoToShow] = useState<Barbero | null>(null);
 
   // Escuchar evento personalizado para abrir el modal
   useEffect(() => {
@@ -46,6 +49,11 @@ export function SucursalBarberosSection({
   const handleEdit = (barbero: Barbero) => {
     setBarberoToEdit(barbero);
     setIsModalOpen(true);
+  };
+
+  const handleShowFicha = (barbero: Barbero) => {
+    setBarberoToShow(barbero);
+    setIsFichaModalOpen(true);
   };
 
   const handleDelete = (barbero: Barbero) => {
@@ -146,13 +154,16 @@ export function SucursalBarberosSection({
               <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
                 Teléfono
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
+              {/* Columna de Email - ocultar en móvil */}
+              <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider md:table-cell hidden">
                 Email
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
+              {/* Columna de Especialidades - ocultar en móvil */}
+              <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider md:table-cell hidden">
                 Especialidades
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
+              {/* Columna de Rol - ocultar en móvil */}
+              <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider md:table-cell hidden">
                 Rol
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
@@ -186,10 +197,12 @@ export function SucursalBarberosSection({
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-qoder-dark-text-primary">
                   {barbero.telefono}
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-qoder-dark-text-primary">
+                {/* Celda de Email - ocultar en móvil */}
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-qoder-dark-text-primary md:table-cell hidden">
                   {barbero.email}
                 </td>
-                <td className="px-4 py-3 text-sm text-qoder-dark-text-primary">
+                {/* Celda de Especialidades - ocultar en móvil */}
+                <td className="px-4 py-3 text-sm text-qoder-dark-text-primary md:table-cell hidden">
                   <div className="flex flex-wrap gap-1">
                     {barbero.especialidades && barbero.especialidades.map((esp: string, index: number) => (
                       <span key={index} className="bg-qoder-dark-bg-secondary text-qoder-dark-text-secondary text-xs px-2 py-1 rounded">
@@ -198,7 +211,8 @@ export function SucursalBarberosSection({
                     ))}
                   </div>
                 </td>
-                <td className="px-4 py-3 text-sm text-qoder-dark-text-primary">
+                {/* Celda de Rol - ocultar en móvil */}
+                <td className="px-4 py-3 text-sm text-qoder-dark-text-primary md:table-cell hidden">
                   <BarberoNivelPermisos 
                     barbero={barbero} 
                     onUpdate={() => {}}
@@ -215,6 +229,17 @@ export function SucursalBarberosSection({
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end space-x-2">
+                    {/* Icono de ojo para ver detalles */}
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleShowFicha(barbero); }}
+                      className="text-gray-500 hover:text-gray-300 bg-transparent !bg-none border-none p-1"
+                      title="Ver detalles"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </button>
                     <button 
                       onClick={(e) => { e.stopPropagation(); handleEdit(barbero); }}
                       className="text-blue-500 hover:text-blue-300 bg-transparent !bg-none border-none p-1"
@@ -293,6 +318,14 @@ export function SucursalBarberosSection({
           </div>
         </div>
       )}
+
+      {/* Ficha del barbero */}
+      <BarberoFichaModal
+        open={isFichaModalOpen}
+        onOpenChange={setIsFichaModalOpen}
+        barbero={barberoToShow}
+        idBarberia={idBarberia || undefined}
+      />
     </div>
   );
 }

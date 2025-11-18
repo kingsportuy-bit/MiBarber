@@ -23,52 +23,75 @@ export function PullToRefresh({
   const [isPulling, setIsPulling] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
+  const touchStartRef = useRef<{ startY: number; scrollTop: number } | null>(null);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    // Solo activar en dispositivos móviles y si no está deshabilitado
-    if (!isMobile || disabled) return;
-    
-    // Solo activar si estamos en la parte superior del contenido
-    if (containerRef.current && containerRef.current.scrollTop > 0) return;
-    
-    setStartY(e.touches[0].clientY);
-    setIsPulling(true);
-  };
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    // Solo activar en dispositivos móviles y si no está deshabilitado
-    if (!isMobile || disabled || !isPulling) return;
-    
-    const currentPosY = e.touches[0].clientY;
-    const distance = currentPosY - startY;
-    
-    // Solo activar pull-to-refresh si estamos al inicio de la página
-    if (window.scrollY === 0 && distance > 0) {
-      e.preventDefault();
-      setCurrentY(currentPosY);
-      setPullDistance(Math.min(distance, 100)); // Limitar a 100px
-    }
-  };
-
-  const handleTouchEnd = () => {
-    // Solo activar en dispositivos móviles y si no está deshabilitado
-    if (!isMobile || disabled || !isPulling) return;
-    
-    if (pullDistance > threshold) { // Umbral para activar el refresh
-      setIsRefreshing(true);
-      onRefresh();
+    // Configurar los eventos táctiles con passive: false para permitir preventDefault
+    const handleTouchStart = (e: TouchEvent) => {
+      // Solo activar en dispositivos móviles y si no está deshabilitado
+      if (!isMobile || disabled) return;
       
-      // Resetear después de 1 segundo
-      setTimeout(() => {
-        setIsRefreshing(false);
+      // Registrar la posición inicial del scroll y del toque
+      touchStartRef.current = {
+        startY: e.touches[0].clientY,
+        scrollTop: container.scrollTop
+      };
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      // Solo activar en dispositivos móviles y si no está deshabilitado
+      if (!isMobile || disabled || !touchStartRef.current) return;
+      
+      const { startY, scrollTop } = touchStartRef.current;
+      const currentPosY = e.touches[0].clientY;
+      const distance = currentPosY - startY;
+      
+      // Solo activar pull-to-refresh si estamos al inicio de la página
+      if (scrollTop === 0 && distance > 0) {
+        // Prevenir el desplazamiento predeterminado solo cuando estamos tirando hacia abajo
+        e.preventDefault();
+        setCurrentY(currentPosY);
+        setPullDistance(Math.min(distance, 100)); // Limitar a 100px
+        setIsPulling(true);
+      }
+    };
+
+    const handleTouchEnd = () => {
+      // Solo activar en dispositivos móviles y si no está deshabilitado
+      if (!isMobile || disabled || !touchStartRef.current) return;
+      
+      if (pullDistance > threshold) { // Umbral para activar el refresh
+        setIsRefreshing(true);
+        onRefresh();
+        
+        // Resetear después de 1 segundo
+        setTimeout(() => {
+          setIsRefreshing(false);
+          setPullDistance(0);
+        }, 1000);
+      } else {
         setPullDistance(0);
-      }, 1000);
-    } else {
-      setPullDistance(0);
-    }
-    
-    setIsPulling(false);
-  };
+      }
+      
+      setIsPulling(false);
+      touchStartRef.current = null;
+    };
+
+    // Añadir los event listeners con passive: false para handleTouchMove
+    container.addEventListener('touchstart', handleTouchStart, { passive: false });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    container.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    // Limpiar los event listeners al desmontar
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isMobile, disabled, pullDistance, threshold, onRefresh]);
 
   // Resetear estados cuando se deshabilita
   useEffect(() => {
@@ -76,6 +99,7 @@ export function PullToRefresh({
       setIsPulling(false);
       setIsRefreshing(false);
       setPullDistance(0);
+      touchStartRef.current = null;
     }
   }, [disabled]);
 
@@ -83,9 +107,6 @@ export function PullToRefresh({
     <div 
       ref={containerRef}
       className="relative w-full h-full"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
     >
       {/* Indicador de pull-to-refresh */}
       {(pullDistance > 0 || isRefreshing) && (

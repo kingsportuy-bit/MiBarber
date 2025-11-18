@@ -59,6 +59,13 @@ export function BottomNav() {
     return pathname?.startsWith(href);
   };
 
+  // Función para limpiar el hash al navegar
+  const handleNavigation = () => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      window.location.hash = '';
+    }
+  };
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 md:hidden z-50">
       <div className="flex justify-around items-center h-16 bottom-nav">
@@ -68,6 +75,7 @@ export function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={handleNavigation}
               className={`flex flex-col items-center gap-1 w-full py-2 bottom-nav-item ${
                 active 
                   ? "text-orange-500 active" 

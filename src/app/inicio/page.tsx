@@ -67,8 +67,8 @@ export default function DashboardPage() {
         backgroundColor: 'transparent'
       }}
     >
-      {/* Contenedor del tablero Kanban */}
-      <div className="w-full max-w-[1800px] mx-auto px-4 py-4 md:px-6 md:py-6 flex-1">
+      {/* Contenedor del tablero Kanban sin paddings innecesarios */}
+      <div className="w-full max-w-[1800px] mx-auto flex-1">
         <div className="h-full w-full overflow-x-auto md:overflow-x-visible">
           {/* Vista de escritorio - Tablero Kanban */}
           <div className="hidden md:block">

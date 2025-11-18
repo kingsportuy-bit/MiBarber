@@ -880,16 +880,57 @@ main {
   max-width: 85%;
 }
 
-@media (min-width: 768px) {
-  .qoder-dark-bubble {
-    padding: 0.75rem 1.25rem;
-  }
+/* Clase exclusiva para separadores naranjas */
+.qoder-dark-separator {
+  border-color: var(--qoder-dark-accent-orange) !important;
+  background-color: var(--qoder-dark-accent-orange) !important;
+  opacity: 0.2;
 }
 
+/* Base: pestaña inactiva por defecto */
+.qoder-dark-sucursal-tab {
+  position: relative;
+  padding: 0.4rem 1.2rem;
+  background: rgba(0, 0, 0, 0,2);       /* negro 80% */
+  color: #6d6d6d;                       /* gris */
+  border-radius: 20px 20px 0 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.05rem;
+  border: none;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+/* Pestaña activa */
+.qoder-dark-sucursal-tab.active {
+  background: rgba(0, 0, 0, 0.5);                /* negro 50% */
+  color: white;        /* texto naranja */
+  border-left: 1px solid var(--qoder-dark-border-primary);
+  border-right: 0px solid var(--qoder-dark-border-primary);
+  border-top: 1px solid var(--qoder-dark-border-primary);
+}
+
+.qoder-dark-sucursal-tab.active::before,
+.qoder-dark-sucursal-tab.active::after {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Pestaña inactiva explícita (opcional, por si querés algo distinto del base) */
+.qoder-dark-sucursal-tab.inactive {
+  background: rgba(0, 0, 0, 1);   /* ya coincide con la base, aquí puedes ajustar si necesitás */
+  color: #3b3b3b;                   /* gris */
+  border-bottom: 1px solid var(--qoder-dark-border-primary);
+  border-right: 0px solid var(--qoder-dark-border-primary);
+  border-left: 1px solid var(--qoder-dark-border-primary);
+  border-top: 1px solid var(--qoder-dark-bg-green);
+}
 .qoder-dark-bubble:hover {
   border-color: var(--qoder-dark-accent-orange);
 }
-
 .qoder-dark-bubble-sender {
   border-bottom-right-radius: 6px;
   margin-left: auto;
@@ -937,15 +978,6 @@ main {
 }
 
 .whatsapp-outgoing-bubble .message-info {
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
-  margin-top: 4px;
-  width: 100%;
-  text-align: right;
-}
-
-.whatsapp-incoming-bubble .message-info {
   display: flex;
   justify-content: flex-end;
   align-items: flex-end;
@@ -1258,17 +1290,17 @@ main {
 /* Estilo específico para modales de cliente */
 .qoder-dark-client-modal {
   background-color: var(--qoder-dark-bg-modal);
-  border-radius: 12px;
-  padding: 0;
+  border-radius: 22px;
+  padding: 5;
   width: 100%;
-  max-width: 28rem;
-  max-height: 90vh;
+  max-width: 100rem;
+  max-height: 100vh;
   overflow: hidden;
   border: 1px solid var(--qoder-dark-border-primary);
   transition: border-color 0.3s ease;
   position: relative;
-  z-index: 50;
-  margin: 1px;
+  z-index: 00;
+  margin: 0px;
 }
 
 .qoder-dark-client-modal:hover {
@@ -1289,9 +1321,9 @@ main {
 }
 
 .qoder-dark-client-modal .content {
-  padding: 1.5rem;
+  padding: 2rem;
   overflow-y: auto;
-  max-height: calc(90vh - 80px);
+  max-height: calc(100vh - 100px);
 }
 
 .qoder-dark-table th {
@@ -1504,6 +1536,60 @@ main {
 /* Clase para efecto de píldora pronunciado */
 .pill-effect {
   border-radius: 25px !important;
+}
+
+/* Clase para pestañas simples */
+.pest-simple {
+  background: transparent !important;
+  border: none !important;
+  padding: 0.5rem 0.75rem !important;
+  cursor: pointer;
+  color: var(--qoder-dark-text-secondary);
+  transition: all 0.2s ease !important;
+  transform: none !important;
+  text-decoration: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+}
+
+.pest-simple:hover {
+  background: transparent !important;
+  border: none !important;
+  color: var(--qoder-dark-text-primary);
+  transition: all 0.2s ease !important;
+  transform: none !important;
+  text-decoration: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.pest-simple:focus {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  transition: all 0.2s ease !important;
+  transform: none !important;
+  text-decoration: none !important;
+}
+
+.pest-simple.active {
+  color: var(--qoder-dark-accent-orange);
+  border-bottom: 2px solid var(--qoder-dark-accent-orange) !important;
+  background: transparent !important;
+}
+
+.pest-simple * {
+  background: transparent !important;
+  border: none !important;
+  transition: none !important;
+  transform: none !important;
+  text-decoration: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Responsive utilities - Modernizado */

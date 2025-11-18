@@ -97,38 +97,60 @@ export function DashboardContainer({ periodo }: DashboardContainerProps) {
 
   return (
     <div className="p-6 rounded-lg" style={{ background: 'var(--qoder-dark-bg-quaternary)' }}>
-      {/* Pestañas */}
-      <div className="flex border-b border-qoder-dark-border-primary">
+      {/* Pestañas estilo navegador Chrome */}
+      <div className="flex overflow-x-auto pb-1 -mb-1">
         <button
-          className={`py-2 px-4 font-medium text-sm ${
+          className={`py-2 px-4 font-medium text-sm rounded-t-lg mr-1 relative transition-all duration-200 ${
             activeTab === "sucursales"
-              ? "text-qoder-dark-accent-primary border-b-2 border-qoder-dark-accent-primary"
-              : "text-qoder-dark-text-secondary hover:text-qoder-dark-text-primary"
+              ? "text-qoder-dark-accent-primary bg-qoder-dark-bg-secondary border-x border-t border-qoder-dark-border-primary z-10"
+              : "text-qoder-dark-text-secondary hover:text-qoder-dark-text-primary bg-qoder-dark-bg-tertiary hover:bg-qoder-dark-bg-secondary border border-transparent"
           }`}
+          style={{
+            clipPath: activeTab === "sucursales" 
+              ? "polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%)" 
+              : "polygon(0 0, calc(100% - 8px) 0, calc(100% - 2px) 100%, 0 100%)"
+          }}
           onClick={() => handleTabChange("sucursales")}
         >
-          Sucursales
+          <div className="flex items-center">
+            <span>Sucursales</span>
+          </div>
         </button>
         <button
-          className={`py-2 px-4 font-medium text-sm ${
+          className={`py-2 px-4 font-medium text-sm rounded-t-lg mr-1 relative transition-all duration-200 ${
             activeTab === "barberos"
-              ? "text-qoder-dark-accent-primary border-b-2 border-qoder-dark-accent-primary"
-              : "text-qoder-dark-text-secondary hover:text-qoder-dark-text-primary"
+              ? "text-qoder-dark-accent-primary bg-qoder-dark-bg-secondary border-x border-t border-qoder-dark-border-primary z-10"
+              : "text-qoder-dark-text-secondary hover:text-qoder-dark-text-primary bg-qoder-dark-bg-tertiary hover:bg-qoder-dark-bg-secondary border border-transparent"
           }`}
+          style={{
+            clipPath: activeTab === "barberos" 
+              ? "polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%)" 
+              : "polygon(0 0, calc(100% - 8px) 0, calc(100% - 2px) 100%, 0 100%)"
+          }}
           onClick={() => handleTabChange("barberos")}
         >
-          Barberos
+          <div className="flex items-center">
+            <span>Barberos</span>
+          </div>
         </button>
         <button
-          className={`py-2 px-4 font-medium text-sm ${
+          className={`py-2 px-4 font-medium text-sm rounded-t-lg mr-1 relative transition-all duration-200 ${
             activeTab === "clientes"
-              ? "text-qoder-dark-accent-primary border-b-2 border-qoder-dark-accent-primary"
-              : "text-qoder-dark-text-secondary hover:text-qoder-dark-text-primary"
+              ? "text-qoder-dark-accent-primary bg-qoder-dark-bg-secondary border-x border-t border-qoder-dark-border-primary z-10"
+              : "text-qoder-dark-text-secondary hover:text-qoder-dark-text-primary bg-qoder-dark-bg-tertiary hover:bg-qoder-dark-bg-secondary border border-transparent"
           }`}
+          style={{
+            clipPath: activeTab === "clientes" 
+              ? "polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%)" 
+              : "polygon(0 0, calc(100% - 8px) 0, calc(100% - 2px) 100%, 0 100%)"
+          }}
           onClick={() => handleTabChange("clientes")}
         >
-          Clientes
+          <div className="flex items-center">
+            <span>Clientes</span>
+          </div>
         </button>
+        <div className="flex-grow border-b border-qoder-dark-border-primary"></div>
       </div>
       
       {/* Contenido de las pestañas */}

@@ -88,6 +88,9 @@ export function KanbanBoard({
   const appointment = selectedAppointment !== undefined ? selectedAppointment : localSelectedAppointment;
   const setAppointment = setSelectedAppointment !== undefined ? setSelectedAppointment : localSetSelectedAppointment;
   
+  // Estado para las columnas
+  const [columns, setColumns] = useState<Record<ColumnId, Column>>(() => COLUMNS);
+  
   // Obtener citas para la fecha actual
   const { data: citas = [], isLoading, isError, refetch } = useCitas({
     sucursalId: filters.sucursalId || undefined,
@@ -126,35 +129,47 @@ export function KanbanBoard({
     return taskMap;
   }, [citas]);
   
-  // Organizar tareas por columnas
-  const columns = useMemo(() => {
-    const columnTasks: Record<ColumnId, string[]> = {
-      pendientes: [],
-      completadas: [],
-      canceladas: [],
-    };
-    
-    Object.values(kanbanTasks).forEach(task => {
-      columnTasks[task.columnId].push(task.id);
+  // Actualizar columnas cuando cambian las tareas
+  useEffect(() => {
+    // Solo actualizar si las tareas realmente cambiaron
+    setColumns(prevColumns => {
+      const columnTasks: Record<ColumnId, string[]> = {
+        pendientes: [],
+        completadas: [],
+        canceladas: [],
+      };
+
+      Object.values(kanbanTasks).forEach(task => {
+        columnTasks[task.columnId].push(task.id);
+      });
+
+      const updatedColumns: Record<ColumnId, Column> = {
+        pendientes: {
+          ...COLUMNS.pendientes,
+          taskIds: columnTasks.pendientes,
+        },
+        completadas: {
+          ...COLUMNS.completadas,
+          taskIds: columnTasks.completadas,
+        },
+        canceladas: {
+          ...COLUMNS.canceladas,
+          taskIds: columnTasks.canceladas,
+        },
+      };
+
+      // Verificar si las columnas realmente cambiaron para evitar actualizaciones innecesarias
+      const hasChanged = (Object.keys(updatedColumns) as ColumnId[]).some(
+        columnId => 
+          JSON.stringify(updatedColumns[columnId].taskIds) !== JSON.stringify(prevColumns[columnId].taskIds)
+      );
+
+      if (hasChanged) {
+        return updatedColumns;
+      }
+      
+      return prevColumns;
     });
-    
-    // Crear columnas con las tareas asignadas
-    const updatedColumns: Record<ColumnId, Column> = {
-      pendientes: {
-        ...COLUMNS.pendientes,
-        taskIds: columnTasks.pendientes,
-      },
-      completadas: {
-        ...COLUMNS.completadas,
-        taskIds: columnTasks.completadas,
-      },
-      canceladas: {
-        ...COLUMNS.canceladas,
-        taskIds: columnTasks.canceladas,
-      },
-    };
-    
-    return updatedColumns;
   }, [kanbanTasks]);
   
   // Convertir tareas de Kanban a tareas compatibles con TaskCard
@@ -293,19 +308,66 @@ export function KanbanBoard({
       return;
     }
     
-    // Determinar el nuevo estado basado en la columna de destino
     let newEstado: EstadoCita = "pendiente";
+    let newColumnId: ColumnId = "pendientes";
+    
     switch (destination.droppableId) {
       case "pendientes":
         newEstado = "pendiente";
+        newColumnId = "pendientes";
         break;
       case "completadas":
         newEstado = "completado";
+        newColumnId = "completadas";
         break;
       case "canceladas":
         newEstado = "cancelado";
+        newColumnId = "canceladas";
         break;
     }
+    
+    const sourceColumnId = source.droppableId as ColumnId;
+    const destColumnId = destination.droppableId as ColumnId;
+    
+    // 1) Actualizar columnas localmente (optimistic update)
+    setColumns((prev) => {
+      const newColumns = { ...prev };
+      
+      const sourceColumn = newColumns[sourceColumnId];
+      const destColumn = newColumns[destColumnId];
+      
+      const sourceTaskIds = Array.from(sourceColumn.taskIds);
+      sourceTaskIds.splice(source.index, 1);
+      
+      if (sourceColumnId === destColumnId) {
+        // Mover dentro de la misma columna
+        sourceTaskIds.splice(destination.index, 0, draggableId);
+        
+        newColumns[sourceColumnId] = {
+          ...sourceColumn,
+          taskIds: sourceTaskIds,
+        };
+      } else {
+        // Mover entre columnas distintas
+        const destTaskIds = Array.from(destColumn.taskIds);
+        destTaskIds.splice(destination.index, 0, draggableId);
+        
+        newColumns[sourceColumnId] = {
+          ...sourceColumn,
+          taskIds: sourceTaskIds,
+        };
+        newColumns[destColumnId] = {
+          ...destColumn,
+          taskIds: destTaskIds,
+        };
+      }
+      
+      return newColumns;
+    });
+    
+    // Guardar el estado original para posibles reversiones
+    const originalEstado = task.estado;
+    const originalColumnId = task.columnId;
     
     try {
       // Actualizar el estado de la cita en la base de datos
@@ -314,13 +376,15 @@ export function KanbanBoard({
         estado: newEstado
       });
       
-      // Refrescar los datos
-      await refetch();
-      
       toast.success("Cita actualizada correctamente");
+      
+      // Refrescar los datos directamente sin setTimeout
+      await refetch();
     } catch (error) {
       console.error("Error al actualizar la cita:", error);
       toast.error("Error al actualizar la cita");
+      
+      // En caso de error, revertir el cambio local
       // Refrescar para restaurar el estado anterior
       await refetch();
     }
@@ -407,10 +471,10 @@ export function KanbanBoard({
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="hidden md:grid md:grid-cols-3 gap-6 w-full">
           {Object.values(columns).map((column) => {
-            const columnTasks = column.taskIds.map(taskId => {
-              const kanbanTask = kanbanTasks[taskId];
-              return convertToTaskCardFormat(kanbanTask);
-            });
+            const columnTasks = column.taskIds
+              .map(taskId => kanbanTasks[taskId])
+              .filter(kanbanTask => kanbanTask !== undefined)
+              .map(kanbanTask => convertToTaskCardFormat(kanbanTask));
 
             return (
               <KanbanColumn

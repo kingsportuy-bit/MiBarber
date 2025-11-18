@@ -16,9 +16,6 @@ export default function ClientesPageClient() {
         <title>Barberox | Clientes</title>
       </Head>
       <div className="flex flex-col h-full">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-qoder-dark-text-primary">Gestión de Clientes</h2>
-        </div>
         <div className="flex-grow">
           <ClientsTable />
         </div>

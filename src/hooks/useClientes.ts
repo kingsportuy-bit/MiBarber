@@ -325,3 +325,56 @@ export function useClientes(
 
   return { ...listQuery, createMutation, updateMutation, deleteMutation };
 }
+
+// Hook para obtener un cliente por su ID
+export function useCliente(id_cliente: string | null) {
+  const supabase = getSupabaseClient();
+  
+  return useQuery({
+    queryKey: ["cliente", id_cliente],
+    queryFn: async () => {
+      if (!id_cliente) {
+        return null;
+      }
+      
+      const { data, error } = await supabase
+        .from("mibarber_clientes")
+        .select("*")
+        .eq("id_cliente", id_cliente)
+        .single();
+      
+      if (error) {
+        throw error;
+      }
+      
+      return data as Client;
+    },
+    enabled: !!id_cliente
+  });
+}
+
+// Hook para obtener múltiples clientes por sus IDs
+export function useClientesByIds(ids: string[]) {
+  const supabase = getSupabaseClient();
+  
+  return useQuery({
+    queryKey: ["clientes", "byIds", ids],
+    queryFn: async () => {
+      if (ids.length === 0) {
+        return [];
+      }
+      
+      const { data, error } = await supabase
+        .from("mibarber_clientes")
+        .select("*")
+        .in("id_cliente", ids);
+      
+      if (error) {
+        throw error;
+      }
+      
+      return data as Client[];
+    },
+    enabled: ids.length > 0
+  });
+}

@@ -77,12 +77,14 @@ export function useUpdateCita(): UpdateCitaResult {
       
       return data as Appointment;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       // Invalidar todas las consultas de citas
       queryClient.invalidateQueries({ queryKey: ["citas"] });
       // También invalidar consultas específicas si es necesario
       queryClient.invalidateQueries({ queryKey: ["citas-rango"] });
       queryClient.invalidateQueries({ queryKey: ["horarios-disponibles"] });
+      // Invalidar también las consultas de horarios disponibles completos
+      queryClient.invalidateQueries({ queryKey: ["horarios-disponibles-completo"] });
     },
   });
 

@@ -100,7 +100,7 @@ const TaskCard = memo(({
       task,
     },
     // Optimizaciones para mejor rendimiento
-    animateLayoutChanges: () => false, // Desactivar animaciones de layout changes
+    animateLayoutChanges: () => true, // Activar animaciones de layout changes
     transition: {
       duration: 150, // Reducir duración de transiciones
       easing: 'ease-out'
@@ -110,8 +110,11 @@ const TaskCard = memo(({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.8 : 1,
     cursor: isDragging ? 'grabbing' : 'grab',
+    zIndex: isDragging ? 1000 : undefined,
+    position: 'relative' as const,
+    transitionProperty: 'transform, opacity',
   };
 
   const overlayStyle = dragOverlay ? {
@@ -122,6 +125,7 @@ const TaskCard = memo(({
     pointerEvents: 'none' as const,
     // transform: 'rotate(3deg)', // Eliminada la rotación que causaba el efecto visual
     boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
+    transition: 'all 150ms ease-out',
   } : undefined;
 
   // Definir colores según el estado de la tarjeta
@@ -275,7 +279,7 @@ const ColumnContainer = memo(({
 
   // Optimización: usar useMemo para evitar recrear el array innecesariamente
   const columnItems = useMemo(() => {
-    return tasks.length > 0 ? tasks.map(t => t.id) : [];
+    return tasks.map(t => t.id);
   }, [tasks]);
 
   return (
@@ -609,18 +613,41 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // Previene drag accidental
+        distance: 5,
       },
     }),
     useSensor(MouseSensor, {
       activationConstraint: {
-        distance: 5, // Reducir distancia para mejor respuesta
+        distance: 3,
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 150, // Reducir delay para mejor UX
-        tolerance: 8,
+        delay: 100,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+  
+  // Añadir sensor de movimiento para mejorar la detección de drag
+  const enhancedSensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 3,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 100,
+        tolerance: 5,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -649,7 +676,17 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
     
     document.body.style.overflow = 'hidden';
   }, [tasks, findContainer]);
-
+  
+  const handleDragCancel = useCallback(() => {
+    document.body.style.overflow = '';
+    setActiveId(null);
+    setOverColumn(null);
+    setSourceColumn(null);
+    
+    // Revertir cambios visuales al cancelar
+    setColumns(prev => ({ ...prev }));
+  }, []);
+  
   const handleDragOver = useCallback((event: any) => {
     const { active, over } = event;
     
@@ -814,16 +851,15 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
 
       setActiveId(null);
       setOverColumn(null);
+      setSourceColumn(null);
       document.body.style.overflow = "";
 
       if (!over) {
-        setSourceColumn(null);
         return;
       }
 
       const activeTask = tasks.find((t) => t.id === active.id);
       if (!activeTask) {
-        setSourceColumn(null);
         return;
       }
 
@@ -833,11 +869,8 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
       // Verificar que targetEstado no sea null
       if (!targetEstado) {
         console.log('No se pudo determinar la columna de destino');
-        setSourceColumn(null);
         return;
       }
-
-      setSourceColumn(null);
 
       if (sourceEstado === targetEstado) {
         const columnTasks = columns[sourceEstado as Estado];
@@ -870,35 +903,43 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
       }
 
       try {
+        // Optimización: Actualizar el estado local de forma inmediata para una mejor experiencia de usuario
+        const updatedTask = { ...activeTask, columnId: targetEstado, estado: targetEstado };
+        
         setColumns((prev) => {
-          const sourceItems = [...prev[sourceEstado as Estado]];
-          const targetItems = [...prev[targetEstado as Estado]];
+          const sourceItems = [...prev[sourceEstado as Estado]].filter(t => t.id !== active.id);
+          const targetItems = [...prev[targetEstado as Estado], updatedTask];
 
-          const taskIndex = sourceItems.findIndex((t) => t.id === active.id);
-          if (taskIndex !== -1) {
-            const [movedTask] = sourceItems.splice(taskIndex, 1);
-            targetItems.push({ ...movedTask, columnId: targetEstado, estado: targetEstado });
-          }
-
-          return { ...prev, [sourceEstado]: sourceItems, [targetEstado]: targetItems };
+          return { 
+            ...prev, 
+            [sourceEstado]: sourceItems, 
+            [targetEstado]: targetItems 
+          };
         });
 
+        // Actualizar en la base de datos
         await updateCitaStatus(active.id as string, targetEstado);
         await refetch();
         toast.success("Cita movida correctamente");
       } catch (error: any) {
+        // En caso de error, revertir el cambio local
+        setColumns((prev) => {
+          const targetItems = [...prev[targetEstado as Estado]].filter(t => t.id !== active.id);
+          const sourceItems = [...prev[sourceEstado as Estado], activeTask];
+
+          return { 
+            ...prev, 
+            [sourceEstado]: sourceItems, 
+            [targetEstado]: targetItems 
+          };
+        });
+        
         toast.error(error.message || "Error al mover cita");
         await refetch();
       }
     },
     [tasks, columns, findContainer, isDiaBloqueado, isHoraBloqueada, updateCitaStatus, refetch]
   );
-
-  const handleDragCancel = useCallback(() => {
-    document.body.style.overflow = '';
-    setActiveId(null);
-    setOverColumn(null);
-  }, []);
 
   // Navegar a días anteriores/siguientes usando la misma lógica que la agenda
   const goToPreviousDay = () => {
@@ -1081,16 +1122,11 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
       ) : (
         <DndContext
           collisionDetection={closestCorners}
-          sensors={sensors}
-          onDragStart={({ active }) => setActiveId(active.id)}
-          onDragEnd={({ active, over }) => {
-            setActiveId(null);
-            if (over && over.id !== active.id) {
-              // Aquí se manejaría el movimiento de tareas
-              console.log('Mover tarea:', active.id, 'a columna:', over.id);
-            }
-          }}
-          onDragCancel={() => setActiveId(null)}
+          sensors={enhancedSensors}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
         >
           <div className="flex gap-5 w-full min-h-[450px] overflow-x-auto px-3">
             {columnStates.map((column) => (

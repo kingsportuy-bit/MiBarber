@@ -65,7 +65,7 @@ export function TabNavigation({ tabs, className = '' }: TabNavigationProps) {
   return (
     <div 
       ref={containerRef}
-      className={`flex bg-white border-t border-gray-200 ${className}`}
+      className={`flex overflow-x-auto pb-1 -mb-1 ${className}`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -76,17 +76,23 @@ export function TabNavigation({ tabs, className = '' }: TabNavigationProps) {
           <Link
             key={tab.href}
             href={tab.href}
-            className={`flex-1 flex flex-col items-center justify-center py-2 px-1 text-xs font-medium transition-colors duration-200 ${
+            className={`flex-1 flex items-center justify-center py-2 px-3 text-xs font-medium rounded-t-lg mr-1 relative transition-all duration-200 truncate ${
               isActive 
-                ? 'text-blue-600 border-t-2 border-blue-600' 
-                : 'text-gray-500 hover:text-gray-700'
+                ? "text-blue-600 bg-white border-x border-t border-gray-200 z-10"
+                : "text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 border border-transparent"
             }`}
+            style={{
+              clipPath: isActive 
+                ? "polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%)" 
+                : "polygon(0 0, calc(100% - 8px) 0, calc(100% - 2px) 100%, 0 100%)"
+            }}
           >
-            {tab.icon && <span className="mb-1">{tab.icon}</span>}
+            {tab.icon && <span className="mr-1">{tab.icon}</span>}
             <span className="truncate">{tab.label}</span>
           </Link>
         );
       })}
+      <div className="flex-grow border-b border-gray-200"></div>
     </div>
   );
 }

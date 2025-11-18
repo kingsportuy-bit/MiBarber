@@ -159,7 +159,10 @@ export function SucursalesManager({ idBarberia, isAdmin }: SucursalesManagerProp
           />
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <SucursalHorariosSection idSucursal={sucursal.id} />
+            <SucursalHorariosSection 
+              idSucursal={sucursal.id} 
+              nombreSucursal={sucursal.nombre_sucursal || `Sucursal ${sucursal.numero_sucursal}`}
+            />
             <SucursalBarberosSection 
               sucursalId={sucursal.numero_sucursal} 
               sucursalUuid={sucursal.id} 

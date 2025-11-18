@@ -202,72 +202,74 @@ export function ClientsTable() {
     <>
       {/* Implementación directa sin TableLayout */}
       <div className="space-y-4 h-full flex flex-col">
-        {/* Filtros globales - solo mostrar filtro de sucursal */}
-        <GlobalFilters showDateFilters={false} showBarberoFilter={false} />
-        
-
-{/* Barra de búsqueda y acciones - responsive */}
-<div className="flex flex-wrap items-center justify-between gap-4">
-  <div className="flex gap-2">
-    <div className="relative">
-      <input
-        type="text"
-        placeholder="Buscar por nombre o teléfono..."
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        className={`qoder-dark-input py-2 px-4 text-sm md:py-3 md:px-5 md:text-base w-full sm:w-64 ${q ? 'pr-10' : 'pr-4'}`}
-      />
-      {q && (
-        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-          <button
-            onClick={() => setQ('')}
-            className="boton-simple"
-            style={{ 
-              background: 'transparent',
-              border: 'none',
-              padding: '0.25rem',
-              cursor: 'pointer',
-              transition: 'none',
-              height: '1.5rem',
-              width: '1.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+        {/* Barra superior con filtro a la izquierda y buscador/botón a la derecha */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          {/* Filtro de sucursales a la izquierda */}
+          <div className="flex-1 min-w-[200px] max-w-xs">
+            <GlobalFilters showDateFilters={false} showBarberoFilter={false} />
+          </div>
+          
+          {/* Buscador y botón Nuevo a la derecha */}
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Buscar por nombre o teléfono..."
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                className={`qoder-dark-input py-2 px-4 text-sm md:py-3 md:px-5 md:text-base w-full sm:w-64 ${q ? 'pr-10' : 'pr-4'}`}
+              />
+              {q && (
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                  <button
+                    onClick={() => setQ('')}
+                    className="boton-simple"
+                    style={{ 
+                      background: 'transparent',
+                      border: 'none',
+                      padding: '0.25rem',
+                      cursor: 'pointer',
+                      transition: 'none',
+                      height: '1.5rem',
+                      width: '1.5rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            <button
+              onClick={() => {
+                setEditing(undefined);
+                setOpen(true);
+              }}
+              className="qoder-dark-button-primary px-3 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition text-sm md:px-4 md:py-2 md:text-base"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                />
+              </svg>
+              <span>Nuevo</span>
+            </button>
+          </div>
         </div>
-      )}
-    </div>
-    <button
-      onClick={() => {
-        setEditing(undefined);
-        setOpen(true);
-      }}
-      className="qoder-dark-button-primary px-3 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition text-sm md:px-4 md:py-2 md:text-base"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-4 w-4"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-        />
-      </svg>
-      <span className="hidden sm:inline">Nuevo</span>
-      <span className="sm:hidden">+</span>
-    </button>
-  </div>
-</div>
 
         {/* Contenedor de la tabla con altura responsiva */}
         <div className="bg-qoder-dark-bg-secondary flex-grow flex flex-col h-full overflow-hidden rounded-xl">
@@ -475,125 +477,88 @@ export function ClientsTable() {
                 </tbody>
               </table>
               
-              {/* Vista de cards para móviles */}
-              <div className="md:hidden space-y-3">
-                {isLoading && (
-                  <div className="text-center py-4 text-qoder-dark-text-primary">
-                    Cargando…
-                  </div>
-                )}
-                {(filteredClients || []).map((c) => (
-                  <div 
-                    key={c.id_cliente} 
-                    className="qoder-dark-card p-4 rounded-lg border border-qoder-dark-border-primary"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-bold text-qoder-dark-text-primary">{c.nombre}</h3>
-                        <p className="text-sm text-qoder-dark-text-secondary mt-1">{c.telefono || "-"}</p>
-                      </div>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => showClientDetails(c)}
-                          className="text-white hover:text-gray-300 bg-transparent !bg-none border-none p-1"
-                          title="Ver ficha del cliente"
+              {/* Vista de tabla para móviles */}
+              <div className="md:hidden flex justify-center">
+                <div className="w-full overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-qoder-dark-border-primary bg-qoder-dark-bg-tertiary text-center">
+                        <th className="py-2 px-2 text-qoder-dark-text-primary font-semibold text-sm">Nombre</th>
+                        <th className="py-2 px-2 text-qoder-dark-text-primary font-semibold text-sm">Puntaje</th>
+                        <th className="py-2 px-2 text-qoder-dark-text-primary font-semibold text-sm">Teléfono</th>
+                        <th className="py-2 px-2 text-qoder-dark-text-primary font-semibold text-sm">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(filteredClients || []).map((c) => (
+                        <tr 
+                          key={c.id_cliente} 
+                          className="border-b border-qoder-dark-border-primary hover:bg-qoder-dark-bg-hover text-center"
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                            />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditing(c);
-                            setOpen(true);
-                          }}
-                          className="text-blue-500 hover:text-blue-300 bg-transparent !bg-none border-none p-1"
-                          title="Editar cliente"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                            />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => confirmDelete(c)}
-                          className="text-red-500 hover:text-red-300 bg-transparent !bg-none border-none p-1"
-                          title="Eliminar cliente"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-3 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-qoder-dark-text-secondary">Puntaje:</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-base">
-                            {getStarsFromScore(c.puntaje ?? 0)}
-                          </span>
-                          <span className="text-xs text-qoder-dark-text-secondary">
-                            ({c.puntaje ?? 0})
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {c.notas && (
-                        <div>
-                          <span className="text-sm text-qoder-dark-text-secondary">Notas:</span>
-                          <p className="text-sm text-qoder-dark-text-primary mt-1">{c.notas}</p>
-                        </div>
-                      )}
-                      
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-qoder-dark-text-secondary">Última interacción:</span>
-                        <span className="text-sm text-qoder-dark-text-primary">
-                          {formatLastInteraction(c.ultima_interaccion)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                          <td className="py-2 px-2 text-qoder-dark-text-primary text-sm truncate max-w-[100px]">
+                            {c.nombre || "-"}
+                          </td>
+                          <td className="py-2 px-2 text-qoder-dark-text-secondary text-sm">
+                            <div className="flex items-center justify-center">
+                              {getStarsFromScore(c.puntaje ?? 0)}
+                            </div>
+                          </td>
+                          <td className="py-2 px-2 text-qoder-dark-text-secondary text-sm truncate max-w-[80px]">
+                            {c.telefono || "-"}
+                          </td>
+                          <td className="py-2 px-2">
+                            <div className="flex space-x-1 justify-center">
+                              <button
+                                onClick={() => {
+                                  setEditing(c);
+                                  setOpen(true);
+                                }}
+                                className="text-blue-500 hover:text-blue-300 bg-transparent !bg-none border-none p-1"
+                                title="Editar cliente"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 w-4"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                  />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => confirmDelete(c)}
+                                className="text-red-500 hover:text-red-300 bg-transparent !bg-none border-none p-1"
+                                title="Eliminar cliente"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 w-4"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
                 {!isLoading && (filteredClients?.length ?? 0) === 0 && (
                   <div className="text-center py-6 text-qoder-dark-text-secondary">
                     Sin resultados

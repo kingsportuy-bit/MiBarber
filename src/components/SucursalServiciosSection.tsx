@@ -201,6 +201,9 @@ export function SucursalServiciosSection({
               <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
                 Duración
               </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
+                Descripción
+              </th>
               <th className="px-4 py-3 text-right text-xs font-medium text-qoder-dark-text-secondary uppercase tracking-wider">
                 Acciones
               </th>
@@ -224,6 +227,9 @@ export function SucursalServiciosSection({
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-qoder-dark-text-primary">
                   {servicio.duracion_minutos} min
+                </td>
+                <td className="px-4 py-3 text-sm text-qoder-dark-text-primary">
+                  {servicio.descripcion || "-"}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end space-x-2">

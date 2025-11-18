@@ -140,9 +140,13 @@ export function useCreateCita(): CreateCitaResult {
         throw new Error(dbError.message || 'Error desconocido al crear la cita');
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       // Invalidar todas las consultas de citas
       queryClient.invalidateQueries({ queryKey: ["citas"] });
+      
+      // Invalidar también las consultas de horarios disponibles
+      // Esto asegura que los horarios se actualicen después de crear una cita
+      queryClient.invalidateQueries({ queryKey: ["horarios-disponibles-completo"] });
     },
     onError: (error: Error) => {
       console.error('🔴 Error en mutation:', error.message);

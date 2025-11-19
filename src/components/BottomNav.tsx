@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useEffect, useState } from "react";
 
 interface NavItem {
   href: string;
@@ -45,9 +46,29 @@ const GearIcon = ({ className }: { className?: string }) => (
 export function BottomNav() {
   const pathname = usePathname();
   const { isAuthenticated } = useAuth();
+  const [isChatView, setIsChatView] = useState(false);
   
-  // Si no hay un barbero logueado o estamos en la página de admin, no mostrar el menú inferior
-  if (!isAuthenticated || pathname?.startsWith('/admin')) {
+  // Verificar si estamos en la vista individual de chat de WhatsApp
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (typeof window !== 'undefined') {
+        setIsChatView(window.location.hash === '#chat-view');
+      }
+    };
+    
+    // Verificar el hash inicial
+    handleHashChange();
+    
+    // Escuchar cambios en el hash
+    window.addEventListener('hashchange', handleHashChange);
+    
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
+  
+  // Si no hay un barbero logueado, estamos en la página de admin, o estamos en la vista individual de chat, no mostrar el menú inferior
+  if (!isAuthenticated || pathname?.startsWith('/admin') || (pathname?.startsWith('/whatsapp') && isChatView)) {
     return null;
   }
   

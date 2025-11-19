@@ -4,6 +4,7 @@ import { QoderFooter } from "@/components/QoderFooter";
 import { ConfiguracionWrapper } from "@/components/ConfiguracionWrapper";
 import { usePathname } from "next/navigation";
 import { PullToRefresh } from "@/components/PullToRefresh";
+import { useEffect, useState } from "react";
 
 export function GeneralLayout({
   children,
@@ -11,6 +12,7 @@ export function GeneralLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [isChatView, setIsChatView] = useState(false);
   
   // Para la página de login, usar un layout más simple
   const isLoginPage = pathname?.startsWith('/login');
@@ -20,6 +22,25 @@ export function GeneralLayout({
   
   // Para la página de WhatsApp, usar un layout especial
   const isWhatsAppPage = pathname?.startsWith('/whatsapp');
+  
+  // Verificar si estamos en la vista individual de chat de WhatsApp
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (typeof window !== 'undefined') {
+        setIsChatView(window.location.hash === '#chat-view');
+      }
+    };
+    
+    // Verificar el hash inicial
+    handleHashChange();
+    
+    // Escuchar cambios en el hash
+    window.addEventListener('hashchange', handleHashChange);
+    
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
   
   const handleRefresh = () => {
     // Recargar la página actual
@@ -56,8 +77,8 @@ export function GeneralLayout({
     return (
       <div className="flex flex-col h-screen w-full min-w-0 pb-16 md:pb-0">
         {children}
-        {/* Espacio transparente para el menú inferior en móviles */}
-        <div className="h-16 md:hidden bg-transparent"></div>
+        {/* Espacio transparente para el menú inferior en móviles, excepto en vista individual de chat */}
+        <div className={`h-16 md:hidden bg-transparent ${isChatView ? 'hidden' : ''}`}></div>
       </div>
     );
   }

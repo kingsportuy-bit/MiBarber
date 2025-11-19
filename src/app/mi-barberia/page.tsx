@@ -383,14 +383,14 @@ function MiBarberiaContent() {
   }
 
   return (
-    <div className="bg-transparent rounded-xl space-y-8">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-qoder-dark-text-primary">
+    <div className="relative left-1/2 right-1/2 w-screen -mx-[50vw] bg-transparent rounded-xl space-y-8 px-0 md:static md:w-full md:mx-0 md:left-0 md:right-0">
+      <div className="flex justify-between items-center px-0">
+        <h2 className="text-2xl font-bold text-qoder-dark-text-primary pl-4">
           Gestión de Sucursales
         </h2>
         <button
           onClick={handleAddSucursal}
-          className="qoder-dark-button-primary px-4 py-2 rounded-lg flex items-center gap-2"
+          className="qoder-dark-button-primary px-4 py-2 rounded-lg flex items-center gap-2 pr-4"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -412,8 +412,8 @@ function MiBarberiaContent() {
 
       {/* Pestañas de sucursales */}
       {sucursales.length > 0 && (
-        <div className="mx-4">
-          <div className="flex overflow-x-auto pb-0 -mb-px">
+        <div className="w-full px-0">
+          <div className="flex overflow-x-auto pb-0 -mb-px px-0">
             {[...sucursales]
               .sort((a, b) => {
                 // La sucursal número 1 (principal) debe ir primero
@@ -441,13 +441,13 @@ function MiBarberiaContent() {
           </div>
           {/* Contenido de la sucursal seleccionada */}
           {sucursalSeleccionada ? (
-            <div key={sucursalSeleccionada.id}>
+            <div key={sucursalSeleccionada.id} className="px-0">
               <div
-                className="bg-black/50 rounded-b-xl border-x border-b border-qoder-dark-border-primary overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
+                className="bg-black/50 rounded-b-xl border-x border-b border-qoder-dark-border-primary overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 mx-0 rounded-t-none"
               >
                 {/* Encabezado de la sucursal con mejor diseño visual */}
-                <div className="bg-transparent p-6 border-b border-qoder-dark-border-primary">
-                  <div className="flex justify-between items-start">
+                <div className="bg-transparent p-0 border-b border-qoder-dark-border-primary">
+                  <div className="flex justify-between items-start p-6">
                     <div className="flex items-center space-x-3">
                       <div className="bg-qoder-dark-accent-primary/10 p-3 rounded-lg">
                         <svg
@@ -509,10 +509,10 @@ function MiBarberiaContent() {
                 </div>
 
                 {/* Información de contacto y horarios con mejor diseño */}
-                <div className="p-6 bg-transparent">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="p-0 bg-transparent">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-0 mb-0 p-0">
                     {/* Sección de Contacto */}
-                    <div className="mb-6">
+                    <div className="mb-0 p-6">
                       <div className="flex items-center mb-3">
                         <div className="bg-qoder-dark-accent-primary/10 p-2 rounded-lg mr-3">
                           <svg
@@ -558,10 +558,10 @@ function MiBarberiaContent() {
                     </div>
 
                     {/* Separador entre contacto y dirección */}
-                    <div className="border-t qoder-dark-separator mx-6 md:col-span-2"></div>
+                    <div className="border-t qoder-dark-separator mx-0 md:col-span-2"></div>
 
                     {/* Sección de Dirección */}
-                    <div className="mb-6">
+                    <div className="mb-0 p-6">
                       <div className="flex items-center mb-3">
                         <div className="bg-qoder-dark-accent-primary/10 p-2 rounded-lg mr-3">
                           <svg
@@ -617,10 +617,10 @@ function MiBarberiaContent() {
                     </div>
 
                     {/* Separador entre dirección y horarios */}
-                    <div className="border-t qoder-dark-separator mx-6 md:col-span-2"></div>
+                    <div className="border-t qoder-dark-separator mx-0 md:col-span-2"></div>
 
                     {/* Sección de Horarios */}
-                    <div className="mb-6">
+                    <div className="mb-0 p-6">
                       <SucursalHorariosSection 
                         idSucursal={sucursalSeleccionada.id} 
                         nombreSucursal={sucursalSeleccionada.nombre_sucursal || `Sucursal ${sucursalSeleccionada.numero_sucursal}`} 
@@ -630,10 +630,10 @@ function MiBarberiaContent() {
                 </div>
 
                 {/* Separador entre secciones */}
-                <div className="border-t qoder-dark-separator mx-6"></div>
+                <div className="border-t qoder-dark-separator mx-0"></div>
 
                 {/* Sección de Barberos */}
-                <div className="mb-6 mx-6 pt-6">
+                <div className="mb-6 mx-0 pt-6 px-6">
                   <SucursalBarberosSection
                     sucursalId={sucursalSeleccionada.numero_sucursal}
                     sucursalUuid={sucursalSeleccionada.id}
@@ -643,10 +643,10 @@ function MiBarberiaContent() {
                 </div>
 
                 {/* Separador entre secciones */}
-                <div className="border-t qoder-dark-separator mx-6"></div>
+                <div className="border-t qoder-dark-separator mx-0"></div>
 
                 {/* Sección de Servicios */}
-                <div className="mb-6 mx-6 pt-6">
+                <div className="mb-6 mx-0 pt-6 px-6">
                   <SucursalServiciosSection
                     sucursalId={sucursalSeleccionada.id}
                     idBarberia={idBarberia}
@@ -661,10 +661,10 @@ function MiBarberiaContent() {
                 </div>
 
                 {/* Separador entre secciones */}
-                <div className="border-t qoder-dark-separator mx-6"></div>
+                <div className="border-t qoder-dark-separator mx-0"></div>
 
                 {/* Sección de Información Adicional */}
-                <div className="mb-6 mx-6 pt-6">
+                <div className="mb-6 mx-0 pt-6 px-6">
                   <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center">
                       <div className="bg-qoder-dark-accent-primary/10 p-2 rounded-lg mr-3">

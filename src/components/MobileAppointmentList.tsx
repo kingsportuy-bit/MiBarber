@@ -53,16 +53,23 @@ export function MobileAppointmentList({ onEdit }: MobileAppointmentListProps) {
     barberoId: filters.barberoId || undefined,
   });
 
+  // Filtrar citas para mostrar solo pendientes y completadas (excluir canceladas)
+  const citasFiltradas = useMemo(() => {
+    return citas.filter(cita => 
+      cita.estado === "pendiente" || cita.estado === "completado"
+    );
+  }, [citas]);
+
   // Obtener IDs únicos de clientes de las citas
   const clienteIds = useMemo(() => {
     return Array.from(
       new Set(
-        citas
+        citasFiltradas
           .map(cita => cita.id_cliente)
           .filter((id): id is string => id !== null && id !== undefined)
       )
     );
-  }, [citas]);
+  }, [citasFiltradas]);
 
   // Obtener información de todos los clientes necesarios
   const { data: clientesData } = useClientesByIds(clienteIds);
@@ -163,7 +170,7 @@ export function MobileAppointmentList({ onEdit }: MobileAppointmentListProps) {
               })}
             </h2>
             <p className="text-qoder-dark-text-secondary text-sm">
-              {citas?.length || 0} citas programadas
+              {citasFiltradas?.length || 0} citas programadas
             </p>
           </div>
           
@@ -183,8 +190,8 @@ export function MobileAppointmentList({ onEdit }: MobileAppointmentListProps) {
       
       {/* Lista de citas en formato de tarjetas */}
       <div className="space-y-3 w-full">
-        {citas.length > 0 ? (
-          citas
+        {citasFiltradas.length > 0 ? (
+          citasFiltradas
             .sort((a, b) => {
               // Ordenar por hora
               return a.hora.localeCompare(b.hora);

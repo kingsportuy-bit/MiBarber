@@ -390,7 +390,7 @@ function MiBarberiaContent() {
         </h2>
         <button
           onClick={handleAddSucursal}
-          className="qoder-dark-button-primary px-4 py-2 rounded-lg flex items-center gap-2 pr-4"
+          className="qoder-dark-button-primary px4 py-2 rounded-lg flex items-center gap-2 pr-4"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

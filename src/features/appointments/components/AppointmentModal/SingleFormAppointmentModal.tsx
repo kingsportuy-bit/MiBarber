@@ -15,6 +15,7 @@ import { useHorariosSucursales } from "@/hooks/useHorariosSucursales";
 import { getLocalDateString } from "@/utils/dateUtils";
 import { useBarberias } from "@/hooks/useBarberias";
 import { normalizePhoneNumber, isValidPhoneNumber } from "@/shared/utils/phoneUtils";
+import { isTimeSlotOccupied } from "@/features/appointments/utils/citasHelpers";
 
 // Función para validar el formato del número de teléfono
 const isValidPhoneNumberLocal = (phone: string): boolean => {
@@ -70,6 +71,9 @@ export function SingleFormAppointmentModal({
     telefono: "",
   });
   
+  // Estado para verificar solapamiento
+  const [isOverlapping, setIsOverlapping] = useState(false);
+  
   // Efecto para reiniciar los estados cuando se abre el modal o cambia la cita
   useEffect(() => {
     if (open) {
@@ -87,6 +91,7 @@ export function SingleFormAppointmentModal({
       setTime(initial?.hora || "");
       setNote(initial?.nota || "");
       setClientPhone(initial?.telefono || null);
+      setIsOverlapping(false); // Resetear estado de solapamiento
       console.log("=== FIN DEBUG Reiniciando estados con initial ===");
     }
   }, [open, initial]); // Eliminado initial?.id_cita y usado initial completo
@@ -131,6 +136,51 @@ export function SingleFormAppointmentModal({
   const { data: serviciosData, isLoading: isLoadingServicios } = useServiciosListPorSucursal(selectedSucursalId);
   const { data: barberosData, isLoading: isLoadingBarberos } = useBarberosList(idBarberia || undefined, selectedSucursalId);
   
+  // Obtener citas existentes para verificar solapamiento
+  const { data: citasExistentes } = useCitas({
+    barberoId: barberId || undefined,
+    fecha: date,
+  });
+  
+  // Verificar solapamiento cuando cambian los valores relevantes
+  useEffect(() => {
+    if (barberId && date && time && duration && citasExistentes) {
+      // Filtrar solo citas pendientes y confirmadas
+      const citasFiltradas = citasExistentes.filter(cita => 
+        cita.estado === "pendiente" || cita.estado === "confirmado"
+      );
+      
+      // Si estamos editando, excluir la cita actual
+      const citasParaVerificar = initial?.id_cita 
+        ? citasFiltradas.filter(cita => cita.id_cita !== initial.id_cita)
+        : citasFiltradas;
+      
+      if (citasParaVerificar.length > 0) {
+        // Extraer hora y minutos
+        const [hora, minutos] = time.split(":").map(Number);
+        const duracion = parseInt(duration) || 30; // Por defecto 30 minutos
+        
+        // Verificar solapamiento
+        const solapado = isTimeSlotOccupied(
+          hora,
+          minutos,
+          citasParaVerificar,
+          barberId,
+          date,
+          duracion,
+          !!initial?.id_cita, // isEdit
+          initial?.id_cita
+        );
+        
+        setIsOverlapping(solapado);
+      } else {
+        setIsOverlapping(false);
+      }
+    } else {
+      setIsOverlapping(false);
+    }
+  }, [barberId, date, time, duration, citasExistentes, initial?.id_cita]);
+
   // Obtener horarios disponibles usando el nuevo hook
   const { horariosDisponibles, isLoading: isLoadingHorarios } = useHorariosDisponiblesCompleto({
     idSucursal: selectedSucursalId,
@@ -386,10 +436,6 @@ const handleSubmit = async () => {
     setIsSubmitting(false);
   }
 };
-
-
-
-
 
 
 
@@ -662,6 +708,12 @@ const handleSubmit = async () => {
                 {availableTimes.length === 0 && serviceId && barberId && (
                   <p className="text-xs text-qoder-dark-text-secondary mt-1">
                     No hay horarios disponibles para la fecha seleccionada
+                  </p>
+                )}
+                {/* Advertencia de solapamiento */}
+                {isOverlapping && (
+                  <p className="text-xs text-yellow-500 mt-1">
+                    ⚠️ Esta cita se solapa con otra existente
                   </p>
                 )}
               </div>

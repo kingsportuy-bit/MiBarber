@@ -2,6 +2,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 import type { Appointment } from '@/types/db';
+import { isTimeSlotOccupied } from "@/features/appointments/utils/citasHelpers";
 
 export interface CreateCitaResult {
   mutate: (newCita: Omit<Appointment, "id_cita">) => void;
@@ -79,6 +80,37 @@ export function useCreateCita(): CreateCitaResult {
           if (bloqueoHorario) {
             throw new Error("No se puede crear una cita en un horario bloqueado");
           }
+        }
+      }
+      
+      // Verificar solapamiento de citas
+      const { data: citasExistentes, error: errorCitas } = await supabase
+        .from("mibarber_citas")
+        .select("*")
+        .eq("id_barbero", newCita.id_barbero || '')
+        .eq("fecha", newCita.fecha)
+        .in("estado", ["pendiente", "confirmado"]);
+      
+      if (!errorCitas && citasExistentes && citasExistentes.length > 0) {
+        // Extraer la hora y minutos de la nueva cita
+        const [hora, minutos] = newCita.hora.split(":").map(Number);
+        const duracion = parseInt(newCita.duracion);
+        
+        // Verificar si hay solapamiento
+        const solapado = isTimeSlotOccupied(
+          hora,
+          minutos,
+          citasExistentes,
+          newCita.id_barbero || undefined,
+          newCita.fecha,
+          duracion,
+          false, // No es edición
+          undefined // No hay ID de cita inicial
+        );
+        
+        if (solapado) {
+          // Permitir la creación de citas solapadas (requerimiento específico)
+          console.log("⚠️ Se detectó solapamiento pero se permite la creación de la cita");
         }
       }
       

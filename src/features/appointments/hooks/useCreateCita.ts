@@ -111,6 +111,7 @@ export function useCreateCita(): CreateCitaResult {
         if (solapado) {
           // Permitir la creación de citas solapadas (requerimiento específico)
           console.log("⚠️ Se detectó solapamiento pero se permite la creación de la cita");
+          // No lanzar ningún error aquí, simplemente continuar con la creación
         }
       }
       

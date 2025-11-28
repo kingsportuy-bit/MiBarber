@@ -33,6 +33,17 @@ export function GlobalFilters({
     return null;
   }
 
+  // Mostrar indicador de carga si aún no tenemos datos
+  if (isLoadingSucursales || isLoadingBarberos) {
+    return (
+      <div className={`flex items-center gap-2 ${className}`}>
+        <div className="text-qoder-dark-text-secondary text-sm">
+          Cargando filtros...
+        </div>
+      </div>
+    );
+  }
+
   // Filtrar barberos por sucursal seleccionada
   const barberosFiltrados = filters.sucursalId 
     ? barberos?.filter((b: any) => b.id_sucursal === filters.sucursalId)

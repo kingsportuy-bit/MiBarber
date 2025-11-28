@@ -78,8 +78,12 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
 
   // Efecto para establecer la sucursal por defecto - solo una vez cuando se cargan las sucursales
   useEffect(() => {
-    // Solo aplicar filtros por defecto si no se han aplicado aún
-    if (!defaultFiltersApplied) {
+    // Verificar si ya tenemos los datos necesarios para aplicar filtros por defecto
+    const hasRequiredData = (isAdmin && sucursales && sucursales.length > 0) || 
+                           (!isAdmin && barbero?.id_sucursal);
+    
+    // Solo aplicar filtros por defecto si no se han aplicado aún Y tenemos los datos necesarios
+    if (!defaultFiltersApplied && hasRequiredData) {
       // Para barberos normales, seleccionar automáticamente su sucursal y barbero
       if (!isAdmin && barbero?.id_sucursal) {
         setFilters(prev => ({
@@ -100,15 +104,29 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
       // Marcar que se han aplicado los filtros por defecto
       setDefaultFiltersApplied(true);
     }
+    
+    // Si no tenemos datos pero ya marcamos como aplicados, resetear para intentar nuevamente
+    if (defaultFiltersApplied && !hasRequiredData) {
+      setDefaultFiltersApplied(false);
+    }
   }, [sucursales, isAdmin, barbero, defaultFiltersApplied]);
 
   // Efecto para establecer el barbero por defecto - solo para barberos normales
   // Este efecto se ejecuta cuando se carga el barbero y no hay barbero seleccionado aún
   useEffect(() => {
+    // Verificar que tenemos los datos necesarios y que aún no se ha establecido un barbero
     if (!isAdmin && barbero?.id_barbero && !filters.barberoId && defaultFiltersApplied) {
       setFilters(prev => ({
         ...prev,
         barberoId: barbero.id_barbero
+      }));
+    }
+    
+    // Si somos admin o no tenemos barbero, asegurarnos de que barberoId sea null
+    if (isAdmin || !barbero?.id_barbero) {
+      setFilters(prev => ({
+        ...prev,
+        barberoId: null
       }));
     }
   }, [barbero?.id_barbero, isAdmin, filters.barberoId, defaultFiltersApplied]);
@@ -132,7 +150,7 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
       fechaFin: null
     };
     
-    // Establecer valores por defecto nuevamente
+    // Establecer valores por defecto nuevamente si tenemos datos
     if (sucursales && sucursales.length > 0) {
       if (!isAdmin && barbero?.id_sucursal) {
         newFilters.sucursalId = barbero.id_sucursal;

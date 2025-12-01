@@ -115,6 +115,24 @@ export function useCreateCita(): CreateCitaResult {
         }
       }
       
+      // Si se proporcionó un id_cliente, obtener el id_conversacion del cliente
+      let id_conversacion = null;
+      if (newCita.id_cliente) {
+        try {
+          const { data: clienteData, error: clienteError } = await supabase
+            .from("mibarber_clientes")
+            .select("id_conversacion")
+            .eq("id_cliente", newCita.id_cliente)
+            .single();
+          
+          if (!clienteError && clienteData) {
+            id_conversacion = clienteData.id_conversacion;
+          }
+        } catch (error) {
+          console.warn("No se pudo obtener el id_conversacion del cliente:", error);
+        }
+      }
+      
       // Construir el objeto para insertar - TODOS los campos menos 'nota'
       const citaToInsert: any = {
         // Campos obligatorios básicos
@@ -143,6 +161,9 @@ export function useCreateCita(): CreateCitaResult {
         
         // Cliente (si existe)
         id_cliente: newCita.id_cliente || null,
+        
+        // id_conversacion del cliente (si existe)
+        id_conv: id_conversacion,
         
         // Notificaciones
         notificacion_barbero: newCita.notificacion_barbero || "no",

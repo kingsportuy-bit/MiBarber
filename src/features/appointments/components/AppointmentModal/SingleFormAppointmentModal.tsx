@@ -65,6 +65,7 @@ export function SingleFormAppointmentModal({
   const [time, setTime] = useState<string>(initial?.hora || "");
   const [note, setNote] = useState<string>(initial?.nota || "");
   const [clientPhone, setClientPhone] = useState<string | null>(initial?.telefono || null);
+  const [appointmentStatus, setAppointmentStatus] = useState<string>(initial?.estado || "pendiente"); // Nuevo estado para el estado de la cita
   const [showQuickClientForm, setShowQuickClientForm] = useState(false);
   const [quickClientData, setQuickClientData] = useState({
     nombre: "",
@@ -91,6 +92,7 @@ export function SingleFormAppointmentModal({
       setTime(initial?.hora || "");
       setNote(initial?.nota || "");
       setClientPhone(initial?.telefono || null);
+      setAppointmentStatus(initial?.estado || "pendiente"); // Inicializar estado de la cita
       setIsOverlapping(false); // Resetear estado de solapamiento
       console.log("=== FIN DEBUG Reiniciando estados con initial ===");
     }
@@ -183,10 +185,11 @@ export function SingleFormAppointmentModal({
 
   // Obtener horarios disponibles usando el nuevo hook
   const { horariosDisponibles, isLoading: isLoadingHorarios } = useHorariosDisponiblesCompleto({
-    idSucursal: selectedSucursalId,
-    idBarbero: barberId || undefined,
+    sucursalId: selectedSucursalId,
+    barberoId: barberId || undefined,
     fecha: date,
     idCitaEditando: initial?.id_cita,
+    duracionServicio: duration ? parseInt(duration, 10) : undefined,
   });
   
   // Obtener horarios de la sucursal
@@ -386,6 +389,9 @@ const handleSubmit = async () => {
     const selectedService = serviciosData?.find((s: Service) => s.id_servicio === serviceId);
     const ticket = selectedService?.precio || null;
     
+    // ✅ OBTENER ESTADO DE LA CITA
+    const estadoCita = appointmentStatus as "pendiente" | "completado" | "cancelado";
+
     // ✅ CONSTRUIR OBJETO COMPLETO
     const appointmentData: Partial<Appointment> = {
       fecha: date,
@@ -398,7 +404,7 @@ const handleSubmit = async () => {
       id_sucursal: selectedSucursalId || '',
       id_barberia: idBarberia || '',
       duracion: finalDuration,  // ✅ Ahora está definido
-      estado: initial?.estado || "pendiente",
+      estado: estadoCita,
       nota: note?.trim() || null,
       id_cliente: clientId || null,
       id_servicio: serviceId || null,
@@ -428,6 +434,7 @@ const handleSubmit = async () => {
     setTime("");
     setNote("");
     setClientPhone(null);
+    setAppointmentStatus("pendiente"); // Resetear el estado de la cita
     
   } catch (error) {
     console.error("Error al guardar el turno:", error);
@@ -437,9 +444,33 @@ const handleSubmit = async () => {
   }
 };
 
+  // Función para convertir hora a minutos
+  const horaAMinutos = (hora: string): number => {
+    const [horas, minutos] = hora.split(':').map(Number);
+    return horas * 60 + minutos;
+  };
 
-
-
+  // Verificar si el horario seleccionado se solapa con una cita existente
+  const isTimeOverlapping = useMemo(() => {
+    if (!time || !citasExistentes || !duration) return false;
+    
+    const selectedTimeMinutes = horaAMinutos(time);
+    const serviceDuration = parseInt(duration, 10);
+    
+    return citasExistentes.some((cita: Appointment) => {
+      // Excluir la cita que se está editando
+      if (initial?.id_cita && cita.id_cita === initial.id_cita) {
+        return false;
+      }
+      
+      const citaStart = horaAMinutos(cita.hora);
+      const citaDuration = parseInt(cita.duracion || "30", 10);
+      const citaEnd = citaStart + citaDuration;
+      
+      // Verificar solapamiento
+      return selectedTimeMinutes < citaEnd && selectedTimeMinutes + serviceDuration > citaStart;
+    });
+  }, [time, citasExistentes, duration, initial?.id_cita]);
 
   const handleClose = () => {
     onOpenChange(false);
@@ -499,6 +530,117 @@ const handleSubmit = async () => {
               </div>
             )}
             
+            {/* Servicio y Duración (en la misma línea) */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
+                  Servicio
+                </label>
+                <select
+                  value={serviceId || ""}
+                  onChange={(e) => {
+                    const selectedService = serviciosData?.find((s: Service) => s.id_servicio === e.target.value);
+                    setServiceId(e.target.value || null);
+                    setServiceName(selectedService?.nombre || "");
+                    // Actualizar la duración cuando se selecciona un servicio
+                    if (selectedService) {
+                      setDuration(selectedService.duracion_minutos.toString());
+                    }
+                  }}
+                  className="qoder-dark-select w-full px-3 py-2 rounded-lg"
+                  disabled={isLoadingServicios}
+                >
+                  <option value="">Seleccione un servicio</option>
+                  {serviciosData?.map((servicio: Service) => (
+                    <option key={servicio.id_servicio} value={servicio.id_servicio}>
+                      {servicio.nombre} - ${servicio.precio}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
+                  Duración (minutos)
+                </label>
+                <input
+                  type="number"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  className="qoder-dark-input w-full px-3 py-2 rounded-lg"
+                  placeholder="Ej: 30"
+                  min="1"
+                />
+              </div>
+            </div>
+            
+            {/* Barbero */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
+                Barbero
+              </label>
+              <select
+                value={barberId || ""}
+                onChange={(e) => {
+                  const selectedBarber = filteredBarberos.find((b: Barbero) => b.id_barbero === e.target.value);
+                  setBarberId(e.target.value || null);
+                  setBarberName(selectedBarber?.nombre || "");
+                }}
+                className="qoder-dark-select w-full px-3 py-2 rounded-lg"
+                disabled={isLoadingBarberos}
+              >
+                <option value="">Seleccione un barbero</option>
+                {filteredBarberos.map((barbero: Barbero) => (
+                  <option key={barbero.id_barbero} value={barbero.id_barbero}>
+                    {barbero.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            {/* Fecha y Hora (en la misma línea) */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
+                  Fecha
+                </label>
+                <div className="w-full">
+                  <CustomDatePicker
+                    value={date}
+                    onChange={setDate}
+                    placeholder="Seleccionar fecha"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
+                  Hora
+                </label>
+                <select
+                  value={getFormattedTimeValue}
+                  onChange={(e) => setTime(e.target.value)}
+                  className={`w-full qoder-dark-select p-3 rounded-lg ${isTimeOverlapping ? 'border-yellow-500' : ''}`}
+                  disabled={isLoadingHorarios}
+                >
+                  <option value="">Seleccione una hora</option>
+                  {availableTimes.map((timeOption) => (
+                    <option key={timeOption} value={timeOption}>
+                      {timeOption}
+                    </option>
+                  ))}
+                </select>
+                {isTimeOverlapping && (
+                  <p className="text-yellow-500 text-xs mt-1">
+                    ⚠️ Este horario se solapa con una cita existente. El turno se creará de todos modos.
+                  </p>
+                )}
+                {isLoadingHorarios && (
+                  <p className="text-qoder-dark-text-secondary text-xs mt-1">
+                    Cargando horarios disponibles...
+                  </p>
+                )}
+              </div>
+            </div>
+
             {/* Cliente */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
@@ -606,119 +748,25 @@ const handleSubmit = async () => {
                 </div>
               )}
             </div>
-            
-            {/* Servicio y Duración (en la misma línea) */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
+
+            {/* Estado de la cita (solo para edición) */}
+            {initial?.id_cita && (
+              <div className="mb-4">
                 <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
-                  Servicio
+                  Estado
                 </label>
                 <select
-                  value={serviceId || ""}
-                  onChange={(e) => {
-                    const selectedService = serviciosData?.find((s: Service) => s.id_servicio === e.target.value);
-                    setServiceId(e.target.value || null);
-                    setServiceName(selectedService?.nombre || "");
-                    // Actualizar la duración cuando se selecciona un servicio
-                    if (selectedService) {
-                      setDuration(selectedService.duracion_minutos.toString());
-                    }
-                  }}
+                  value={appointmentStatus}
+                  onChange={(e) => setAppointmentStatus(e.target.value)}
                   className="qoder-dark-select w-full px-3 py-2 rounded-lg"
-                  disabled={isLoadingServicios}
                 >
-                  <option value="">Seleccione un servicio</option>
-                  {serviciosData?.map((servicio: Service) => (
-                    <option key={servicio.id_servicio} value={servicio.id_servicio}>
-                      {servicio.nombre} - ${servicio.precio}
-                    </option>
-                  ))}
+                  <option value="pendiente">Pendiente</option>
+                  <option value="completado">Completado</option>
+                  <option value="cancelado">Cancelado</option>
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
-                  Duración (minutos)
-                </label>
-                <input
-                  type="number"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  className="qoder-dark-input w-full px-3 py-2 rounded-lg"
-                  placeholder="Ej: 30"
-                  min="1"
-                />
-              </div>
-            </div>
-            
-            {/* Barbero */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
-                Barbero
-              </label>
-              <select
-                value={barberId || ""}
-                onChange={(e) => {
-                  const selectedBarber = filteredBarberos.find((b: Barbero) => b.id_barbero === e.target.value);
-                  setBarberId(e.target.value || null);
-                  setBarberName(selectedBarber?.nombre || "");
-                }}
-                className="qoder-dark-select w-full px-3 py-2 rounded-lg"
-                disabled={isLoadingBarberos}
-              >
-                <option value="">Seleccione un barbero</option>
-                {filteredBarberos.map((barbero: Barbero) => (
-                  <option key={barbero.id_barbero} value={barbero.id_barbero}>
-                    {barbero.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            {/* Fecha y Hora (en la misma línea) */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
-                  Fecha
-                </label>
-                <div className="w-full">
-                  <CustomDatePicker
-                    value={date}
-                    onChange={setDate}
-                    placeholder="Seleccionar fecha"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
-                  Hora
-                </label>
-                <select
-                  value={getFormattedTimeValue}
-                  onChange={(e) => setTime(e.target.value)}
-                  className="qoder-dark-select w-full px-3 py-2 rounded-lg"
-                  disabled={!serviceId || !barberId}
-                >
-                  <option value="">Seleccione una hora</option>
-                  {availableTimes.map((timeOption) => (
-                    <option key={timeOption} value={timeOption}>
-                      {timeOption}
-                    </option>
-                  ))}
-                </select>
-                {availableTimes.length === 0 && serviceId && barberId && (
-                  <p className="text-xs text-qoder-dark-text-secondary mt-1">
-                    No hay horarios disponibles para la fecha seleccionada
-                  </p>
-                )}
-                {/* Advertencia de solapamiento */}
-                {isOverlapping && (
-                  <p className="text-xs text-yellow-500 mt-1">
-                    ⚠️ Esta cita se solapa con otra existente
-                  </p>
-                )}
-              </div>
-            </div>
-            
+            )}
+
             {/* Nota */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
@@ -732,7 +780,7 @@ const handleSubmit = async () => {
                 placeholder="Agregar nota..."
               />
             </div>
-            
+
             {/* Botones de acción */}
             <div className="flex justify-end gap-2">
               <button

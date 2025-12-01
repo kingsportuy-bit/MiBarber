@@ -1,6 +1,5 @@
-// hooks/useHorariosDisponiblesCompleto.ts
 import { useQuery } from "@tanstack/react-query";
-import type { HorariosDisponiblesParams } from "@/types/horarios";
+import type { HorariosDisponiblesParams } from "@/features/appointments/types";
 
 interface HorariosDisponiblesResult {
   horariosDisponibles: string[];
@@ -10,29 +9,32 @@ interface HorariosDisponiblesResult {
 }
 
 export function useHorariosDisponiblesCompleto({
-  idSucursal,
-  idBarbero,
+  sucursalId,
+  barberoId,
   fecha,
   idCitaEditando, // Para excluir cita actual al editar
-}: HorariosDisponiblesParams): HorariosDisponiblesResult {
+  duracionServicio, // Nueva propiedad para la duración del servicio
+}: HorariosDisponiblesParams & { idCitaEditando?: string; duracionServicio?: number }): HorariosDisponiblesResult {
   const query = useQuery({
     queryKey: [
       "horarios-disponibles-completo",
-      idSucursal,
-      idBarbero,
+      sucursalId,
+      barberoId,
       fecha,
       idCitaEditando,
+      duracionServicio,
     ],
     queryFn: async () => {
-      if (!idSucursal || !idBarbero || !fecha) {
+      if (!sucursalId || !barberoId || !fecha) {
         return [];
       }
 
       const params = new URLSearchParams({
-        idSucursal,
-        idBarbero,
+        idSucursal: sucursalId,
+        idBarbero: barberoId,
         fecha,
         ...(idCitaEditando && { idCitaEditando }),
+        ...(duracionServicio && { duracionServicio: duracionServicio.toString() }),
       });
 
       const response = await fetch(
@@ -45,7 +47,7 @@ export function useHorariosDisponiblesCompleto({
 
       return response.json();
     },
-    enabled: !!idSucursal && !!idBarbero && !!fecha,
+    enabled: !!sucursalId && !!barberoId && !!fecha,
   });
 
   return {

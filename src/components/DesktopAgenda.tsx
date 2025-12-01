@@ -134,7 +134,9 @@ export function DesktopAgenda() {
     // Crear un mapa de citas por fecha para acceso rápido
     const citasPorFecha: { [key: string]: Appointment[] } = {};
     if (citasMesData) {
-      citasMesData.forEach(cita => {
+      citasMesData
+        .filter(cita => cita.estado !== "cancelado") // Filtrar citas canceladas
+        .forEach(cita => {
         // Asegurarse de que la fecha esté en el formato correcto (YYYY-MM-DD)
         const fechaParts = cita.fecha.split('T');
         const fechaStr = fechaParts[0];
@@ -150,7 +152,7 @@ export function DesktopAgenda() {
       // Formatear la fecha del día actual en el mismo formato que las citas
       const fechaStr = current.toISOString().split('T')[0];
       const citasDelDia = citasPorFecha[fechaStr] || [];
-      
+    
       days.push({
         date: new Date(current),
         isCurrentMonth: current.getMonth() === month,
@@ -433,6 +435,7 @@ export function DesktopAgenda() {
                     const selectedFecha = selectedDate.toISOString().split('T')[0];
                     return citaFecha === selectedFecha;
                   })
+                  .filter(cita => cita.estado !== "cancelado") // Filtrar citas canceladas
                   .sort((a, b) => {
                     // Ordenar por hora
                     return a.hora.localeCompare(b.hora);

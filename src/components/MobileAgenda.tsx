@@ -159,14 +159,16 @@ export function MobileAgenda() {
     // Crear un mapa de citas por fecha para acceso rápido
     const citasPorFecha: { [key: string]: Appointment[] } = {};
     if (citasMesData) {
-      citasMesData.forEach((cita: Appointment) => {
-        // Asegurarse de que la fecha esté en el formato correcto (YYYY-MM-DD)
-        const fecha = cita.fecha.split('T')[0];
-        if (!citasPorFecha[fecha]) {
-          citasPorFecha[fecha] = [];
-        }
-        citasPorFecha[fecha].push(cita);
-      });
+      citasMesData
+        .filter((cita: Appointment) => cita.estado !== "cancelado") // Filtrar citas canceladas
+        .forEach((cita: Appointment) => {
+          // Asegurarse de que la fecha esté en el formato correcto (YYYY-MM-DD)
+          const fecha = cita.fecha.split('T')[0];
+          if (!citasPorFecha[fecha]) {
+            citasPorFecha[fecha] = [];
+          }
+          citasPorFecha[fecha].push(cita);
+        });
     }
     
     while (current <= endDay) {
@@ -418,6 +420,7 @@ export function MobileAgenda() {
                     const selectedFecha = selectedDate.toISOString().split('T')[0];
                     return citaFecha === selectedFecha;
                   })
+                  .filter(cita => cita.estado !== "cancelado") // Filtrar citas canceladas
                   .sort((a, b) => {
                     // Ordenar por hora
                     return a.hora.localeCompare(b.hora);

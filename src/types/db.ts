@@ -22,6 +22,7 @@ export interface Appointment {
   id_barbero?: string | null; // UUID del barbero
   id_servicio?: string | null; // UUID del servicio
   telefono?: string | null; // Número de teléfono del cliente
+  id_conv?: number | null; // bigint en la BD - nuevo campo para id_conversacion
   created_at?: string; // timestamptz
   updated_at?: string; // timestamptz
 }

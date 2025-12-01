@@ -49,6 +49,81 @@ function generarIntervalosTiempos(horaInicio: string, horaFin: string): string[]
   return intervalos;
 }
 
+// Función para generar slots consecutivos basados en la duración del servicio
+function generarSlotsConsecutivos(
+  citas: Cita[],
+  horaApertura: string,
+  horaCierre: string,
+  duracionServicio: number,
+  horaInicioAlmuerzo: string | null,
+  horaFinAlmuerzo: string | null
+): string[] {
+  console.log("=== DEBUG generarSlotsConsecutivos ===");
+  console.log("Citas recibidas:", citas);
+
+  const citasOrdenadas = [...(citas || [])].sort(
+    (a, b) => horaAMinutos(a.hora) - horaAMinutos(b.hora)
+  );
+
+  const slots: string[] = [];
+  const minApertura = horaAMinutos(horaApertura);
+  const minCierre = horaAMinutos(horaCierre);
+  const minInicioAlmuerzo = horaInicioAlmuerzo ? horaAMinutos(horaInicioAlmuerzo) : null;
+  const minFinAlmuerzo = horaFinAlmuerzo ? horaAMinutos(horaFinAlmuerzo) : null;
+
+  console.log("Minutos apertura:", minApertura);
+  console.log("Minutos cierre:", minCierre);
+  console.log("Minutos inicio almuerzo:", minInicioAlmuerzo);
+  console.log("Minutos fin almuerzo:", minFinAlmuerzo);
+
+  let tiempoActual = minApertura;
+  let contador = 0;
+
+  while (tiempoActual + duracionServicio <= minCierre && contador < 200) {
+    const slotInicio = tiempoActual;
+    const slotFin = tiempoActual + duracionServicio;
+
+    // 1) Almuerzo
+    let enAlmuerzo = false;
+    if (minInicioAlmuerzo !== null && minFinAlmuerzo !== null) {
+      enAlmuerzo = slotInicio < minFinAlmuerzo && slotFin > minInicioAlmuerzo;
+    }
+
+    // 2) Solapamiento con citas
+    let solapaConCita = false;
+    if (!enAlmuerzo) {
+      for (const cita of citasOrdenadas) {
+        const inicioCita = horaAMinutos(cita.hora);
+        const finCita =
+          inicioCita + parseInt(cita.duracion || "30", 10);
+
+        // Hay solapamiento si intervalos [slotInicio, slotFin) y [inicioCita, finCita) se pisan
+        if (slotInicio < finCita && slotFin > inicioCita) {
+          solapaConCita = true;
+          break;
+        }
+      }
+    }
+
+    console.log(
+      `Evaluando slot ${minutosAHora(slotInicio)}: almuerzo=${enAlmuerzo}, solapaConCita=${solapaConCita}`
+    );
+
+    if (!enAlmuerzo && !solapaConCita) {
+      const horaSlot = minutosAHora(slotInicio);
+      slots.push(horaSlot);
+      console.log(`Slot generado: ${horaSlot} (${slotInicio} minutos)`);
+    }
+
+    tiempoActual += duracionServicio;
+    contador++;
+  }
+
+  console.log("Slots generados:", slots);
+  console.log("=== FIN DEBUG generarSlotsConsecutivos ===");
+  return slots;
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Crear cliente Supabase en runtime
@@ -63,6 +138,10 @@ export async function GET(request: NextRequest) {
     const idBarbero = searchParams.get("idBarbero");
     const fecha = searchParams.get("fecha");
     const idCitaEditando = searchParams.get("idCitaEditando");
+    const duracionServicioStr = searchParams.get("duracionServicio");
+
+    // Convertir duración del servicio a número (por defecto 30 minutos)
+    const duracionServicio = duracionServicioStr ? parseInt(duracionServicioStr, 10) : 30;
 
     if (!idSucursal || !idBarbero || !fecha) {
       return NextResponse.json(
@@ -110,26 +189,7 @@ export async function GET(request: NextRequest) {
 
     console.log("✅ Horario sucursal:", horarioSucursal);
 
-    // Generar base de horarios disponibles (cada 15 min)
-    let horariosDisponibles = generarIntervalosTiempos(
-      horarioSucursal.hora_apertura,
-      horarioSucursal.hora_cierre
-    );
-
-    // 2️⃣ Filtrar horas de almuerzo (global de sucursal)
-    if (horarioSucursal.hora_inicio_almuerzo && horarioSucursal.hora_fin_almuerzo) {
-      horariosDisponibles = horariosDisponibles.filter((hora) => {
-        const minHora = horaAMinutos(hora);
-        const minAlmuerzoInicio = horaAMinutos(horarioSucursal.hora_inicio_almuerzo!);
-        const minAlmuerzoFin = horaAMinutos(horarioSucursal.hora_fin_almuerzo!);
-
-        return minHora < minAlmuerzoInicio || minHora >= minAlmuerzoFin;
-      });
-
-      console.log("⏰ Después filtrar almuerzo:", horariosDisponibles);
-    }
-
-    // 3️⃣ Obtener bloqueo de día completo (si existe)
+    // 2️⃣ Obtener bloqueo de día completo (si existe)
     const { data: bloqueodia, error: errorBloqueoDia } = await supabase
       .from("mibarber_bloqueos_barbero")
       .select("*")
@@ -143,7 +203,47 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([]);
     }
 
-    // 4️⃣ Obtener descansos extra recurrentes
+    // 3️⃣ Obtener citas ya agendadas (excluyendo la que se está editando)
+    let queryDisponibles = supabase
+      .from("mibarber_citas")
+      .select("*")
+      .eq("id_barbero", idBarbero)
+      .eq("fecha", fecha)
+      // Solo considerar citas pendientes y confirmadas
+      .in("estado", ["pendiente", "confirmado"]);
+
+    // Si estamos editando, excluir esa cita
+    if (idCitaEditando) {
+      queryDisponibles = queryDisponibles.neq("id_cita", idCitaEditando);
+    }
+
+    const { data: citas, error: errorCitas } = await queryDisponibles;
+
+    console.log("=== DEBUG Citas obtenidas ===");
+    console.log("Query ejecutado:", {
+      id_barbero: idBarbero,
+      fecha: fecha,
+      id_cita_editando: idCitaEditando
+    });
+    console.log("Citas obtenidas:", citas);
+    console.log("Error en consulta:", errorCitas);
+    console.log("=== FIN DEBUG Citas ===");
+
+    // 4️⃣ Generar slots consecutivos basados en la nueva lógica
+    let horariosDisponibles = generarSlotsConsecutivos(
+      citas || [],
+      horarioSucursal.hora_apertura,
+      horarioSucursal.hora_cierre,
+      duracionServicio,
+      horarioSucursal.hora_inicio_almuerzo,
+      horarioSucursal.hora_fin_almuerzo
+    );
+
+    console.log("=== DEBUG Horarios disponibles después de generar slots ===");
+    console.log("Horarios disponibles:", horariosDisponibles);
+    console.log("=== FIN DEBUG Horarios disponibles ===");
+
+    // 5️⃣ Obtener descansos extra recurrentes
     const { data: descansosExtra, error: errorDescansos } = await supabase
       .from("mibarber_descansos_extra")
       .select("*")
@@ -180,7 +280,7 @@ export async function GET(request: NextRequest) {
       console.log("😴 Después filtrar descansos extra:", horariosDisponibles);
     }
 
-    // 5️⃣ Obtener bloqueos de horas puntuales
+    // 6️⃣ Obtener bloqueos de horas puntuales
     const { data: bloqueoHoras, error: errorBloqueoHoras } = await supabase
       .from("mibarber_bloqueos_barbero")
       .select("*")
@@ -204,63 +304,29 @@ export async function GET(request: NextRequest) {
       console.log("🚫 Después filtrar bloqueos de horas:", horariosDisponibles);
     }
 
-    // 6️⃣ Obtener citas ya agendadas (excluyendo la que se está editando)
-    let queryDisponibles = supabase
-      .from("mibarber_citas")
-      .select("*")
-      .eq("id_barbero", idBarbero)
-      .eq("fecha", fecha)
-      // Solo considerar citas pendientes y confirmadas
-      .in("estado", ["pendiente", "confirmado"]);
-
-    // Si estamos editando, excluir esa cita
-    if (idCitaEditando) {
-      queryDisponibles = queryDisponibles.neq("id_cita", idCitaEditando);
-    }
-
-    const { data: citas, error: errorCitas } = await queryDisponibles;
-
-    if (!errorCitas && citas && citas.length > 0) {
-      citas.forEach((cita) => {
-        const duracion = parseInt(cita.duracion || "30", 10); // Por defecto 30 min
-        const minCita = horaAMinutos(cita.hora);
-        const minCitaFin = minCita + duracion;
-
-        // Generar rangos de tiempo ocupados por la cita
-        const horariosOcupados: string[] = [];
-        for (let i = minCita; i < minCitaFin; i += 15) {
-          horariosOcupados.push(minutosAHora(i));
-        }
-
-        // Filtrar horarios disponibles
-        horariosDisponibles = horariosDisponibles.filter(
-          (h) => !horariosOcupados.includes(h)
-        );
-      });
-
-      console.log("📅 Después filtrar citas:", horariosDisponibles);
-    }
-
     // 7️⃣ Filtrar horarios pasados si es el día actual
     const hoy = new Date();
-    
+
     // Parsear la fecha de consulta
     const [yearFecha, monthFecha, dayFecha] = fecha.split("-").map(Number);
     const fechaConsulta = new Date(yearFecha, monthFecha - 1, dayFecha);
-    
+
     // Crear una fecha para hoy sin hora
     const hoySinHora = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
-    
+
     // Comparar si es el mismo día
     if (fechaConsulta.getTime() === hoySinHora.getTime()) {
+      // Para el día actual, solo filtrar horarios que ya han pasado
+      // (hora actual menos 15 minutos de gracia para permitir agendar con un poco de anticipación)
       const horaActual = hoy.getHours() * 60 + hoy.getMinutes();
+      const minutosGracia = 15;
       
       horariosDisponibles = horariosDisponibles.filter((hora) => {
         const [h, m] = hora.split(":").map(Number);
         const minHora = h * 60 + m;
         
-        // Solo mostrar horarios futuros (más 15 minutos de gracia)
-        return minHora >= horaActual + 15;
+        // Mostrar horarios futuros o muy recientes (con gracia de 15 minutos)
+        return minHora >= horaActual - minutosGracia;
       });
 
       console.log("⏳ Después filtrar horarios pasados:", horariosDisponibles);

@@ -35,7 +35,7 @@ export function useCitas(props?: UseCitasProps) {
     useCitasPorRango({ sucursalId, fechaInicio, fechaFin });
   
   const useHorariosDisponiblesFn = (sucursalId?: string, fecha?: string, barberoId?: string) => 
-    useHorariosDisponiblesCompleto({ idSucursal: sucursalId, idBarbero: barberoId, fecha });
+    useHorariosDisponiblesCompleto({ sucursalId, barberoId, fecha });
 
   return {
     ...citasQuery,

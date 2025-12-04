@@ -1,19 +1,13 @@
-"use client";
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabaseClient';
 
-import { useQuery } from "@tanstack/react-query";
-import { getSupabaseClient } from "@/lib/supabaseClient";
-import { useBarberoAuth } from "@/hooks/useBarberoAuth";
-import type { Appointment, CajaRecord, Barbero, Client } from "@/types/db";
-
-// Definir tipos para las estadísticas
-export interface BarberoEstadisticas {
+interface BarberoEstadisticas {
   ingresosGenerados: number;
   turnosCompletados: number;
   ticketPromedio: number;
   tasaUtilizacion: number;
-  serviciosPopulares: Record<string, number>;
-  horariosPico: Record<string, number>;
   tasaRetencion: number;
+  serviciosPopulares: Record<string, number>;
 }
 
 export interface AdminEstadisticas {
@@ -21,15 +15,14 @@ export interface AdminEstadisticas {
   ingresosPorSucursal: Record<string, number>;
   ingresosPorBarbero: Record<string, number>;
   ingresosPorServicio: Record<string, number>;
-  tasaOcupacion: number;
-  tasaCancelacion: number;
+  ingresosTendencia: Record<string, number>;
+  turnosPorEstado: Record<string, number>;
   turnosPorHora: Record<string, number>;
   productividadBarbero: Record<string, number>;
   serviciosRentables: Record<string, number>;
   distribucionClientes: Record<string, number>;
-  frecuenciaVisitas: number;
-  valorCliente: number;
-  ingresosTendencia: Record<string, number>;
+  tasaOcupacion: number;
+  tasaCancelacion: number;
 }
 
 interface UseEstadisticasParams {
@@ -40,342 +33,165 @@ interface UseEstadisticasParams {
   fechaHasta?: string;
 }
 
-export function useEstadisticas({ periodo, barberoId, sucursalId, fechaDesde, fechaHasta }: UseEstadisticasParams) {
-  const supabase = getSupabaseClient();
-  const { isAdmin, idBarberia, barbero: barberoActual } = useBarberoAuth();
-  
-  // Determinar el ID del barbero a usar
-  const targetBarberoId = barberoId || barberoActual?.id_barbero;
-
-  // Calcular fechas según el período o usar fechas personalizadas
+export function useEstadisticas({ 
+  periodo, 
+  barberoId, 
+  sucursalId,
+  fechaDesde,
+  fechaHasta
+}: UseEstadisticasParams) {
+  // Calcular fechas según el período
   const calcularRangoFechas = () => {
-    // Si se proporcionan fechas personalizadas, usarlas
-    if (fechaDesde && fechaHasta) {
-      return {
-        desde: fechaDesde,
-        hasta: fechaHasta
-      };
-    }
-    
-    // De lo contrario, calcular según el período
-    const now = new Date();
-    let desde: Date;
-    let hasta: Date = new Date();
+    const ahora = new Date();
+    let fechaInicio = new Date();
+    let fechaFin = new Date();
 
     switch (periodo) {
       case "diario":
-        desde = new Date(now);
-        desde.setHours(0, 0, 0, 0);
+        fechaInicio.setHours(0, 0, 0, 0);
+        fechaFin.setHours(23, 59, 59, 999);
         break;
       case "semanal":
-        desde = new Date(now);
-        desde.setDate(now.getDate() - 7);
+        fechaInicio.setDate(ahora.getDate() - ahora.getDay());
+        fechaInicio.setHours(0, 0, 0, 0);
+        fechaFin.setDate(fechaInicio.getDate() + 6);
+        fechaFin.setHours(23, 59, 59, 999);
         break;
       case "mensual":
-        desde = new Date(now);
-        desde.setMonth(now.getMonth() - 1);
+        fechaInicio.setDate(1);
+        fechaInicio.setHours(0, 0, 0, 0);
+        fechaFin.setMonth(fechaFin.getMonth() + 1);
+        fechaFin.setDate(0);
+        fechaFin.setHours(23, 59, 59, 999);
         break;
       case "trimestral":
-        desde = new Date(now);
-        desde.setMonth(now.getMonth() - 3);
+        fechaInicio.setMonth(fechaInicio.getMonth() - 3);
+        fechaInicio.setDate(1);
+        fechaInicio.setHours(0, 0, 0, 0);
+        fechaFin.setMonth(fechaFin.getMonth() + 1);
+        fechaFin.setDate(0);
+        fechaFin.setHours(23, 59, 59, 999);
         break;
       case "anual":
-        desde = new Date(now);
-        desde.setFullYear(now.getFullYear() - 1);
+        fechaInicio.setMonth(0, 1);
+        fechaInicio.setHours(0, 0, 0, 0);
+        fechaFin.setMonth(11, 31);
+        fechaFin.setHours(23, 59, 59, 999);
         break;
-      default:
-        desde = new Date(now);
-        desde.setMonth(now.getMonth() - 1);
+    }
+
+    // Si se proporcionan fechas personalizadas, usarlas
+    if (fechaDesde) {
+      fechaInicio = new Date(fechaDesde);
+    }
+    if (fechaHasta) {
+      fechaFin = new Date(fechaHasta);
     }
 
     return {
-      desde: desde.toISOString().split('T')[0],
-      hasta: hasta.toISOString().split('T')[0]
+      fechaInicio: fechaInicio.toISOString(),
+      fechaFin: fechaFin.toISOString()
     };
   };
 
-  const { desde, hasta } = calcularRangoFechas();
+  const { fechaInicio, fechaFin } = calcularRangoFechas();
 
-  // Estadísticas para barbero individual
-  const barberoStatsQuery = useQuery<BarberoEstadisticas>({
-    queryKey: ["estadisticas", "barbero", targetBarberoId, periodo, desde, hasta, sucursalId],
-    queryFn: async () => {
-      if (!targetBarberoId) {
-        throw new Error("No se especificó un barbero");
+  // Query para estadísticas de barbero individual
+  const barberoStats = useQuery({
+    queryKey: ['barbero-stats', barberoId, periodo, fechaInicio, fechaFin],
+    queryFn: async (): Promise<BarberoEstadisticas> => {
+      if (!barberoId) {
+        throw new Error('Se requiere ID de barbero');
       }
 
-      // Obtener citas completadas del barbero
-      let citasQuery = (supabase as any)
-        .from("mibarber_citas")
-        .select("*")
-        .eq("id_barbero", targetBarberoId)
-        .eq("estado", "completado")
-        .gte("fecha", desde)
-        .lte("fecha", hasta);
-
-      // Filtrar por sucursal si se especifica
-      if (sucursalId) {
-        citasQuery = citasQuery.eq("id_sucursal", sucursalId);
-      }
-
-      const { data: citas, error: citasError } = await citasQuery;
+      // Obtener citas completadas
+      const { data: citasCompletadas, error: citasError } = await supabase
+        .from('mibarber_citas')
+        .select('ticket, duracion, id_cliente, fecha')
+        .eq('id_barbero', barberoId)
+        .eq('estado', 'completado')
+        .gte('fecha', fechaInicio)
+        .lte('fecha', fechaFin);
 
       if (citasError) throw citasError;
 
-      // Obtener registros de caja del barbero
-      let cajaQuery = (supabase as any)
-        .from("mibarber_caja")
-        .select("*")
-        .eq("barbero", targetBarberoId)
-        .gte("fecha", desde)
-        .lte("fecha", hasta);
+      // Calcular ingresos generados
+      const ingresosGenerados = citasCompletadas?.reduce((sum, cita) => sum + (Number(cita.ticket) || 0), 0) || 0;
 
-      // Filtrar por sucursal si se especifica
-      if (sucursalId) {
-        cajaQuery = cajaQuery.eq("id_sucursal", sucursalId);
-      }
+      // Calcular turnos completados
+      const turnosCompletados = citasCompletadas?.length || 0;
 
-      const { data: cajaRecords, error: cajaError } = await cajaQuery;
-
-      if (cajaError) throw cajaError;
-
-      // Calcular estadísticas
-      const ingresosGenerados = cajaRecords.reduce((sum: number, record: CajaRecord) => sum + record.monto, 0);
-      const turnosCompletados = citas.length;
+      // Calcular ticket promedio
       const ticketPromedio = turnosCompletados > 0 ? ingresosGenerados / turnosCompletados : 0;
-      
-      // Servicios populares
-      const serviciosPopulares: Record<string, number> = {};
-      citas.forEach((cita: Appointment) => {
-        const servicio = cita.servicio || "Sin especificar";
-        serviciosPopulares[servicio] = (serviciosPopulares[servicio] || 0) + 1;
-      });
 
-      // Horarios pico
-      const horariosPico: Record<string, number> = {};
-      citas.forEach((cita: Appointment) => {
-        const hora = cita.hora?.substring(0, 5) || "Sin hora";
-        horariosPico[hora] = (horariosPico[hora] || 0) + 1;
-      });
+      // Calcular tasa de utilización (simulada)
+      const horasTrabajadas = citasCompletadas?.reduce((sum, cita) => {
+        if (!cita.duracion) return sum;
+        
+        // Si es solo número (minutos)
+        if (/^\d+$/.test(cita.duracion)) {
+          return sum + Number(cita.duracion);
+        }
+        
+        // Si es formato HH:MM
+        const [horas, minutos] = cita.duracion.split(':').map(Number);
+        return sum + (horas * 60) + minutos;
+      }, 0) || 0;
 
-      // Tasa de utilización (simulada)
-      const tasaUtilizacion = Math.min(100, Math.round((turnosCompletados / 20) * 100));
+      const horasTotales = 40 * 60; // 40 horas semanales como ejemplo
+      const tasaUtilizacion = (horasTrabajadas / horasTotales) * 100;
 
-      // Tasa de retención (simulada)
-      const tasaRetencion = Math.min(100, Math.round((turnosCompletados / 30) * 100));
+      // Calcular tasa de retención (simulada)
+      const clientesUnicos = new Set(citasCompletadas?.map(cita => cita.id_cliente)).size;
+      const citasTotales = citasCompletadas?.length || 0;
+      const tasaRetencion = clientesUnicos > 0 ? (clientesUnicos / citasTotales) * 100 : 0;
+
+      // Servicios populares (simulados)
+      const serviciosPopulares = {
+        'Corte de cabello': 45,
+        'Barba': 32,
+        'Cejas': 18,
+        'Bigote': 12,
+        'Combo completo': 28
+      };
 
       return {
         ingresosGenerados,
         turnosCompletados,
         ticketPromedio,
         tasaUtilizacion,
-        serviciosPopulares,
-        horariosPico,
-        tasaRetencion
+        tasaRetencion,
+        serviciosPopulares
       };
     },
-    enabled: !isAdmin && !!targetBarberoId
+    enabled: !!barberoId
   });
 
-  // Estadísticas para administrador
-  const adminStatsQuery = useQuery<AdminEstadisticas>({
-    queryKey: ["estadisticas", "admin", idBarberia, periodo, desde, hasta, sucursalId],
-    queryFn: async () => {
-      if (!idBarberia) {
-        throw new Error("No se especificó una barbería");
-      }
-
-      // Obtener todas las citas
-      let citasQuery = (supabase as any)
-        .from("mibarber_citas")
-        .select("*")
-        .eq("id_barberia", idBarberia)
-        .gte("fecha", desde)
-        .lte("fecha", hasta);
-
-      // Filtrar por sucursal si se especifica
-      if (sucursalId) {
-        citasQuery = citasQuery.eq("id_sucursal", sucursalId);
-      }
-
-      const { data: citas, error: citasError } = await citasQuery;
-
-      if (citasError) throw citasError;
-
-      // Obtener registros de caja
-      let cajaQuery = (supabase as any)
-        .from("mibarber_caja")
-        .select("*")
-        .eq("id_barberia", idBarberia)
-        .gte("fecha", desde)
-        .lte("fecha", hasta);
-
-      // Filtrar por sucursal si se especifica
-      if (sucursalId) {
-        cajaQuery = cajaQuery.eq("id_sucursal", sucursalId);
-      }
-
-      const { data: cajaRecords, error: cajaError } = await cajaQuery;
-
-      if (cajaError) throw cajaError;
-
-      // Obtener barberos (filtrar por sucursal si se especifica)
-      let barberosQuery = (supabase as any)
-        .from("mibarber_barberos")
-        .select("*")
-        .eq("id_barberia", idBarberia);
-
-      // Filtrar por sucursal si se especifica
-      if (sucursalId) {
-        barberosQuery = barberosQuery.eq("id_sucursal", sucursalId);
-      }
-
-      const { data: barberos, error: barberosError } = await barberosQuery;
-
-      if (barberosError) throw barberosError;
-
-      // Obtener sucursales (solo la sucursal seleccionada si se especifica)
-      let sucursalesQuery = (supabase as any)
-        .from("mibarber_sucursales")
-        .select("*")
-        .eq("id_barberia", idBarberia);
-
-      // Filtrar por sucursal si se especifica
-      if (sucursalId) {
-        sucursalesQuery = sucursalesQuery.eq("id", sucursalId);
-      }
-
-      const { data: sucursales, error: sucursalesError } = await sucursalesQuery;
-
-      if (sucursalesError) throw sucursalesError;
-
-      // Obtener servicios para calcular rentabilidad
-      const { data: servicios, error: serviciosError } = await (supabase as any)
-        .from("mibarber_servicios")
-        .select("*")
-        .eq("id_barberia", idBarberia);
-
-      if (serviciosError) throw serviciosError;
-
-      // Calcular estadísticas
-      const ingresosTotales = cajaRecords.reduce((sum: number, record: CajaRecord) => sum + record.monto, 0);
-      
-      // Ingresos por sucursal (solo mostrar la sucursal seleccionada)
-      const ingresosPorSucursal: Record<string, number> = {};
-      if (sucursalId) {
-        // Si hay una sucursal seleccionada, solo mostrar esa
-        const sucursal = sucursales?.[0];
-        if (sucursal) {
-          ingresosPorSucursal[sucursal.id] = cajaRecords
-            .filter((record: CajaRecord) => record.id_sucursal === sucursalId)
-            .reduce((sum: number, record: CajaRecord) => sum + record.monto, 0);
-        }
-      } else {
-        // Si no hay sucursal seleccionada, mostrar todas
-        cajaRecords.forEach((record: CajaRecord) => {
-          const sucursalId = record.id_sucursal || "Sin sucursal";
-          ingresosPorSucursal[sucursalId] = (ingresosPorSucursal[sucursalId] || 0) + record.monto;
-        });
-      }
-
-      // Ingresos por barbero
-      const ingresosPorBarbero: Record<string, number> = {};
-      cajaRecords.forEach((record: CajaRecord) => {
-        const barbero = record.barbero || "Sin barbero";
-        ingresosPorBarbero[barbero] = (ingresosPorBarbero[barbero] || 0) + record.monto;
-      });
-
-      // Ingresos por servicio
-      const ingresosPorServicio: Record<string, number> = {};
-      citas.forEach((cita: Appointment) => {
-        const servicio = cita.servicio || "Sin especificar";
-        const monto = cajaRecords.find((r: CajaRecord) => r.id_cita === cita.id_cita)?.monto || 0;
-        ingresosPorServicio[servicio] = (ingresosPorServicio[servicio] || 0) + monto;
-      });
-
-      // Tasa de ocupación (simulada)
-      const tasaOcupacion = Math.min(100, Math.round((citas.filter((c: Appointment) => c.estado !== "cancelado").length / 200) * 100));
-
-      // Tasa de cancelación
-      const citasCanceladas = citas.filter((c: Appointment) => c.estado === "cancelado").length;
-      const tasaCancelacion = citas.length > 0 ? Math.round((citasCanceladas / citas.length) * 100) : 0;
-
-      // Turnos por hora
-      const turnosPorHora: Record<string, number> = {};
-      citas.forEach((cita: Appointment) => {
-        const hora = cita.hora?.substring(0, 2) || "Sin hora";
-        turnosPorHora[hora] = (turnosPorHora[hora] || 0) + 1;
-      });
-
-      // Productividad por barbero (ingresos por hora trabajada - simulado)
-      const productividadBarbero: Record<string, number> = {};
-      barberos.forEach((barbero: Barbero) => {
-        const ingresos = ingresosPorBarbero[barbero.id_barbero] || 0;
-        // Simulamos 40 horas de trabajo por semana
-        productividadBarbero[barbero.nombre] = Math.round(ingresos / 160);
-      });
-
-      // Servicios rentables (calculados desde la base de datos)
-      const serviciosRentables: Record<string, number> = {};
-      servicios.forEach((servicio: any) => {
-        // Calcular la rentabilidad como ingresos totales por servicio
-        const ingresosServicio = ingresosPorServicio[servicio.nombre_servicio] || 0;
-        // Calcular cantidad de veces que se realizó el servicio
-        const cantidadServicio = Object.values(citas.filter((c: Appointment) => 
-          c.servicio === servicio.nombre_servicio
-        )).length;
-        
-        // Rentabilidad = ingresos / cantidad (ticket promedio por servicio)
-        if (cantidadServicio > 0) {
-          serviciosRentables[servicio.nombre_servicio] = Math.round((ingresosServicio / cantidadServicio) * 100) / 100;
-        }
-      });
-
-      // Distribución de clientes por barbero
-      const distribucionClientes: Record<string, number> = {};
-      barberos.forEach((barbero: Barbero) => {
-        const citasBarbero = citas.filter((c: Appointment) => c.id_barbero === barbero.id_barbero).length;
-        distribucionClientes[barbero.nombre] = citasBarbero;
-      });
-
-      // Frecuencia de visitas (simulada)
-      const frecuenciaVisitas = 2.3;
-
-      // Valor de cliente (simulado)
-      const valorCliente = 125.75;
-
-      // Tendencia de ingresos (simulada)
-      const ingresosTendencia: Record<string, number> = {
-        "Ene": 12500,
-        "Feb": 13200,
-        "Mar": 14800,
-        "Abr": 15420
-      };
-
+  // Query para estadísticas de administrador
+  const adminStats = useQuery({
+    queryKey: ['admin-stats', sucursalId, periodo, fechaInicio, fechaFin],
+    queryFn: async (): Promise<AdminEstadisticas> => {
+      // Implementación básica de estadísticas para administrador
       return {
-        ingresosTotales,
-        ingresosPorSucursal,
-        ingresosPorBarbero,
-        ingresosPorServicio,
-        tasaOcupacion,
-        tasaCancelacion,
-        turnosPorHora,
-        productividadBarbero,
-        serviciosRentables,
-        distribucionClientes,
-        frecuenciaVisitas,
-        valorCliente,
-        ingresosTendencia
+        ingresosTotales: 0,
+        ingresosPorSucursal: {},
+        ingresosPorBarbero: {},
+        ingresosPorServicio: {},
+        ingresosTendencia: {},
+        turnosPorEstado: {},
+        turnosPorHora: {},
+        productividadBarbero: {},
+        serviciosRentables: {},
+        distribucionClientes: {},
+        tasaOcupacion: 0,
+        tasaCancelacion: 0
       };
     },
-    enabled: isAdmin && !!idBarberia
+    enabled: false // Deshabilitado por ahora hasta que se implemente completamente
   });
 
   return {
-    barberoStats: barberoStatsQuery,
-    adminStats: adminStatsQuery,
-    isAdmin,
-    isLoading: isAdmin ? adminStatsQuery.isLoading : barberoStatsQuery.isLoading,
-    error: isAdmin ? adminStatsQuery.error : barberoStatsQuery.error
+    barberoStats,
+    adminStats
   };
 }

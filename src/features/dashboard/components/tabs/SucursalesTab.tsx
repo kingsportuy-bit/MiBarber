@@ -8,15 +8,12 @@ import { RevenueWidget } from "@/features/dashboard/components/widgets/RevenueWi
 import { OccupancyWidget } from "@/features/dashboard/components/widgets/OccupancyWidget";
 import { CancellationWidget } from "@/features/dashboard/components/widgets/CancellationWidget";
 import { ClientsWidget } from "@/features/dashboard/components/widgets/ClientsWidget";
-import { BarChart } from "@/features/dashboard/components/charts/BarChart";
-import { LineChart } from "@/features/dashboard/components/charts/LineChart";
-import { PieChart } from "@/features/dashboard/components/charts/PieChart";
 import type { AdminEstadisticas } from "@/hooks/useEstadisticas";
 import type { ChartData, LineChartData, PieChartData } from "@/features/dashboard/types";
 import type { Sucursal } from "@/types/db";
 
 interface SucursalesTabProps {
-  stats: AdminEstadisticas;
+  stats: any;
   sucursalSeleccionada: string | null;
   onSucursalChange: (sucursalId: string | null) => void;
   fechaDesde: string;
@@ -151,11 +148,7 @@ export function SucursalesTab({
           </div>
           <p className="dashboard-subtitle">Total de ingresos generados por cada sucursal</p>
           <div className="dashboard-chart-container">
-            <BarChart 
-              data={ingresosPorSucursalData as ChartData[]} 
-              titulo="" 
-              color="bg-qoder-dark-accent-secondary"
-            />
+            {/* Componente BarChart eliminado */}
           </div>
         </div>
         
@@ -170,11 +163,7 @@ export function SucursalesTab({
           </div>
           <p className="dashboard-subtitle">Evolución de ingresos a lo largo del tiempo</p>
           <div className="dashboard-chart-container">
-            <LineChart 
-              data={ingresosTendenciaData as LineChartData[]} 
-              titulo="" 
-              color="text-qoder-dark-accent-primary"
-            />
+            {/* Componente LineChart eliminado */}
           </div>
         </div>
       </div>
@@ -185,11 +174,7 @@ export function SucursalesTab({
           <h2>Ingresos por Tipo de Servicio</h2>
           <p className="dashboard-subtitle">Distribución de ingresos según tipo de servicio</p>
           <div className="dashboard-chart-container">
-            <BarChart 
-              data={ingresosPorServicioData as ChartData[]} 
-              titulo="" 
-              color="bg-qoder-dark-accent-primary"
-            />
+            {/* Componente BarChart eliminado */}
           </div>
         </div>
         
@@ -197,10 +182,7 @@ export function SucursalesTab({
           <h2>Servicios Más Rentables</h2>
           <p className="dashboard-subtitle">Top 5 servicios con mayor margen de ganancia</p>
           <div className="dashboard-chart-container">
-            <PieChart 
-              data={serviciosRentablesData as PieChartData[]} 
-              titulo="" 
-            />
+            {/* Componente BarChart eliminado */}
           </div>
         </div>
       </div>
@@ -210,11 +192,7 @@ export function SucursalesTab({
         <h2>Distribución de Turnos por Hora</h2>
         <p className="dashboard-subtitle">Cantidad de turnos programados en cada franja horaria</p>
         <div className="dashboard-chart-container">
-          <BarChart 
-            data={turnosPorHoraData as ChartData[]} 
-            titulo="" 
-            color="bg-qoder-dark-accent-tertiary"
-          />
+          {/* Componente BarChart eliminado */}
         </div>
       </div>
     </div>

@@ -1,0 +1,319 @@
+ANÁLISIS PREVIO - NO GENERES CÓDIGO TODAVÍA
+
+Necesito crear: [DESCRIPCIÓN DEL COMPONENTE/PÁGINA]
+
+CONTEXTO:
+Lee estos archivos:
+1. .qoder/project-context-v2.md
+2. .qoder/design-system-v2.md
+3. app/(v2)/globals-v2.css
+
+TAREAS DE ANÁLISIS:
+
+1. REVISAR COMPONENTES EXISTENTES V2:
+   - Busca en src/components/ui/ si ya existe algo similar
+   - Lista componentes V2 que puedo reutilizar directamente
+
+2. REVISAR COMPONENTES LEGACY:
+   - Busca en src/components/shared/ componentes similares
+   - Busca en src/features/[dominios]/components/
+   - Identifica qué componentes tienen lógica útil pero estilos legacy
+
+3. REVISAR HOOKS Y LÓGICA:
+   - Busca en src/hooks/ qué hooks puedo reutilizar
+   - Busca en src/features/[dominio]/hooks/
+   - Lista hooks existentes relacionados con mi funcionalidad
+
+4. REVISAR TIPOS:
+   - Busca en src/types/ tipos relacionados
+   - Identifica qué tipos puedo reutilizar
+
+5. DECISIÓN:
+   Para cada componente que necesito, dime:
+   
+   A) ✅ REUTILIZAR: Ya existe en V2, úsalo directo
+   B) 🔄 MIGRAR: Existe en legacy con buena lógica, extraer y recrear en V2
+   C) 🆕 CREAR NUEVO: No existe nada similar, crear desde cero
+
+DAME UN REPORTE CON:
+- Qué componentes V2 puedo reutilizar
+- Qué componentes legacy debo migrar (con rutas de archivos)
+- Qué hooks/tipos ya existen para reutilizar
+- Qué componentes nuevos debo crear
+- Plan de acción recomendado
+
+NO GENERES CÓDIGO. Solo el análisis y recomendaciones.
+
+--------------------------------------------------------------------------------------------------
+
+⚙️ PASO 2: Ejecución (DESPUÉS DEL ANÁLISIS)
+Una vez que Qoder te dé el reporte de análisis, usa este prompt:
+
+text
+Según tu análisis anterior, procede con el plan:
+
+COMPONENTES A REUTILIZAR:
+[Lista de src/components/ui/... que ya existen]
+
+COMPONENTES A MIGRAR DESDE LEGACY:
+[Lista con rutas de archivos legacy]
+Para cada uno:
+- Extrae la lógica (hooks, handlers, tipos)
+- Crea nuevo en src/components/ui/[Nombre].tsx
+- Reescribe JSX con componentes V2
+- Reemplaza clases qoder-dark-* con v2-*
+- Sigue reglas de project-context-v2.md
+
+COMPONENTES NUEVOS A CREAR:
+[Lista de componentes sin equivalente]
+Para cada uno:
+- Props con interface
+- Prop className
+- Named export
+- Solo clases v2-*
+- JSDoc si >3 props
+
+HOOKS A REUTILIZAR:
+[Imports necesarios de src/hooks/]
+
+TIPOS A REUTILIZAR:
+[Imports necesarios de src/types/]
+
+Muéstrame el código completo con todos los imports y componentes organizados.
+
+--------------------------------------------------------------------------------------------------
+
+
+
+🧩 Crear Componente Base Nuevo
+text
+Crea el componente [NOMBRE] en src/components/ui/[Nombre].tsx siguiendo estas reglas:
+
+REQUISITOS:
+- Props tipadas con interface
+- Incluir prop className para extensibilidad
+- Named export (no default)
+- Solo usar clases con prefijo v2-* de globals-v2.css
+- Spread ...props para atributos HTML nativos
+- JSDoc si tiene más de 3 props
+- Máximo 2 niveles de anidación
+
+COMPONENTE: [Button/Card/Input/Modal/etc.]
+
+VARIANTES: [primary, secondary, etc.]
+
+FUNCIONALIDAD: [descripción específica]
+
+Primero revisa globals-v2.css para ver qué clases CSS ya existen. Si no existen, dime qué necesitas agregar.
+Ejemplo concreto:
+
+text
+Crea el componente Select en src/components/ui/Select.tsx siguiendo estas reglas:
+
+REQUISITOS:
+- Props tipadas con interface
+- Incluir prop className para extensibilidad
+- Named export (no default)
+- Solo usar clases con prefijo v2-* de globals-v2.css
+- Spread ...props para atributos HTML nativos
+- JSDoc si tiene más de 3 props
+
+COMPONENTE: Select dropdown
+
+VARIANTES: default, error
+
+PROPS: label, options (array de {value, label}), error, onChange, value, disabled
+
+FUNCIONALIDAD: Select con label, manejo de errores, estados disabled
+
+Primero revisa globals-v2.css para ver si existe .v2-select
+
+--------------------------------------------------------------------------------------------------
+
+📄 Crear Página Nueva
+text
+Crea la página app/(v2)/[nombre]/page.tsx siguiendo estas reglas:
+
+CONTEXTO:
+- Reutilizar hooks de src/hooks/ (NO crear duplicados)
+- Reutilizar tipos de src/types/
+- Solo usar componentes de src/components/ui/
+- Queries con id_barberia desde sesión (useAuth)
+- Validar formularios con Zod
+- Query keys según formato canon de project-context-v2.md
+
+PÁGINA: [nombre y descripción]
+
+FUNCIONALIDAD:
+1. [función 1]
+2. [función 2]
+3. [función 3]
+
+COMPONENTES NECESARIOS: [listar]
+
+Muéstrame el código completo con todos los imports.
+Ejemplo concreto:
+
+text
+Crea la página app/(v2)/perfil/page.tsx siguiendo estas reglas:
+
+CONTEXTO:
+- Reutilizar useAuth de src/hooks/
+- Usar tipos User de src/types/
+- Solo usar componentes de src/components/ui/ (Button, Input, Card)
+- Validar con Zod
+
+PÁGINA: Perfil de usuario
+
+FUNCIONALIDAD:
+1. Formulario editar nombre, email, teléfono
+2. Mostrar rol (Admin/Barbero) - solo lectura
+3. Botón guardar cambios
+4. Validación: nombre min 2 chars, email válido, teléfono 10 dígitos
+
+COMPONENTES: Card, Input, Button
+
+Muéstrame el código completo con imports, schema Zod y handlers.
+
+--------------------------------------------------------------------------------------------------
+
+🎨 Agregar Token/Estilo Nuevo al Sistema
+text
+Necesito agregar [COLOR/ESPACIADO/COMPONENTE] al sistema V2.
+
+Edita app/(v2)/globals-v2.css siguiendo esta estructura:
+
+PASO 1: Agregar primitivo
+--primitive-[nombre]: [valor]
+
+PASO 2: Agregar semántico (si aplica)
+--[categoria]-[nombre]: var(--primitive-[nombre])
+
+PASO 3: Crear componente CSS (si aplica)
+.v2-[nombre] { ... usando tokens semánticos }
+
+NECESITO: [descripción específica]
+
+COLOR/VALOR: [hex o medida]
+
+USO: [dónde se usará]
+
+Muéstrame qué agregar en cada sección de globals-v2.css.
+Ejemplo concreto:
+
+text
+Necesito agregar color morado de acento al sistema V2.
+
+Edita app/(v2)/globals-v2.css siguiendo esta estructura:
+
+PASO 1: Agregar primitivo
+--primitive-purple-accent: #8b5cf6
+
+PASO 2: Agregar semántico
+--color-accent-secondary: var(--primitive-purple-accent)
+
+PASO 3: Crear componente CSS
+.v2-badge-purple para badges morados
+.v2-btn-accent para botones con el morado
+
+NECESITO: Color morado para destacar features premium
+
+COLOR: #8b5cf6
+
+USO: Badges de "Premium" y botones de upgrade
+
+Muéstrame qué agregar en cada sección de globals-v2.css y cómo actualizar el componente Badge.
+
+--------------------------------------------------------------------------------------------------
+
+🔄 Migrar Componente Legacy a V2
+text
+Necesito migrar el componente [NOMBRE] de legacy a V2.
+
+UBICACIÓN ACTUAL: src/components/shared/[Nombre].tsx (o src/features/[dominio]/components/)
+
+PASOS:
+1. Analiza el componente actual y extrae la LÓGICA (hooks, handlers, tipos)
+2. Crea nuevo componente en src/components/ui/[Nombre].tsx
+3. Reescribe el JSX usando solo componentes V2 y clases v2-*
+4. Reemplaza todas las clases qoder-dark-* con v2-*
+5. Asegura que props sigan las reglas V2 (interface, className, etc.)
+
+COMPONENTE: [nombre]
+
+Muéstrame el componente actual y el nuevo lado a lado para comparar.
+Ejemplo concreto:
+
+text
+Necesito migrar el componente CitaCard de legacy a V2.
+
+UBICACIÓN ACTUAL: src/features/appointments/components/CitaCard.tsx
+
+PASOS:
+1. Extrae la lógica de deleteCita, updateCita
+2. Crea nuevo en src/components/ui/CitaCard.tsx
+3. Usa componentes Button, Badge de ui/
+4. Reemplaza qoder-dark-card con v2-card
+5. Asegura interface CitaCardProps con className
+
+COMPONENTE: CitaCard (muestra info de cita con botones de acción)
+
+Muéstrame el código nuevo usando componentes V2.
+🔍 Verificar/Listar Recursos Disponibles
+text
+Lista todos los [TOKENS/COMPONENTES/CLASES] disponibles en globals-v2.css.
+
+CATEGORIA: [colores/espaciados/componentes]
+
+Formato de salida:
+- Nombre del token/clase
+- Valor o descripción
+- Ejemplo de uso
+
+Quiero saber qué ya existe antes de crear algo nuevo.
+Ejemplo concreto:
+
+text
+Lista todos los componentes de botones disponibles en globals-v2.css.
+
+CATEGORIA: Botones (.v2-btn-*)
+
+Formato:
+- Clase CSS
+- Descripción del estilo
+- Ejemplo de uso en JSX
+
+Quiero saber todas las variantes de botones que ya existen.
+
+--------------------------------------------------------------------------------------------------
+
+🐛 Revisar/Debuggear Código V2
+text
+Revisa este componente y verifica que cumple las reglas V2:
+
+[PEGAR CÓDIGO AQUÍ]
+
+CHECKLIST:
+- ¿Props con interface?
+- ¿Incluye className?
+- ¿Named export?
+- ¿Solo clases v2-*?
+- ¿Sin valores hardcoded?
+- ¿Sin inline styles?
+- ¿Reutiliza hooks existentes?
+- ¿Máximo 2 niveles anidación?
+
+Lista los problemas encontrados y cómo corregirlos.
+
+--------------------------------------------------------------------------------------------------
+
+💡 Tips de Uso
+SIEMPRE empieza con el prompt de inicio de sesión
+
+Sé específico con nombres, funcionalidad y requisitos
+
+Menciona explícitamente qué hooks/tipos reutilizar
+
+Pide confirmación de que leyó los archivos antes de generar código
+
+Revisa que el código generado no mezcle sistemas (v2 vs legacy)

@@ -530,6 +530,11 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
     
     // Verificar si hay bloqueos de horas o descansos que afecten esta hora
     return bloqueos.some((bloqueo: any) => {
+      // Solo considerar bloqueos activos de horas o descansos
+      if (bloqueo.activo === false) {
+        return false;
+      }
+      
       // Solo considerar bloqueos de horas o descansos
       if (bloqueo.tipo !== 'descanso' && bloqueo.tipo !== 'bloqueo_horas') {
         return false;

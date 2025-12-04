@@ -299,11 +299,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-  font-size: 2rem;
-  margin-bottom: 0.6rem;
-  text-align: center;
   position: relative;
   padding-bottom: 6px;
+  display: inline-block;
 }
 
 h1::after {

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { useCajaRecords } from "@/hooks/useCajaRecords";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 
 interface CompletarCitaModalProps {

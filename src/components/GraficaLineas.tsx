@@ -7,114 +7,81 @@ interface GraficaLineasProps {
 }
 
 export function GraficaLineas({ data, titulo, color = "text-qoder-dark-accent-primary" }: GraficaLineasProps) {
-  if (data.length === 0) {
-    return (
-      <div className="qoder-dark-card">
-        <h3 className="font-semibold text-qoder-dark-text-primary mb-4">{titulo}</h3>
-        <div className="h-64 flex items-center justify-center text-qoder-dark-text-secondary">
-          No hay datos para mostrar
-        </div>
-      </div>
-    );
-  }
-
-  // Encontrar valores mínimos y máximos para escalar
-  const valores = data.map(item => item.valor);
-  const minValor = Math.min(...valores);
-  const maxValor = Math.max(...valores);
-  const rango = maxValor - minValor || 1; // Evitar división por cero
-
-  // Dimensiones de la gráfica
-  const width = 600;
-  const height = 200;
-  const padding = 40;
-
-  // Convertir datos a puntos
-  const puntos = data.map((item, index) => {
-    const x = padding + (index * (width - 2 * padding) / (data.length - 1));
-    const y = height - padding - ((item.valor - minValor) / rango) * (height - 2 * padding);
-    return { x, y, ...item };
-  });
-
-  // Crear path para la línea
-  let pathData = "";
-  if (puntos.length > 0) {
-    pathData = `M ${puntos[0].x},${puntos[0].y}`;
-    for (let i = 1; i < puntos.length; i++) {
-      pathData += ` L ${puntos[i].x},${puntos[i].y}`;
-    }
-  }
-
+  // Encontrar valores mínimo y máximo para escalar la gráfica
+  const values = data.map(item => item.valor);
+  const minValue = Math.min(...values);
+  const maxValue = Math.max(...values);
+  const range = maxValue - minValue || 1; // Evitar división por cero
+  
+  // Calcular puntos para la línea
+  const points = data.map((item, index) => {
+    const x = (index / (data.length - 1)) * 100;
+    const y = 100 - ((item.valor - minValue) / range) * 100;
+    return `${x},${y}`;
+  }).join(' ');
+  
   return (
     <div className="qoder-dark-card">
       <h3 className="font-semibold text-qoder-dark-text-primary mb-4">{titulo}</h3>
-      <div className="overflow-x-auto">
-        <svg 
-          width={width} 
-          height={height} 
-          viewBox={`0 0 ${width} ${height}`}
-          className="min-w-full"
-        >
-          {/* Ejes */}
-          <line 
-            x1={padding} 
-            y1={padding} 
-            x2={padding} 
-            y2={height - padding} 
-            stroke="currentColor" 
-            strokeOpacity="0.2" 
+      
+      <div className="h-64">
+        <svg viewBox="0 0 100 100" className="w-full h-full" preserveAspectRatio="none">
+          {/* Grid */}
+          <defs>
+            <pattern id="grid" width="25" height="25" patternUnits="userSpaceOnUse">
+              <path d="M 25 0 L 0 0 0 25" fill="none" stroke="#374151" strokeWidth="0.5" opacity="0.5"/>
+            </pattern>
+          </defs>
+          <rect width="100" height="100" fill="url(#grid)" />
+          
+          {/* Línea de la gráfica */}
+          <polyline
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            points={points}
+            className={color}
           />
-          <line 
-            x1={padding} 
-            y1={height - padding} 
-            x2={width - padding} 
-            y2={height - padding} 
-            stroke="currentColor" 
-            strokeOpacity="0.2" 
-          />
-
-          {/* Línea de datos */}
-          {pathData && (
-            <path 
-              d={pathData} 
-              fill="none" 
-              stroke={`currentColor`} 
-              strokeWidth="2" 
-              className={color}
-            />
-          )}
-
+          
           {/* Puntos de datos */}
-          {puntos.map((punto, index) => (
-            <g key={index}>
-              <circle 
-                cx={punto.x} 
-                cy={punto.y} 
-                r="4" 
-                fill="currentColor" 
+          {data.map((item, index) => {
+            const x = (index / (data.length - 1)) * 100;
+            const y = 100 - ((item.valor - minValue) / range) * 100;
+            return (
+              <circle
+                key={index}
+                cx={x}
+                cy={y}
+                r="1.5"
+                fill="currentColor"
                 className={color}
               />
-              <text 
-                x={punto.x} 
-                y={punto.y - 10} 
-                textAnchor="middle" 
-                fill="currentColor" 
-                className="text-xs"
-              >
-                {punto.valor}
-              </text>
-              <text 
-                x={punto.x} 
-                y={height - 10} 
-                textAnchor="middle" 
-                fill="currentColor" 
-                className="text-xs"
-              >
-                {punto.fecha.split('-')[2]} {/* Solo el día */}
-              </text>
-            </g>
-          ))}
+            );
+          })}
         </svg>
+        
+        {/* Etiquetas de fechas */}
+        <div className="flex justify-between mt-2">
+          {data.map((item, index) => (
+            <div 
+              key={index} 
+              className="text-xs text-qoder-dark-text-secondary"
+              style={{ width: `${100 / data.length}%` }}
+            >
+              {item.fecha}
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      {/* Leyenda de valores */}
+      <div className="flex justify-between mt-4 text-xs">
+        <span className="text-qoder-dark-text-secondary">
+          Mín: ${minValue.toFixed(2)}
+        </span>
+        <span className="text-qoder-dark-text-secondary">
+          Máx: ${maxValue.toFixed(2)}
+        </span>
       </div>
     </div>
   );

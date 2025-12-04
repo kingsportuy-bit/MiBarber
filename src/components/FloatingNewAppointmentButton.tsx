@@ -38,7 +38,9 @@ export function FloatingNewAppointmentButton() {
     </button>
   );
 
-  if (!mounted) return null;
+  if (!mounted) {
+    return null;
+  }
   
   return createPortal(button, document.body);
 }

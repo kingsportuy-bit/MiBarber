@@ -1,10 +1,11 @@
 "use client";
 
-import { QoderFooter } from "@/components/QoderFooter";
-import { ConfiguracionWrapper } from "@/components/ConfiguracionWrapper";
 import { usePathname } from "next/navigation";
-import { PullToRefresh } from "@/components/PullToRefresh";
 import { useEffect, useState } from "react";
+import { LoginLayout } from "@/components/layouts/LoginLayout";
+import { WhatsAppLayout } from "@/components/layouts/WhatsAppLayout";
+import { AdminLayout } from "@/components/layouts/AdminLayout";
+import { DefaultLayout } from "@/components/layouts/DefaultLayout";
 
 export function GeneralLayout({
   children,
@@ -48,55 +49,16 @@ export function GeneralLayout({
   };
   
   if (isLoginPage) {
-    return (
-      <div className="flex flex-col pb-16 md:pb-0" style={{ minHeight: '100vh' }}>
-        <div className="flex-grow flex flex-col justify-center" style={{ minHeight: 'calc(100vh - 80px)' }}>
-          {children}
-        </div>
-        <QoderFooter />
-        {/* Espacio transparente para el menú inferior en móviles */}
-        <div className="h-16 md:hidden bg-transparent"></div>
-      </div>
-    );
+    return <LoginLayout>{children}</LoginLayout>;
   }
   
   if (isAdminPage) {
-    return (
-      <>
-        <div className="flex-grow pb-16 md:pb-0">
-          {children}
-        </div>
-        <QoderFooter />
-        {/* Espacio transparente para el menú inferior en móviles */}
-        <div className="h-16 md:hidden bg-transparent"></div>
-      </>
-    );
+    return <AdminLayout>{children}</AdminLayout>;
   }
   
   if (isWhatsAppPage) {
-    return (
-      <div className="flex flex-col h-screen w-full min-w-0 pb-16 md:pb-0">
-        {children}
-        {/* Espacio transparente para el menú inferior en móviles, excepto en vista individual de chat */}
-        <div className={`h-16 md:hidden bg-transparent ${isChatView ? 'hidden' : ''}`}></div>
-      </div>
-    );
+    return <WhatsAppLayout>{children}</WhatsAppLayout>;
   }
   
-  return (
-    <PullToRefresh onRefresh={handleRefresh}>
-      <div className="dashboard pb-16 md:pb-0">
-        <div className="dashboard-content">
-          <ConfiguracionWrapper>
-            <div className="flex-grow flex flex-col flex-1 min-w-0">
-              {children}
-            </div>
-          </ConfiguracionWrapper>
-        </div>
-        <QoderFooter />
-        {/* Espacio transparente para el menú inferior en móviles */}
-        <div className="h-16 md:hidden bg-transparent"></div>
-      </div>
-    </PullToRefresh>
-  );
+  return <DefaultLayout onRefresh={handleRefresh}>{children}</DefaultLayout>;
 }

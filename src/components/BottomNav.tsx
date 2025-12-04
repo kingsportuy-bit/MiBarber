@@ -77,7 +77,7 @@ export function BottomNav() {
     { href: "/agenda", label: "Agenda", icon: <CalendarIcon className="h-5 w-5" /> },
     { href: "/clientes", label: "Clientes", icon: <PeopleIcon className="h-5 w-5" /> },
     { href: "/whatsapp", label: "WhatsApp", icon: <ChatBubbleIcon className="h-5 w-5" /> },
-    { href: "/mi-barberia", label: "Perfil", icon: <GearIcon className="h-5 w-5" /> },
+    { href: "/perfil", label: "Perfil", icon: <GearIcon className="h-5 w-5" /> },
   ];
 
   const isActive = (href: string) => {

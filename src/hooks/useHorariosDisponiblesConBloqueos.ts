@@ -57,21 +57,26 @@ export function useHorariosDisponiblesConBloqueos({
       
       // Si hay bloqueos, filtrar las citas según los bloqueos
       if (bloqueos && bloqueos.length > 0) {
-        // Verificar si hay un bloqueo de día completo
-        const bloqueoDiaCompleto = bloqueos.some((bloqueo: any) => bloqueo.tipo === 'bloqueo_dia');
+        // Verificar si hay un bloqueo de día completo ACTIVO
+        const bloqueoDiaCompleto = bloqueos.some((bloqueo: any) => bloqueo.tipo === 'bloqueo_dia' && bloqueo.activo !== false);
         
         if (bloqueoDiaCompleto) {
-          // Si hay un bloqueo de día completo, no hay horarios disponibles
+          // Si hay un bloqueo de día completo activo, no hay horarios disponibles
           return [];
         }
         
-        // Filtrar citas que caen dentro de bloqueos de horas o descansos
+        // Filtrar citas que caen dentro de bloqueos de horas o descansos ACTIVOS
         return (data as Appointment[]).filter(cita => {
           const citaHora = cita.hora?.slice(0, 5); // HH:mm
           if (!citaHora) return true;
           
-          // Verificar si la cita cae dentro de algún bloqueo
+          // Verificar si la cita cae dentro de algún bloqueo ACTIVO
           return !bloqueos.some((bloqueo: any) => {
+            // Solo considerar bloqueos activos
+            if (bloqueo.activo === false) {
+              return false;
+            }
+            
             // Para bloqueo_horas: verificar si la cita cae dentro del rango del bloqueo
             if (bloqueo.tipo === 'bloqueo_horas') {
               if (bloqueo.hora_inicio && bloqueo.hora_fin) {

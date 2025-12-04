@@ -8,14 +8,11 @@ import { RevenueWidget } from "@/features/dashboard/components/widgets/RevenueWi
 import { OccupancyWidget } from "@/features/dashboard/components/widgets/OccupancyWidget";
 import { CancellationWidget } from "@/features/dashboard/components/widgets/CancellationWidget";
 import { ClientsWidget } from "@/features/dashboard/components/widgets/ClientsWidget";
-import { BarChart } from "@/features/dashboard/components/charts/BarChart";
-import { PieChart } from "@/features/dashboard/components/charts/PieChart";
-import type { AdminEstadisticas } from "@/hooks/useEstadisticas";
 import type { ChartData, PieChartData } from "@/features/dashboard/types";
 import type { Sucursal } from "@/types/db";
 
 interface BarberosTabProps {
-  stats: AdminEstadisticas;
+  stats: any;
   filtroBarbero: 'todos' | 'porSucursal' | 'individual';
   onFiltroBarberoChange: (filtro: 'todos' | 'porSucursal' | 'individual') => void;
   sucursalSeleccionada: string | null;
@@ -130,25 +127,12 @@ export function BarberosTab({
 
       {/* Gráficas para barberos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <BarChart 
-          data={ingresosPorBarberoData as ChartData[]} 
-          titulo="Ingresos por Barbero" 
-          color="bg-qoder-dark-accent-success"
-        />
         
-        <BarChart 
-          data={productividadBarberoData as ChartData[]} 
-          titulo="Productividad por Barbero" 
-          color="bg-qoder-dark-accent-purple"
-        />
       </div>
       
       {/* Servicios más rentables */}
       <div>
-        <PieChart 
-          data={serviciosRentablesData as PieChartData[]} 
-          titulo="Servicios Más Rentables" 
-        />
+        {/* Componente PieChart eliminado */}
       </div>
     </div>
   );

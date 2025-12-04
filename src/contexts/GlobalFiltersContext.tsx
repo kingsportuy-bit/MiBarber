@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from "react";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 import { useSucursales } from "@/hooks/useSucursales";
 import { useBarberos } from "@/hooks/useBarberos";
@@ -73,63 +73,65 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
     }
   }, [filters]);
 
-  // Estado para controlar si los filtros por defecto ya se han aplicado
-  const [defaultFiltersApplied, setDefaultFiltersApplied] = useState(false);
+  // Ref para rastrear si ya se aplicaron los filtros por defecto
+  const defaultFiltersAppliedRef = useRef(false);
+  // Ref para rastrear si ya se aplicaron los filtros de admin
+  const adminFiltersAppliedRef = useRef(false);
 
-  // Efecto para establecer la sucursal por defecto - solo una vez cuando se cargan las sucursales
+  // Efecto para establecer valores por defecto cuando el barbero cambia
   useEffect(() => {
-    // Verificar si ya tenemos los datos necesarios para aplicar filtros por defecto
-    const hasRequiredData = (isAdmin && sucursales && sucursales.length > 0) || 
-                           (!isAdmin && barbero?.id_sucursal);
-    
-    // Solo aplicar filtros por defecto si no se han aplicado aún Y tenemos los datos necesarios
-    if (!defaultFiltersApplied && hasRequiredData) {
-      // Para barberos normales, seleccionar automáticamente su sucursal y barbero
+    // Solo ejecutar una vez por cambio de barbero
+    if (!defaultFiltersAppliedRef.current) {
+      // Si no somos admin y tenemos un barbero con sucursal, establecerla por defecto
       if (!isAdmin && barbero?.id_sucursal) {
         setFilters(prev => ({
           ...prev,
-          sucursalId: barbero.id_sucursal,
-          barberoId: barbero.id_barbero || null
+          sucursalId: prev.sucursalId ?? barbero.id_sucursal
         }));
-        setBarberoIdFilter(barbero.id_sucursal);
-      } else if (isAdmin && sucursales && sucursales.length > 0) {
-        // Para administradores, seleccionar la primera sucursal por defecto (sin barbero específico)
-        setFilters(prev => ({
-          ...prev,
-          sucursalId: sucursales[0].id
-        }));
-        setBarberoIdFilter(sucursales[0].id);
       }
       
-      // Marcar que se han aplicado los filtros por defecto
-      setDefaultFiltersApplied(true);
+      // Si no somos admin y tenemos un barbero, establecer el barberoId por defecto
+      if (!isAdmin && barbero?.id_barbero) {
+        setFilters(prev => ({
+          ...prev,
+          barberoId: prev.barberoId ?? barbero.id_barbero
+        }));
+      }
+      
+      // Marcar que los filtros por defecto han sido aplicados
+      defaultFiltersAppliedRef.current = true;
     }
     
-    // Si no tenemos datos pero ya marcamos como aplicados, resetear para intentar nuevamente
-    if (defaultFiltersApplied && !hasRequiredData) {
-      setDefaultFiltersApplied(false);
-    }
-  }, [sucursales, isAdmin, barbero, defaultFiltersApplied]);
+    // Resetear la bandera cuando cambia el barbero o el rol
+    return () => {
+      defaultFiltersAppliedRef.current = false;
+    };
+  }, [barbero?.id_barbero, barbero?.id_sucursal, isAdmin, setFilters]);
 
-  // Efecto para establecer el barbero por defecto - solo para barberos normales
-  // Este efecto se ejecuta cuando se carga el barbero y no hay barbero seleccionado aún
+  // Efecto separado para manejar los filtros de admin
   useEffect(() => {
-    // Verificar que tenemos los datos necesarios y que aún no se ha establecido un barbero
-    if (!isAdmin && barbero?.id_barbero && !filters.barberoId && defaultFiltersApplied) {
-      setFilters(prev => ({
-        ...prev,
-        barberoId: barbero.id_barbero
-      }));
+    // Solo ejecutar una vez por cambio de condición
+    if (!adminFiltersAppliedRef.current) {
+      // Si somos admin o no tenemos barbero, asegurarnos de que barberoId sea null
+      if (isAdmin || !barbero?.id_barbero) {
+        setFilters(prev => {
+          if (prev.barberoId !== null) {
+            return {
+              ...prev,
+              barberoId: null
+            };
+          }
+          return prev;
+        });
+        adminFiltersAppliedRef.current = true;
+      }
     }
     
-    // Si somos admin o no tenemos barbero, asegurarnos de que barberoId sea null
-    if (isAdmin || !barbero?.id_barbero) {
-      setFilters(prev => ({
-        ...prev,
-        barberoId: null
-      }));
+    // Resetear la bandera cuando cambia el barbero o el rol
+    if ((barbero?.id_barbero && !isAdmin) || (!barbero?.id_barbero)) {
+      adminFiltersAppliedRef.current = false;
     }
-  }, [barbero?.id_barbero, isAdmin, filters.barberoId, defaultFiltersApplied]);
+  }, [barbero?.id_barbero, isAdmin, setFilters]);
 
   // Efecto para actualizar barberoIdFilter cuando cambia la sucursal
   useEffect(() => {
@@ -166,7 +168,7 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
     setFilters(newFilters);
     
     // Reiniciar el estado de filtros por defecto aplicados
-    setDefaultFiltersApplied(false);
+    defaultFiltersAppliedRef.current = false;
   };
 
   // Valor del contexto

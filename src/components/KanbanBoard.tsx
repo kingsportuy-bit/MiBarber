@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { KanbanColumn } from "@/components/KanbanColumn";
 import { SingleFormAppointmentModalWithSucursal } from "@/components/SingleFormAppointmentModalWithSucursal";
@@ -129,47 +129,65 @@ export function KanbanBoard({
     return taskMap;
   }, [citas]);
   
+  // Ref para rastrear las tareas anteriores y evitar actualizaciones innecesarias
+  const prevKanbanTasksRef = useRef<Record<string, any>>({});
+
   // Actualizar columnas cuando cambian las tareas
   useEffect(() => {
-    // Solo actualizar si las tareas realmente cambiaron
-    setColumns(prevColumns => {
-      const columnTasks: Record<ColumnId, string[]> = {
-        pendientes: [],
-        completadas: [],
-        canceladas: [],
-      };
-
-      Object.values(kanbanTasks).forEach(task => {
-        columnTasks[task.columnId].push(task.id);
-      });
-
-      const updatedColumns: Record<ColumnId, Column> = {
-        pendientes: {
-          ...COLUMNS.pendientes,
-          taskIds: columnTasks.pendientes,
-        },
-        completadas: {
-          ...COLUMNS.completadas,
-          taskIds: columnTasks.completadas,
-        },
-        canceladas: {
-          ...COLUMNS.canceladas,
-          taskIds: columnTasks.canceladas,
-        },
-      };
-
-      // Verificar si las columnas realmente cambiaron para evitar actualizaciones innecesarias
-      const hasChanged = (Object.keys(updatedColumns) as ColumnId[]).some(
-        columnId => 
-          JSON.stringify(updatedColumns[columnId].taskIds) !== JSON.stringify(prevColumns[columnId].taskIds)
+    // Verificar si las tareas realmente cambiaron
+    const prevTasks = prevKanbanTasksRef.current;
+    const currentTasks = kanbanTasks;
+    
+    // Comparar las tareas para ver si realmente cambiaron
+    const hasChanged = Object.keys(currentTasks).length !== Object.keys(prevTasks).length ||
+      Object.keys(currentTasks).some(key => 
+        currentTasks[key].id !== prevTasks[key]?.id ||
+        currentTasks[key].columnId !== prevTasks[key]?.columnId
       );
+    
+    if (hasChanged) {
+      setColumns(prevColumns => {
+        const columnTasks: Record<ColumnId, string[]> = {
+          pendientes: [],
+          completadas: [],
+          canceladas: [],
+        };
 
-      if (hasChanged) {
-        return updatedColumns;
-      }
-      
-      return prevColumns;
-    });
+        Object.values(kanbanTasks).forEach(task => {
+          columnTasks[task.columnId].push(task.id);
+        });
+
+        const updatedColumns: Record<ColumnId, Column> = {
+          pendientes: {
+            ...COLUMNS.pendientes,
+            taskIds: columnTasks.pendientes,
+          },
+          completadas: {
+            ...COLUMNS.completadas,
+            taskIds: columnTasks.completadas,
+          },
+          canceladas: {
+            ...COLUMNS.canceladas,
+            taskIds: columnTasks.canceladas,
+          },
+        };
+
+        // Verificar si las columnas realmente cambiaron para evitar actualizaciones innecesarias
+        const columnsChanged = (Object.keys(updatedColumns) as ColumnId[]).some(
+          columnId => 
+            JSON.stringify(updatedColumns[columnId].taskIds) !== JSON.stringify(prevColumns[columnId].taskIds)
+        );
+
+        if (columnsChanged) {
+          return updatedColumns;
+        }
+        
+        return prevColumns;
+      });
+    }
+    
+    // Actualizar las tareas anteriores
+    prevKanbanTasksRef.current = kanbanTasks;
   }, [kanbanTasks]);
   
   // Convertir tareas de Kanban a tareas compatibles con TaskCard

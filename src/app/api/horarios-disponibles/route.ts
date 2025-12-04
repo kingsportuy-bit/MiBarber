@@ -196,6 +196,7 @@ export async function GET(request: NextRequest) {
       .eq("id_barbero", idBarbero)
       .eq("fecha", fecha)
       .eq("tipo", "bloqueo_dia")
+      .eq("activo", true) // Solo considerar bloqueos activos
       .single();
 
     if (!errorBloqueoDia && bloqueodia) {
@@ -247,7 +248,8 @@ export async function GET(request: NextRequest) {
     const { data: descansosExtra, error: errorDescansos } = await supabase
       .from("mibarber_descansos_extra")
       .select("*")
-      .eq("id_barbero", idBarbero);
+      .eq("id_barbero", idBarbero)
+      .eq("activo", true); // Solo considerar descansos activos
 
     let horariosDescanso: string[] = [];
     if (!errorDescansos && descansosExtra && descansosExtra.length > 0) {
@@ -286,7 +288,8 @@ export async function GET(request: NextRequest) {
       .select("*")
       .eq("id_barbero", idBarbero)
       .eq("fecha", fecha)
-      .eq("tipo", "bloqueo_horas");
+      .eq("tipo", "bloqueo_horas")
+      .eq("activo", true); // Solo considerar bloqueos activos
 
     if (!errorBloqueoHoras && bloqueoHoras && bloqueoHoras.length > 0) {
       bloqueoHoras.forEach((bloqueo) => {

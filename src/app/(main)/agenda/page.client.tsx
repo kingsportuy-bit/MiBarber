@@ -11,7 +11,6 @@ import { GlobalFilters } from "@/components/shared/GlobalFilters";
 import type { Appointment } from "@/types/db";
 import { toast } from "sonner";
 import { useGlobalFilters } from "@/hooks/useGlobalFilters";
-import { FloatingNewAppointmentButton } from "@/components/FloatingNewAppointmentButton";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { MobileAgenda } from "@/components/MobileAgenda";

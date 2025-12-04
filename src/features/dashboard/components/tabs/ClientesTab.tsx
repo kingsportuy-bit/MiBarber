@@ -1,13 +1,11 @@
 "use client";
 
 import { ClientsWidget } from "@/features/dashboard/components/widgets/ClientsWidget";
-import { PieChart } from "@/features/dashboard/components/charts/PieChart";
-import { BarChart } from "@/features/dashboard/components/charts/BarChart";
-import type { AdminEstadisticas } from "@/hooks/useEstadisticas";
+
 import type { ChartData, PieChartData } from "@/features/dashboard/types";
 
 interface ClientesTabProps {
-  stats: AdminEstadisticas;
+  stats: any;
 }
 
 export function ClientesTab({ stats }: ClientesTabProps) {
@@ -55,10 +53,7 @@ export function ClientesTab({ stats }: ClientesTabProps) {
 
       {/* Distribución de clientes */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <PieChart 
-          data={distribucionClientesData as PieChartData[]} 
-          titulo="Distribución de Clientes por Barbero" 
-        />
+        {/* Componente PieChart eliminado */}
         
         <div className="qoder-dark-card p-6">
           <h3 className="font-semibold text-qoder-dark-text-primary mb-4">

@@ -1,4 +1,4 @@
-"use client";
+﻿﻿﻿﻿﻿﻿﻿﻿﻿"use client";
 
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import Link from "next/link";
@@ -23,7 +23,7 @@ function formatUserName(name: string): string {
   const firstName = parts[0];
   const lastName = parts.length > 1 ? parts[parts.length - 1] : "";
   
-  // Formatear: primera letra mayúscula, resto minúscula
+  // Formatear: primera letra mayÃºscula, resto minÃºscula
   const formattedFirstName = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
   const formattedLastName = lastName ? lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase() : "";
   
@@ -43,7 +43,7 @@ export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMe
       <DropdownMenu.Trigger asChild>
         <button
           className="hidden md:flex text-qoder-dark-text-primary hover:text-qoder-dark-accent-orange p-1 rounded-md hover:bg-qoder-dark-bg-hover items-center gap-1 relative"
-          title="Menú de usuario"
+          title="MenÃº de usuario"
           style={{ 
             fontFamily: "'Roboto', 'Arial', sans-serif", 
             color: '#ffffff',
@@ -55,9 +55,9 @@ export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMe
             padding: '0.25rem 0.5rem', // Ajustar padding
             borderRadius: '0.375rem', // Ajustar border-radius
             fontWeight: 'normal', // Ajustar fontWeight
-            textTransform: 'none', // Eliminar transformación de texto
+            textTransform: 'none', // Eliminar transformaciÃ³n de texto
             letterSpacing: 'normal', // Eliminar espaciado de letras
-            fontSize: '0.875rem' // Ajustar tamaño de fuente
+            fontSize: '0.875rem' // Ajustar tamaÃ±o de fuente
           }}
         >
           <span className="text-sm" style={{ 
@@ -79,7 +79,7 @@ export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMe
               d="M19 9l-7 7-7-7" 
             />
           </svg>
-          {/* Barra inferior que aparece al pasar el mouse o cuando el menú está abierto */}
+          {/* Barra inferior que aparece al pasar el mouse o cuando el menÃº estÃ¡ abierto */}
           <span 
             className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 h-1 bg-gradient-to-r from-orange-800 to-orange-500 transition-all duration-300 ${
               isOpen ? 'w-4/5' : 'w-0'
@@ -120,13 +120,13 @@ export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMe
                     fontSize: '1rem'
                   }}
                 >
-                  Mi Barbería
+                  Mi Barberi­a
                 </Link>
               </DropdownMenu.Item>
               <DropdownMenu.Item asChild>
                 <Link 
-                  href="/mis-datos" 
-                  className={`dropdown-item ${pathname?.startsWith("/mis-datos") ? "active" : ""}`}
+                  href="/perfil" 
+                  className={`dropdown-item ${pathname?.startsWith("/perfil") ? "active" : ""}`}
                   style={{
                     padding: '12px 15px',
                     color: '#ffffff',
@@ -139,7 +139,7 @@ export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMe
                     fontSize: '1rem'
                   }}
                 >
-                  Mis Datos
+                  Perfil
                 </Link>
               </DropdownMenu.Item>
               <DropdownMenu.Separator className="border-qoder-dark-border-primary my-1" />
@@ -166,8 +166,8 @@ export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMe
             <>
               <DropdownMenu.Item asChild>
                 <Link 
-                  href="/mis-datos" 
-                  className={`dropdown-item ${pathname?.startsWith("/mis-datos") ? "active" : ""}`}
+                  href="/perfil" 
+                  className={`dropdown-item ${pathname?.startsWith("/perfil") ? "active" : ""}`}
                   style={{
                     padding: '12px 15px',
                     color: '#ffffff',
@@ -180,7 +180,7 @@ export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMe
                     fontSize: '1rem'
                   }}
                 >
-                  Mis Datos
+                  Perfil
                 </Link>
               </DropdownMenu.Item>
               <DropdownMenu.Separator className="border-qoder-dark-border-primary my-1" />

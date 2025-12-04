@@ -18,10 +18,23 @@ export function EditarBarberoModal({
   barbero,
   onSave 
 }: EditarBarberoModalProps) {
+  console.log("EditarBarberoModal - Props recibidas:", { open, barbero });
+  
+  // Log para diagnóstico de especialidades
+  console.log('[DIAGNÓSTICO] EditarBarberoModal - Datos del barbero:', barbero);
+  console.log('[DIAGNÓSTICO] EditarBarberoModal - Especialidades del barbero:', barbero?.especialidades);
+  console.log('[DIAGNÓSTICO] EditarBarberoModal - Tipo de especialidades:', typeof barbero?.especialidades);
+  console.log('[DIAGNÓSTICO] EditarBarberoModal - ¿Es un array?', Array.isArray(barbero?.especialidades));
+  
   const [username, setUsername] = useState(barbero.username || "");
   const [email, setEmail] = useState(barbero.email || "");
   const [telefono, setTelefono] = useState(barbero.telefono || "");
-  const [especialidades, setEspecialidades] = useState<string[]>(barbero.especialidades || []);
+  const [especialidades, setEspecialidades] = useState<string[]>(() => {
+    // Asegurarse de que las especialidades se inicialicen correctamente
+    const initialEspecialidades = barbero.especialidades || [];
+    console.log("Inicializando especialidades:", initialEspecialidades);
+    return initialEspecialidades;
+  });
   const [serviciosDisponibles, setServiciosDisponibles] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -29,6 +42,7 @@ export function EditarBarberoModal({
   const queryClient = useQueryClient();
 
   const loadServiciosDisponibles = useCallback(async () => {
+    console.log("Cargando servicios disponibles para sucursal:", barbero.id_sucursal);
     try {
       const supabase = getSupabaseClient();
       const { data, error } = await supabase
@@ -40,24 +54,53 @@ export function EditarBarberoModal({
 
       if (error) throw error;
       setServiciosDisponibles(data || []);
+      
+      // Verificar las especialidades cargadas
+      console.log("Servicios disponibles cargados:", data);
+      console.log("Especialidades actuales:", especialidades);
     } catch (error) {
       console.error("Error al cargar servicios:", error);
       setServiciosDisponibles([]);
     }
-  }, [barbero.id_sucursal]);
-
+  }, [barbero.id_sucursal, especialidades]);
+  
   // Cargar servicios disponibles cuando se abre el modal
   useEffect(() => {
+    console.log("useEffect - Cambio en open o id_sucursal:", { open, id_sucursal: barbero.id_sucursal });
     if (open && barbero.id_sucursal) {
       loadServiciosDisponibles();
     }
   }, [open, barbero.id_sucursal, loadServiciosDisponibles]);
+  
+  // Actualizar especialidades cuando cambie el barbero
+  useEffect(() => {
+    console.log("useEffect - Cambio en barbero:", barbero);
+    const newEspecialidades = barbero.especialidades || [];
+    console.log("Actualizando especialidades desde barbero:", newEspecialidades);
+    setEspecialidades(newEspecialidades);
+  }, [barbero]);
+  
+  // Log cuando cambian las especialidades
+  useEffect(() => {
+    console.log("Especialidades actualizadas:", especialidades);
+  }, [especialidades]);
 
   const handleEspecialidadChange = (servicioId: string, checked: boolean) => {
+    console.log(`Cambiando especialidad ${servicioId} a ${checked}`);
+    console.log("Especialidades actuales antes del cambio:", especialidades);
+    
     if (checked) {
-      setEspecialidades(prev => [...prev, servicioId]);
+      setEspecialidades(prev => {
+        const newEspecialidades = [...prev, servicioId];
+        console.log("Agregando especialidad, nuevo array:", newEspecialidades);
+        return newEspecialidades;
+      });
     } else {
-      setEspecialidades(prev => prev.filter(id => id !== servicioId));
+      setEspecialidades(prev => {
+        const newEspecialidades = prev.filter(id => id !== servicioId);
+        console.log("Removiendo especialidad, nuevo array:", newEspecialidades);
+        return newEspecialidades;
+      });
     }
   };
 
@@ -190,23 +233,27 @@ export function EditarBarberoModal({
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {serviciosDisponibles.length > 0 ? (
-                      serviciosDisponibles.map((servicio) => (
-                        <div key={servicio.id_servicio} className="flex items-center">
-                          <input
-                            type="checkbox"
-                            id={`servicio-${servicio.id_servicio}`}
-                            checked={especialidades.includes(servicio.id_servicio)}
-                            onChange={(e) => handleEspecialidadChange(servicio.id_servicio, e.target.checked)}
-                            className="qoder-dark-checkbox h-5 w-5 rounded border-qoder-dark-border bg-qoder-dark-bg-form text-qoder-dark-accent-primary focus:ring-qoder-dark-accent-primary"
-                          />
-                          <label 
-                            htmlFor={`servicio-${servicio.id_servicio}`} 
-                            className="ml-2 text-qoder-dark-text-primary"
-                          >
-                            {servicio.nombre}
-                          </label>
-                        </div>
-                      ))
+                      serviciosDisponibles.map((servicio) => {
+                        const isChecked = especialidades.includes(servicio.id_servicio);
+                        console.log(`Renderizando servicio ${servicio.id_servicio} - ${servicio.nombre}, checked: ${isChecked}`);
+                        return (
+                          <div key={servicio.id_servicio} className="flex items-center">
+                            <input
+                              type="checkbox"
+                              id={`servicio-${servicio.id_servicio}`}
+                              checked={isChecked}
+                              onChange={(e) => handleEspecialidadChange(servicio.id_servicio, e.target.checked)}
+                              className="qoder-dark-checkbox h-5 w-5 rounded border-qoder-dark-border bg-qoder-dark-bg-form text-qoder-dark-accent-primary focus:ring-qoder-dark-accent-primary"
+                            />
+                            <label 
+                              htmlFor={`servicio-${servicio.id_servicio}`} 
+                              className="ml-2 text-qoder-dark-text-primary"
+                            >
+                              {servicio.nombre}
+                            </label>
+                          </div>
+                        );
+                      })
                     ) : (
                       <p className="text-qoder-dark-text-muted text-sm col-span-3">
                         No hay servicios disponibles en tu sucursal

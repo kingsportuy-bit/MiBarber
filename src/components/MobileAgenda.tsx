@@ -6,7 +6,6 @@ import { useGlobalFilters } from "@/contexts/GlobalFiltersContext";
 import { SingleFormAppointmentModalWithSucursal } from "@/components/SingleFormAppointmentModalWithSucursal";
 import type { Appointment } from "@/types/db";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
-import { FloatingNewAppointmentButton } from "@/components/FloatingNewAppointmentButton";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useClientesByIds } from "@/hooks/useClientes";
 import { Client } from "@/types/db";

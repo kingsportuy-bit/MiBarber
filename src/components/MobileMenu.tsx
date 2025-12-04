@@ -140,13 +140,13 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                   Mi Barbería
                 </Link>
                 <Link
-                  href="/mis-datos"
+                  href="/perfil"
                   className={`dropdown-item flex items-center ${
-                    pathname === "/mis-datos" ? 'active' : ''
+                    pathname === "/perfil" ? 'active' : ''
                   }`}
                   onClick={closeMenu}
                 >
-                  Mis Datos
+                  Perfil
                 </Link>
               </>
             )}

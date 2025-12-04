@@ -22,7 +22,7 @@ export function useBarberoData() {
 
       const { data, error } = await supabase
         .from('mibarber_barberos')
-        .select('*')
+        .select('*, especialidades')
         .eq('id_barbero', session.user.id)
         .single();
 

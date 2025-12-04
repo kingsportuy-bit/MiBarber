@@ -7,7 +7,6 @@ import { useState, useCallback, useEffect } from "react";
 import type { Appointment } from "@/types/db";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
 import { GlobalFilters } from "@/components/shared/GlobalFilters";
-import { FloatingNewAppointmentButton } from "@/components/FloatingNewAppointmentButton";
 
 export default function DashboardPage() {
   usePageTitle("Barberox | Inicio");
@@ -87,8 +86,6 @@ export default function DashboardPage() {
         </div>
       </div>
       
-      {/* Botón flotante de nuevo turno */}
-      <FloatingNewAppointmentButton />
     </div>
   );
 }

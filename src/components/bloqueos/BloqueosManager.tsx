@@ -12,6 +12,22 @@ import type { TipoBloqueo } from "@/types/bloqueos";
 import { createBloqueoSchema, createDescansoExtraSchema } from "@/features/bloqueos/utils/validations";
 import { GlobalFilters } from "@/components/shared/GlobalFilters";
 
+// Función para formatear fechas de bloqueos correctamente
+const formatBloqueoDate = (dateString: string): string => {
+  // Si ya está en formato YYYY-MM-DD, retornar tal cual
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    return dateString;
+  }
+  
+  // Si es una fecha ISO, convertirla manteniendo la fecha sin ajustar zona horaria
+  try {
+    const [datePart] = dateString.split('T');
+    return datePart;
+  } catch (e) {
+    return dateString;
+  }
+};
+
 interface BloqueosManagerProps {
   mode: "admin" | "barbero";
 }
@@ -330,7 +346,7 @@ const BloqueosTabs: React.FC<BloqueosTabsProps> = ({
                             </span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-qoder-dark-text-primary">
-                            {item.fecha || "-"}
+                            {item.fecha ? formatBloqueoDate(item.fecha) : "-"}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-qoder-dark-text-primary">
                             {item.tipo === "bloqueo_dia" ? (
@@ -414,7 +430,7 @@ const BloqueosTabs: React.FC<BloqueosTabsProps> = ({
                             </span>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-qoder-dark-text-primary">
-                            {item.fecha || "-"}
+                            {item.fecha ? formatBloqueoDate(item.fecha) : "-"}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-qoder-dark-text-primary">
                             {item.tipo === "bloqueo_dia" ? (

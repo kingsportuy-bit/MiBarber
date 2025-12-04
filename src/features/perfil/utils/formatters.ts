@@ -11,6 +11,18 @@ export function formatHours(hours: number): string {
 }
 
 export function formatDate(dateString: string): string {
+  // Si ya está en formato YYYY-MM-DD, parsear manualmente para evitar problemas de zona horaria
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day); // Mes es 0-indexado
+    return new Intl.DateTimeFormat('es-UY', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    }).format(date);
+  }
+  
+  // Para otros formatos, usar el comportamiento original
   return new Intl.DateTimeFormat('es-UY', {
     day: '2-digit',
     month: '2-digit',

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useEstadisticas } from "@/hooks/useEstadisticas";
+import { useEstadisticasBarbero } from "@/hooks/useEstadisticas";
 import { StatCard } from "@/components/StatCard";
 import { GraficaBarras } from "@/components/GraficaBarras";
 import { GraficaLineas } from "@/components/GraficaLineas";
@@ -16,7 +16,7 @@ interface BarberoStatsViewProps {
 }
 
 export function BarberoStatsView({ barberoId, periodo }: BarberoStatsViewProps) {
-  const { barberoStats } = useEstadisticas({ periodo, barberoId });
+  const { barberoStats } = useEstadisticasBarbero({ periodo, barberoId });
   
   if (barberoStats.isLoading) {
     return (

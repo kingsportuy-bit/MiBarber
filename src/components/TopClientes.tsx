@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { useEstadisticas } from "@/hooks/useEstadisticas";
-import type { AdminEstadisticas } from "@/hooks/useEstadisticas";
+import { useEstadisticasClientes } from "@/hooks/useEstadisticas";
+import type { FiltrosEstadisticas } from "@/types/estadisticas";
 
 interface TopClientesProps {
   filtros: {
@@ -14,26 +14,24 @@ interface TopClientesProps {
   };
 }
 
-interface CajaRecord {
-  id_cliente?: string;
-  monto: number;
-}
-
-interface Cliente {
-  id_cliente: string;
-  nombre: string;
-}
-
 export function TopClientes({ filtros }: TopClientesProps) {
-  // Como no tenemos el hook avanzado, vamos a simular los datos necesarios
-  const isLoading = false;
-  const cajaRecords: CajaRecord[] = [];
-  const clientes: Cliente[] = [];
+  // Convertir los filtros al formato esperado por useEstadisticasClientes
+  const filtrosEstadisticas: FiltrosEstadisticas = {
+    sucursalId: filtros.sucursalId,
+    barberoId: filtros.barberoId,
+    fechaInicio: filtros.fechaDesde,
+    fechaFin: filtros.fechaHasta
+  };
+
+  const { data: clientesStats, isLoading, error } = useEstadisticasClientes(filtrosEstadisticas);
   
+  // Extraer los clientes frecuentes de las estadísticas
   const top5Clientes = useMemo(() => {
-    // Simulamos datos vacíos por ahora
-    return [];
-  }, [cajaRecords, clientes]);
+    if (!clientesStats?.clientes_frecuentes) return [];
+    
+    // Los clientes frecuentes ya están ordenados por visitas, tomar los top 5
+    return clientesStats.clientes_frecuentes.slice(0, 5);
+  }, [clientesStats]);
 
   if (isLoading) {
     return (
@@ -51,21 +49,32 @@ export function TopClientes({ filtros }: TopClientesProps) {
     );
   }
 
+  if (error) {
+    return (
+      <div className="qoder-dark-card">
+        <h3 className="font-semibold text-qoder-dark-text-primary mb-4">Top 5 Clientes por Facturación</h3>
+        <div className="text-qoder-dark-text-secondary text-center py-4">
+          Error al cargar los datos: {error.message}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="qoder-dark-card">
-      <h3 className="font-semibold text-qoder-dark-text-primary mb-4">Top 5 Clientes por Facturación</h3>
+      <h3 className="font-semibold text-qoder-dark-text-primary mb-4">Top 5 Clientes por Visitas</h3>
       <div className="space-y-3">
         {top5Clientes.length > 0 ? (
-          top5Clientes.map((cliente: any, index: number) => (
-            <div key={index} className="flex items-center justify-between">
+          top5Clientes.map((cliente, index) => (
+            <div key={cliente.id_cliente} className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className="w-8 h-8 rounded-full bg-qoder-dark-bg-secondary flex items-center justify-center mr-3">
                   <span className="text-qoder-dark-text-primary font-semibold">{index + 1}</span>
                 </div>
-                <div className="text-qoder-dark-text-primary">{cliente.nombre}</div>
+                <div className="text-qoder-dark-text-primary">{cliente.nombre_cliente}</div>
               </div>
               <div className="text-qoder-dark-text-primary font-semibold">
-                ${cliente.monto?.toFixed(2) || '0.00'}
+                {cliente.total_visitas} visitas
               </div>
             </div>
           ))

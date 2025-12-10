@@ -209,7 +209,7 @@ export function NavBar() {
     if (
       authState.isAuthenticated &&
       !authState.isAdmin &&
-      (pathname === "/caja")
+      (pathname === "/v2/caja")
     ) {
       router.push("/agenda");
     }
@@ -233,6 +233,9 @@ export function NavBar() {
         { href: "/agenda", label: "Agenda" },
         { href: "/clientes", label: "Clientes" },
         { href: "/whatsapp", label: "WhatsApp" },
+        { href: "/caja", label: "Caja" },
+        { href: "/estadisticas", label: "Estadísticas" },
+        { href: "/mi-barberia", label: "Mi Barbería" },
       ];
     } else {
       tabs = [
@@ -297,17 +300,25 @@ export function NavBar() {
         </Link>
         
         {/* Navegación de escritorio - ocultar en móviles */}
-        <div className="hidden md:flex items-center gap-2 text-sm">
+        <div className="hidden md:flex items-center gap-1 text-xs">
           {authState.isAuthenticated &&
             tabs.map((t) => {
               const active = pathname?.startsWith(t.href);
+              // Verificar si la página es exclusiva de administradores
+              const isAdminPage = t.href === '/estadisticas' || t.href === '/admin' || t.href === '/admin/bloqueos' || t.href === '/v2/caja' || t.href === '/mi-barberia';
+              
               return (
                 <Link
                   key={t.href}
                   href={t.href}
-                  className={`nav-link ${active ? 'active' : ''}`}
+                  className={`nav-link ${active ? 'active' : ''} px-2 py-1 flex items-center gap-1`}
                 >
-                  {t.label}
+                  <span>{t.label}</span>
+                  {isAdminPage && authState.isAdmin && (
+                    <span className="text-[10px] bg-orange-500 text-white px-1 py-0.5 rounded">
+                      Admin
+                    </span>
+                  )}
                 </Link>
               );
             })}

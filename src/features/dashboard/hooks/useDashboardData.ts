@@ -1,4 +1,4 @@
-import { useEstadisticas } from '@/hooks/useEstadisticas';
+import { useEstadisticasAdmin } from '@/hooks/useEstadisticas';
 import { useBarberoAuth } from '@/hooks/useBarberoAuth';
 import type { AdminEstadisticas } from '@/hooks/useEstadisticas';
 import type { TabType } from '@/features/dashboard/types';
@@ -41,8 +41,8 @@ export function useDashboardData({
     ? (sucursalSeleccionada || barberoActual?.id_sucursal || null) // Admin puede cambiar
     : (barberoActual?.id_sucursal || null); // Barbero común: FIJO (fallback)
 
-  // Usar el hook de estadísticas existente
-  const adminStatsQuery = useEstadisticas({ 
+  // Usar el hook de estadísticas de administrador
+  const adminStatsQuery = useEstadisticasAdmin({ 
     periodo,
     sucursalId: activeTab === "sucursales" && sucursalSegura ? sucursalSegura : undefined,
     fechaDesde: activeTab === "sucursales" ? fechaDesde : undefined,

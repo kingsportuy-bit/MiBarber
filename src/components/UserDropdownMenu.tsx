@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿"use client";
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿"use client";
 
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import Link from "next/link";
@@ -63,7 +63,8 @@ export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMe
           <span className="text-sm" style={{ 
             color: '#ffffff', 
             textTransform: 'none',
-            backgroundColor: 'transparent'
+            backgroundColor: 'transparent',
+            fontWeight: 'bold' // Agregar negrita
           }}>{formattedUserName}</span>
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
@@ -104,25 +105,8 @@ export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMe
         >
           {isAdmin ? (
             <>
-              <DropdownMenu.Item asChild>
-                <Link 
-                  href="/mi-barberia" 
-                  className={`dropdown-item ${pathname?.startsWith("/mi-barberia") ? "active" : ""}`}
-                  style={{
-                    padding: '12px 15px',
-                    color: '#ffffff',
-                    textDecoration: 'none',
-                    display: 'block',
-                    transition: 'all 0.2s ease',
-                    fontWeight: 500,
-                    backgroundColor: 'transparent',
-                    fontFamily: "'Roboto', 'Arial', sans-serif",
-                    fontSize: '1rem'
-                  }}
-                >
-                  Mi Barberi­a
-                </Link>
-              </DropdownMenu.Item>
+              {/* Mi Barbería se mueve al NavBar */}
+              {/* Estadísticas se mueve al menú móvil */}
               <DropdownMenu.Item asChild>
                 <Link 
                   href="/perfil" 
@@ -144,7 +128,7 @@ export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMe
               </DropdownMenu.Item>
               <DropdownMenu.Separator className="border-qoder-dark-border-primary my-1" />
               <DropdownMenu.Item 
-                className="dropdown-item text-red-400 hover:!bg-red-900/30 hover:!text-red-400"
+                className="dropdown-item text-orange-400 hover:!bg-red-900/30 hover:!text-orange-400 font-bold"
                 onClick={onLogout}
                 style={{
                   padding: '12px 15px',
@@ -185,7 +169,7 @@ export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMe
               </DropdownMenu.Item>
               <DropdownMenu.Separator className="border-qoder-dark-border-primary my-1" />
               <DropdownMenu.Item 
-                className="dropdown-item text-red-400 hover:!bg-red-900/30 hover:!text-red-400"
+                className="dropdown-item text-red-400 hover:!bg-red-900/30 hover:!text-red-400 font-bold"
                 onClick={onLogout}
                 style={{
                   padding: '12px 15px',

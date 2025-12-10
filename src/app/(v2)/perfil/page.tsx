@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
 import { Tabs, TabContent } from '@/components/ui/Tabs';
+import { useCurrentDate } from '@/components/shared/CurrentDateProvider';
 
 // ⭐ NUEVAS IMPORTACIONES
 import { EstadisticasCards } from '@/features/perfil/components/EstadisticasCards';

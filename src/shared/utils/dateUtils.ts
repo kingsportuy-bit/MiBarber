@@ -45,58 +45,14 @@ export function convertISOToLocalDate(isoString: string): string {
 }
 
 /**
- * Obtiene el día de la semana para una fecha dada (0 = Domingo, 1 = Lunes, etc.)
- * Ajustado para zona horaria local (UTC-3 para Uruguay)
+ * Compara dos fechas ignorando la hora y ajustando a la zona horaria local
+ * Devuelve true si las fechas representan el mismo día
  */
-export function getDayOfWeek(dateString: string): number {
-  // Parsear la fecha manualmente para evitar problemas de zona horaria
-  const [year, month, day] = dateString.split('-').map(Number);
-  // Crear una fecha en la zona horaria local (ajustando a mediodía para evitar problemas de DST)
-  const localDate = new Date(year, month - 1, day, 12, 0, 0);
+export function isSameDay(date1: Date, date2: Date): boolean {
+  // Ajustar ambas fechas a UTC-3 (Uruguay)
+  const d1 = new Date(date1);
+  const d2 = new Date(date2);
   
-  return localDate.getDay();
-}
-
-/**
- * Convierte el día de la semana de JavaScript al ID de día en la base de datos
- * JavaScript: 0=Domingo, 1=Lunes, 2=Martes, 3=Miércoles, 4=Jueves, 5=Viernes, 6=Sábado
- * Base de datos: 0=Domingo, 1=Lunes, 2=Martes, 3=Miércoles, 4=Jueves, 5=Viernes, 6=Sábado
- */
-export function convertJsDayToDbDay(jsDay: number): number {
-  // Ahora JavaScript y la base de datos usan el mismo esquema, así que no es necesario convertir
-  return jsDay;
-}
-
-/**
- * Compara dos fechas (YYYY-MM-DD) para determinar si una es anterior a la otra
- */
-export function isDateBefore(date1: string, date2: string): boolean {
-  // Crear fechas sin considerar la hora para comparar solo las fechas
-  const [year1, month1, day1] = date1.split('-').map(Number);
-  const [year2, month2, day2] = date2.split('-').map(Number);
-  
-  const d1 = new Date(year1, month1 - 1, day1);
-  const d2 = new Date(year2, month2 - 1, day2);
-  
-  // Ajustar manualmente a UTC-3 (Uruguay)
-  d1.setMinutes(d1.getMinutes() + d1.getTimezoneOffset() + (-180));
-  d2.setMinutes(d2.getMinutes() + d2.getTimezoneOffset() + (-180));
-  
-  return d1 < d2;
-}
-
-/**
- * Compara dos fechas (YYYY-MM-DD) para determinar si una es igual a la otra
- */
-export function isDateEqual(date1: string, date2: string): boolean {
-  // Crear fechas sin considerar la hora para comparar solo las fechas
-  const [year1, month1, day1] = date1.split('-').map(Number);
-  const [year2, month2, day2] = date2.split('-').map(Number);
-  
-  const d1 = new Date(year1, month1 - 1, day1);
-  const d2 = new Date(year2, month2 - 1, day2);
-  
-  // Ajustar manualmente a UTC-3 (Uruguay)
   d1.setMinutes(d1.getMinutes() + d1.getTimezoneOffset() + (-180));
   d2.setMinutes(d2.getMinutes() + d2.getTimezoneOffset() + (-180));
   
@@ -162,4 +118,19 @@ export function getNextDay(dateString: string): string {
   const newDay = String(date.getDate()).padStart(2, '0');
   
   return `${newYear}-${newMonth}-${newDay}`;
+}
+
+/**
+ * Obtiene el primer día del mes actual
+ */
+export function getFirstDayOfMonth(): string {
+  const now = new Date();
+  // Ajustar manualmente a UTC-3 (Uruguay)
+  now.setMinutes(now.getMinutes() + now.getTimezoneOffset() + (-180));
+  
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = '01';
+  
+  return `${year}-${month}-${day}`;
 }

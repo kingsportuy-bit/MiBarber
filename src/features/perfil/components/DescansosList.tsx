@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { formatTime, diasSemanaNombres } from '../utils/formatters'
 import { DescansoModalForm } from './DescansoModalForm'
 import type { Descanso, DescansoInput } from '../types'
+import { getLocalDateString } from '@/shared/utils/dateUtils'
 
 interface Props {
   barberoId: string

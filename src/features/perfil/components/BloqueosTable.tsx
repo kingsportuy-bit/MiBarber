@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { formatDate, formatTime } from '../utils/formatters'
 import { BloqueoModalForm } from './BloqueoModalForm'
 import type { Bloqueo, BloqueoInput } from '../types'
+import { getLocalDateString } from '@/shared/utils/dateUtils'
 
 interface Props {
   barberoId: string
@@ -21,16 +22,18 @@ function useTodosBloqueos(barberoId: string, barberiaId: string) {
   return useQuery({
     queryKey: ['todos-bloqueos', barberoId, barberiaId],
     queryFn: async (): Promise<Bloqueo[]> => {
-      // Calcular la fecha de hace 30 días
+      // Calcular la fecha de hace 30 días utilizando la utilidad reutilizable
       const hace30Dias = new Date();
       hace30Dias.setDate(hace30Dias.getDate() - 30);
+      // Asegurarnos de que la fecha esté en el formato correcto y zona horaria ajustada
+      const fechaHace30Dias = getLocalDateString(hace30Dias);
       
       const { data } = await supabase
         .from('mibarber_bloqueos_barbero')
         .select('*')
         .eq('id_barbero', barberoId)
         .eq('id_barberia', barberiaId)
-        .gte('fecha', hace30Dias.toISOString().split('T')[0])
+        .gte('fecha', fechaHace30Dias)
         .order('fecha', { ascending: true })
         .order('hora_inicio', { ascending: true, nullsFirst: false })
 

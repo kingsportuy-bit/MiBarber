@@ -25,20 +25,18 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   
   // Definir items del menú basados en el rol del usuario
   const tabs = useMemo(() => {
-    const baseItems: Tab[] = [
-      { href: "/inicio", label: "Inicio" },
-      { href: "/agenda", label: "Agenda" },
-      { href: "/whatsapp", label: "WhatsApp" }
-    ];
-    
-    // Para administradores, agregar items adicionales
+    // Para administradores, solo mostrar páginas exclusivas de administrador
     if (isAdmin) {
-      baseItems.splice(2, 0, 
-        { href: "/clientes", label: "Clientes" }
-      );
+      return [
+        { href: "/caja", label: "Caja" },
+        { href: "/estadisticas", label: "Estadísticas" },
+        { href: "/mi-barberia", label: "Mi Barbería" }
+      ];
     }
     
-    return baseItems;
+    // Para barberos normales, no mostrar páginas en el menú hamburguesa
+    // ya que están disponibles en la navegación inferior
+    return [];
   }, [isAdmin]);
 
   const toggleMenu = () => {
@@ -102,64 +100,64 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           </svg>
         )}
       </button>
-
-      {/* Menú desplegable */}
+      
+      {/* Efecto de difuminado que ocupa toda la pantalla excepto el menú */}
       {menuOpen && (
-        <div ref={menuRef} className="dropdown-menu absolute top-12 left-0 right-0 z-50 animate-fadeInDown">
-          <div className="px-2 pt-2 pb-3 space-y-1">
-            {/* Nombre del barbero logueado */}
-            {barbero && (
-              <div className="px-3 py-2 text-qoder-dark-text-primary font-medium border-b border-qoder-dark-border">
-                {barbero.nombre}
-              </div>
-            )}
-            
-            {tabs.map((tab) => {
-              const active = pathname === tab.href;
-              return (
-                <Link
-                  key={tab.href}
-                  href={tab.href}
-                  className={`dropdown-item flex items-center ${active ? 'active' : ''}`}
-                  onClick={closeMenu}
-                >
-                  {tab.label}
-                </Link>
-              );
-            })}
-            
-            {barbero && (
-              <>
-                <Link
-                  href="/mi-barberia"
-                  className={`dropdown-item flex items-center ${
-                    pathname === "/mi-barberia" ? 'active' : ''
-                  }`}
-                  onClick={closeMenu}
-                >
-                  Mi Barbería
-                </Link>
-                <Link
-                  href="/perfil"
-                  className={`dropdown-item flex items-center ${
-                    pathname === "/perfil" ? 'active' : ''
-                  }`}
-                  onClick={closeMenu}
-                >
-                  Perfil
-                </Link>
-              </>
-            )}
-            
-            {/* Botón de cerrar sesión */}
-            <button
-              onClick={handleLogout}
-              className="dropdown-item flex items-center w-full text-left"
-            >
-              Cerrar Sesión
-            </button>
+        <>
+          {/* Overlay difuminado para toda la pantalla */}
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm z-40"
+            onClick={closeMenu}
+          />
+          
+          {/* Menú desplegable con recorte para evitar el difuminado en el área del menú */}
+          <div 
+            ref={menuRef} 
+            className="dropdown-menu absolute top-12 left-0 right-0 z-50 animate-fadeInDown"
+            style={{ backdropFilter: 'none' }}
+          >
+            <div className="px-2 pt-2 pb-3 space-y-1 bg-qoder-dark-bg-secondary rounded-b-lg border border-qoder-dark-border-primary">
+              {/* Nombre del barbero logueado */}
+              {barbero && (
+                <div className="px-3 py-2 text-qoder-dark-text-primary font-bold border-b border-qoder-dark-border">
+                  {barbero.nombre}
+                </div>
+              )}
+              
+              {tabs.map((tab) => {
+                const active = pathname === tab.href;
+                // Verificar si la página es exclusiva de administradores
+                const isAdminPage = tab.href === '/estadisticas' || tab.href === '/admin' || tab.href === '/admin/bloqueos' || tab.href === '/v2/caja' || tab.href === '/mi-barberia';
+                
+                return (
+                  <Link
+                    key={tab.href}
+                    href={tab.href}
+                    className={`dropdown-item flex items-center justify-between ${active ? 'active' : ''}`}
+                    onClick={closeMenu}
+                  >
+                    <span>{tab.label}</span>
+                    {isAdminPage && isAdmin && (
+                      <span className="text-[10px] bg-orange-500 text-white px-1 py-0.5 rounded">
+                        Admin
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+              
+
+              
+              {/* Botón de cerrar sesión */}
+              <button
+                onClick={handleLogout}
+                className="dropdown-item flex items-center w-full text-left capitalize"
+              >
+                Cerrar Sesión
+              </button>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

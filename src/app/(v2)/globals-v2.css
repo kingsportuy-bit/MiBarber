@@ -787,12 +787,26 @@
     /* Mayor espacio entre selectores */
   margin-left: var(--space-md) !important;
   margin-right: var(--space-md) !important;
+  /* Padding vertical reducido */
+  padding-top: var(--space-xs) !important;
+  padding-bottom: var(--space-xs) !important;
 }
 
 .v2-tabs-selector.active {
 
   border-bottom: 2px solid var(--tab-border-active) !important;
   color: var(--color-primary) !important;
+}
+
+/* Estilos para móviles */
+@media (max-width: 767px) {
+  .v2-tabs-selector {
+    font-size: var(--font-size-base) !important;
+    margin-left: var(--space-sm) !important;
+    margin-right: var(--space-sm) !important;
+    padding-top: var(--space-xs) !important;
+    padding-bottom: var(--space-xs) !important;
+  }
 }
 
 /* Footer */
@@ -1051,4 +1065,29 @@ content: '✎';
 
 .v2-icon-delete::before {
 content: '🗑';
+}
+
+/* Botón simple - estilo minimalista para acciones como limpiar búsqueda */
+.boton-simple {
+  background: transparent;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  transition: none;
+  height: 1.5rem;
+  width: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+
+.boton-simple:hover {
+  background-color: var(--bg-hover);
+}
+
+.boton-simple svg {
+  height: 0.75rem;
+  width: 0.75rem;
+  color: var(--text-muted);
 }

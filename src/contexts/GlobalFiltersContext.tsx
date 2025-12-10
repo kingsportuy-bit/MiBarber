@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef, useCallback } from "react";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 import { useSucursales } from "@/hooks/useSucursales";
 import { useBarberos } from "@/hooks/useBarberos";
@@ -39,32 +39,136 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
     barberoIdFilter
   );
 
-  // Estado para los filtros globales
+  // Función para obtener las fechas por defecto
+  const getDefaultDates = () => {
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    
+    return {
+      fechaInicio: firstDayOfMonth.toISOString().split('T')[0],
+      fechaFin: today.toISOString().split('T')[0]
+    };
+  };
+
+  // Función para validar y corregir fechas
+  const validateAndFixDates = (fechaInicio: string | null, fechaFin: string | null) => {
+    // Si alguna fecha es null, usar las fechas por defecto
+    if (!fechaInicio || !fechaFin) {
+      return getDefaultDates();
+    }
+    
+    try {
+      const startDate = new Date(fechaInicio);
+      const endDate = new Date(fechaFin);
+      const today = new Date();
+      
+      // Limpiar horas para comparación
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+      
+      // Si las fechas son futuras, corregirlas
+      if (startDate > today) {
+        console.warn('Fecha de inicio futura corregida a hoy');
+        startDate.setTime(today.getTime());
+      }
+      if (endDate > today) {
+        console.warn('Fecha de fin futura corregida a hoy');
+        endDate.setTime(today.getTime());
+      }
+      
+      // Si las fechas están invertidas, corregirlas
+      if (startDate > endDate) {
+        console.warn('Fechas invertidas corregidas');
+        // Intercambiar las fechas
+        const temp = new Date(startDate);
+        startDate.setTime(endDate.getTime());
+        endDate.setTime(temp.getTime());
+      }
+      
+      return {
+        fechaInicio: startDate.toISOString().split('T')[0],
+        fechaFin: endDate.toISOString().split('T')[0]
+      };
+    } catch (error) {
+      console.error('Error al validar fechas:', error);
+      return getDefaultDates();
+    }
+  };
+
+  // Estado para los filtros globales con validación de fechas
   const [filters, setFilters] = useState<GlobalFilters>(() => {
     // Recuperar filtros del localStorage si existen
     if (typeof window !== "undefined") {
       const savedFilters = localStorage.getItem("globalFilters");
       if (savedFilters) {
         try {
-          return JSON.parse(savedFilters);
+          const parsedFilters = JSON.parse(savedFilters);
+          
+          // Validar y corregir fechas al cargar desde localStorage
+          if (parsedFilters.fechaInicio && parsedFilters.fechaFin) {
+            const startDate = new Date(parsedFilters.fechaInicio);
+            const endDate = new Date(parsedFilters.fechaFin);
+            
+            // Corregir fechas si están invertidas
+            if (startDate > endDate) {
+              console.warn('Corrigiendo fechas invertidas al cargar desde localStorage');
+              return {
+                ...parsedFilters,
+                fechaInicio: parsedFilters.fechaFin,
+                fechaFin: parsedFilters.fechaInicio
+              };
+            }
+          }
+          
+          return parsedFilters;
         } catch {
+          const defaultDates = getDefaultDates();
           return {
             sucursalId: null,
             barberoId: null,
-            fechaInicio: null,
-            fechaFin: null
+            fechaInicio: defaultDates.fechaInicio,
+            fechaFin: defaultDates.fechaFin
           };
         }
       }
     }
     
+    // Valores por defecto con fechas preseleccionadas
+    const defaultDates = getDefaultDates();
     return {
       sucursalId: null,
       barberoId: null,
-      fechaInicio: null,
-      fechaFin: null
+      fechaInicio: defaultDates.fechaInicio,
+      fechaFin: defaultDates.fechaFin
     };
   });
+
+  // Función personalizada para actualizar filtros con validación de fechas
+  const setFiltersWithValidation = useCallback((newFilters: React.SetStateAction<GlobalFilters>) => {
+    setFilters(prev => {
+      // Obtener los nuevos filtros
+      const nextFilters = typeof newFilters === 'function' ? newFilters(prev) : newFilters;
+      
+      // Validar y corregir fechas si están invertidas
+      if (nextFilters.fechaInicio && nextFilters.fechaFin) {
+        const startDate = new Date(nextFilters.fechaInicio);
+        const endDate = new Date(nextFilters.fechaFin);
+        
+        // Si las fechas están invertidas, corregirlas
+        if (startDate > endDate) {
+          console.warn('Corrigiendo fechas invertidas al actualizar filtros');
+          return {
+            ...nextFilters,
+            fechaInicio: nextFilters.fechaFin,
+            fechaFin: nextFilters.fechaInicio
+          };
+        }
+      }
+      
+      return nextFilters;
+    });
+  }, []);
 
   // Efecto para guardar filtros en localStorage cuando cambian
   useEffect(() => {
@@ -89,7 +193,7 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
           sucursalId: prev.sucursalId ?? barbero.id_sucursal
         }));
       }
-      
+    
       // Si no somos admin y tenemos un barbero, establecer el barberoId por defecto
       if (!isAdmin && barbero?.id_barbero) {
         setFilters(prev => ({
@@ -97,7 +201,25 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
           barberoId: prev.barberoId ?? barbero.id_barbero
         }));
       }
-      
+    
+      // Validar y corregir fechas si están invertidas
+      setFilters(prev => {
+        if (prev.fechaInicio && prev.fechaFin) {
+          const startDate = new Date(prev.fechaInicio);
+          const endDate = new Date(prev.fechaFin);
+          
+          // Si las fechas están invertidas, corregirlas
+          if (startDate > endDate) {
+            return {
+              ...prev,
+              fechaInicio: prev.fechaFin,
+              fechaFin: prev.fechaInicio
+            };
+          }
+        }
+        return prev;
+      });
+    
       // Marcar que los filtros por defecto han sido aplicados
       defaultFiltersAppliedRef.current = true;
     }
@@ -145,11 +267,12 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
 
   // Función para resetear filtros
   const resetFilters = () => {
+    const defaultDates = getDefaultDates();
     const newFilters: GlobalFilters = {
       sucursalId: null,
       barberoId: null,
-      fechaInicio: null,
-      fechaFin: null
+      fechaInicio: defaultDates.fechaInicio,
+      fechaFin: defaultDates.fechaFin
     };
     
     // Establecer valores por defecto nuevamente si tenemos datos
@@ -174,7 +297,7 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
   // Valor del contexto
   const contextValue: GlobalFiltersContextType = {
     filters,
-    setFilters,
+    setFilters: setFiltersWithValidation, // Usar la versión con validación
     sucursales: sucursales || [],
     barberos: barberos || [],
     isLoadingSucursales,

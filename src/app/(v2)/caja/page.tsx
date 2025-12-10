@@ -61,6 +61,12 @@ export default function CajaPage() {
     tipo: registrosTab,
   });
 
+  // Query para obtener todos los movimientos según filtros (para el resumen global)
+  const { data: movimientosGlobales = [], isLoading: loadingMovimientosGlobales } = useCaja({
+    ...filtrosCaja,
+    // Sin especificar tipo para obtener todos los movimientos
+  });
+
   const { data: estadisticas, isLoading: loadingEstadisticas } = useEstadisticasCaja(filtrosCaja);
   const { data: ranking = [] } = useRankingBarberos(filtrosCaja);
 
@@ -344,7 +350,7 @@ export default function CajaPage() {
           <TabContent value="ingreso" activeTab={registrosTab}>
             <Card>
               <div className="p-6">
-                <ResumenMovimientos movimientos={movimientos} />
+                <ResumenMovimientos movimientos={movimientosGlobales} />
                 <TablaMovimientos
                   movimientos={movimientos}
                   isLoading={loadingMovimientos}
@@ -360,7 +366,7 @@ export default function CajaPage() {
           <TabContent value="gasto_barbero" activeTab={registrosTab}>
             <Card>
               <div className="p-6">
-                <ResumenMovimientos movimientos={movimientos} />
+                <ResumenMovimientos movimientos={movimientosGlobales} />
                 <TablaMovimientos
                   movimientos={movimientos}
                   isLoading={loadingMovimientos}
@@ -377,7 +383,7 @@ export default function CajaPage() {
             <TabContent value="gasto_barberia" activeTab={registrosTab}>
               <Card>
                 <div className="p-6">
-                  <ResumenMovimientos movimientos={movimientos} />
+                  <ResumenMovimientos movimientos={movimientosGlobales} />
                   <TablaMovimientos
                     movimientos={movimientos}
                     isLoading={loadingMovimientos}

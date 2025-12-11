@@ -177,7 +177,7 @@ select {
   border-radius: 6px;
   padding: 10px 12px;
   color: white; /* Texto blanco */
-  font-size: 0.9rem;
+  font-size: 1rem; /* Cambiado de 0.9rem a 1rem para prevenir zoom en iOS Safari */
   width: 100%;
   box-sizing: border-box;
   appearance: none;
@@ -353,7 +353,7 @@ input, select, textarea {
   border-radius: 6px;
   padding: 10px 12px;
   color: white;
-  font-size: 0.9rem;
+  font-size: 1rem; /* Cambiado de 0.9rem a 1rem para prevenir zoom en iOS Safari */
   width: 100%;
   box-sizing: border-box;
   font-family: 'Roboto', 'Arial', sans-serif;
@@ -467,7 +467,7 @@ a:hover {
   .qoder-dark-search-box,
   .qoder-dark-filter-box {
     padding: 0.5rem;
-    font-size: 1rem;
+    font-size: 1rem; /* Mantener 1rem para prevenir zoom en iOS Safari */
   }
   
   /* Ajustes para botones en móviles */

@@ -69,7 +69,7 @@ p {
 .qoder-dark-search-box,
 .qoder-dark-filter-box {
   padding: 10px 12px;
-  font-size: 1rem;
+  font-size: 1rem; /* Mantener 1rem para prevenir zoom en iOS Safari */
   min-height: 44px; /* Minimum touch target size */
 }
 
@@ -296,7 +296,7 @@ textarea {
   .qoder-dark-search-box,
   .qoder-dark-filter-box {
     padding: 10px 12px;
-    font-size: 1rem;
+    font-size: 1rem; /* Mantener 1rem para prevenir zoom en iOS Safari */
     min-height: 44px; /* Minimum touch target size */
   }
   

@@ -20,14 +20,14 @@ export function VirtualKeyboardHandler({
   useEffect(() => {
     // Obtener la altura inicial del viewport
     if (typeof window !== 'undefined') {
-      initialViewportHeight.current = window.innerHeight;
+      initialViewportHeight.current = window.visualViewport?.height || window.innerHeight;
     }
 
     const handleResize = () => {
       if (typeof window === 'undefined') return;
       
-      // Calcular la diferencia de altura
-      const currentHeight = window.innerHeight;
+      // Usar visualViewport si está disponible (mejor precisión en móviles)
+      const currentHeight = window.visualViewport?.height || window.innerHeight;
       const heightDifference = initialViewportHeight.current - currentHeight;
       
       // Si la diferencia es significativa, asumimos que el teclado está visible
@@ -50,8 +50,9 @@ export function VirtualKeyboardHandler({
       }
     };
 
-    // Escuchar cambios en el tamaño de la ventana
+    // Escuchar cambios en el tamaño de la ventana y visualViewport
     window.addEventListener('resize', handleResize);
+    window.visualViewport?.addEventListener('resize', handleResize);
     
     // Verificar la altura inicial
     handleResize();
@@ -59,6 +60,7 @@ export function VirtualKeyboardHandler({
     // Limpiar event listeners
     return () => {
       window.removeEventListener('resize', handleResize);
+      window.visualViewport?.removeEventListener('resize', handleResize);
     };
   }, [isKeyboardVisible, onKeyboardShow, onKeyboardHide]);
 

@@ -9,6 +9,7 @@ import { formatWhatsAppTimestamp } from "@/utils/formatters";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 import type { ChatConversation, ChatMessage, Client } from "@/types/db";
 import Image from "next/image";
+import { VirtualKeyboardHandler } from "@/components/VirtualKeyboardHandler";
 
 // Función para convertir puntaje a estrellas con borde dorado y sin relleno
 const getStarsFromScore = (puntaje: number) => {
@@ -306,10 +307,23 @@ export function WhatsAppChatMobile() {
     setShowChatList(true); // Mostrar la lista de chats
   };
 
+  // Scroll al mensaje cuando se enfoca el input
+  const handleInputFocus = () => {
+    // En móvil, hacer scroll al final para mantener el input visible
+    setTimeout(() => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ 
+          behavior: "smooth", 
+          block: "end" 
+        });
+      }
+    }, 300); // Pequeño delay para que el teclado tenga tiempo de aparecer
+  };
+
   return (
     <>
       {/* Contenedor principal del chat - diseño móvil */}
-      <div className={`flex flex-col w-full bg-[#161717] overflow-hidden min-w-0 ${showChatList ? 'h-[calc(100vh-64px)]' : 'h-screen'}`}>
+      <div className={`flex flex-col w-full bg-[#161717] overflow-hidden min-w-0 ${showChatList ? 'h-[calc(100vh-64px)]' : 'h-dvh'}`}>
         {showChatList ? (
           // Vista de lista de chats (móvil)
           <div className="flex flex-col h-full w-full min-w-0">
@@ -528,210 +542,213 @@ export function WhatsAppChatMobile() {
           </div>
         ) : (
           // Vista de chat individual (móvil)
-          <div className="flex flex-col h-full w-full min-w-0">
-            {/* Header del chat */}
-            {activeConv && (
-              <div className="p-3 bg-[#161717] flex items-center justify-between min-w-0">
-                <div className="flex items-center gap-3">
-                  <button 
-                    onClick={handleBackToChats}
-                    className="boton-simple p-2 rounded-full hover:bg-qoder-dark-bg-hover transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-qoder-dark-text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                  </button>
-                  <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0">
-                    {(() => {
-                      const clientInfo = getClientInfo(activeConv.session_id);
-                      const fotoPerfil = clientInfo?.foto_perfil;
-                      const clientName = getClientName(activeConv.session_id);
-                      
-                      if (fotoPerfil) {
-                        return (
-                          <img 
-                            src={fotoPerfil} 
-                            alt={clientName} 
-                            className="w-10 h-10 rounded-full object-cover"
-                            onError={(e) => {
-                              // Si la imagen no carga, mostrar el avatar con inicial
-                              e.currentTarget.onerror = null;
-                              e.currentTarget.onerror = null;
-                              if (e.currentTarget.parentElement) {
-                                e.currentTarget.parentElement.innerHTML = `<span class="text-white font-semibold">${clientName.charAt(0).toUpperCase()}</span>`;
-                              }
-                            }}
-                          />
-                        );
-                      } else {
-                        return (
-                          <span className="text-white font-semibold">
-                            {clientName.charAt(0).toUpperCase()}
-                          </span>
-                        );
-                      }
-                    })()}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-qoder-dark-text-primary flex items-center">
-                      {getClientName(activeConv.session_id)}
+          <VirtualKeyboardHandler>
+            <div className="flex flex-col h-full w-full min-w-0">
+              {/* Header del chat */}
+              {activeConv && (
+                <div className="p-3 bg-[#161717] flex items-center justify-between min-w-0">
+                  <div className="flex items-center gap-3">
+                    <button 
+                      onClick={handleBackToChats}
+                      className="boton-simple p-2 rounded-full hover:bg-qoder-dark-bg-hover transition-colors"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-qoder-dark-text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0">
                       {(() => {
                         const clientInfo = getClientInfo(activeConv.session_id);
-                        const clientData = clientInfo?.id_cliente ? clientesMap[clientInfo.id_cliente] : undefined;
-                        return clientData && clientData.puntaje !== null && clientData.puntaje !== undefined ? (
-                          <span className="ml-2">
-                            {getStarsFromScore(clientData.puntaje)}
-                          </span>
-                        ) : null;
+                        const fotoPerfil = clientInfo?.foto_perfil;
+                        const clientName = getClientName(activeConv.session_id);
+                      
+                        if (fotoPerfil) {
+                          return (
+                            <img 
+                              src={fotoPerfil} 
+                              alt={clientName} 
+                              className="w-10 h-10 rounded-full object-cover"
+                              onError={(e) => {
+                                // Si la imagen no carga, mostrar el avatar con inicial
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.onerror = null;
+                                if (e.currentTarget.parentElement) {
+                                  e.currentTarget.parentElement.innerHTML = `<span class="text-white font-semibold">${clientName.charAt(0).toUpperCase()}</span>`;
+                                }
+                              }}
+                            />
+                          );
+                        } else {
+                          return (
+                            <span className="text-white font-semibold">
+                              {clientName.charAt(0).toUpperCase()}
+                            </span>
+                          );
+                        }
                       })()}
-                    </h3>
-                    <p className="text-xs text-qoder-dark-text-secondary">
-                      {getClientInfo(activeConv.session_id)?.telefono || 'Número no disponible'}
-                    </p>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-qoder-dark-text-primary flex items-center">
+                        {getClientName(activeConv.session_id)}
+                        {(() => {
+                          const clientInfo = getClientInfo(activeConv.session_id);
+                          const clientData = clientInfo?.id_cliente ? clientesMap[clientInfo.id_cliente] : undefined;
+                          return clientData && clientData.puntaje !== null && clientData.puntaje !== undefined ? (
+                            <span className="ml-2">
+                              {getStarsFromScore(clientData.puntaje)}
+                            </span>
+                          ) : null;
+                        })()}
+                      </h3>
+                      <p className="text-xs text-qoder-dark-text-secondary">
+                        {getClientInfo(activeConv.session_id)?.telefono || 'Número no disponible'}
+                      </p>
+                    </div>
                   </div>
-                </div>
                 
-                <div className="flex items-center gap-2">
-                  {/* Control humano/IA */}
-                  <div className="flex items-center gap-2 bg-qoder-dark-bg-primary px-3 py-1 rounded-full">
-                    <span className="text-xs text-qoder-dark-text-secondary">IA</span>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        className="sr-only peer" 
-                        checked={getClientInfo(activeConv.session_id)?.chat_humano === 1}
-                        onChange={(e) => handleControlHumanoChange(e.target.checked)}
-                      />
-                      <div className="w-11 h-6 bg-blue-500 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500" style={{ backgroundColor: getClientInfo(activeConv.session_id)?.chat_humano === 1 ? '#144D37' : '#14274D' }}></div>
-                    </label>
-                    <span className="text-xs text-qoder-dark-text-secondary">Humano</span>
+                  <div className="flex items-center gap-2">
+                    {/* Control humano/IA */}
+                    <div className="flex items-center gap-2 bg-qoder-dark-bg-primary px-3 py-1 rounded-full">
+                      <span className="text-xs text-qoder-dark-text-secondary">IA</span>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          className="sr-only peer" 
+                          checked={getClientInfo(activeConv.session_id)?.chat_humano === 1}
+                          onChange={(e) => handleControlHumanoChange(e.target.checked)}
+                        />
+                        <div className="w-11 h-6 bg-blue-500 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500" style={{ backgroundColor: getClientInfo(activeConv.session_id)?.chat_humano === 1 ? '#144D37' : '#14274D' }}></div>
+                      </label>
+                      <span className="text-xs text-qoder-dark-text-secondary">Humano</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
             
-            {/* Área de mensajes - WhatsApp Mobile Style */}
-            <div 
-              className="flex-1 relative overflow-hidden min-w-0"
-              style={{ backgroundColor: '#161717' }}
-            >
-              {/* Capa de fondo fijo con patrón */}
+              {/* Área de mensajes - WhatsApp Mobile Style */}
               <div 
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  backgroundImage: "url('https://i.postimg.cc/bwtp831q/m5BEg2K4OR4.png')",
-                  backgroundRepeat: 'repeat',
-                  backgroundSize: 'auto 100%',
-                  backgroundPosition: 'center',
-                  backgroundAttachment: 'fixed',
-                  mixBlendMode: 'overlay'
-                }}
-              />
-              
-              {/* Contenido scrollable sobre el fondo */}
-              <div 
-                className="relative h-full overflow-y-auto p-4 custom-scrollbar scrollbar-styled bg-transparent min-w-0"
-                id="messages-container"
-                style={{ 
-                  overscrollBehavior: 'contain',
-                  backgroundColor: 'transparent'
-                }}
+                className="flex-1 relative overflow-hidden min-w-0"
+                style={{ backgroundColor: '#161717' }}
               >
-              {activeConv ? (
-                <div className="space-y-2">
-                  {activeConv.messages.map((msg: ChatMessage, index: number) => (
-                    <div 
-                      key={index} 
-                      className={`flex ${(msg.type === 'ai' && msg.source === 'manual') || msg.type === 'ai' ? 'justify-end' : 'justify-start'} mb-2`}
-                    >
-                      <div 
-                        className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl px-4 py-2 rounded-3xl ${
-                          (msg.type === 'ai' && msg.source === 'manual') 
-                            ? 'whatsapp-outgoing-bubble' 
-                            : (msg.type === 'ai' 
-                                ? 'whatsapp-incoming-bubble' 
-                                : 'whatsapp-client-bubble')
-                        }`}
-                      >
-                        {/* Verificar si el contenido es una imagen */}
-                        {isImageUrl(msg.content) ? (
-                          (() => {
-                            const imageData = parseImageMessage(msg.content);
-                            return (
-                              <div className="space-y-1 max-w-full">
-                                <Image 
-                                  src={imageData?.imageUrl || msg.content} 
-                                  alt="Imagen del mensaje" 
-                                  width={256}
-                                  height={256}
-                                  className="max-w-full max-h-64 object-contain rounded cursor-pointer"
-                                  onClick={() => setFullscreenImage(imageData?.imageUrl || msg.content)}
-                                />
-                                {imageData?.caption && (
-                                  <p className="text-sm text-qoder-dark-text-primary mt-1">
-                                    {imageData.caption}
-                                  </p>
-                                )}
-                                <p className="text-xs opacity-50 mt-1">
-                                  {msg.type === 'ai' && msg.source === 'manual' ? 'Humano' : (msg.type === 'ai' ? 'IA' : 'Cliente')} • {formatWhatsAppTimestamp(msg.timestamp)}
-                                </p>
+                {/* Capa de fondo fijo con patrón */}
+                <div 
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    backgroundImage: "url('https://i.postimg.cc/bwtp831q/m5BEg2K4OR4.png')",
+                    backgroundRepeat: 'repeat',
+                    backgroundSize: 'auto 100%',
+                    backgroundPosition: 'center',
+                    backgroundAttachment: 'fixed',
+                    mixBlendMode: 'overlay'
+                  }}
+                />
+              
+                {/* Contenido scrollable sobre el fondo */}
+                <div 
+                  className="relative h-full overflow-y-auto p-4 custom-scrollbar scrollbar-styled bg-transparent min-w-0"
+                  id="messages-container"
+                  style={{ 
+                    overscrollBehavior: 'contain',
+                    backgroundColor: 'transparent'
+                  }}
+                >
+                  {activeConv ? (
+                    <div className="space-y-2">
+                      {activeConv.messages.map((msg: ChatMessage, index: number) => (
+                        <div 
+                          key={index} 
+                          className={`flex ${(msg.type === 'ai' && msg.source === 'manual') || msg.type === 'ai' ? 'justify-end' : 'justify-start'} mb-2`}
+                        >
+                          <div 
+                            className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl px-4 py-2 rounded-3xl ${
+                              (msg.type === 'ai' && msg.source === 'manual') 
+                                ? 'whatsapp-outgoing-bubble' 
+                                : (msg.type === 'ai' 
+                                    ? 'whatsapp-incoming-bubble' 
+                                    : 'whatsapp-client-bubble')
+                            }`}
+                          >
+                            {/* Verificar si el contenido es una imagen */}
+                            {isImageUrl(msg.content) ? (
+                              (() => {
+                                const imageData = parseImageMessage(msg.content);
+                                return (
+                                  <div className="space-y-1 max-w-full">
+                                    <Image 
+                                      src={imageData?.imageUrl || msg.content} 
+                                      alt="Imagen del mensaje" 
+                                      width={256}
+                                      height={256}
+                                      className="max-w-full max-h-64 object-contain rounded cursor-pointer"
+                                      onClick={() => setFullscreenImage(imageData?.imageUrl || msg.content)}
+                                    />
+                                    {imageData?.caption && (
+                                      <p className="text-sm text-qoder-dark-text-primary mt-1">
+                                        {imageData.caption}
+                                      </p>
+                                    )}
+                                    <p className="text-xs opacity-50 mt-1">
+                                      {msg.type === 'ai' && msg.source === 'manual' ? 'Humano' : (msg.type === 'ai' ? 'IA' : 'Cliente')} • {formatWhatsAppTimestamp(msg.timestamp)}
+                                    </p>
+                                  </div>
+                                );
+                              })()
+                            ) : (
+                              <div className="space-y-1">
+                                <p className="whitespace-pre-wrap message-text">{msg.content}</p>
+                                <div className="message-info">
+                                  <span className="message-sender">{msg.type === 'ai' && msg.source === 'manual' ? 'Humano' : (msg.type === 'ai' ? 'IA' : 'Cliente')}</span>
+                                  <span className="message-time">{formatWhatsAppTimestamp(msg.timestamp)}</span>
+                                </div>
                               </div>
-                            );
-                          })()
-                        ) : (
-                          <div className="space-y-1">
-                            <p className="whitespace-pre-wrap message-text">{msg.content}</p>
-                            <div className="message-info">
-                              <span className="message-sender">{msg.type === 'ai' && msg.source === 'manual' ? 'Humano' : (msg.type === 'ai' ? 'IA' : 'Cliente')}</span>
-                              <span className="message-time">{formatWhatsAppTimestamp(msg.timestamp)}</span>
-                            </div>
+                            )}
                           </div>
-                        )}
+                        </div>
+                      ))}
+                      <div ref={messagesEndRef} style={{ height: '1px' }} />
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center text-qoder-dark-text-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-24 w-24 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9 8s9 3.582 9 8z" />
+                        </svg>
+                        <h3 className="text-xl font-semibold mb-2">WhatsApp Web</h3>
+                        <p className="max-w-md">Selecciona un chat para comenzar a enviar y recibir mensajes</p>
                       </div>
                     </div>
-                  ))}
-                  <div ref={messagesEndRef} style={{ height: '1px' }} />
+                  )}
                 </div>
-              ) : (
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center text-qoder-dark-text-secondary">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-24 w-24 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9 8s9 3.582 9 8z" />
-                    </svg>
-                    <h3 className="text-xl font-semibold mb-2">WhatsApp Web</h3>
-                    <p className="max-w-md">Selecciona un chat para comenzar a enviar y recibir mensajes</p>
+              </div>
+              {/* Área de entrada de mensaje */}
+              {activeConv && (
+                <div className="p-3 bg-transparent min-w-0 relative">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <input
+                      type="text"
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      onFocus={handleInputFocus}
+                      placeholder="Escribe un mensaje..."
+                      className="flex-1 py-4 px-4 focus:outline-none focus:ring-0 focus:ring-transparent focus:border-transparent bg-[#242626] relative pill-effect border-0"
+                      style={{ backgroundColor: '#242626' }}
+                    />
+                    <button
+                      onClick={handleSendMessage}
+                      disabled={!message.trim()}
+                      className="p-3 bg-green-600 rounded-full hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{ transform: 'rotate(90deg)' }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               )}
             </div>
-            </div>
-            {/* Área de entrada de mensaje */}
-            {activeConv && (
-              <div className="p-3 bg-transparent min-w-0 relative">
-                <div className="flex items-center gap-2 min-w-0">
-                  <input
-                    type="text"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Escribe un mensaje..."
-                    className="flex-1 py-4 px-4 focus:outline-none focus:ring-0 focus:ring-transparent focus:border-transparent bg-[#242626] relative pill-effect border-0"
-                    style={{ backgroundColor: '#242626' }}
-                  />
-                  <button
-                    onClick={handleSendMessage}
-                    disabled={!message.trim()}
-                    className="p-3 bg-green-600 rounded-full hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ transform: 'rotate(90deg)' }}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          </VirtualKeyboardHandler>
         )}
       </div>
 

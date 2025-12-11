@@ -309,7 +309,7 @@ export function WhatsAppChatMobile() {
   return (
     <>
       {/* Contenedor principal del chat - diseño móvil */}
-      <div className="flex flex-col h-[calc(100vh-64px)] w-full bg-[#161717] overflow-hidden min-w-0">
+      <div className={`flex flex-col w-full bg-[#161717] overflow-hidden min-w-0 ${showChatList ? 'h-[calc(100vh-64px)]' : 'h-screen'}`}>
         {showChatList ? (
           // Vista de lista de chats (móvil)
           <div className="flex flex-col h-full w-full min-w-0">

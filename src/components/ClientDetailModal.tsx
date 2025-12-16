@@ -24,15 +24,23 @@ export function ClientDetailModal({ open, onOpenChange, client }: Props) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/20 z-50 qoder-dark-modal-overlay" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 w-[92vw] max-w-lg -translate-x-1/2 -translate-y-1/2 z-50 h-[90vh] max-h-[600px]">
-          <div className="qoder-dark-card h-full flex flex-col">
-            <div className="qoder-dark-window-header">
-              <Dialog.Title className="text-lg font-semibold text-qoder-dark-text-primary">
-                Ficha del Cliente
-              </Dialog.Title>
-            </div>
-            <div className="p-4 space-y-4 overflow-y-auto flex-grow">
+        <Dialog.Overlay className="v2-overlay" />
+        <Dialog.Content className="v2-modal" aria-describedby={undefined}>
+          <div className="v2-modal-header">
+            <Dialog.Title className="v2-modal-title">
+              Ficha del Cliente
+            </Dialog.Title>
+            <Dialog.Close asChild>
+              <button 
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl"
+                aria-label="Cerrar"
+              >
+                ×
+              </button>
+            </Dialog.Close>
+          </div>
+          <div className="v2-modal-body">
+            <div className="space-y-4">
               <div className="grid grid-cols-1 gap-4">
                 <div>
                   <h3 className="text-sm font-medium text-qoder-dark-text-secondary mb-1">Nombre</h3>
@@ -75,11 +83,11 @@ export function ClientDetailModal({ open, onOpenChange, client }: Props) {
                 </div>
               </div>
             </div>
-            <div className="mt-4 flex justify-end gap-2 p-4 pt-0">
+            <div className="v2-modal-footer">
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                className="qoder-dark-button px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+                className="v2-btn v2-btn-secondary"
               >
                 <span>Cerrar</span>
               </button>

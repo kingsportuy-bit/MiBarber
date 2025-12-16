@@ -156,20 +156,27 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 qoder-dark-modal-overlay-global" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
-          <div className="qoder-dark-client-modal">
-            <div className="qoder-dark-window-header">
-              <Dialog.Title className="text-lg font-semibold text-qoder-dark-text-primary">
-                {isEdit ? "Editar barbero" : "Nuevo barbero"}
-              </Dialog.Title>
-            </div>
-            <div className="content">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <Dialog.Overlay className="v2-overlay" />
+        <Dialog.Content className="v2-modal" style={{ maxWidth: '600px' }}>
+          <div className="v2-modal-header">
+            <Dialog.Title className="v2-modal-title">
+              {isEdit ? "Editar barbero" : "Nuevo barbero"}
+            </Dialog.Title>
+            <Dialog.Close asChild>
+              <button 
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl"
+                aria-label="Cerrar"
+              >
+                ×
+              </button>
+            </Dialog.Close>
+          </div>
+          <div className="v2-modal-body">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="col-span-2">
-                <label className="text-xs text-qoder-dark-text-secondary">Nombre</label>
+                <label className="v2-label">Nombre</label>
                 <input 
-                  className={`w-full qoder-dark-input p-3 rounded-lg ${errors.nombre ? "border-red-500" : ""}`} 
+                  className={`v2-input ${errors.nombre ? "border-red-500" : ""}`} 
                   value={nombre} 
                   onChange={(e) => setNombre(e.target.value)} 
                   placeholder="Nombre completo"
@@ -178,9 +185,9 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
               </div>
               
               <div className="col-span-2">
-                <label className="text-xs text-qoder-dark-text-secondary">Teléfono</label>
+                <label className="v2-label">Teléfono</label>
                 <input 
-                  className={`w-full qoder-dark-input p-3 rounded-lg ${errors.telefono ? "border-red-500" : ""}`} 
+                  className={`v2-input ${errors.telefono ? "border-red-500" : ""}`} 
                   value={telefono} 
                   onChange={(e) => setTelefono(e.target.value)} 
                   placeholder="Ej: +59891234567"
@@ -189,10 +196,10 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
               </div>
               
               <div className="col-span-2">
-                <label className="text-xs text-qoder-dark-text-secondary">Email</label>
+                <label className="v2-label">Email</label>
                 <input 
                   type="email"
-                  className={`w-full qoder-dark-input p-3 rounded-lg ${errors.email ? "border-red-500" : ""}`} 
+                  className={`v2-input ${errors.email ? "border-red-500" : ""}`} 
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)} 
                   placeholder="Ej: barbero@ejemplo.com"
@@ -201,10 +208,10 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
               </div>
               
               <div className="col-span-2">
-                <label className="text-xs text-qoder-dark-text-secondary">Especialidades</label>
-                <div className="border border-qoder-dark-border-primary rounded-lg p-3 max-h-40 overflow-y-auto">
+                <label className="v2-label">Especialidades</label>
+                <div className="border border-[var(--border-primary)] rounded-lg p-3 max-h-40 overflow-y-auto">
                   {serviciosLoading ? (
-                    <p className="text-qoder-dark-text-secondary">Cargando servicios...</p>
+                    <p className="text-[var(--text-secondary)]">Cargando servicios...</p>
                   ) : serviciosError ? (
                     <p className="text-red-500">Error al cargar servicios</p>
                   ) : servicios && servicios.length > 0 ? (
@@ -215,42 +222,42 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
                             type="checkbox"
                             checked={especialidades.includes(servicio.id_servicio)}
                             onChange={() => handleEspecialidadChange(servicio.id_servicio)}
-                            className="rounded"
+                            className="v2-checkbox"
                           />
-                          <span className="text-qoder-dark-text-primary">{servicio.nombre}</span>
+                          <span className="text-[var(--text-primary)]">{servicio.nombre}</span>
                         </label>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-qoder-dark-text-secondary">No hay servicios disponibles</p>
+                    <p className="text-[var(--text-secondary)]">No hay servicios disponibles</p>
                   )}
                 </div>
-                <p className="text-xs text-qoder-dark-text-muted mt-1">Seleccione los servicios que este barbero puede realizar</p>
+                <p className="text-xs text-[var(--text-muted)] mt-1">Seleccione los servicios que este barbero puede realizar</p>
               </div>
               
               {/* Solo mostrar opción de administrador si el usuario actual es administrador 
                   y no es el barbero principal (protegido) */}
               {isAdminUser && !isBarberoPrincipal && (
                 <div className="col-span-2">
-                  <label className="text-xs text-qoder-dark-text-secondary">Rol</label>
+                  <label className="v2-label">Rol</label>
                   <div className="flex items-center gap-4 mt-1">
                     <label className="flex items-center gap-2">
                       <input 
                         type="radio" 
                         checked={isAdminRole} 
                         onChange={() => setIsAdminRole(true)} 
-                        className="rounded"
+                        className="v2-radio"
                       />
-                      <span className="text-qoder-dark-text-primary">Administrador</span>
+                      <span className="text-[var(--text-primary)]">Administrador</span>
                     </label>
                     <label className="flex items-center gap-2">
                       <input 
                         type="radio" 
                         checked={!isAdminRole} 
                         onChange={() => setIsAdminRole(false)} 
-                        className="rounded"
+                        className="v2-radio"
                       />
-                      <span className="text-qoder-dark-text-primary">Barbero Normal</span>
+                      <span className="text-[var(--text-primary)]">Barbero Normal</span>
                     </label>
                   </div>
                 </div>
@@ -259,15 +266,15 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
               {/* Mostrar indicador de permisos para barberos principales (protegidos) */}
               {isBarberoPrincipal && (
                 <div className="col-span-2">
-                  <label className="text-xs text-qoder-dark-text-secondary">Rol</label>
+                  <label className="v2-label">Rol</label>
                   <div className="flex items-center gap-4 mt-1">
-                    <span className="text-qoder-dark-text-primary">
+                    <span className="text-[var(--text-primary)]">
                       {isAdminRole ? "Administrador" : "Barbero Normal"}
                     </span>
                     <span className="text-xs text-gray-400">
                       (protegido)
                     </span>
-                    <span className="text-xs text-qoder-dark-text-secondary">
+                    <span className="text-xs text-[var(--text-secondary)]">
                       (No se puede cambiar el rol)
                     </span>
                   </div>
@@ -276,9 +283,9 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
               
               {/* Campo de nombre de usuario para todos los barberos */}
               <div className="col-span-2">
-                <label className="text-xs text-qoder-dark-text-secondary">Nombre de Usuario</label>
+                <label className="v2-label">Nombre de Usuario</label>
                 <input 
-                  className={`w-full qoder-dark-input p-3 rounded-lg ${errors.username ? "border-red-500" : ""}`} 
+                  className={`v2-input ${errors.username ? "border-red-500" : ""}`} 
                   value={username} 
                   onChange={(e) => setUsername(e.target.value)} 
                   placeholder="Nombre de usuario para iniciar sesión"
@@ -290,11 +297,11 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
               {!isEdit ? (
                 <>
                   <div className="col-span-2">
-                    <label className="text-xs text-qoder-dark-text-secondary">Contraseña</label>
+                    <label className="v2-label">Contraseña</label>
                     <div className="relative">
                       <input 
                         type="password"
-                        className={`w-full qoder-dark-input p-3 rounded-lg ${errors.password ? "border-red-500" : ""}`} 
+                        className={`v2-input ${errors.password ? "border-red-500" : ""}`} 
                         value={password} 
                         onChange={(e) => setPassword(e.target.value)} 
                         placeholder="Contraseña"
@@ -307,7 +314,7 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
                             input.type = input.type === 'password' ? 'text' : 'password';
                           }
                         }}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-qoder-dark-text-secondary bg-transparent !bg-none border-none"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-[var(--text-secondary)] bg-transparent !bg-none border-none"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -319,11 +326,11 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
                   </div>
                   
                   <div className="col-span-2">
-                    <label className="text-xs text-qoder-dark-text-secondary">Confirmar Contraseña</label>
+                    <label className="v2-label">Confirmar Contraseña</label>
                     <div className="relative">
                       <input 
                         type="password"
-                        className={`w-full qoder-dark-input p-3 rounded-lg ${errors.confirmPassword ? "border-red-500" : ""}`} 
+                        className={`v2-input ${errors.confirmPassword ? "border-red-500" : ""}`} 
                         value={confirmPassword} 
                         onChange={(e) => setConfirmPassword(e.target.value)} 
                         placeholder="Confirmar contraseña"
@@ -336,7 +343,7 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
                             input.type = input.type === 'password' ? 'text' : 'password';
                           }
                         }}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-qoder-dark-text-secondary bg-transparent !bg-none border-none"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-[var(--text-secondary)] bg-transparent !bg-none border-none"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -349,36 +356,34 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
                 </>
               ) : (
                 // Para barberos existentes, mostrar campo de cambio de contraseña opcional
-                <>
-                  <div className="col-span-2">
-                    <label className="text-xs text-qoder-dark-text-secondary">Nueva Contraseña (opcional)</label>
-                    <div className="relative">
-                      <input 
-                        type="password"
-                        className="w-full qoder-dark-input p-3 rounded-lg" 
-                        value={password} 
-                        onChange={(e) => setPassword(e.target.value)} 
-                        placeholder="Dejar en blanco para no cambiar"
-                      />
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                          if (input) {
-                            input.type = input.type === 'password' ? 'text' : 'password';
-                          }
-                        }}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-qoder-dark-text-secondary bg-transparent !bg-none border-none"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      </button>
-                    </div>
-                    <p className="text-xs text-qoder-dark-text-muted mt-1">Solo complete si desea cambiar la contraseña</p>
+                <div className="col-span-2">
+                  <label className="v2-label">Nueva Contraseña (opcional)</label>
+                  <div className="relative">
+                    <input 
+                      type="password"
+                      className="v2-input" 
+                      value={password} 
+                      onChange={(e) => setPassword(e.target.value)} 
+                      placeholder="Dejar en blanco para no cambiar"
+                    />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                        if (input) {
+                          input.type = input.type === 'password' ? 'text' : 'password';
+                        }
+                      }}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-[var(--text-secondary)] bg-transparent !bg-none border-none"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </button>
                   </div>
-                </>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">Solo complete si desea cambiar la contraseña</p>
+                </div>
               )}
               
               <div className="col-span-2">
@@ -387,30 +392,29 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
                     type="checkbox" 
                     checked={activo} 
                     onChange={(e) => setActivo(e.target.checked)} 
-                    className="rounded"
+                    className="v2-checkbox"
                   />
-                  <span className="text-qoder-dark-text-primary">Activo</span>
+                  <span className="text-[var(--text-primary)]">Activo</span>
                 </label>
               </div>
             </div>
-            <div className="mt-4 flex justify-end gap-2 p-4 pt-0">
-              <button
-                type="button"
-                onClick={() => onOpenChange(false)}
-                className="cancel-button"
-              >
-                <span>Cancelar</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                className="action-button"
-              >
-                <span>{isEdit ? "Actualizar" : "Crear barbero"}</span>
-              </button>
-            </div>
           </div>
-        </div>
+          <div className="v2-modal-footer">
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              className="v2-btn v2-btn-secondary"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="v2-btn v2-btn-primary"
+            >
+              {isEdit ? "Actualizar" : "Crear barbero"}
+            </button>
+          </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

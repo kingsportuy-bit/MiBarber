@@ -80,21 +80,21 @@ export function AppointmentList({ fecha }: AppointmentListProps) {
   }
 
   return (
-    <div className="qoder-dark-window">
-      <div className="qoder-dark-window-header">
-        <h3 className="font-semibold text-qoder-dark-text-primary">{fecha ? formatDisplayDate(fecha) : "Turnos de Hoy"}</h3>
-        <span className="cursor-button px-2 py-1 text-xs font-mono bg-qoder-dark-bg-tertiary rounded text-qoder-dark-text-primary">
+    <div className="v2-window">
+      <div className="v2-window-header">
+        <h3 className="font-semibold text-[var(--text-primary)]">{fecha ? formatDisplayDate(fecha) : "Turnos de Hoy"}</h3>
+        <span className="cursor-button px-2 py-1 text-xs font-mono bg-[var(--bg-tertiary)] rounded text-[var(--text-primary)]">
           {citasOrdenadas.length}
         </span>
       </div>
       
       {/* Filtros para administradores */}
       {isAdmin && (
-        <div className="p-4 border-b border-qoder-dark-border-primary flex flex-wrap gap-2">
+        <div className="p-4 border-b border-[var(--border-primary)] flex flex-wrap gap-2">
           <select 
             value={sucursalFiltro || ""}
             onChange={(e) => setSucursalFiltro(e.target.value || null)}
-            className="qoder-dark-select"
+            className="v2-select"
           >
             <option value="">Todas las sucursales</option>
             {sucursales?.map((sucursal) => (
@@ -106,7 +106,7 @@ export function AppointmentList({ fecha }: AppointmentListProps) {
           <select 
             value={barberoFiltro || ""}
             onChange={(e) => setBarberoFiltro(e.target.value || null)}
-            className="qoder-dark-select"
+            className="v2-select"
           >
             <option value="">Todos los barberos</option>
             {barberos?.map((barbero) => (
@@ -121,37 +121,37 @@ export function AppointmentList({ fecha }: AppointmentListProps) {
       <div className="p-4">
         {citasOrdenadas.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-qoder-dark-text-secondary">No hay turnos programados para hoy</p>
+            <p className="text-[var(--text-secondary)]">No hay turnos programados para hoy</p>
           </div>
         ) : (
           <div className="space-y-3">
             {citasOrdenadas.map((cita) => (
               <div 
                 key={cita.id_cita} 
-                className="qoder-dark-card p-4 hover-lift smooth-transition"
+                className="v2-card p-4 hover-lift smooth-transition"
               >
                 <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="font-medium text-qoder-dark-text-primary">{cita.cliente_nombre}</h4>
-                    <p className="text-sm text-qoder-dark-text-secondary">{cita.servicio}</p>
+                    <h4 className="font-medium text-[var(--text-primary)]">{cita.cliente_nombre}</h4>
+                    <p className="text-sm text-[var(--text-secondary)]">{cita.servicio}</p>
                   </div>
-                  <span className="text-sm font-mono text-qoder-dark-text-secondary">{cita.hora.slice(0, 5)}</span>
+                  <span className="text-sm font-mono text-[var(--text-secondary)]">{cita.hora.slice(0, 5)}</span>
                 </div>
                 
                 <div className="flex justify-between items-center mt-2">
-                  <span className="text-xs text-qoder-dark-text-secondary">
+                  <span className="text-xs text-[var(--text-secondary)]">
                     {cita.barbero}
                   </span>
                   {cita.ticket && (
-                    <span className="text-xs font-medium text-qoder-dark-status-success">
+                    <span className="text-xs font-medium text-[var(--status-success)]">
                       ${cita.ticket}
                     </span>
                   )}
                 </div>
                 
                 {cita.nota && (
-                  <div className="mt-2 pt-2 border-t border-qoder-dark-border-primary">
-                    <p className="text-xs text-qoder-dark-text-muted line-clamp-2" title={cita.nota}>
+                  <div className="mt-2 pt-2 border-t border-[var(--border-primary)]">
+                    <p className="text-xs text-[var(--text-muted)] line-clamp-2" title={cita.nota}>
                       {cita.nota}
                     </p>
                   </div>

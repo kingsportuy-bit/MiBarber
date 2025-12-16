@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useCitas } from "@/hooks/useCitas";
 import { useGlobalFilters } from "@/contexts/GlobalFiltersContext";
-import { SingleFormAppointmentModalWithSucursal } from "@/components/SingleFormAppointmentModalWithSucursal";
+import { FinalAppointmentModal } from "@/components/FinalAppointmentModal";
 import type { Appointment } from "@/types/db";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
@@ -55,9 +55,10 @@ export function MobileAgenda() {
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
   const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
   
+  // Cuando barberoId es una cadena vacía, pasarla explícitamente para que el hook pueda manejarla correctamente
   const citasQuery = useCitas({
     sucursalId: filters.sucursalId || undefined,
-    barberoId: filters.barberoId || undefined,
+    barberoId: filters.barberoId !== null ? filters.barberoId : undefined,
   });
   
   const { data: citasData, isLoading, error, refetch } = citasQuery;
@@ -69,17 +70,17 @@ export function MobileAgenda() {
     lastDayOfMonth.toISOString().split('T')[0]
   );
 
-  // Obtener IDs únicos de clientes de las citas
+  // Obtener IDs únicos de clientes de las citas filtradas
   const clienteIds = useMemo(() => {
-    if (!citasMesData) return [];
+    if (!citasData) return [];
     return Array.from(
       new Set(
-        citasMesData
+        citasData
           .map((cita: Appointment) => cita.id_cliente)
           .filter((id): id is string => id !== null && id !== undefined)
       )
     );
-  }, [citasMesData]);
+  }, [citasData]);
 
   // Obtener información de todos los clientes necesarios
   const { data: clientesData } = useClientesByIds(clienteIds);
@@ -157,8 +158,8 @@ export function MobileAgenda() {
     
     // Crear un mapa de citas por fecha para acceso rápido
     const citasPorFecha: { [key: string]: Appointment[] } = {};
-    if (citasMesData) {
-      citasMesData
+    if (citasData) {
+      citasData
         .filter((cita: Appointment) => cita.estado !== "cancelado") // Filtrar citas canceladas
         .forEach((cita: Appointment) => {
           // Asegurarse de que la fecha esté en el formato correcto (YYYY-MM-DD)
@@ -234,6 +235,17 @@ export function MobileAgenda() {
   useEffect(() => {
     refetch();
   }, [filters.sucursalId, filters.barberoId, selectedDate, refetch]);
+  
+  // Efecto para asegurar que el filtro de barbero esté preseleccionado con el barbero logueado
+  useEffect(() => {
+    // Si no hay barbero seleccionado y tenemos un barbero logueado, preseleccionarlo
+    if ((!filters.barberoId || filters.barberoId === "") && barbero?.id_barbero && !isAdmin) {
+      setFilters(prev => ({
+        ...prev,
+        barberoId: barbero.id_barbero
+      }));
+    }
+  }, [barbero, filters.barberoId, isAdmin, setFilters]);
 
   return (
     // Contenedor principal que engloba todo el contenido
@@ -278,7 +290,7 @@ export function MobileAgenda() {
               Barbero
             </label>
             <select
-              value={filters.barberoId || ""}
+              value={filters.barberoId || barbero?.id_barbero || ""}
               onChange={(e) => handleBarberoChange(e.target.value || undefined)}
               className="qoder-dark-input w-full py-2 px-3 text-sm rounded-lg"
               disabled={isLoadingBarberos}
@@ -287,7 +299,6 @@ export function MobileAgenda() {
                 <option>Cargando barberos...</option>
               ) : (
                 <>
-                  <option value="">Todos los barberos</option>
                   {filteredBarbers?.map((barbero: any) => (
                     <option key={barbero.id_barbero} value={barbero.id_barbero}>
                       {barbero.nombre}
@@ -410,9 +421,9 @@ export function MobileAgenda() {
               <div className="text-center py-8 text-red-500 flex items-center justify-center">
                 Error al cargar las citas: {error.message}
               </div>
-            ) : citasMesData && citasMesData.length > 0 ? (
+            ) : citasData && citasData.length > 0 ? (
               <div className="space-y-3 pb-4">
-                {citasMesData
+                {citasData
                   .filter(cita => {
                     // Filtrar solo las citas del día seleccionado
                     const citaFecha = cita.fecha.split('T')[0];
@@ -481,7 +492,7 @@ export function MobileAgenda() {
       )}
       
       {/* Modal de Cita */}
-      <SingleFormAppointmentModalWithSucursal
+      <FinalAppointmentModal
         open={isModalOpen}
         onOpenChange={handleCloseModal}
         initial={selectedAppointment || undefined}

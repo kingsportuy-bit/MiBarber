@@ -479,46 +479,75 @@ const handleSubmit = async () => {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 qoder-dark-modal-overlay-global" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
-          <div className="qoder-dark-client-modal">
-            <div className="content">
-              <div className="flex justify-between items-center mb-4">
-            <Dialog.Title className="text-lg font-bold text-qoder-dark-text-primary">
+        <Dialog.Overlay className="v2-overlay" style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          zIndex: 1040,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px'
+        }} />
+        <Dialog.Content className="v2-modal" style={{ 
+          maxWidth: '600px',
+          background: '#2a2a2a',
+          border: '1px solid #333333',
+          borderRadius: '8px',
+          padding: '16px',
+          width: '100%',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          position: 'relative',
+          zIndex: 1050,
+          display: 'block',
+          margin: 'auto',
+          isolation: 'isolate',
+          color: 'white'
+        }}>
+          <div className="v2-modal-header" style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '16px',
+            paddingBottom: '12px',
+            borderBottom: '1px solid #333333'
+          }}>
+            <Dialog.Title className="v2-modal-title" style={{
+              fontSize: '24px',
+              fontWeight: 700,
+              color: 'white',
+              margin: 0
+            }}>
               {initial?.id_cita ? "Editar Turno" : "Crear Nuevo Turno"}
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button
-                className="p-2 rounded-full hover:bg-qoder-dark-bg-hover text-qoder-dark-text-secondary"
+              <button 
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl"
                 aria-label="Cerrar"
+                style={{
+                  color: 'rgba(255, 255, 255, 0.6)'
+                }}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                ×
               </button>
             </Dialog.Close>
           </div>
+          <div className="v2-modal-body" style={{
+            marginBottom: '16px'
+          }}>
           
           <div className="space-y-4">
             {/* Filtro de sucursal (solo para administradores) */}
             {isAdmin && (
               <div className="mb-4">
-                <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
+                <label className="v2-label">
                   Sucursal
                 </label>
                 <select
                   value={selectedSucursalId || ""}
                   onChange={(e) => setSelectedSucursalId(e.target.value || undefined)}
-                  className="qoder-dark-select w-full px-3 py-2 rounded-lg"
+                  className="v2-select"
                   disabled={isLoadingSucursales}
                 >
                   {allSucursales?.map((sucursal: any) => (
@@ -533,7 +562,7 @@ const handleSubmit = async () => {
             {/* Servicio y Duración (en la misma línea) */}
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
+                <label className="v2-label">
                   Servicio
                 </label>
                 <select
@@ -547,7 +576,7 @@ const handleSubmit = async () => {
                       setDuration(selectedService.duracion_minutos.toString());
                     }
                   }}
-                  className="qoder-dark-select w-full px-3 py-2 rounded-lg"
+                  className="v2-select"
                   disabled={isLoadingServicios}
                 >
                   <option value="">Seleccione un servicio</option>
@@ -559,14 +588,14 @@ const handleSubmit = async () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
+                <label className="v2-label">
                   Duración (minutos)
                 </label>
                 <input
                   type="number"
                   value={duration}
                   onChange={(e) => setDuration(e.target.value)}
-                  className="qoder-dark-input w-full px-3 py-2 rounded-lg"
+                  className="v2-input"
                   placeholder="Ej: 30"
                   min="1"
                 />
@@ -575,7 +604,7 @@ const handleSubmit = async () => {
             
             {/* Barbero */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
+              <label className="v2-label">
                 Barbero
               </label>
               <select
@@ -585,7 +614,7 @@ const handleSubmit = async () => {
                   setBarberId(e.target.value || null);
                   setBarberName(selectedBarber?.nombre || "");
                 }}
-                className="qoder-dark-select w-full px-3 py-2 rounded-lg"
+                className="v2-select"
                 disabled={isLoadingBarberos}
               >
                 <option value="">Seleccione un barbero</option>
@@ -600,7 +629,7 @@ const handleSubmit = async () => {
             {/* Fecha y Hora (en la misma línea) */}
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
+                <label className="v2-label">
                   Fecha
                 </label>
                 <div className="w-full">
@@ -612,13 +641,13 @@ const handleSubmit = async () => {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
+                <label className="v2-label">
                   Hora
                 </label>
                 <select
                   value={getFormattedTimeValue}
                   onChange={(e) => setTime(e.target.value)}
-                  className={`w-full qoder-dark-select p-3 rounded-lg ${isTimeOverlapping ? 'border-yellow-500' : ''}`}
+                  className={`v2-select ${isTimeOverlapping ? 'border-yellow-500' : ''}`}
                   disabled={isLoadingHorarios}
                 >
                   <option value="">Seleccione una hora</option>
@@ -643,7 +672,7 @@ const handleSubmit = async () => {
 
             {/* Cliente */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
+              <label className="v2-label">
                 Cliente
               </label>
               <div className="relative">
@@ -658,7 +687,7 @@ const handleSubmit = async () => {
                       setClientPhone(null);
                     }
                   }}
-                  className="qoder-dark-input w-full px-3 py-2 rounded-lg"
+                  className="v2-input"
                   placeholder="Buscar cliente..."
                 />
                 {clientName && !clientId && (
@@ -704,26 +733,26 @@ const handleSubmit = async () => {
                 <div className="mt-3 p-3 bg-qoder-dark-bg-secondary rounded-lg">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div>
-                      <label className="block text-xs text-qoder-dark-text-primary mb-1">
+                      <label className="v2-label">
                         Nombre *
                       </label>
                       <input
                         type="text"
                         value={quickClientData.nombre}
                         onChange={(e) => setQuickClientData({...quickClientData, nombre: e.target.value})}
-                        className="qoder-dark-input w-full px-2 py-1 text-sm rounded"
+                        className="v2-input"
                         placeholder="Nombre completo"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-qoder-dark-text-primary mb-1">
+                      <label className="v2-label">
                         Teléfono
                       </label>
                       <input
                         type="text"
                         value={quickClientData.telefono}
                         onChange={(e) => setQuickClientData({...quickClientData, telefono: e.target.value})}
-                        className="qoder-dark-input w-full px-2 py-1 text-sm rounded"
+                        className="v2-input"
                         placeholder="Teléfono"
                       />
                     </div>
@@ -732,14 +761,14 @@ const handleSubmit = async () => {
                     <button
                       type="button"
                       onClick={() => setShowQuickClientForm(false)}
-                      className="cancel-button px-3 py-1 text-sm rounded"
+                      className="v2-btn v2-btn-secondary"
                     >
                       Cancelar
                     </button>
                     <button
                       type="button"
                       onClick={handleCreateQuickClient}
-                      className="qoder-dark-button px-3 py-1 text-sm rounded"
+                      className="v2-btn v2-btn-primary"
                     >
                       Crear
                     </button>
@@ -752,13 +781,13 @@ const handleSubmit = async () => {
             {/* Estado de la cita (solo para edición) */}
             {initial?.id_cita && (
               <div className="mb-4">
-                <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
+                <label className="v2-label">
                   Estado
                 </label>
                 <select
                   value={appointmentStatus}
                   onChange={(e) => setAppointmentStatus(e.target.value)}
-                  className="qoder-dark-select w-full px-3 py-2 rounded-lg"
+                  className="v2-select"
                 >
                   <option value="pendiente">Pendiente</option>
                   <option value="completado">Completado</option>
@@ -769,42 +798,41 @@ const handleSubmit = async () => {
 
             {/* Nota */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-qoder-dark-text-primary mb-1">
+              <label className="v2-label">
                 Nota
               </label>
               <textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                className="qoder-dark-input w-full px-3 py-2 rounded-lg"
+                className="v2-textarea"
                 rows={3}
                 placeholder="Agregar nota..."
               />
             </div>
-
-            {/* Botones de acción */}
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="cancel-button px-4 py-2 rounded-lg"
-                disabled={isSubmitting}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                className="action-button px-4 py-2 rounded-lg"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Guardando..." : "Guardar Turno"}
-              </button>
-              </div>
-            </div>
+          </div>
+          
+          {/* Botones de acción */}
+          <div className="v2-modal-footer">
+            <button
+              type="button"
+              onClick={handleClose}
+              className="v2-btn v2-btn-secondary"
+              disabled={isSubmitting}
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="v2-btn v2-btn-primary"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Guardando..." : "Guardar Turno"}
+            </button>
           </div>
         </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
-  );
+      </Dialog.Content>
+    </Dialog.Portal>
+  </Dialog.Root>
+);
 }

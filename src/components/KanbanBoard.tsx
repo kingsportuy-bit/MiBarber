@@ -3,10 +3,11 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { KanbanColumn } from "@/components/KanbanColumn";
-import { SingleFormAppointmentModalWithSucursal } from "@/components/SingleFormAppointmentModalWithSucursal";
+import { FinalAppointmentModal } from "@/components/FinalAppointmentModal";
 import type { Appointment } from "@/types/db";
 import { useCitas } from "@/hooks/useCitas";
 import { useGlobalFilters } from "@/contexts/GlobalFiltersContext";
+import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 import { useUpdateCita } from "@/features/appointments/hooks/useUpdateCita";
 import { toast } from "sonner";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
@@ -72,6 +73,7 @@ export function KanbanBoard({
 }: KanbanBoardProps) {
   console.log('KanbanBoard props:', { isCreateModalOpen, selectedAppointment });
   const { filters } = useGlobalFilters();
+  const { barbero: barberoActual, isAdmin } = useBarberoAuth();
   const [currentDate, setCurrentDate] = useState<Date>(() => {
     // Usar la fecha ajustada a la zona horaria local
     const localDate = getLocalDateTime();
@@ -92,16 +94,17 @@ export function KanbanBoard({
   const [columns, setColumns] = useState<Record<ColumnId, Column>>(() => COLUMNS);
   
   // Obtener citas para la fecha actual
+  // Para la página de inicio, siempre mostrar las citas del barbero logueado
   const { data: citas = [], isLoading, isError, refetch } = useCitas({
-    sucursalId: filters.sucursalId || undefined,
+    sucursalId: barberoActual?.id_sucursal || undefined,
     fecha: getLocalDateString(currentDate), // Usar nuestra función unificada
-    barberoId: filters.barberoId || undefined,
+    barberoId: barberoActual?.id_barbero || undefined,
   });
   
   // Hook para crear citas
   const { createMutation } = useCitas({
-    sucursalId: filters.sucursalId || undefined,
-    barberoId: filters.barberoId || undefined
+    sucursalId: barberoActual?.id_sucursal || undefined,
+    barberoId: barberoActual?.id_barbero || undefined
   });
   
   const { mutateAsync: updateCita } = useUpdateCita();
@@ -525,16 +528,15 @@ export function KanbanBoard({
       
       {/* Modal de nuevo turno */}
       {appointment && (
-        <SingleFormAppointmentModalWithSucursal
+        <FinalAppointmentModal
           open={modalOpen}
-          onOpenChange={(open) => {
+          onOpenChange={(open: boolean) => {
             setModalOpen(open);
             if (!open) {
               setAppointment(null);
             }
           }}
           initial={appointment}
-          sucursalId={filters.sucursalId || undefined}
         />
       )}
     </div>

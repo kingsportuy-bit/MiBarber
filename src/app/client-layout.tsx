@@ -8,6 +8,7 @@ import { GeneralLayout } from '@/components/GeneralLayout';
 import { BottomNav } from '@/components/BottomNav';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
 import { FloatingNewAppointmentButton } from '@/components/FloatingNewAppointmentButton';
+import { Portal } from '@radix-ui/react-portal';
 
 export default function ClientLayout({
   children,
@@ -17,7 +18,7 @@ export default function ClientLayout({
   const pathname = usePathname();
 
   // Detectar rutas V2
-  const v2Routes = ['/perfil', '/estadisticas', '/caja', '/agente-ia', '/plantilla'];
+  const v2Routes = ['/perfil', '/estadisticas', '/caja', '/agente-ia', '/plantilla', '/v2/inicio-v2'];
   const isV2Route = v2Routes.some(route => pathname?.startsWith(route));
 
   if (isV2Route) {
@@ -43,6 +44,7 @@ export default function ClientLayout({
         <BottomNav />
         <OfflineIndicator />
         {showFloatingButton && <FloatingNewAppointmentButton />}
+        <Portal />
       </GlobalFiltersProvider>
     </Providers>
   );

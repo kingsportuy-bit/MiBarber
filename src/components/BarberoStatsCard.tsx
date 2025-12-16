@@ -18,9 +18,9 @@ interface BarberoStatsCardProps {
 
 export function BarberoStatsCard({ stats }: BarberoStatsCardProps) {
   return (
-    <div className="qoder-dark-card">
-      <div className="qoder-dark-window-header">
-        <h3 className="font-semibold text-qoder-dark-text-primary">{stats.nombre}</h3>
+    <div className="v2-card">
+      <div className="v2-window-header">
+        <h3 className="font-semibold text-[var(--text-primary)]">{stats.nombre}</h3>
       </div>
       <div className="p-4 space-y-4">
         <div className="grid grid-cols-2 gap-3">
@@ -50,7 +50,7 @@ export function BarberoStatsCard({ stats }: BarberoStatsCardProps) {
         </div>
         
         <div>
-          <h4 className="text-sm font-medium text-qoder-dark-text-secondary mb-2">
+          <h4 className="text-sm font-medium text-[var(--text-secondary)] mb-2">
             Especialidades
           </h4>
           <div className="flex flex-wrap gap-2">
@@ -58,13 +58,13 @@ export function BarberoStatsCard({ stats }: BarberoStatsCardProps) {
               stats.especialidades.map((esp, index) => (
                 <span 
                   key={index} 
-                  className="bg-qoder-dark-bg-secondary text-qoder-dark-text-secondary text-xs px-2 py-1 rounded"
+                  className="bg-[var(--bg-secondary)] text-[var(--text-secondary)] text-xs px-2 py-1 rounded"
                 >
                   {esp}
                 </span>
               ))
             ) : (
-              <span className="text-qoder-dark-text-secondary text-sm">
+              <span className="text-[var(--text-secondary)] text-sm">
                 Sin especialidades registradas
               </span>
             )}

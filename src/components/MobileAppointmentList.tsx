@@ -7,6 +7,7 @@ import { useGlobalFilters } from "@/contexts/GlobalFiltersContext";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
 import { useClientesByIds } from "@/hooks/useClientes";
 import { Client } from "@/types/db";
+import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 
 // Función para convertir puntaje a estrellas con borde dorado y sin relleno
 const getStarsFromScore = (puntaje: number) => {
@@ -40,6 +41,7 @@ interface MobileAppointmentListProps {
 
 export function MobileAppointmentList({ onEdit }: MobileAppointmentListProps) {
   const { filters } = useGlobalFilters();
+  const { barbero: barberoActual, isAdmin } = useBarberoAuth();
   const [currentDate, setCurrentDate] = useState<Date>(() => {
     // Usar la fecha ajustada a la zona horaria local
     const localDate = getLocalDateTime();
@@ -47,10 +49,11 @@ export function MobileAppointmentList({ onEdit }: MobileAppointmentListProps) {
   });
 
   // Obtener citas para la fecha actual
+  // Para la página de inicio, siempre mostrar las citas del barbero logueado
   const { data: citas = [], isLoading, isError, refetch } = useCitas({
-    sucursalId: filters.sucursalId || undefined,
+    sucursalId: barberoActual?.id_sucursal || undefined,
     fecha: getLocalDateString(currentDate), // Usar nuestra función unificada
-    barberoId: filters.barberoId || undefined,
+    barberoId: barberoActual?.id_barbero || undefined,
   });
 
   // Filtrar citas para mostrar solo pendientes y completadas (excluir canceladas)

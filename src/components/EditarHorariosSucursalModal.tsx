@@ -193,10 +193,10 @@ export function EditarHorariosSucursalModal({
     return (
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 qoder-dark-modal-overlay-global" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 w-[95vw] max-w-md md:max-w-2xl -translate-x-1/2 -translate-y-1/2 z-50">
-            <div className="qoder-dark-card">
-              <div className="p-6 text-qoder-dark-text-primary text-center">Cargando horarios...</div>
+          <Dialog.Overlay className="v2-overlay" />
+          <Dialog.Content className="v2-modal">
+            <div className="v2-modal-body text-[var(--text-primary)] text-center">
+              Cargando horarios...
             </div>
           </Dialog.Content>
         </Dialog.Portal>
@@ -218,41 +218,40 @@ export function EditarHorariosSucursalModal({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 qoder-dark-modal-overlay-global" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
-          <div className="qoder-dark-client-modal">
-            <div className="content">
-            <div className="qoder-dark-window-header">
-              <div>
-                <Dialog.Title className="text-2xl font-bold text-qoder-dark-text-primary">
-                  Horarios de Sucursal
-                </Dialog.Title>
-                <p className="text-qoder-dark-text-secondary mt-1">
-                  {nombreSucursal}
-                </p>
-              </div>
-              <button 
-                onClick={() => onOpenChange(false)}
-                className="text-qoder-dark-text-secondary hover:text-qoder-dark-text-primary text-2xl"
-              >
-                &times;
-              </button>
+        <Dialog.Overlay className="v2-overlay" />
+        <Dialog.Content className="v2-modal">
+          <div className="v2-modal-header">
+            <div>
+              <Dialog.Title className="v2-modal-title">
+                Horarios de Sucursal
+              </Dialog.Title>
+              <p className="text-[var(--text-secondary)] mt-1">
+                {nombreSucursal}
+              </p>
             </div>
+            <button 
+              onClick={() => onOpenChange(false)}
+              className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl"
+            >
+              ×
+            </button>
+          </div>
+          <div className="v2-modal-body">
             
             <form onSubmit={handleSubmit}>
               <div className="space-y-6 p-4">
                 {diasSemana.map(dia => {
                   const horario = horariosForm[dia.id];
                   return (
-                    <div key={dia.id} className="bg-qoder-dark-bg-form p-4 rounded-lg border border-qoder-dark-border-primary">
+                    <div key={dia.id} className="bg-[var(--bg-form)] p-4 rounded-lg border border-[var(--border-primary)]">
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-qoder-dark-text-primary">{dia.nombre}</h3>
-                        <label className="flex items-center text-qoder-dark-text-primary">
+                        <h3 className="text-lg font-semibold text-[var(--text-primary)]">{dia.nombre}</h3>
+                        <label className="flex items-center text-[var(--text-primary)]">
                           <input
                             type="checkbox"
                             checked={horario?.activo ?? true}
                             onChange={(e) => handleInputChange(dia.id, "activo", e.target.checked)}
-                            className="mr-2"
+                            className="mr-2 v2-checkbox"
                           />
                           Activo
                         </label>
@@ -260,39 +259,39 @@ export function EditarHorariosSucursalModal({
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-1">
+                          <label className="v2-label">
                             Hora de Apertura
                           </label>
                           <input
                             type="time"
                             value={horario?.hora_apertura?.substring(0, 5) || "08:00"}
                             onChange={(e) => handleInputChange(dia.id, "hora_apertura", `${e.target.value}:00`)}
-                            className="w-full bg-qoder-dark-bg-primary border border-qoder-dark-border-primary rounded-lg px-3 py-2 text-qoder-dark-text-primary"
+                            className="v2-input"
                             disabled={!horario?.activo}
                           />
                         </div>
                         
                         <div>
-                          <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-1">
+                          <label className="v2-label">
                             Hora de Cierre
                           </label>
                           <input
                             type="time"
                             value={horario?.hora_cierre?.substring(0, 5) || "18:00"}
                             onChange={(e) => handleInputChange(dia.id, "hora_cierre", `${e.target.value}:00`)}
-                            className="w-full bg-qoder-dark-bg-primary border border-qoder-dark-border-primary rounded-lg px-3 py-2 text-qoder-dark-text-primary"
+                            className="v2-input"
                             disabled={!horario?.activo}
                           />
                         </div>
                         
                         <div className="md:col-span-2">
                           <div className="flex items-center justify-between mb-2">
-                            <label className="flex items-center text-qoder-dark-text-primary">
+                            <label className="flex items-center text-[var(--text-primary)]">
                               <input
                                 type="checkbox"
                                 checked={tieneAlmuerzo[dia.id] || false}
                                 onChange={() => handleToggleAlmuerzo(dia.id)}
-                                className="mr-2"
+                                className="mr-2 v2-checkbox"
                                 disabled={!horario?.activo}
                               />
                               Tiene hora de almuerzo
@@ -302,26 +301,26 @@ export function EditarHorariosSucursalModal({
                           {tieneAlmuerzo[dia.id] && horario?.activo && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                               <div>
-                                <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-1">
+                                <label className="v2-label">
                                   Inicio de Almuerzo
                                 </label>
                                 <input
                                   type="time"
                                   value={horario?.hora_inicio_almuerzo?.substring(0, 5) || "12:00"}
                                   onChange={(e) => handleInputChange(dia.id, "hora_inicio_almuerzo", `${e.target.value}:00`)}
-                                  className="w-full bg-qoder-dark-bg-primary border border-qoder-dark-border-primary rounded-lg px-3 py-2 text-qoder-dark-text-primary"
+                                  className="v2-input"
                                 />
                               </div>
                               
                               <div>
-                                <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-1">
+                                <label className="v2-label">
                                   Fin de Almuerzo
                                 </label>
                                 <input
                                   type="time"
                                   value={horario?.hora_fin_almuerzo?.substring(0, 5) || "13:00"}
                                   onChange={(e) => handleInputChange(dia.id, "hora_fin_almuerzo", `${e.target.value}:00`)}
-                                  className="w-full bg-qoder-dark-bg-primary border border-qoder-dark-border-primary rounded-lg px-3 py-2 text-qoder-dark-text-primary"
+                                  className="v2-input"
                                 />
                               </div>
                             </div>
@@ -333,18 +332,18 @@ export function EditarHorariosSucursalModal({
                 })}
               </div>
               
-              <div className="flex justify-end space-x-4 p-4 border-t border-qoder-dark-border-primary">
+              <div className="v2-modal-footer">
                 <button
                   type="button"
                   onClick={() => onOpenChange(false)}
-                  className="cancel-button"
+                  className="v2-btn v2-btn-secondary"
                   disabled={guardando}
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="action-button"
+                  className="v2-btn v2-btn-primary"
                   disabled={guardando}
                 >
                   {guardando ? "Guardando..." : "Guardar Horarios"}
@@ -353,7 +352,6 @@ export function EditarHorariosSucursalModal({
 
             </form>
           </div>
-        </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

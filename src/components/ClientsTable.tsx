@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useClientes, type SortOption } from "@/hooks/useClientes";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 import { useGlobalFilters } from "@/contexts/GlobalFiltersContext";
 import { GlobalFilters } from "@/components/shared/GlobalFilters";
 import type { Client } from "@/types/db";
-import { ClientModal } from "./ClientModal";
-import { ClientDetailModal } from "./ClientDetailModal";
+import { LegacyClientModal } from "./LegacyClientModal";
+import { LegacyClientDetailModal } from "./LegacyClientDetailModal";
+import { LegacyDeleteConfirmModal } from "./LegacyDeleteConfirmModal";
 import { toast } from "sonner";
 
 export function ClientsTable() {
@@ -84,8 +85,25 @@ export function ClientsTable() {
 
   // Usar todos los clientes filtrados por sucursal
   const filteredClients = data || [];
+  
+  // Estado para la paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const clientsPerPage = 10;
+  
+  // Calcular índices para la paginación
+  const indexOfLastClient = currentPage * clientsPerPage;
+  const indexOfFirstClient = indexOfLastClient - clientsPerPage;
+  const currentClients = filteredClients.slice(indexOfFirstClient, indexOfLastClient);
+  
+  // Calcular número total de páginas
+  const totalPages = Math.ceil(filteredClients.length / clientsPerPage);
 
   const [open, setOpen] = useState(false);
+  
+  // Debugging - log when open state changes
+  useEffect(() => {
+    console.log('ClientModal open state changed:', open);
+  }, [open]);
   const [editing, setEditing] = useState<Partial<Client> | undefined>();
 
   // Estado para el popup de confirmación de eliminación
@@ -93,12 +111,22 @@ export function ClientsTable() {
     open: boolean;
     client: Client | null;
   }>({ open: false, client: null });
+  
+  // Debugging - log when deleteConfirm state changes
+  useEffect(() => {
+    console.log('DeleteConfirm state changed:', deleteConfirm);
+  }, [deleteConfirm]);
 
   // Estado para el modal de detalles del cliente
   const [detailModal, setDetailModal] = useState<{
     open: boolean;
     client: Client | null;
   }>({ open: false, client: null });
+  
+  // Debugging - log when detailModal state changes
+  useEffect(() => {
+    console.log('DetailModal state changed:', detailModal);
+  }, [detailModal]);
 
   const onSave = async (values: Partial<Client>) => {
     try {
@@ -153,9 +181,9 @@ export function ClientsTable() {
     }
   };
 
-  const confirmDelete = (client: Client) => {
+  const confirmDelete = useCallback((client: Client) => {
     setDeleteConfirm({ open: true, client });
-  };
+  }, []);
 
   const onDelete = async () => {
     if (!deleteConfirm.client?.id_cliente) return;
@@ -194,9 +222,10 @@ export function ClientsTable() {
   };
 
   // Función para mostrar el modal de detalles del cliente
-  const showClientDetails = (client: Client) => {
+  const showClientDetails = useCallback((client: Client) => {
+    console.log('Opening client details modal for client:', client);
     setDetailModal({ open: true, client });
-  };
+  }, []);
 
   return (
     <>
@@ -247,6 +276,7 @@ export function ClientsTable() {
             
             <button
               onClick={() => {
+                console.log('Opening new client modal');
                 setEditing(undefined);
                 setOpen(true);
               }}
@@ -347,7 +377,7 @@ export function ClientsTable() {
                       </td>
                     </tr>
                   )}
-                  {(filteredClients || []).map((c, index) => (
+                  {currentClients.map((c, index) => (
                     <tr
                       key={c.id_cliente}
                       className={`border-t border-qoder-dark-border-primary hover:bg-qoder-dark-bg-hover transition-all duration-150`}
@@ -389,7 +419,7 @@ export function ClientsTable() {
                       <td className="px-3 py-2 text-xs text-qoder-dark-text-secondary bg-qoder-dark-bg-secondary md:px-4 md:py-3 md:text-sm">
                         {formatLastInteraction(c.ultima_interaccion)}
                       </td>
-                      <td className={`px-3 py-2 bg-qoder-dark-bg-secondary md:px-4 md:py-3 ${index === 0 ? 'rounded-tr-xl' : ''} ${index === (filteredClients || []).length - 1 ? 'rounded-br-xl' : ''}`}>
+                      <td className={`px-3 py-2 bg-qoder-dark-bg-secondary md:px-4 md:py-3 ${index === 0 ? 'rounded-tr-xl' : ''} ${index === currentClients.length - 1 ? 'rounded-br-xl' : ''}`}>
                         <div className="flex space-x-2">
                           <button
                             onClick={() => showClientDetails(c)}
@@ -419,6 +449,7 @@ export function ClientsTable() {
                           </button>
                           <button
                             onClick={() => {
+                              console.log('Opening edit modal for client:', c);
                               setEditing(c);
                               setOpen(true);
                             }}
@@ -441,7 +472,10 @@ export function ClientsTable() {
                             </svg>
                           </button>
                           <button
-                            onClick={() => confirmDelete(c)}
+                            onClick={() => {
+                              console.log('Opening delete confirmation for client:', c);
+                              confirmDelete(c);
+                            }}
                             className="text-red-500 hover:text-red-300 bg-transparent !bg-none border-none p-1"
                             title="Eliminar cliente"
                           >
@@ -474,11 +508,66 @@ export function ClientsTable() {
                       </td>
                     </tr>
                   )}
+                  
+                  {/* Fila de paginación para desktop */}
+                  <tr>
+                    <td colSpan={6} className="px-4 py-3 bg-qoder-dark-bg-secondary rounded-b-xl">
+                      {totalPages > 1 && (
+                        <div className="flex flex-col items-center space-y-2">
+                          <div className="flex justify-center items-center space-x-1">
+                            <span
+                              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                              className="text-qoder-dark-text-muted text-sm cursor-pointer hover:text-qoder-dark-text-primary px-2"
+                            >
+                              Anterior
+                            </span>
+                            
+                            {/* Números de página */}
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                              let pageNum;
+                              if (totalPages <= 5) {
+                                pageNum = i + 1;
+                              } else if (currentPage <= 3) {
+                                pageNum = i + 1;
+                              } else if (currentPage >= totalPages - 2) {
+                                pageNum = totalPages - 4 + i;
+                              } else {
+                                pageNum = currentPage - 2 + i;
+                              }
+                              
+                              return (
+                                <span
+                                  key={pageNum}
+                                  onClick={() => setCurrentPage(pageNum)}
+                                  className={`text-sm cursor-pointer px-2 ${currentPage === pageNum 
+                                    ? 'text-qoder-dark-accent-primary font-medium' 
+                                    : 'text-qoder-dark-text-muted hover:text-qoder-dark-text-primary'}`}
+                                >
+                                  {pageNum}
+                                </span>
+                              );
+                            })}
+                            
+                            <span
+                              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                              className="text-qoder-dark-text-muted text-sm cursor-pointer hover:text-qoder-dark-text-primary px-2"
+                            >
+                              Siguiente
+                            </span>
+                          </div>
+                          
+                          <div className="text-qoder-dark-text-primary text-xs">
+                            Página {currentPage} de {totalPages} (Total: {filteredClients.length} clientes)
+                          </div>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
                 </tbody>
               </table>
               
               {/* Vista de tabla para móviles */}
-              <div className="md:hidden flex justify-center">
+              <div className="md:hidden">
                 <div className="w-full overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
@@ -490,7 +579,7 @@ export function ClientsTable() {
                       </tr>
                     </thead>
                     <tbody>
-                      {(filteredClients || []).map((c) => (
+                      {currentClients.map((c) => (
                         <tr 
                           key={c.id_cliente} 
                           className="border-b border-qoder-dark-border-primary hover:bg-qoder-dark-bg-hover text-center"
@@ -564,13 +653,68 @@ export function ClientsTable() {
                     Sin resultados
                   </div>
                 )}
+                
+                {/* Paginación para mobile - Alineada a la derecha */}
+                {totalPages > 1 && (
+                  <div className="px-4 py-3 bg-qoder-dark-bg-secondary border-t border-qoder-dark-border-primary">
+                    <div className="flex flex-col items-end space-y-2">
+                      <div className="flex justify-end items-center space-x-1">
+                        <span
+                          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                          className="text-qoder-dark-text-muted text-sm cursor-pointer hover:text-qoder-dark-text-primary px-2"
+                        >
+                          Anterior
+                        </span>
+                        
+                        {/* Números de página */}
+                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                          let pageNum;
+                          if (totalPages <= 5) {
+                            pageNum = i + 1;
+                          } else if (currentPage <= 3) {
+                            pageNum = i + 1;
+                          } else if (currentPage >= totalPages - 2) {
+                            pageNum = totalPages - 4 + i;
+                          } else {
+                            pageNum = currentPage - 2 + i;
+                          }
+                          
+                          return (
+                            <span
+                              key={pageNum}
+                              onClick={() => setCurrentPage(pageNum)}
+                              className={`text-sm cursor-pointer px-2 ${currentPage === pageNum 
+                                ? 'text-qoder-dark-accent-primary font-medium' 
+                                : 'text-qoder-dark-text-muted hover:text-qoder-dark-text-primary'}`}
+                            >
+                              {pageNum}
+                            </span>
+                          );
+                        })}
+                        
+                        <span
+                          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                          className="text-qoder-dark-text-muted text-sm cursor-pointer hover:text-qoder-dark-text-primary px-2"
+                        >
+                          Siguiente
+                        </span>
+                      </div>
+                      
+                      <div className="text-qoder-dark-text-primary text-xs">
+                        Página {currentPage} de {totalPages} (Total: {filteredClients.length} clientes)
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <ClientModal
+
+
+      <LegacyClientModal
         open={open}
         onOpenChange={setOpen}
         initial={editing}
@@ -580,7 +724,7 @@ export function ClientsTable() {
 
       {/* Modal de detalles del cliente */}
       {detailModal.open && detailModal.client && (
-        <ClientDetailModal
+        <LegacyClientDetailModal
           open={detailModal.open}
           onOpenChange={(open) => setDetailModal({ ...detailModal, open })}
           client={detailModal.client}
@@ -588,52 +732,13 @@ export function ClientsTable() {
       )}
 
       {/* Popup de confirmación para eliminar */}
-      {deleteConfirm.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 qoder-dark-modal-overlay">
-          <div className="qoder-dark-card w-[90vw] max-w-md">
-            <h3 className="text-lg font-semibold mb-2 text-qoder-dark-text-primary">
-              Confirmar eliminación
-            </h3>
-            <p className="text-sm text-qoder-dark-text-secondary mb-4">
-              ¿Estás seguro que quieres eliminar al cliente{" "}
-              <strong className="text-qoder-dark-text-primary">
-                {deleteConfirm.client?.nombre}
-              </strong>
-              ?
-            </p>
-            <p className="text-xs text-qoder-dark-text-muted mb-6">
-              Celular: {deleteConfirm.client?.telefono || "Sin teléfono"}
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setDeleteConfirm({ open: false, client: null })}
-                className="qoder-dark-button px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
-              >
-                <span>Cancelar</span>
-              </button>
-              <button
-                onClick={onDelete}
-                className="qoder-dark-button-primary px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-                <span>Eliminar</span>
-              </button>
-            </div>
-          </div>
-        </div>
+      {deleteConfirm.open && deleteConfirm.client && (
+        <LegacyDeleteConfirmModal
+          open={deleteConfirm.open}
+          onOpenChange={(isOpen: boolean) => setDeleteConfirm({ ...deleteConfirm, open: isOpen })}
+          client={deleteConfirm.client}
+          onConfirm={onDelete}
+        />
       )}
     </>
   );

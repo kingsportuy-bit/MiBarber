@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useBarberos } from "@/hooks/useBarberos";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 import { useServiciosList } from "@/hooks/useServiciosList";
-import { BarberoModal } from "@/components/BarberoModal";
+import { LegacyBarberoModal } from "@/components/LegacyBarberoModal";
 import { BarberoNivelPermisos } from "@/components/BarberoNivelPermisos";
 import { BarberoFichaModal } from "@/components/BarberoFichaModal";
 import type { Barbero } from "@/types/db";
@@ -279,7 +279,7 @@ export function SucursalBarberosSection({
       </div>
 
       {/* Modal para crear/editar barbero */}
-      <BarberoModal
+      <LegacyBarberoModal
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
         initial={barberoToEdit || undefined}

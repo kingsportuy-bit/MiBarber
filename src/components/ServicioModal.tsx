@@ -115,20 +115,27 @@ export function ServicioModal({ open, onOpenChange, initial, onSave, onCancel, i
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 qoder-dark-modal-overlay-global" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
-          <div className="qoder-dark-client-modal">
-            <div className="qoder-dark-window-header">
-              <Dialog.Title className="text-lg font-semibold text-qoder-dark-text-primary">
-                {isEdit ? "Editar servicio" : "Nuevo servicio"}
-              </Dialog.Title>
-            </div>
-            <div className="content">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <Dialog.Overlay className="v2-overlay" />
+        <Dialog.Content className="v2-modal" style={{ maxWidth: '600px' }}>
+          <div className="v2-modal-header">
+            <Dialog.Title className="v2-modal-title">
+              {isEdit ? "Editar servicio" : "Nuevo servicio"}
+            </Dialog.Title>
+            <Dialog.Close asChild>
+              <button 
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl"
+                aria-label="Cerrar"
+              >
+                ×
+              </button>
+            </Dialog.Close>
+          </div>
+          <div className="v2-modal-body">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="col-span-2">
-                <label className="text-xs text-qoder-dark-text-secondary">Nombre del Servicio</label>
+                <label className="v2-label">Nombre del Servicio</label>
                 <input 
-                  className={`w-full qoder-dark-input p-3 rounded-lg ${errors.nombre ? "border-red-500" : ""}`} 
+                  className={`v2-input ${errors.nombre ? "border-red-500" : ""}`} 
                   value={nombre} 
                   onChange={(e) => setNombre(e.target.value)} 
                   placeholder="Ej: Corte de cabello"
@@ -137,10 +144,10 @@ export function ServicioModal({ open, onOpenChange, initial, onSave, onCancel, i
               </div>
               
               <div className="col-span-2 md:col-span-1">
-                <label className="text-xs text-qoder-dark-text-secondary">Precio ($)</label>
+                <label className="v2-label">Precio ($)</label>
                 <input 
                   type="number"
-                  className={`w-full qoder-dark-input p-3 rounded-lg ${errors.precio ? "border-red-500" : ""}`} 
+                  className={`v2-input ${errors.precio ? "border-red-500" : ""}`} 
                   value={precio || ""} 
                   onChange={(e) => setPrecio(parseFloat(e.target.value) || 0)} 
                   placeholder="Ej: 500"
@@ -151,10 +158,10 @@ export function ServicioModal({ open, onOpenChange, initial, onSave, onCancel, i
               </div>
               
               <div className="col-span-2 md:col-span-1">
-                <label className="text-xs text-qoder-dark-text-secondary">Duración (minutos)</label>
+                <label className="v2-label">Duración (minutos)</label>
                 <input 
                   type="number"
-                  className="w-full qoder-dark-input p-3 rounded-lg" 
+                  className="v2-input" 
                   value={duracion_minutos || ""} 
                   onChange={(e) => setDuracionMinutos(parseInt(e.target.value) || 0)} 
                   placeholder="Ej: 30"
@@ -164,9 +171,9 @@ export function ServicioModal({ open, onOpenChange, initial, onSave, onCancel, i
               </div>
               
               <div className="col-span-2">
-                <label className="text-xs text-qoder-dark-text-secondary">Descripción</label>
+                <label className="v2-label">Descripción</label>
                 <input 
-                  className="w-full qoder-dark-input p-3 rounded-lg" 
+                  className="v2-input" 
                   value={descripcion || ""} 
                   onChange={(e) => setDescripcion(e.target.value)} 
                   placeholder="Descripción del servicio"
@@ -176,8 +183,8 @@ export function ServicioModal({ open, onOpenChange, initial, onSave, onCancel, i
               {/* Selector de barbero para asignar/desasignar especialidad */}
               {barberos && barberos.length > 0 && (
                 <div className="col-span-2">
-                  <label className="text-xs text-qoder-dark-text-secondary">Barberos que ofrecen este servicio</label>
-                  <div className="space-y-2 max-h-40 overflow-y-auto p-2 bg-qoder-dark-bg-secondary rounded-lg">
+                  <label className="v2-label">Barberos que ofrecen este servicio</label>
+                  <div className="space-y-2 max-h-40 overflow-y-auto p-2 bg-[var(--bg-secondary)] rounded-lg">
                     {barberos.map((barbero) => {
                       // Verificar si este barbero ya tiene este servicio en sus especialidades
                       const tieneEspecialidad = isEdit 
@@ -222,9 +229,9 @@ export function ServicioModal({ open, onOpenChange, initial, onSave, onCancel, i
                                 }
                               }
                             }}
-                            className="mr-2 h-4 w-4 text-qoder-dark-accent-primary rounded"
+                            className="mr-2 h-4 w-4 text-[var(--accent-primary)] rounded"
                           />
-                          <label htmlFor={`barbero-${barbero.id_barbero}`} className="text-sm text-qoder-dark-text-primary">
+                          <label htmlFor={`barbero-${barbero.id_barbero}`} className="text-sm text-[var(--text-primary)]">
                             {barbero.nombre}
                           </label>
                         </div>
@@ -232,35 +239,34 @@ export function ServicioModal({ open, onOpenChange, initial, onSave, onCancel, i
                     })}
                   </div>
                   {isLoadingBarberos && (
-                    <p className="text-xs text-qoder-dark-text-secondary mt-1">Cargando barberos...</p>
+                    <p className="text-xs text-[var(--text-secondary)] mt-1">Cargando barberos...</p>
                   )}
                 </div>
               )}
             </div>
-            <div className="mt-4 flex justify-end gap-2 p-4 pt-0">
-              <button
-                type="button"
-                onClick={() => {
-                  if (onCancel) {
-                    onCancel();
-                  }
-                  onOpenChange(false);
-                }}
-                className="cancel-button"
-              >
-                <span>Cancelar</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                className="action-button"
-                disabled={!nombre || precio <= 0}
-              >
-                <span>{isEdit ? "Actualizar" : "Crear servicio"}</span>
-              </button>
-            </div>
           </div>
-        </div>
+          <div className="v2-modal-footer">
+            <button
+              type="button"
+              onClick={() => {
+                if (onCancel) {
+                  onCancel();
+                }
+                onOpenChange(false);
+              }}
+              className="v2-btn v2-btn-secondary"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="v2-btn v2-btn-primary"
+              disabled={!nombre || precio <= 0}
+            >
+              {isEdit ? "Actualizar" : "Crear servicio"}
+            </button>
+          </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

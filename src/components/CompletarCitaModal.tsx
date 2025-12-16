@@ -120,69 +120,74 @@ export function CompletarCitaModal({ citaId, onClose, onCompletado }: CompletarC
   };
 
   return (
-    <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 qoder-dark-modal-overlay">
-      <div className="qoder-dark-window w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold mb-4">Completar Cita</h3>
+    <div className="v2-overlay">
+      <div className="v2-modal" style={{ maxWidth: '400px' }}>
+        <div className="v2-modal-header">
+          <h3 className="v2-modal-title">Completar Cita</h3>
+        </div>
         
         {error && (
-          <div className="bg-red-900/30 border border-red-700 rounded p-2 mb-4 text-red-300">
-            {error}
+          <div className="v2-modal-body">
+            <div className="bg-red-900/30 border border-red-700 rounded p-2 mb-4 text-red-300">
+              {error}
+            </div>
           </div>
         )}
         
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm text-qoder-dark-text-secondary mb-1">
-              Número de Factura (Opcional)
-            </label>
-            <input
-              type="text"
-              value={numeroFactura}
-              onChange={(e) => setNumeroFactura(e.target.value)}
-              className="w-full qoder-dark-input p-2"
-              placeholder="Ingrese el número de factura"
-            />
-            {numeroFactura && !validateNumeroFactura(numeroFactura) && (
-              <p className="text-red-400 text-xs mt-1">Solo números y guiones permitidos</p>
-            )}
-          </div>
-          
-          <div>
-            <label className="block text-sm text-qoder-dark-text-secondary mb-1">
-              Método de Pago *
-            </label>
-            <select
-              value={metodoPago}
-              onChange={(e) => setMetodoPago(e.target.value)}
-              className={`w-full qoder-dark-input p-2 ${!metodoPago && error ? 'border-red-500' : ''}`}
-            >
-              <option value="">Seleccione un método de pago</option>
-              <option value="Efectivo">Efectivo</option>
-              <option value="Tarjeta de Débito">Tarjeta de Débito</option>
-              <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
-              <option value="Transferencia">Transferencia</option>
-              <option value="Otro">Otro</option>
-            </select>
+        <div className="v2-modal-body">
+          <div className="space-y-4">
+            <div>
+              <label className="v2-label">
+                Número de Factura (Opcional)
+              </label>
+              <input
+                type="text"
+                value={numeroFactura}
+                onChange={(e) => setNumeroFactura(e.target.value)}
+                className="v2-input"
+                placeholder="Ingrese el número de factura"
+              />
+              {numeroFactura && !validateNumeroFactura(numeroFactura) && (
+                <p className="text-red-400 text-xs mt-1">Solo números y guiones permitidos</p>
+              )}
+            </div>
+            
+            <div>
+              <label className="v2-label">
+                Método de Pago *
+              </label>
+              <select
+                value={metodoPago}
+                onChange={(e) => setMetodoPago(e.target.value)}
+                className={`v2-select ${!metodoPago && error ? 'border-red-500' : ''}`}
+              >
+                <option value="">Seleccione un método de pago</option>
+                <option value="Efectivo">Efectivo</option>
+                <option value="Tarjeta de Débito">Tarjeta de Débito</option>
+                <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
+                <option value="Transferencia">Transferencia</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
           </div>
         </div>
         
-        <div className="flex justify-end space-x-3 mt-6">
+        <div className="v2-modal-footer">
           <button
             onClick={onClose}
-            className="cancel-button"
+            className="v2-btn v2-btn-secondary"
             disabled={isLoading}
           >
             Cancelar
           </button>
           <button
             onClick={handleCompletar}
-            className="action-button"
+            className="v2-btn v2-btn-primary"
             disabled={isLoading}
           >
             {isLoading ? "Completando..." : "Completar Cita"}
           </button>
         </div>
-
       </div>
     </div>
   );

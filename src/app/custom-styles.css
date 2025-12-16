@@ -49,14 +49,19 @@ a.nav-logo {
   justify-self: start;
   cursor: pointer;
   text-decoration: none;
-  font-size: 1.5rem;
+  font-size: 3rem; /* Doblamos el tamaño de la fuente */
   display: flex;
   align-items: center;
   font-weight: 700;
   box-sizing: border-box;
   transition: color 0.3s ease; /* Transición suave para el color */
   position: relative;
-  font-family: 'Roboto', 'Arial', sans-serif; /* Fuente consistente */
+  font-family: 'Old English Text MT', 'Roboto', 'Arial', sans-serif; /* Fuente personalizada */
+}
+
+/* Estilo para nombres de clientes */
+.client-name {
+  font-family: 'Old English Text MT', 'Roboto', 'Arial', sans-serif; /* Fuente personalizada para nombres de clientes */
 }
 
 a.nav-logo:hover {

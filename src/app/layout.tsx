@@ -5,6 +5,7 @@ import "./custom-styles.css";
 import "./responsive.css";
 import "./transitions.css";
 import ClientLayout from "./client-layout";
+import { Portal } from '@radix-ui/react-portal';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -36,6 +37,7 @@ export default function RootLayout({
         <ClientLayout>
           {children}
         </ClientLayout>
+        <Portal />
       </body>
     </html>
   );

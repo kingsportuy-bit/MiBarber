@@ -153,32 +153,32 @@ export function BarberosTableSimple() {
 
       {/* Modal de confirmación de eliminación */}
       {barberoToDelete && (
-        <div className="fixed inset-0 bg-black/20 z-50 flex items-center justify-center qoder-dark-modal-overlay">
-          <div className="qoder-dark-card w-[92vw] max-w-md">
-            <div className="qoder-dark-window-header-modal">
-              <h3 className="text-lg font-semibold text-qoder-dark-text-primary">Confirmar eliminación</h3>
+        <div className="v2-overlay">
+          <div className="v2-modal" style={{ maxWidth: '400px' }}>
+            <div className="v2-modal-header">
+              <h3 className="v2-modal-title">Confirmar eliminación</h3>
             </div>
-            <div className="p-4">
-              <p className="text-qoder-dark-text-secondary mt-2">
+            <div className="v2-modal-body">
+              <p className="text-[var(--text-secondary)]">
                 ¿Estás seguro de que quieres eliminar al barbero {barberoToDelete.nombre}? Esta acción no se puede deshacer.
               </p>
-              <div className="flex justify-end space-x-3 mt-6">
-                <button 
-                  onClick={() => setBarberoToDelete(null)}
-                  className="qoder-dark-button px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
-                >
-                  <span>Cancelar</span>
-                </button>
-                <button 
-                  onClick={confirmDelete}
-                  className="qoder-dark-button-primary px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                  <span>Eliminar</span>
-                </button>
-              </div>
+            </div>
+            <div className="v2-modal-footer">
+              <button 
+                onClick={() => setBarberoToDelete(null)}
+                className="v2-btn v2-btn-secondary"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={confirmDelete}
+                className="v2-btn v2-btn-primary"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <span>Eliminar</span>
+              </button>
             </div>
           </div>
         </div>

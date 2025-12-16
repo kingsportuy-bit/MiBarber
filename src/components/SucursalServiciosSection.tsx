@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Service } from "@/types/db";
 import { toast } from "sonner";
-import { ServicioModal } from "@/components/ServicioModal";
+import { LegacyServicioModal } from "@/components/LegacyServicioModal";
 import { useActualizarEspecialidadesBarbero } from "@/hooks/useActualizarEspecialidadesBarbero";
 import { useBarberosList } from "@/hooks/useBarberosList";
 
@@ -267,7 +267,7 @@ export function SucursalServiciosSection({
       </div>
 
       {/* Modal para crear/editar servicio */}
-      <ServicioModal
+      <LegacyServicioModal
         open={isModalOpen}
         onOpenChange={(open) => {
           setIsModalOpen(open);

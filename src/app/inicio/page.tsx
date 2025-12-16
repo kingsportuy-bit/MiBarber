@@ -7,6 +7,7 @@ import { useState, useCallback, useEffect } from "react";
 import type { Appointment } from "@/types/db";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
 import { GlobalFilters } from "@/components/shared/GlobalFilters";
+import { FinalAppointmentModal } from "@/components/FinalAppointmentModal";
 
 export default function DashboardPage() {
   usePageTitle("Barberox | Inicio");
@@ -57,6 +58,12 @@ export default function DashboardPage() {
     setIsCreateModalOpen(true);
   };
   
+  // Función para cerrar el modal
+  const handleCloseModal = () => {
+    setIsCreateModalOpen(false);
+    setSelectedAppointment(null);
+  };
+
   return (
     // Contenedor principal para el tablero Kanban
     // Este contenedor será transparente y se adaptará al contenido
@@ -86,6 +93,12 @@ export default function DashboardPage() {
         </div>
       </div>
       
+      {/* Modal de cita - Compartido entre vistas móvil y escritorio */}
+      <FinalAppointmentModal
+        open={isCreateModalOpen}
+        onOpenChange={handleCloseModal}
+        initial={selectedAppointment || undefined}
+      />
     </div>
   );
 }

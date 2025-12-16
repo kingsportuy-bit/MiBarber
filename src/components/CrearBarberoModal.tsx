@@ -116,149 +116,153 @@ export function CrearBarberoModal({ open, onOpenChange, idBarberia, id_sucursal,
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-4 qoder-dark-modal-overlay">
-      <div className="qoder-dark-card w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <h3 className="text-lg font-semibold mb-4 text-qoder-dark-text-primary">
-          Crear Nuevo Barbero
-        </h3>
+    <div className="v2-overlay">
+      <div className="v2-modal" style={{ maxWidth: '500px' }}>
+        <div className="v2-modal-header">
+          <h3 className="v2-modal-title">
+            Crear Nuevo Barbero
+          </h3>
+        </div>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-1">
-              Nombre completo
-            </label>
-            <input
-              type="text"
-              name="nombre"
-              value={formData.nombre}
-              onChange={handleChange}
-              className="qoder-dark-input w-full p-2 rounded-lg"
-              placeholder="Nombre del barbero"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-1">
-              Teléfono
-            </label>
-            <input
-              type="text"
-              name="telefono"
-              value={formData.telefono}
-              onChange={handleChange}
-              className="qoder-dark-input w-full p-2 rounded-lg"
-              placeholder="Teléfono de contacto"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="qoder-dark-input w-full p-2 rounded-lg"
-              placeholder="Email del barbero"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-1">
-              Nombre de usuario
-            </label>
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              className="qoder-dark-input w-full p-2 rounded-lg"
-              placeholder="Nombre de usuario para login"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-1">
-              Contraseña
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="qoder-dark-input w-full p-2 rounded-lg"
-              placeholder="Contraseña para login"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-1">
-              Nivel de Permisos
-            </label>
-            <select
-              name="nivel_permisos"
-              value={formData.nivel_permisos}
-              onChange={(e) => setFormData(prev => ({ ...prev, nivel_permisos: parseInt(e.target.value) }))}
-              className="qoder-dark-input w-full p-2 rounded-lg"
-            >
-              <option value={1}>Administrador - Acceso completo (1)</option>
-              <option value={2}>Barbero Normal - Acceso limitado (2)</option>
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-1">
-              Especialidades (servicios que puede realizar este barbero)
-            </label>
-            <div className="border border-qoder-dark-border-primary rounded-lg p-3 max-h-40 overflow-y-auto">
-              {serviciosQuery.isLoading ? (
-                <p className="text-qoder-dark-text-secondary">Cargando servicios...</p>
-              ) : serviciosQuery.isError ? (
-                <p className="text-red-500">Error al cargar servicios</p>
-              ) : serviciosQuery.data && serviciosQuery.data.length > 0 ? (
-                <div className="space-y-2">
-                  {serviciosQuery.data.map((servicio) => (
-                    <label key={servicio.id_servicio} className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={formData.especialidades.includes(servicio.id_servicio)}
-                        onChange={() => handleEspecialidadChange(servicio.id_servicio, servicio.nombre)}
-                        className="rounded"
-                      />
-                      <span className="text-qoder-dark-text-primary">{servicio.nombre}</span>
-                    </label>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-qoder-dark-text-secondary">No hay servicios disponibles</p>
-              )}
+        <form onSubmit={handleSubmit} className="v2-modal-body">
+          <div className="space-y-4">
+            <div>
+              <label className="v2-label">
+                Nombre completo
+              </label>
+              <input
+                type="text"
+                name="nombre"
+                value={formData.nombre}
+                onChange={handleChange}
+                className="v2-input"
+                placeholder="Nombre del barbero"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="v2-label">
+                Teléfono
+              </label>
+              <input
+                type="text"
+                name="telefono"
+                value={formData.telefono}
+                onChange={handleChange}
+                className="v2-input"
+                placeholder="Teléfono de contacto"
+              />
+            </div>
+            
+            <div>
+              <label className="v2-label">
+                Email
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="v2-input"
+                placeholder="Email del barbero"
+              />
+            </div>
+            
+            <div>
+              <label className="v2-label">
+                Nombre de usuario
+              </label>
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                className="v2-input"
+                placeholder="Nombre de usuario para login"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="v2-label">
+                Contraseña
+              </label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="v2-input"
+                placeholder="Contraseña para login"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="v2-label">
+                Nivel de Permisos
+              </label>
+              <select
+                name="nivel_permisos"
+                value={formData.nivel_permisos}
+                onChange={(e) => setFormData(prev => ({ ...prev, nivel_permisos: parseInt(e.target.value) }))}
+                className="v2-select"
+              >
+                <option value={1}>Administrador - Acceso completo (1)</option>
+                <option value={2}>Barbero Normal - Acceso limitado (2)</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="v2-label">
+                Especialidades (servicios que puede realizar este barbero)
+              </label>
+              <div className="border border-[var(--border-primary)] rounded-lg p-3 max-h-40 overflow-y-auto">
+                {serviciosQuery.isLoading ? (
+                  <p className="text-[var(--text-secondary)]">Cargando servicios...</p>
+                ) : serviciosQuery.isError ? (
+                  <p className="text-red-500">Error al cargar servicios</p>
+                ) : serviciosQuery.data && serviciosQuery.data.length > 0 ? (
+                  <div className="space-y-2">
+                    {serviciosQuery.data.map((servicio) => (
+                      <label key={servicio.id_servicio} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.especialidades.includes(servicio.id_servicio)}
+                          onChange={() => handleEspecialidadChange(servicio.id_servicio, servicio.nombre)}
+                          className="v2-checkbox"
+                        />
+                        <span className="text-[var(--text-primary)]">{servicio.nombre}</span>
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-[var(--text-secondary)]">No hay servicios disponibles</p>
+                )}
+              </div>
             </div>
           </div>
-
-          <div className="flex justify-end space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={() => onOpenChange(false)}
-              className="cancel-button"
-              disabled={loading}
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="action-button"
-              disabled={loading}
-            >
-              {loading ? "Creando..." : "Crear Barbero"}
-            </button>
-          </div>
-
         </form>
+        
+        <div className="v2-modal-footer">
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            className="v2-btn v2-btn-secondary"
+            disabled={loading}
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            onClick={handleSubmit as any}
+            className="v2-btn v2-btn-primary"
+            disabled={loading}
+          >
+            {loading ? "Creando..." : "Crear Barbero"}
+          </button>
+        </div>
       </div>
     </div>
   );

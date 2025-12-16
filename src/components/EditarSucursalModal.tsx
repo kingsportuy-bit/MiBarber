@@ -75,21 +75,27 @@ export function EditarSucursalModal({ open, onOpenChange, initial, onSave, onCan
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 qoder-dark-modal-overlay-global" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
-          <div className="qoder-dark-client-modal">
-            <div className="qoder-dark-window-header">
-              <Dialog.Title className="text-lg font-semibold text-qoder-dark-text-primary">
-                {isEdit ? "Editar sucursal" : "Nueva sucursal"}
-              </Dialog.Title>
-            </div>
-            
-            <div className="content">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <Dialog.Overlay className="v2-overlay" />
+        <Dialog.Content className="v2-modal">
+          <div className="v2-modal-header">
+            <Dialog.Title className="v2-modal-title">
+              {isEdit ? "Editar sucursal" : "Nueva sucursal"}
+            </Dialog.Title>
+            <Dialog.Close asChild>
+              <button 
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl"
+                aria-label="Cerrar"
+              >
+                ×
+              </button>
+            </Dialog.Close>
+          </div>
+          <div className="v2-modal-body">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="col-span-2">
-                <label className="text-xs text-qoder-dark-text-secondary">Nombre de la Sucursal</label>
+                <label className="v2-label">Nombre de la Sucursal</label>
                 <input 
-                  className={`w-full qoder-dark-input p-3 rounded-lg ${errors.nombre_sucursal ? "border-red-500" : ""}`} 
+                  className={`v2-input ${errors.nombre_sucursal ? "border-red-500" : ""}`} 
                   value={nombre_sucursal} 
                   onChange={(e) => setNombreSucursal(e.target.value)} 
                   placeholder="Nombre de la sucursal"
@@ -98,9 +104,9 @@ export function EditarSucursalModal({ open, onOpenChange, initial, onSave, onCan
               </div>
               
               <div className="col-span-2">
-                <label className="text-xs text-qoder-dark-text-secondary">Teléfono</label>
+                <label className="v2-label">Teléfono</label>
                 <input 
-                  className="w-full qoder-dark-input p-3 rounded-lg" 
+                  className="v2-input" 
                   value={telefono} 
                   onChange={(e) => setTelefono(e.target.value)} 
                   placeholder="Teléfono"
@@ -108,9 +114,9 @@ export function EditarSucursalModal({ open, onOpenChange, initial, onSave, onCan
               </div>
               
               <div className="col-span-2">
-                <label className="text-xs text-qoder-dark-text-secondary">Dirección</label>
+                <label className="v2-label">Dirección</label>
                 <input 
-                  className="w-full qoder-dark-input p-3 rounded-lg" 
+                  className="v2-input" 
                   value={direccion} 
                   onChange={(e) => setDireccion(e.target.value)} 
                   placeholder="Dirección completa"
@@ -119,9 +125,9 @@ export function EditarSucursalModal({ open, onOpenChange, initial, onSave, onCan
               
               {/* Campo para información adicional */}
               <div className="col-span-2">
-                <label className="text-xs text-qoder-dark-text-secondary">Información Adicional</label>
+                <label className="v2-label">Información Adicional</label>
                 <textarea 
-                  className="w-full qoder-dark-input p-3 rounded-lg" 
+                  className="v2-textarea" 
                   value={info} 
                   onChange={(e) => setInfo(e.target.value)} 
                   placeholder="Información adicional sobre la sucursal"
@@ -130,7 +136,7 @@ export function EditarSucursalModal({ open, onOpenChange, initial, onSave, onCan
               </div>
             </div>
             
-            <div className="mt-4 flex justify-between gap-2 p-4 pt-0">
+            <div className="v2-modal-footer">
               <button
                 type="button"
                 onClick={() => {
@@ -139,20 +145,19 @@ export function EditarSucursalModal({ open, onOpenChange, initial, onSave, onCan
                   }
                   onOpenChange(false);
                 }}
-                className="cancel-button"
+                className="v2-btn v2-btn-secondary"
               >
                 <span>Cancelar</span>
               </button>
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="action-button"
+                className="v2-btn v2-btn-primary"
               >
                 <span>{isEdit ? "Actualizar" : "Crear sucursal"}</span>
               </button>
             </div>
           </div>
-        </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

@@ -53,56 +53,62 @@ export function EditarInfoAdicionalModal({ open, onOpenChange, initial, onSave, 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 qoder-dark-modal-overlay-global" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
-          <div className="qoder-dark-client-modal">
-            <div className="qoder-dark-window-header">
-              <Dialog.Title className="text-lg font-semibold text-qoder-dark-text-primary">
-                Editar Información Adicional
-              </Dialog.Title>
-            </div>
-            
-            <div className="content">
-              <div className="grid grid-cols-1 gap-3">
+        <Dialog.Overlay className="v2-overlay" />
+        <Dialog.Content className="v2-modal" style={{ maxWidth: '600px' }}>
+          <div className="v2-modal-header">
+            <Dialog.Title className="v2-modal-title">
+              Editar Información Adicional
+            </Dialog.Title>
+            <Dialog.Close asChild>
+              <button 
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl"
+                aria-label="Cerrar"
+              >
+                ×
+              </button>
+            </Dialog.Close>
+          </div>
+          
+          <div className="v2-modal-body">
+            <div className="grid grid-cols-1 gap-4">
               {/* Campo para información adicional */}
               <div className="col-span-2">
-                <label className="text-xs text-qoder-dark-text-secondary">Información Adicional</label>
+                <label className="v2-label">Información Adicional</label>
                 <textarea 
-                  className="w-full qoder-dark-input p-3 rounded-lg" 
+                  className="v2-textarea" 
                   value={info} 
                   onChange={(e) => setInfo(e.target.value)} 
                   placeholder="Información adicional sobre la sucursal"
                   rows={6}
                 />
-                <p className="text-qoder-dark-text-secondary text-xs mt-1">
+                <p className="text-[var(--text-secondary)] text-xs mt-1">
                   Puedes incluir detalles como políticas, servicios especiales, o cualquier otra información relevante.
                 </p>
               </div>
             </div>
-            
-            <div className="mt-4 flex justify-between gap-2 p-4 pt-0">
-              <button
-                type="button"
-                onClick={() => {
-                  if (onCancel) {
-                    onCancel();
-                  }
-                  onOpenChange(false);
-                }}
-                className="cancel-button"
-              >
-                <span>Cancelar</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                className="action-button"
-              >
-                <span>Actualizar Información</span>
-              </button>
-            </div>
           </div>
-        </div>
+          
+          <div className="v2-modal-footer">
+            <button
+              type="button"
+              onClick={() => {
+                if (onCancel) {
+                  onCancel();
+                }
+                onOpenChange(false);
+              }}
+              className="v2-btn v2-btn-secondary"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="v2-btn v2-btn-primary"
+            >
+              Actualizar Información
+            </button>
+          </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

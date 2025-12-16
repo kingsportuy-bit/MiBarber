@@ -49,13 +49,13 @@ export function useCitasList({
         q = q.eq("fecha", fecha);
       }
       
-      // Si se proporciona un barbero específico para filtrar, usarlo
-      if (barberoId) {
+      // Si se proporciona un barbero específico para filtrar (no cadena vacía), usarlo
+      if (barberoId && barberoId !== "") {
         console.log('🔍 Filtrando por barbero ID:', barberoId);
         q = q.eq("id_barbero", barberoId);
       } 
-      // Si el usuario no es administrador y no se especificó un barbero, solo mostrar sus propias citas
-      else if (!isAdmin && barberoActual?.id_barbero) {
+      // Si el usuario no es administrador y no se especificó un barbero (barberoId es undefined), solo mostrar sus propias citas
+      else if (!isAdmin && barberoActual?.id_barbero && barberoId === undefined) {
         console.log('🔍 Filtrando por barbero actual:', barberoActual.id_barbero);
         q = q.eq("id_barbero", barberoActual.id_barbero);
       }

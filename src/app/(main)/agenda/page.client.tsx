@@ -5,7 +5,7 @@ import Head from 'next/head';
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useCitas } from "@/hooks/useCitas";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
-import { SingleFormAppointmentModalWithSucursal } from "@/components/SingleFormAppointmentModalWithSucursal";
+// import { SingleFormAppointmentModalWithSucursal } from "@/components/SingleFormAppointmentModalWithSucursal";
 import { CalendarWithBloqueos } from "@/components/CalendarWithBloqueos";
 import { GlobalFilters } from "@/components/shared/GlobalFilters";
 import type { Appointment } from "@/types/db";
@@ -14,6 +14,7 @@ import { useGlobalFilters } from "@/hooks/useGlobalFilters";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { MobileAgenda } from "@/components/MobileAgenda";
+import { EnhancedFinalAppointmentModal } from "@/components/EnhancedFinalAppointmentModal";
 import { DesktopAgenda } from "@/components/DesktopAgenda";
 
 export default function AgendaPageClient() {
@@ -89,6 +90,16 @@ export default function AgendaPageClient() {
           <title>Barberox | Agenda</title>
         </Head>
         <MobileAgenda />
+        {/* <SingleFormAppointmentModalWithSucursal
+          open={isModalOpen}
+          onOpenChange={handleCloseModal}
+          initial={selectedAppointment || undefined}
+        /> */}
+        <EnhancedFinalAppointmentModal
+          open={isModalOpen}
+          onOpenChange={handleCloseModal}
+          initial={selectedAppointment || undefined}
+        />
       </>
     );
   }
@@ -100,6 +111,16 @@ export default function AgendaPageClient() {
         <title>Barberox | Agenda</title>
       </Head>
       <DesktopAgenda />
+      {/* <SingleFormAppointmentModalWithSucursal
+        open={isModalOpen}
+        onOpenChange={handleCloseModal}
+        initial={selectedAppointment || undefined}
+      /> */}
+      <EnhancedFinalAppointmentModal
+        open={isModalOpen}
+        onOpenChange={handleCloseModal}
+        initial={selectedAppointment || undefined}
+      />
     </>
   );
 }

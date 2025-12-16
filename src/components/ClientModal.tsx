@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 import * as Dialog from "@radix-ui/react-dialog";
 import { useFormData } from "@/hooks/useFormData";
 import type { Client } from "@/types/db";
@@ -30,36 +32,45 @@ export function ClientModal({
     update("telefono", value);
   };
 
+
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 qoder-dark-modal-overlay-global" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
-          <div className="qoder-dark-client-modal">
-            <div className="qoder-dark-window-header">
-              <Dialog.Title className="text-lg font-semibold text-qoder-dark-text-primary">
-                {isEdit ? "Editar cliente" : "Nuevo cliente"}
-              </Dialog.Title>
-            </div>
-            <div className="content">
-              <div className="grid grid-cols-2 gap-3">
+        <Dialog.Overlay className="v2-overlay" />
+        <Dialog.Content className="v2-modal" aria-describedby={undefined}>
+          <div className="v2-modal-header">
+            <Dialog.Title className="v2-modal-title">
+              {isEdit ? "Editar cliente" : "Nuevo cliente"}
+            </Dialog.Title>
+            <Dialog.Close asChild>
+              <button 
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl"
+                aria-label="Cerrar"
+              >
+                ×
+              </button>
+            </Dialog.Close>
+          </div>
+          <div className="v2-modal-body">
+            <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
-                <label className="text-xs text-qoder-dark-text-secondary">
+                <label className="v2-label">
                   Celular
                 </label>
                 <input
-                  className="w-full qoder-dark-input p-3 rounded-lg"
+                  className="v2-input"
                   value={values.telefono || ""}
                   onChange={(e) => handlePhoneChange(e.target.value)}
                   placeholder="Ej: 099123456"
                 />
               </div>
               <div className="col-span-2">
-                <label className="text-xs text-qoder-dark-text-secondary">
+                <label className="v2-label">
                   Nombre
                 </label>
                 <input
-                  className="w-full qoder-dark-input p-3 rounded-lg"
+                  className="v2-input"
                   value={values.nombre || ""}
                   onChange={(e) => update("nombre", e.target.value)}
                   placeholder="Nombre completo del cliente"
@@ -70,11 +81,11 @@ export function ClientModal({
               {isEdit && (
                 <>
                   <div className="col-span-2">
-                    <label className="text-xs text-qoder-dark-text-secondary">
+                    <label className="v2-label">
                       Email (Opcional)
                     </label>
                     <input
-                      className="w-full qoder-dark-input p-3 rounded-lg"
+                      className="v2-input"
                       value={(values as any).email || ""}
                       onChange={(e) => update("email" as any, e.target.value)}
                       placeholder="correo@ejemplo.com"
@@ -83,7 +94,7 @@ export function ClientModal({
                   </div>
 
                   <div>
-                    <label className="text-xs text-qoder-dark-text-secondary">
+                    <label className="v2-label">
                       Fecha de Nacimiento (Opcional)
                     </label>
                     <CustomDatePicker
@@ -95,11 +106,11 @@ export function ClientModal({
                   </div>
 
                   <div className="col-span-2">
-                    <label className="text-xs text-qoder-dark-text-secondary">
+                    <label className="v2-label">
                       Dirección (Opcional)
                     </label>
                     <input
-                      className="w-full qoder-dark-input p-3 rounded-lg"
+                      className="v2-input"
                       value={(values as any).direccion || ""}
                       onChange={(e) =>
                         update("direccion" as any, e.target.value)
@@ -111,22 +122,22 @@ export function ClientModal({
               )}
 
               <div className="col-span-2">
-                <label className="text-xs text-qoder-dark-text-secondary">
+                <label className="v2-label">
                   Notas
                 </label>
                 <textarea
-                  className="w-full qoder-dark-input p-3 h-24 rounded-lg"
+                  className="v2-textarea"
                   value={values.notas || ""}
                   onChange={(e) => update("notas", e.target.value)}
                   placeholder="Notas sobre el cliente..."
                 />
               </div>
             </div>
-            <div className="mt-4 flex justify-end gap-2 p-4 pt-0">
+            <div className="v2-modal-footer">
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                className="cancel-button"
+                className="v2-btn v2-btn-secondary"
               >
                 <span>Cancelar</span>
               </button>
@@ -146,13 +157,12 @@ export function ClientModal({
                   };
                   await onSave(normalizedValues);
                 }}
-                className="action-button"
+                className="v2-btn v2-btn-primary"
               >
                 <span>{isEdit ? "Actualizar" : "Crear cliente"}</span>
               </button>
             </div>
           </div>
-        </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

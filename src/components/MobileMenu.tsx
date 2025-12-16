@@ -119,7 +119,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             <div className="px-2 pt-2 pb-3 space-y-1 bg-qoder-dark-bg-secondary rounded-b-lg border border-qoder-dark-border-primary">
               {/* Nombre del barbero logueado */}
               {barbero && (
-                <div className="px-3 py-2 text-qoder-dark-text-primary font-bold border-b border-qoder-dark-border">
+                <div className="px-3 py-2 text-qoder-dark-text-primary border-b border-qoder-dark-border client-name" style={{ fontSize: '1.3125rem' }}>
                   {barbero.nombre}
                 </div>
               )}

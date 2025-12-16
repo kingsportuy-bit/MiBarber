@@ -8,16 +8,16 @@ import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 import { useServiciosBarbero } from "@/hooks/useServiciosBarbero";
 import { useActualizarBarbero } from "@/hooks/useActualizarBarbero";
 import { AdminProtectedRoute } from "@/components/AdminProtectedRoute";
-import { EditarBarberoModal } from "@/components/EditarBarberoModal";
+import { LegacyEditarBarberoModal } from "@/components/LegacyEditarBarberoModal";
 
 import type { Sucursal } from "@/types/db";
 import { SucursalBarberosSection } from "@/components/SucursalBarberosSection";
 import { SucursalServiciosSection } from "@/components/SucursalServiciosSection";
 import { SucursalHorariosSection } from "@/components/SucursalHorariosSection";
 import { SucursalHorarioDisplay } from "@/components/SucursalHorarioDisplay";
-import { EditarSucursalModal } from "@/components/EditarSucursalModal";
+import { LegacyEditarSucursalModal } from "@/components/LegacyEditarSucursalModal";
 import { EditarHorariosSucursalModal } from "@/components/EditarHorariosSucursalModal";
-import { EditarInfoAdicionalModal } from "@/components/EditarInfoAdicionalModal";
+import { LegacyEditarInfoAdicionalModal } from "@/components/LegacyEditarInfoAdicionalModal";
 
 export default function MiBarberiaPage() {
   usePageTitle("Barberox | Mi Barbería");
@@ -358,7 +358,7 @@ function MiBarberiaContent() {
         </div>
 
         {/* Modal para editar información del barbero */}
-        <EditarBarberoModal
+        <LegacyEditarBarberoModal
           open={isModalOpen}
           onOpenChange={setIsModalOpen}
           barbero={barbero}
@@ -721,7 +721,7 @@ function MiBarberiaContent() {
       )}
 
       {/* Modal para crear/editar sucursal */}
-      <EditarSucursalModal
+      <LegacyEditarSucursalModal
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
         initial={sucursalToEdit || undefined}
@@ -729,7 +729,7 @@ function MiBarberiaContent() {
       />
       
       {/* Modal para editar información adicional */}
-      <EditarInfoAdicionalModal
+      <LegacyEditarInfoAdicionalModal
         open={isInfoAdicionalModalOpen}
         onOpenChange={(open) => {
           setIsInfoAdicionalModalOpen(open);

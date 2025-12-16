@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useCitas } from "@/hooks/useCitas";
 import { useGlobalFilters } from "@/contexts/GlobalFiltersContext";
-import { SingleFormAppointmentModalWithSucursal } from "@/components/SingleFormAppointmentModalWithSucursal";
+import { FinalAppointmentModal } from "@/components/FinalAppointmentModal";
 import type { Appointment } from "@/types/db";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
@@ -56,9 +56,10 @@ export function DesktopAgenda() {
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
   const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
   
+  // Cuando barberoId es una cadena vacía, pasarla explícitamente para que el hook pueda manejarla correctamente
   const citasQuery = useCitas({
     sucursalId: filters.sucursalId || undefined,
-    barberoId: filters.barberoId || undefined,
+    barberoId: filters.barberoId !== null ? filters.barberoId : undefined,
   });
   
   const { data: citasData, isLoading, error, refetch } = citasQuery;
@@ -132,8 +133,8 @@ export function DesktopAgenda() {
     
     // Crear un mapa de citas por fecha para acceso rápido
     const citasPorFecha: { [key: string]: Appointment[] } = {};
-    if (citasMesData) {
-      citasMesData
+    if (citasData) {
+      citasData
         .filter(cita => cita.estado !== "cancelado") // Filtrar citas canceladas
         .forEach(cita => {
         // Asegurarse de que la fecha esté en el formato correcto (YYYY-MM-DD)
@@ -212,15 +213,20 @@ export function DesktopAgenda() {
     refetch();
   }, [filters.sucursalId, filters.barberoId, selectedDate, refetch]);
   
-  // Obtener IDs únicos de clientes de las citas del mes
-  const clienteIds = citasMesData 
-    ? Array.from(new Set(citasMesData
-        .filter(cita => {
-          // Filtrar solo las citas del día seleccionado para obtener los IDs
-          const citaFecha = cita.fecha.split('T')[0];
-          const selectedFecha = selectedDate.toISOString().split('T')[0];
-          return citaFecha === selectedFecha;
-        })
+  // Efecto para asegurar que el filtro de barbero esté preseleccionado con el barbero logueado
+  useEffect(() => {
+    // Si no hay barbero seleccionado y tenemos un barbero logueado, preseleccionarlo
+    if ((!filters.barberoId || filters.barberoId === "") && barbero?.id_barbero && !isAdmin) {
+      setFilters(prev => ({
+        ...prev,
+        barberoId: barbero.id_barbero
+      }));
+    }
+  }, [barbero, filters.barberoId, isAdmin, setFilters]);
+  
+  // Obtener IDs únicos de clientes de las citas filtradas
+  const clienteIds = citasData 
+    ? Array.from(new Set(citasData
         .map(cita => cita.id_cliente)
         .filter((id): id is string => id !== null && id !== undefined)))
     : [];
@@ -277,7 +283,7 @@ export function DesktopAgenda() {
               Barbero
             </label>
             <select
-              value={filters.barberoId || ""}
+              value={filters.barberoId || barbero?.id_barbero || ""}
               onChange={(e) => handleBarberoChange(e.target.value || undefined)}
               className="qoder-dark-input w-full py-3 px-4 text-base rounded-lg"
               disabled={isLoadingBarberos}
@@ -286,7 +292,6 @@ export function DesktopAgenda() {
                 <option>Cargando barberos...</option>
               ) : (
                 <>
-                  <option value="">Todos los barberos</option>
                   {filteredBarbers?.map((barbero: any) => (
                     <option key={barbero.id_barbero} value={barbero.id_barbero}>
                       {barbero.nombre}
@@ -425,9 +430,9 @@ export function DesktopAgenda() {
               <div className="text-center py-12 text-red-500 flex items-center justify-center">
                 Error al cargar las citas: {error.message}
               </div>
-            ) : citasMesData && citasMesData.length > 0 ? (
+            ) : citasData && citasData.length > 0 ? (
               <div className="space-y-4 pb-6">
-                {citasMesData
+                {citasData
                   .filter(cita => {
                     // Filtrar solo las citas del día seleccionado
                     const citaFecha = cita.fecha.split('T')[0];
@@ -492,7 +497,7 @@ export function DesktopAgenda() {
       )}
       
       {/* Modal de Cita */}
-      <SingleFormAppointmentModalWithSucursal
+      <FinalAppointmentModal
         open={isModalOpen}
         onOpenChange={handleCloseModal}
         initial={selectedAppointment || undefined}

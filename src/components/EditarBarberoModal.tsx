@@ -141,43 +141,30 @@ export function EditarBarberoModal({
 
   return (
     <div className={`fixed inset-0 z-50 ${open ? "block" : "hidden"}`}>
-      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm qoder-dark-modal-overlay" onClick={handleClose}></div>
+      <div className="v2-overlay" onClick={handleClose}></div>
       
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <div 
-          className="bg-qoder-dark-bg-primary rounded-xl border border-qoder-dark-border-primary w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+          className="v2-modal"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-qoder-dark-text-primary">
-                Editar Información Personal
-              </h2>
-              <button 
-                onClick={handleClose}
-                className="text-qoder-dark-text-secondary hover:text-qoder-dark-text-primary"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
+          <div className="v2-modal-header">
+            <h2 className="v2-modal-title">
+              Editar Información Personal
+            </h2>
+            <button 
+              onClick={handleClose}
+              className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl"
+            >
+              ×
+            </button>
+          </div>
+          <div className="v2-modal-body">
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-2">
+                  <label className="v2-label">
                     Nombre
                   </label>
                   <div className="w-full qoder-dark-bg-form p-3 rounded-lg text-qoder-dark-text-primary">
@@ -189,46 +176,46 @@ export function EditarBarberoModal({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-2">
+                  <label className="v2-label">
                     Nombre de Usuario
                   </label>
                   <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full qoder-dark-input p-3 rounded-lg"
+                    className="v2-input"
                     placeholder="Nombre de usuario"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-2">
+                  <label className="v2-label">
                     Email
                   </label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full qoder-dark-input p-3 rounded-lg"
+                    className="v2-input"
                     placeholder="tu@email.com"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-2">
+                  <label className="v2-label">
                     Teléfono
                   </label>
                   <input
                     type="tel"
                     value={telefono}
                     onChange={(e) => setTelefono(e.target.value)}
-                    className="w-full qoder-dark-input p-3 rounded-lg"
+                    className="v2-input"
                     placeholder="099 123 456"
                   />
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-2">
+                  <label className="v2-label">
                     Servicios que Ofrezco
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -263,18 +250,18 @@ export function EditarBarberoModal({
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-3 pt-4">
+              <div className="v2-modal-footer">
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="cancel-button"
+                  className="v2-btn v2-btn-secondary"
                   disabled={isLoading}
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="action-button"
+                  className="v2-btn v2-btn-primary"
                   disabled={isLoading}
                 >
                   {isLoading ? (

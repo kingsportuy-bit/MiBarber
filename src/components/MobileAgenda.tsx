@@ -56,12 +56,69 @@ export function MobileAgenda() {
   const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
   
   // Cuando barberoId es una cadena vacía, pasarla explícitamente para que el hook pueda manejarla correctamente
-  const citasQuery = useCitas({
-    sucursalId: filters.sucursalId || undefined,
-    barberoId: filters.barberoId !== null ? filters.barberoId : undefined,
+  console.log('🔍 Filtros actuales:', filters);
+  
+  // Efecto para asegurar que los filtros estén preseleccionados con la sucursal y barbero logueado
+  useEffect(() => {
+    // Verificar si los filtros ya están establecidos
+    const areFiltersSet = filters.sucursalId && filters.barberoId;
+    
+    // Si los filtros no están establecidos y tenemos datos del usuario, preseleccionarlos
+    if (!areFiltersSet && barbero) {
+      let shouldUpdateFilters = false;
+      const newFilters = { ...filters };
+      
+      // Si no hay sucursal seleccionada y solo hay una sucursal, preseleccionarla
+      if (!filters.sucursalId && sucursales?.length === 1) {
+        newFilters.sucursalId = sucursales[0].id;
+        shouldUpdateFilters = true;
+      }
+      
+      // Si somos un barbero normal (no admin) y no hay sucursal seleccionada, usar la del barbero
+      if (!isAdmin && !filters.sucursalId && barbero?.id_sucursal) {
+        newFilters.sucursalId = barbero.id_sucursal;
+        shouldUpdateFilters = true;
+      }
+      
+      // Si no hay barbero seleccionado y tenemos un barbero logueado, preseleccionarlo
+      if (!filters.barberoId && barbero?.id_barbero) {
+        newFilters.barberoId = barbero.id_barbero;
+        shouldUpdateFilters = true;
+      }
+      
+      // Actualizar filtros si es necesario
+      if (shouldUpdateFilters) {
+        setFilters(newFilters);
+      }
+    }
+  }, [barbero, filters, isAdmin, setFilters, sucursales]);
+
+  // Verificar si los filtros están listos
+  const areFiltersReady = useMemo(() => {
+    // Para administradores, necesitamos al menos la sucursal
+    if (isAdmin) {
+      return !!filters.sucursalId;
+    }
+    // Para barberos normales, necesitamos ambos filtros
+    return !!filters.sucursalId && !!filters.barberoId;
+  }, [filters.sucursalId, filters.barberoId, isAdmin]);
+
+  // Solo hacer la consulta cuando los filtros estén listos
+  const citasQuery = useCitas(
+    areFiltersReady ? {
+      sucursalId: filters.sucursalId || undefined,
+      barberoId: filters.barberoId || undefined,
+    } : undefined
+  );
+  
+  console.log('📅 Parámetros enviados a useCitas:', { 
+    areFiltersReady,
+    sucursalId: filters.sucursalId || undefined, 
+    barberoId: filters.barberoId || undefined 
   });
   
   const { data: citasData, isLoading, error, refetch } = citasQuery;
+  console.log('📊 Datos de citas recibidos:', { citasData, isLoading, error });
   
   // Obtener citas para todo el mes usando el rango
   const { data: citasMesData } = citasQuery.useCitasPorRango(
@@ -69,6 +126,7 @@ export function MobileAgenda() {
     firstDayOfMonth.toISOString().split('T')[0],
     lastDayOfMonth.toISOString().split('T')[0]
   );
+  console.log('🗓️ Datos de citas por rango:', citasMesData);
 
   // Obtener IDs únicos de clientes de las citas filtradas
   const clienteIds = useMemo(() => {
@@ -159,17 +217,19 @@ export function MobileAgenda() {
     // Crear un mapa de citas por fecha para acceso rápido
     const citasPorFecha: { [key: string]: Appointment[] } = {};
     if (citasData) {
-      citasData
-        .filter((cita: Appointment) => cita.estado !== "cancelado") // Filtrar citas canceladas
-        .forEach((cita: Appointment) => {
-          // Asegurarse de que la fecha esté en el formato correcto (YYYY-MM-DD)
-          const fecha = cita.fecha.split('T')[0];
-          if (!citasPorFecha[fecha]) {
-            citasPorFecha[fecha] = [];
-          }
-          citasPorFecha[fecha].push(cita);
-        });
+      console.log('📋 Citas antes de filtrar:', citasData);
+      const citasFiltradas = citasData.filter((cita: Appointment) => cita.estado !== "cancelado"); // Filtrar citas canceladas
+      console.log('✅ Citas después de filtrar:', citasFiltradas);
+      citasFiltradas.forEach((cita: Appointment) => {
+        // Asegurarse de que la fecha esté en el formato correcto (YYYY-MM-DD)
+        const fecha = cita.fecha.split('T')[0];
+        if (!citasPorFecha[fecha]) {
+          citasPorFecha[fecha] = [];
+        }
+        citasPorFecha[fecha].push(cita);
+      });
     }
+    console.log('📅 Mapa de citas por fecha:', citasPorFecha);
     
     while (current <= endDay) {
       // Formatear la fecha actual para comparar con las citas
@@ -235,17 +295,6 @@ export function MobileAgenda() {
   useEffect(() => {
     refetch();
   }, [filters.sucursalId, filters.barberoId, selectedDate, refetch]);
-  
-  // Efecto para asegurar que el filtro de barbero esté preseleccionado con el barbero logueado
-  useEffect(() => {
-    // Si no hay barbero seleccionado y tenemos un barbero logueado, preseleccionarlo
-    if ((!filters.barberoId || filters.barberoId === "") && barbero?.id_barbero && !isAdmin) {
-      setFilters(prev => ({
-        ...prev,
-        barberoId: barbero.id_barbero
-      }));
-    }
-  }, [barbero, filters.barberoId, isAdmin, setFilters]);
 
   return (
     // Contenedor principal que engloba todo el contenido
@@ -290,7 +339,7 @@ export function MobileAgenda() {
               Barbero
             </label>
             <select
-              value={filters.barberoId || barbero?.id_barbero || ""}
+              value={filters.barberoId || ""}
               onChange={(e) => handleBarberoChange(e.target.value || undefined)}
               className="qoder-dark-input w-full py-2 px-3 text-sm rounded-lg"
               disabled={isLoadingBarberos}

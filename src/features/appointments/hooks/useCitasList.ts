@@ -54,10 +54,16 @@ export function useCitasList({
         console.log('🔍 Filtrando por barbero ID:', barberoId);
         q = q.eq("id_barbero", barberoId);
       } 
-      // Si el usuario no es administrador y no se especificó un barbero (barberoId es undefined), solo mostrar sus propias citas
-      else if (!isAdmin && barberoActual?.id_barbero && barberoId === undefined) {
+      // Si no se especificó un barbero (barberoId es undefined o null), 
+      // pero tenemos un barbero logueado, solo mostrar sus propias citas
+      // Esto aplica tanto para administradores como para barberos normales
+      else if (barberoActual?.id_barbero && (barberoId === undefined || barberoId === null)) {
         console.log('🔍 Filtrando por barbero actual:', barberoActual.id_barbero);
         q = q.eq("id_barbero", barberoActual.id_barbero);
+      }
+      // Si no hay usuario autenticado y no se especificó un barbero, no aplicar filtro de barbero
+      else if (!barberoActual && (barberoId === undefined || barberoId === null)) {
+        console.log('🔍 Sin usuario autenticado, mostrando todas las citas');
       }
       
       // Si tenemos un idBarberia, filtrar por él

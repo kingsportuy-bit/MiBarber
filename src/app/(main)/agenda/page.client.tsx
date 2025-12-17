@@ -72,11 +72,21 @@ export default function AgendaPageClient() {
     };
   }, []);
 
+  // Efecto para refetch cuando cambian los filtros o la idBarberia
   useEffect(() => {
+    // Solo ejecutar refetch si tenemos idBarberia
     if (idBarberia) {
       refetch();
     }
   }, [idBarberia, filters.sucursalId, filters.barberoId, refetch]);
+  
+  // Efecto adicional para asegurar que se refetch cuando los datos estén listos
+  useEffect(() => {
+    // Verificar si tenemos todos los datos necesarios
+    if (idBarberia && ((filters.sucursalId && filters.barberoId) || (isAdmin && filters.sucursalId))) {
+      refetch();
+    }
+  }, [idBarberia, filters.sucursalId, filters.barberoId, isAdmin, refetch]);
 
   if (error) {
     return <div>Error al cargar las citas: {error.message}</div>;

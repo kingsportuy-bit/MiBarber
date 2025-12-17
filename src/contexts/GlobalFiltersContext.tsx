@@ -1,9 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode, useRef, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback, ReactNode } from "react";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 import { useSucursales } from "@/hooks/useSucursales";
-import { useBarberos } from "@/hooks/useBarberos";
+import { useBarberosList } from "@/hooks/useBarberosList";
 
 // Definir tipos para los filtros globales
 export interface GlobalFilters {
@@ -35,7 +35,8 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
   const { sucursales, isLoading: isLoadingSucursales } = useSucursales(idBarberia || undefined);
   const [barberoIdFilter, setBarberoIdFilter] = useState<string | undefined>(undefined);
   
-  const { data: barberos, isLoading: isLoadingBarberos } = useBarberos(
+  const { data: barberos, isLoading: isLoadingBarberos } = useBarberosList(
+    idBarberia || undefined,
     barberoIdFilter
   );
 
@@ -185,21 +186,36 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
   // Efecto para establecer valores por defecto cuando el barbero cambia
   useEffect(() => {
     // Solo ejecutar una vez por cambio de barbero
-    if (!defaultFiltersAppliedRef.current) {
+    if (!defaultFiltersAppliedRef.current && barbero) {
       // Si no somos admin y tenemos un barbero con sucursal, establecerla por defecto
-      if (!isAdmin && barbero?.id_sucursal) {
+      if (!isAdmin && barbero?.id_sucursal && !filters.sucursalId) {
         setFilters(prev => ({
           ...prev,
-          sucursalId: prev.sucursalId ?? barbero.id_sucursal
+          sucursalId: barbero.id_sucursal
         }));
       }
     
       // Si no somos admin y tenemos un barbero, establecer el barberoId por defecto
-      if (!isAdmin && barbero?.id_barbero) {
+      if (!isAdmin && barbero?.id_barbero && !filters.barberoId) {
         setFilters(prev => ({
           ...prev,
-          barberoId: prev.barberoId ?? barbero.id_barbero
+          barberoId: barbero.id_barbero
         }));
+      }
+    
+      // Para administradores también, si tienen una sucursal asignada, preseleccionarla
+      if (isAdmin && barbero?.id_sucursal && !filters.sucursalId) {
+        setFilters(prev => ({
+          ...prev,
+          sucursalId: barbero.id_sucursal
+        }));
+      }
+      
+      // Para administradores, si no hay barbero seleccionado, dejarlo como null
+      // para mostrar todos los barberos, pero si ya hay uno seleccionado, mantenerlo
+      if (isAdmin && !filters.barberoId) {
+        // No hacemos nada aquí, dejamos que el usuario seleccione el barbero
+        // o que se seleccione mediante otros mecanismos
       }
     
       // Validar y corregir fechas si están invertidas
@@ -228,14 +244,15 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
     return () => {
       defaultFiltersAppliedRef.current = false;
     };
-  }, [barbero?.id_barbero, barbero?.id_sucursal, isAdmin, setFilters]);
+  }, [barbero?.id_barbero, barbero?.id_sucursal, isAdmin, setFilters, filters.sucursalId, filters.barberoId]);
 
   // Efecto separado para manejar los filtros de admin
   useEffect(() => {
     // Solo ejecutar una vez por cambio de condición
     if (!adminFiltersAppliedRef.current) {
-      // Si somos admin o no tenemos barbero, asegurarnos de que barberoId sea null
-      if (isAdmin || !barbero?.id_barbero) {
+      // Si somos admin y no tenemos un barbero específico seleccionado, asegurarnos de que barberoId sea null
+      // Pero si ya tenemos un barberoId seleccionado, no lo sobrescribimos
+      if (isAdmin && !barbero?.id_barbero && !filters.barberoId) {
         setFilters(prev => {
           if (prev.barberoId !== null) {
             return {
@@ -247,13 +264,21 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
         });
         adminFiltersAppliedRef.current = true;
       }
+      // Si no somos admin pero tenemos un barbero logueado, establecerlo como filtro
+      else if (!isAdmin && barbero?.id_barbero && !filters.barberoId) {
+        setFilters(prev => ({
+          ...prev,
+          barberoId: barbero.id_barbero
+        }));
+        adminFiltersAppliedRef.current = true;
+      }
     }
     
     // Resetear la bandera cuando cambia el barbero o el rol
     if ((barbero?.id_barbero && !isAdmin) || (!barbero?.id_barbero)) {
       adminFiltersAppliedRef.current = false;
     }
-  }, [barbero?.id_barbero, isAdmin, setFilters]);
+  }, [barbero?.id_barbero, isAdmin, setFilters, filters.barberoId]);
 
   // Efecto para actualizar barberoIdFilter cuando cambia la sucursal
   useEffect(() => {

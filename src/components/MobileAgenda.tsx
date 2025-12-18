@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useCitas } from "@/hooks/useCitas";
-import { useGlobalFilters } from "@/contexts/GlobalFiltersContext";
+import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 import { FinalAppointmentModal } from "@/components/FinalAppointmentModal";
 import type { Appointment } from "@/types/db";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
@@ -39,90 +39,33 @@ interface CalendarDay {
 }
 
 export function MobileAgenda() {
-  const { filters, setFilters, sucursales, barberos, isLoadingSucursales, isLoadingBarberos, isAdmin, barbero } = useGlobalFilters();
+  // ========================================
+  // SIMPLIFICADO: Usar datos directos como /inicio
+  // ========================================
+  const { barbero: barberoActual, isAdmin } = useBarberoAuth();
+
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
-  const [view, setView] = useState<'calendar' | 'day'>('calendar'); // calendar or day view
+  const [view, setView] = useState<'calendar' | 'day'>('calendar');
 
-  // Filter barbers by selected branch
-  const filteredBarbers = filters.sucursalId 
-    ? barberos?.filter((b: any) => b.id_sucursal === filters.sucursalId)
-    : barberos;
-
-  // Calcular el primer y último día del mes para obtener todas las citas del mes
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
   const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-  
-  // Cuando barberoId es una cadena vacía, pasarla explícitamente para que el hook pueda manejarla correctamente
-  console.log('🔍 Filtros actuales:', filters);
-  
-  // Efecto para asegurar que los filtros estén preseleccionados con la sucursal y barbero logueado
-  useEffect(() => {
-    // Verificar si los filtros ya están establecidos
-    const areFiltersSet = filters.sucursalId && filters.barberoId;
-    
-    // Si los filtros no están establecidos y tenemos datos del usuario, preseleccionarlos
-    if (!areFiltersSet && barbero) {
-      let shouldUpdateFilters = false;
-      const newFilters = { ...filters };
-      
-      // Si no hay sucursal seleccionada y solo hay una sucursal, preseleccionarla
-      if (!filters.sucursalId && sucursales?.length === 1) {
-        newFilters.sucursalId = sucursales[0].id;
-        shouldUpdateFilters = true;
-      }
-      
-      // Si somos un barbero normal (no admin) y no hay sucursal seleccionada, usar la del barbero
-      if (!isAdmin && !filters.sucursalId && barbero?.id_sucursal) {
-        newFilters.sucursalId = barbero.id_sucursal;
-        shouldUpdateFilters = true;
-      }
-      
-      // Si no hay barbero seleccionado y tenemos un barbero logueado, preseleccionarlo
-      if (!filters.barberoId && barbero?.id_barbero) {
-        newFilters.barberoId = barbero.id_barbero;
-        shouldUpdateFilters = true;
-      }
-      
-      // Actualizar filtros si es necesario
-      if (shouldUpdateFilters) {
-        setFilters(newFilters);
-      }
-    }
-  }, [barbero, filters, isAdmin, setFilters, sucursales]);
 
-  // Verificar si los filtros están listos
-  const areFiltersReady = useMemo(() => {
-    // Para administradores, necesitamos al menos la sucursal
-    if (isAdmin) {
-      return !!filters.sucursalId;
-    }
-    // Para barberos normales, necesitamos ambos filtros
-    return !!filters.sucursalId && !!filters.barberoId;
-  }, [filters.sucursalId, filters.barberoId, isAdmin]);
-
-  // Solo hacer la consulta cuando los filtros estén listos
-  const citasQuery = useCitas(
-    areFiltersReady ? {
-      sucursalId: filters.sucursalId || undefined,
-      barberoId: filters.barberoId || undefined,
-    } : undefined
-  );
-  
-  console.log('📅 Parámetros enviados a useCitas:', { 
-    areFiltersReady,
-    sucursalId: filters.sucursalId || undefined, 
-    barberoId: filters.barberoId || undefined 
+  // ========================================
+  // CONSULTAR CITAS CON DATOS DIRECTOS (como KanbanBoard)
+  // ========================================
+  const citasQuery = useCitas({
+    sucursalId: barberoActual?.id_sucursal || undefined,
+    fecha: getLocalDateString(selectedDate),
+    barberoId: barberoActual?.id_barbero || undefined,
   });
-  
+
   const { data: citasData, isLoading, error, refetch } = citasQuery;
-  console.log('📊 Datos de citas recibidos:', { citasData, isLoading, error });
-  
-  // Obtener citas para todo el mes usando el rango
+
   const { data: citasMesData } = citasQuery.useCitasPorRango(
-    filters.sucursalId || undefined,
+    barberoActual?.id_sucursal || undefined,
     firstDayOfMonth.toISOString().split('T')[0],
     lastDayOfMonth.toISOString().split('T')[0]
   );
@@ -154,23 +97,6 @@ export function MobileAgenda() {
     }, {} as Record<string, Client>);
   }, [clientesData]);
 
-  // Handle branch change
-  const handleSucursalChange = (value: string | undefined) => {
-    setFilters(prev => ({
-      ...prev,
-      sucursalId: value || null,
-      barberoId: null // Reset barber when branch changes
-    }));
-  };
-
-  // Handle barber change
-  const handleBarberoChange = (value: string | undefined) => {
-    setFilters(prev => ({
-      ...prev,
-      barberoId: value || null
-    }));
-  };
-
   // Navigation functions
   const goToPreviousMonth = () => {
     setCurrentDate(prev => {
@@ -194,11 +120,12 @@ export function MobileAgenda() {
     setSelectedDate(today);
   };
 
+
   // Generate calendar days
   const generateCalendarDays = (): CalendarDay[] => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    
+
     // First day of the month
     const firstDay = new Date(year, month, 1);
     // Last day of the month
@@ -209,17 +136,17 @@ export function MobileAgenda() {
     // Last day of the calendar (Saturday of the week containing the last day)
     const endDay = new Date(lastDay);
     endDay.setDate(lastDay.getDate() + (6 - lastDay.getDay()));
-    
+
     const days: CalendarDay[] = [];
     const today = new Date();
     const current = new Date(startDay);
-    
+
     // Crear un mapa de citas por fecha para acceso rápido
     const citasPorFecha: { [key: string]: Appointment[] } = {};
-    if (citasData) {
-      console.log('📋 Citas antes de filtrar:', citasData);
-      const citasFiltradas = citasData.filter((cita: Appointment) => cita.estado !== "cancelado"); // Filtrar citas canceladas
-      console.log('✅ Citas después de filtrar:', citasFiltradas);
+    if (citasMesData) {
+      console.log('📋 Citas del mes antes de filtrar:', citasMesData);
+      const citasFiltradas = citasMesData.filter((cita: Appointment) => cita.estado !== "cancelado");
+      console.log('✅ Citas del mes después de filtrar:', citasFiltradas);
       citasFiltradas.forEach((cita: Appointment) => {
         // Asegurarse de que la fecha esté en el formato correcto (YYYY-MM-DD)
         const fecha = cita.fecha.split('T')[0];
@@ -230,12 +157,12 @@ export function MobileAgenda() {
       });
     }
     console.log('📅 Mapa de citas por fecha:', citasPorFecha);
-    
+
     while (current <= endDay) {
       // Formatear la fecha actual para comparar con las citas
       const fechaActual = current.toISOString().split('T')[0];
       const citasDelDia = citasPorFecha[fechaActual] || [];
-      
+
       days.push({
         date: new Date(current),
         isCurrentMonth: current.getMonth() === month,
@@ -245,7 +172,7 @@ export function MobileAgenda() {
       });
       current.setDate(current.getDate() + 1);
     }
-    
+
     return days;
   };
 
@@ -253,10 +180,10 @@ export function MobileAgenda() {
 
   // Format date for display
   const formatDate = (date: Date): string => {
-    return date.toLocaleDateString('es-ES', { 
-      weekday: 'long', 
-      day: 'numeric', 
-      month: 'long' 
+    return date.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long'
     });
   };
 
@@ -280,7 +207,7 @@ export function MobileAgenda() {
       servicio: "",
       barbero: ""
     };
-    
+
     setSelectedAppointment(newAppointment as Appointment);
     setIsModalOpen(true);
   };
@@ -291,10 +218,6 @@ export function MobileAgenda() {
     setSelectedAppointment(null);
   };
 
-  // Effect to refetch when filters change
-  useEffect(() => {
-    refetch();
-  }, [filters.sucursalId, filters.barberoId, selectedDate, refetch]);
 
   return (
     // Contenedor principal que engloba todo el contenido
@@ -303,69 +226,15 @@ export function MobileAgenda() {
       <div className="mb-1">
         <h2 className="text-1xl font-bold text-left text-qoder-dark-text-primary">Agenda</h2>
       </div>
-      
+
       {/* Filtros - compartidos por ambas vistas */}
-      <div className="mb-6">
-        <div className="flex flex-wrap gap-3 items-end">
-          {/* Filtro de Sucursal */}
-          <div className="flex-1 min-w-[200px] max-w-[250px]">
-            <label className="block text-xs font-medium text-qoder-dark-text-primary mb-1">
-              Sucursal
-            </label>
-            <select
-              value={filters.sucursalId || ""}
-              onChange={(e) => handleSucursalChange(e.target.value || undefined)}
-              className="qoder-dark-input w-full py-2 px-3 text-sm rounded-lg"
-              disabled={isLoadingSucursales}
-            >
-              {isLoadingSucursales ? (
-                <option>Cargando sucursales...</option>
-              ) : (
-                <>
-                  <option value="">Todas las sucursales</option>
-                  {sucursales.map((sucursal) => (
-                    <option key={sucursal.id} value={sucursal.id}>
-                      {sucursal.nombre_sucursal || `Sucursal ${sucursal.numero_sucursal}`}
-                    </option>
-                  ))}
-                </>
-              )}
-            </select>
-          </div>
-          
-          {/* Filtro de Barbero */}
-          <div className="flex-1 min-w-[200px] max-w-[250px]">
-            <label className="block text-xs font-medium text-qoder-dark-text-primary mb-1">
-              Barbero
-            </label>
-            <select
-              value={filters.barberoId || ""}
-              onChange={(e) => handleBarberoChange(e.target.value || undefined)}
-              className="qoder-dark-input w-full py-2 px-3 text-sm rounded-lg"
-              disabled={isLoadingBarberos}
-            >
-              {isLoadingBarberos ? (
-                <option>Cargando barberos...</option>
-              ) : (
-                <>
-                  {filteredBarbers?.map((barbero: any) => (
-                    <option key={barbero.id_barbero} value={barbero.id_barbero}>
-                      {barbero.nombre}
-                    </option>
-                  ))}
-                </>
-              )}
-            </select>
-          </div>
-        </div>
-      </div>
-      
+
       {/* Vista de Calendario */}
       {view === 'calendar' && (
         <div className="flex-1 pb-6 overflow-auto">
           {/* Navegación de Mes */}
           <div className="flex items-center justify-between mb-4">
-            <button 
+            <button
               onClick={goToPreviousMonth}
               className="p-2 rounded-full hover:bg-qoder-dark-bg-secondary transition-colors duration-200"
             >
@@ -374,32 +243,32 @@ export function MobileAgenda() {
             <h2 className="text-lg font-semibold text-qoder-dark-text-primary">
               {currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
             </h2>
-            <button 
+            <button
               onClick={goToNextMonth}
               className="p-2 rounded-full hover:bg-qoder-dark-bg-secondary transition-colors duration-200"
             >
               <ChevronRightIcon className="h-5 w-5 text-qoder-dark-text-primary" />
             </button>
           </div>
-          
+
           {/* Encabezados de Día de la Semana */}
           <div className="grid grid-cols-7 gap-0 mb-0">
             {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day) => (
-              <div 
-                key={day} 
+              <div
+                key={day}
                 className="text-center text-sm font-semibold text-orange-500 py-2 bg-transparent"
               >
                 {day}
               </div>
             ))}
           </div>
-          
+
           {/* Cuadrícula del Calendario */}
           <div className="grid grid-cols-7 gap-1 mb-6">
             {calendarDays.map((day, index) => {
               // Contar las citas del día
               const citaCount = day.citas ? day.citas.length : 0;
-              
+
               return (
                 <div
                   key={index}
@@ -407,10 +276,9 @@ export function MobileAgenda() {
                 >
                   <div
                     onClick={() => handleDaySelect(day)}
-                    className={`flex flex-col items-center justify-center text-sm w-full h-full rounded transition-all duration-200 cursor-pointer ${
-                      day.isToday ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white' : 
+                    className={`flex flex-col items-center justify-center text-sm w-full h-full rounded transition-all duration-200 cursor-pointer ${day.isToday ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white' :
                       day.isSelected && !day.isToday ? 'bg-gray-700' : 'bg-transparent'
-                    } hover:bg-orange-500 hover:bg-opacity-50 hover:text-white`}
+                      } hover:bg-orange-500 hover:bg-opacity-50 hover:text-white`}
                     style={{
                       opacity: day.isCurrentMonth ? 1 : 0.5,
                       border: '1px solid rgba(75, 85, 99, 0.2)' // Gris con 20% opacidad
@@ -429,7 +297,7 @@ export function MobileAgenda() {
               );
             })}
           </div>
-          
+
           {/* Botón de Nueva Cita */}
           <div className="mt-auto">
             <button
@@ -441,7 +309,7 @@ export function MobileAgenda() {
           </div>
         </div>
       )}
-      
+
       {/* Vista de Día */}
       {view === 'day' && (
         <div className="flex flex-col flex-1">
@@ -487,7 +355,7 @@ export function MobileAgenda() {
                   .map((appointment) => {
                     // Obtener información del cliente del mapa
                     const clientData = appointment.id_cliente ? clientesMap[appointment.id_cliente] : undefined;
-                    
+
                     return (
                       <div
                         key={appointment.id_cita}
@@ -539,7 +407,7 @@ export function MobileAgenda() {
           </div>
         </div>
       )}
-      
+
       {/* Modal de Cita */}
       <FinalAppointmentModal
         open={isModalOpen}

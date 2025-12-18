@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useCitas } from "@/hooks/useCitas";
-import { useGlobalFilters } from "@/contexts/GlobalFiltersContext";
+import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 import { FinalAppointmentModal } from "@/components/FinalAppointmentModal";
 import type { Appointment } from "@/types/db";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
@@ -40,111 +40,41 @@ interface CalendarDay {
 }
 
 export function DesktopAgenda() {
-  const { filters, setFilters, sucursales, barberos, isLoadingSucursales, isLoadingBarberos, isAdmin, barbero } = useGlobalFilters();
+  // ========================================
+  // SIMPLIFICADO: Usar datos directos como /inicio
+  // ========================================
+  const { barbero: barberoActual, isAdmin } = useBarberoAuth();
+
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [view, setView] = useState<'calendar' | 'day'>('calendar'); // calendar or day view
 
-  // Filter barbers by selected branch
-  const filteredBarbers = filters.sucursalId 
-    ? barberos?.filter((b: any) => b.id_sucursal === filters.sucursalId)
-    : barberos;
-
   // Calcular el primer y último día del mes para obtener todas las citas del mes
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
   const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-  
-  // Cuando barberoId es una cadena vacía, pasarla explícitamente para que el hook pueda manejarla correctamente
-  console.log('🔍 Filtros actuales:', filters);
-  
-  // Efecto para asegurar que los filtros estén preseleccionados con la sucursal y barbero logueado
-  useEffect(() => {
-    // Verificar si los filtros ya están establecidos
-    const areFiltersSet = filters.sucursalId && filters.barberoId;
-    
-    // Si los filtros no están establecidos y tenemos datos del usuario, preseleccionarlos
-    if (!areFiltersSet && barbero) {
-      let shouldUpdateFilters = false;
-      const newFilters = { ...filters };
-      
-      // Si no hay sucursal seleccionada y solo hay una sucursal, preseleccionarla
-      if (!filters.sucursalId && sucursales?.length === 1) {
-        newFilters.sucursalId = sucursales[0].id;
-        shouldUpdateFilters = true;
-      }
-      
-      // Si somos un barbero normal (no admin) y no hay sucursal seleccionada, usar la del barbero
-      if (!isAdmin && !filters.sucursalId && barbero?.id_sucursal) {
-        newFilters.sucursalId = barbero.id_sucursal;
-        shouldUpdateFilters = true;
-      }
-      
-      // Si no hay barbero seleccionado y tenemos un barbero logueado, preseleccionarlo
-      if (!filters.barberoId && barbero?.id_barbero) {
-        newFilters.barberoId = barbero.id_barbero;
-        shouldUpdateFilters = true;
-      }
-      
-      // Actualizar filtros si es necesario
-      if (shouldUpdateFilters) {
-        setFilters(newFilters);
-      }
-    }
-  }, [barbero, filters, isAdmin, setFilters, sucursales]);
 
-  // Verificar si los filtros están listos
-  const areFiltersReady = useMemo(() => {
-    // Para administradores, necesitamos al menos la sucursal
-    if (isAdmin) {
-      return !!filters.sucursalId;
-    }
-    // Para barberos normales, necesitamos ambos filtros
-    return !!filters.sucursalId && !!filters.barberoId;
-  }, [filters.sucursalId, filters.barberoId, isAdmin]);
-
-  // Solo hacer la consulta cuando los filtros estén listos
-  const citasQuery = useCitas(
-    areFiltersReady ? {
-      sucursalId: filters.sucursalId || undefined,
-      barberoId: filters.barberoId || undefined,
-    } : undefined
-  );
-  
-  console.log('📅 Parámetros enviados a useCitas:', { 
-    areFiltersReady,
-    sucursalId: filters.sucursalId || undefined, 
-    barberoId: filters.barberoId || undefined 
+  // ========================================
+  // CONSULTAR CITAS CON DATOS DIRECTOS (como KanbanBoard)
+  // ========================================
+  const citasQuery = useCitas({
+    sucursalId: barberoActual?.id_sucursal || undefined,
+    fecha: getLocalDateString(selectedDate), // Agregar fecha como KanbanBoard
+    barberoId: barberoActual?.id_barbero || undefined,
   });
-  
+
   const { data: citasData, isLoading, error, refetch } = citasQuery;
   console.log('📊 Datos de citas recibidos:', { citasData, isLoading, error });
-  
+
   // Obtener citas para todo el mes usando el rango
   const { data: citasMesData } = citasQuery.useCitasPorRango(
-    filters.sucursalId || undefined,
+    barberoActual?.id_sucursal || undefined,
     firstDayOfMonth.toISOString().split('T')[0],
     lastDayOfMonth.toISOString().split('T')[0]
   );
   console.log('🗓️ Datos de citas por rango:', citasMesData);
 
-  // Handle branch change
-  const handleSucursalChange = (value: string | undefined) => {
-    setFilters(prev => ({
-      ...prev,
-      sucursalId: value || null,
-      barberoId: null // Reset barber when branch changes
-    }));
-  };
-
-  // Handle barber change
-  const handleBarberoChange = (value: string | undefined) => {
-    setFilters(prev => ({
-      ...prev,
-      barberoId: value || null
-    }));
-  };
 
   // Navigation functions
   const goToPreviousMonth = () => {
@@ -169,11 +99,12 @@ export function DesktopAgenda() {
     setSelectedDate(today);
   };
 
+
   // Generate calendar days
   const generateCalendarDays = (): CalendarDay[] => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    
+
     // First day of the month
     const firstDay = new Date(year, month, 1);
     // Last day of the month
@@ -184,22 +115,22 @@ export function DesktopAgenda() {
     // Last day of the calendar (Saturday of the week containing the last day)
     const endDay = new Date(lastDay);
     endDay.setDate(lastDay.getDate() + (6 - lastDay.getDay()));
-    
+
     const days: CalendarDay[] = [];
     const today = new Date();
     const current = new Date(startDay);
-    
+
     // Crear un mapa de citas por fecha para acceso rápido
     const citasPorFecha: { [key: string]: Appointment[] } = {};
-    if (citasData) {
-      console.log('📋 Citas antes de filtrar:', citasData);
-      const citasFiltradas = citasData.filter(cita => cita.estado !== "cancelado"); // Filtrar citas canceladas
-      console.log('✅ Citas después de filtrar:', citasFiltradas);
+    // Usar citasMesData para el calendario (todo el mes) en lugar de citasData (solo un día)
+    if (citasMesData) {
+      console.log('📋 Citas del mes antes de filtrar:', citasMesData);
+      const citasFiltradas = citasMesData.filter(cita => cita.estado !== "cancelado");
+      console.log('✅ Citas del mes después de filtrar:', citasFiltradas);
       citasFiltradas.forEach(cita => {
-        // Asegurarse de que la fecha esté en el formato correcto (YYYY-MM-DD)
         const fechaParts = cita.fecha.split('T');
         const fechaStr = fechaParts[0];
-        
+
         if (!citasPorFecha[fechaStr]) {
           citasPorFecha[fechaStr] = [];
         }
@@ -207,12 +138,12 @@ export function DesktopAgenda() {
       });
     }
     console.log('📅 Mapa de citas por fecha:', citasPorFecha);
-    
+
     while (current <= endDay) {
       // Formatear la fecha del día actual en el mismo formato que las citas
       const fechaStr = current.toISOString().split('T')[0];
       const citasDelDia = citasPorFecha[fechaStr] || [];
-    
+
       days.push({
         date: new Date(current),
         isCurrentMonth: current.getMonth() === month,
@@ -222,7 +153,7 @@ export function DesktopAgenda() {
       });
       current.setDate(current.getDate() + 1);
     }
-    
+
     return days;
   };
 
@@ -230,10 +161,10 @@ export function DesktopAgenda() {
 
   // Format date for display
   const formatDate = (date: Date): string => {
-    return date.toLocaleDateString('es-ES', { 
-      weekday: 'long', 
-      day: 'numeric', 
-      month: 'long' 
+    return date.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long'
     });
   };
 
@@ -257,7 +188,7 @@ export function DesktopAgenda() {
       servicio: "",
       barbero: ""
     };
-    
+
     setSelectedAppointment(newAppointment as Appointment);
     setIsModalOpen(true);
   };
@@ -268,107 +199,47 @@ export function DesktopAgenda() {
     setSelectedAppointment(null);
   };
 
-  // Effect to refetch when filters change
-  useEffect(() => {
-    refetch();
-  }, [filters.sucursalId, filters.barberoId, selectedDate, refetch]);
-  
+
   // Obtener IDs únicos de clientes de las citas filtradas
-  const clienteIds = citasData 
+  const clienteIds = citasData
     ? Array.from(new Set(citasData
-        .map(cita => cita.id_cliente)
-        .filter((id): id is string => id !== null && id !== undefined)))
+      .map(cita => cita.id_cliente)
+      .filter((id): id is string => id !== null && id !== undefined)))
     : [];
-  
+
   // Obtener información de todos los clientes necesarios
   const { data: clientesData, isLoading: clientesLoading } = useClientesByIds(clienteIds);
-  
+
   // Crear un mapa de clientes por ID para acceso rápido
-  const clientesMap = clientesData 
+  const clientesMap = clientesData
     ? clientesData.reduce((acc, cliente) => {
-        acc[cliente.id_cliente] = cliente;
-        return acc;
-      }, {} as Record<string, Client>)
+      acc[cliente.id_cliente] = cliente;
+      return acc;
+    }, {} as Record<string, Client>)
     : {};
 
   return (
     // Contenedor principal que engloba todo el contenido con márgenes adecuados para desktop
     <div className="flex flex-col w-full bg-transparent px-8 py-1">
       {/* Título de la agenda - compartido por ambas vistas */}
-      
-      
-      {/* Filtros - compartidos por ambas vistas */}
-      <div className="mb-8">
-        <div className="flex flex-wrap gap-6 items-end">
-          {/* Filtro de Sucursal */}
-          <div className="flex-1 min-w-[250px] max-w-[300px]">
-            <label className="block text-sm font-medium text-qoder-dark-text-primary mb-2">
-              Sucursal
-            </label>
-            <select
-              value={filters.sucursalId || ""}
-              onChange={(e) => handleSucursalChange(e.target.value || undefined)}
-              className="qoder-dark-input w-full py-3 px-4 text-base rounded-lg"
-              disabled={isLoadingSucursales}
-            >
-              {isLoadingSucursales ? (
-                <option>Cargando sucursales...</option>
-              ) : (
-                <>
-                  <option value="">Todas las sucursales</option>
-                  {sucursales.map((sucursal) => (
-                    <option key={sucursal.id} value={sucursal.id}>
-                      {sucursal.nombre_sucursal || `Sucursal ${sucursal.numero_sucursal}`}
-                    </option>
-                  ))}
-                </>
-              )}
-            </select>
-          </div>
-          
-          {/* Filtro de Barbero */}
-          <div className="flex-1 min-w-[250px] max-w-[300px]">
-            <label className="block text-sm font-medium text-qoder-dark-text-primary mb-2">
-              Barbero
-            </label>
-            <select
-              value={filters.barberoId || ""}
-              onChange={(e) => handleBarberoChange(e.target.value || undefined)}
-              className="qoder-dark-input w-full py-3 px-4 text-base rounded-lg"
-              disabled={isLoadingBarberos}
-            >
-              {isLoadingBarberos ? (
-                <option>Cargando barberos...</option>
-              ) : (
-                <>
-                  {filteredBarbers?.map((barbero: any) => (
-                    <option key={barbero.id_barbero} value={barbero.id_barbero}>
-                      {barbero.nombre}
-                    </option>
-                  ))}
-                </>
-              )}
-            </select>
-          </div>
-          
-          {/* Botón de Nuevo Turno alineado a la derecha */}
-          <div className="ml-auto">
-            <button
-              onClick={handleNewAppointment}
-              className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-600 hover:to-amber-600 text-white py-3 px-6 rounded-lg font-medium transition-all duration-200 whitespace-nowrap"
-            >
-              + Nuevo Turno
-            </button>
-          </div>
-        </div>
+
+
+      {/* Botón de Nuevo Turno */}
+      <div className="mb-8 flex justify-end">
+        <button
+          onClick={handleNewAppointment}
+          className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-600 hover:to-amber-600 text-white py-3 px-6 rounded-lg font-medium transition-all duration-200 whitespace-nowrap"
+        >
+          + Nuevo Turno
+        </button>
       </div>
-      
+
       {/* Vista de Calendario */}
       {view === 'calendar' && (
         <div className="flex-1 pb-8">
           {/* Navegación de Mes */}
           <div className="flex items-center justify-between mb-6">
-            <button 
+            <button
               onClick={goToPreviousMonth}
               className="p-3 rounded-full hover:bg-qoder-dark-bg-secondary transition-colors duration-200"
             >
@@ -377,32 +248,32 @@ export function DesktopAgenda() {
             <h2 className="text-xl font-semibold text-qoder-dark-text-primary">
               {currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
             </h2>
-            <button 
+            <button
               onClick={goToNextMonth}
               className="p-3 rounded-full hover:bg-qoder-dark-bg-secondary transition-colors duration-200"
             >
               <ChevronRightIcon className="h-6 w-6 text-qoder-dark-text-primary" />
             </button>
           </div>
-          
+
           {/* Encabezados de Día de la Semana */}
           <div className="grid grid-cols-7 gap-0 mb-0">
             {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day) => (
-              <div 
-                key={day} 
+              <div
+                key={day}
                 className="text-center text-lg font-semibold text-orange-500 py-3 bg-transparent"
               >
                 {day}
               </div>
             ))}
           </div>
-          
+
           {/* Cuadrícula del Calendario */}
           <div className="grid grid-cols-7 gap-1 mb-8">
             {calendarDays.map((day, index) => {
               // Contar las citas del día
               const citaCount = day.citas ? day.citas.length : 0;
-              
+
               return (
                 <div
                   key={index}
@@ -410,10 +281,9 @@ export function DesktopAgenda() {
                 >
                   <div
                     onClick={() => handleDaySelect(day)}
-                    className={`flex flex-col items-center justify-center text-base w-full h-full rounded transition-all duration-200 cursor-pointer transform hover:-translate-y-1 hover:shadow-lg ${
-                      day.isToday ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white' : 
+                    className={`flex flex-col items-center justify-center text-base w-full h-full rounded transition-all duration-200 cursor-pointer transform hover:-translate-y-1 hover:shadow-lg ${day.isToday ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white' :
                       day.isSelected && !day.isToday ? 'bg-gray-700' : 'bg-transparent'
-                    } hover:bg-orange-500 hover:bg-opacity-50 hover:text-white`}
+                      } hover:bg-orange-500 hover:bg-opacity-50 hover:text-white`}
                     style={{
                       opacity: day.isCurrentMonth ? 1 : 0.5,
                       border: '1px solid rgba(75, 85, 99, 0.2)' // Gris con 20% opacidad
@@ -432,7 +302,7 @@ export function DesktopAgenda() {
               );
             })}
           </div>
-          
+
           {/* Calendario FullCalendar para vista desktop - DESACTIVADO */}
           {/* 
           <div className="mt-8">
@@ -449,108 +319,111 @@ export function DesktopAgenda() {
           </div>
           */}
         </div>
-      )}
-      
+      )
+      }
+
       {/* Vista de Día */}
-      {view === 'day' && (
-        <div className="flex flex-col flex-1">
-          {/* Botón de volver al calendario y fecha */}
-          <div className="flex items-center gap-4 mb-6">
-            <button
-              onClick={() => setView("calendar")}
-              className="text-white text-base font-medium flex items-center bg-qoder-dark-button-secondary hover:bg-qoder-dark-button-secondary-hover py-2 px-4 rounded-lg transition-colors duration-200"
-            >
-              <ChevronLeftIcon className="h-5 w-5 mr-2" />
-              Volver
-            </button>
+      {
+        view === 'day' && (
+          <div className="flex flex-col flex-1">
+            {/* Botón de volver al calendario y fecha */}
+            <div className="flex items-center gap-4 mb-6">
+              <button
+                onClick={() => setView("calendar")}
+                className="text-white text-base font-medium flex items-center bg-qoder-dark-button-secondary hover:bg-qoder-dark-button-secondary-hover py-2 px-4 rounded-lg transition-colors duration-200"
+              >
+                <ChevronLeftIcon className="h-5 w-5 mr-2" />
+                Volver
+              </button>
 
-            <h2 className="text-xl font-semibold text-qoder-dark-text-primary">
-              {formatDate(selectedDate)}
-            </h2>
-          </div>
+              <h2 className="text-xl font-semibold text-qoder-dark-text-primary">
+                {formatDate(selectedDate)}
+              </h2>
+            </div>
 
-          {/* Lista de Citas: contenedor que crece/achica según cantidad */}
-          <div className="flex flex-col gap-4 flex-1">
-            {isLoading ? (
-              <div className="text-center py-12 text-qoder-dark-text-secondary flex items-center justify-center">
-                Cargando citas...
-              </div>
-            ) : error ? (
-              <div className="text-center py-12 text-red-500 flex items-center justify-center">
-                Error al cargar las citas: {error.message}
-              </div>
-            ) : citasData && citasData.length > 0 ? (
-              <div className="space-y-4 pb-6">
-                {citasData
-                  .filter(cita => {
-                    // Filtrar solo las citas del día seleccionado
-                    const citaFecha = cita.fecha.split('T')[0];
-                    const selectedFecha = selectedDate.toISOString().split('T')[0];
-                    return citaFecha === selectedFecha;
-                  })
-                  .filter(cita => cita.estado !== "cancelado") // Filtrar citas canceladas
-                  .sort((a, b) => {
-                    // Ordenar por hora
-                    return a.hora.localeCompare(b.hora);
-                  })
-                  .map((appointment) => {
-                    // Obtener información del cliente del mapa
-                    const clientData = appointment.id_cliente ? clientesMap[appointment.id_cliente] : undefined;
-                    
-                    return (
-                      <div
-                        key={appointment.id_cita}
-                        onClick={() => handleAppointmentClick(appointment)}
-                        className="bg-qoder-dark-bg-form rounded-xl p-5 border border-qoder-dark-border cursor-pointer hover:shadow-lg transition-shadow duration-200"
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <div className="font-semibold text-qoder-dark-text-primary text-lg">
-                              {appointment.cliente_nombre}
-                              {clientData && clientData.puntaje !== null && clientData.puntaje !== undefined && (
-                                <span className="ml-2">
-                                  {getStarsFromScore(clientData.puntaje)}
-                                </span>
+            {/* Lista de Citas: contenedor que crece/achica según cantidad */}
+            <div className="flex flex-col gap-4 flex-1">
+              {isLoading ? (
+                <div className="text-center py-12 text-qoder-dark-text-secondary flex items-center justify-center">
+                  Cargando citas...
+                </div>
+              ) : error ? (
+                <div className="text-center py-12 text-red-500 flex items-center justify-center">
+                  Error al cargar las citas: {error?.message || 'Error desconocido'}
+                </div>
+              ) : citasData && citasData.length > 0 ? (
+                <div className="space-y-4 pb-6">
+                  {citasData
+                    .filter(cita => {
+                      // Filtrar solo las citas del día seleccionado
+                      const citaFecha = cita.fecha.split('T')[0];
+                      const selectedFecha = selectedDate.toISOString().split('T')[0];
+                      return citaFecha === selectedFecha;
+                    })
+                    .filter(cita => cita.estado !== "cancelado") // Filtrar citas canceladas
+                    .sort((a, b) => {
+                      // Ordenar por hora
+                      return a.hora.localeCompare(b.hora);
+                    })
+                    .map((appointment) => {
+                      // Obtener información del cliente del mapa
+                      const clientData = appointment.id_cliente ? clientesMap[appointment.id_cliente] : undefined;
+
+                      return (
+                        <div
+                          key={appointment.id_cita}
+                          onClick={() => handleAppointmentClick(appointment)}
+                          className="bg-qoder-dark-bg-form rounded-xl p-5 border border-qoder-dark-border cursor-pointer hover:shadow-lg transition-shadow duration-200"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <div className="font-semibold text-qoder-dark-text-primary text-lg">
+                                {appointment.cliente_nombre}
+                                {clientData && clientData.puntaje !== null && clientData.puntaje !== undefined && (
+                                  <span className="ml-2">
+                                    {getStarsFromScore(clientData.puntaje)}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-base text-qoder-dark-text-secondary mt-2">
+                                {appointment.servicio}
+                              </div>
+                              {/* Mostrar notas de forma sutil si existen */}
+                              {appointment.nota && (
+                                <div className="mt-2 text-sm text-qoder-dark-text-muted italic truncate max-w-xs">
+                                  {appointment.nota}
+                                </div>
                               )}
                             </div>
-                            <div className="text-base text-qoder-dark-text-secondary mt-2">
-                              {appointment.servicio}
-                            </div>
-                            {/* Mostrar notas de forma sutil si existen */}
-                            {appointment.nota && (
-                              <div className="mt-2 text-sm text-qoder-dark-text-muted italic truncate max-w-xs">
-                                {appointment.nota}
+                            <div className="text-right">
+                              <div className="font-semibold text-qoder-dark-text-primary text-lg">
+                                {appointment.hora.substring(0, 5)} {/* Formato HH:MM */}
                               </div>
-                            )}
-                          </div>
-                          <div className="text-right">
-                            <div className="font-semibold text-qoder-dark-text-primary text-lg">
-                              {appointment.hora.substring(0, 5)} {/* Formato HH:MM */}
-                            </div>
-                            <div className="text-base text-qoder-dark-text-secondary mt-2">
-                              {appointment.duracion} min {/* Agregar "min" a la duración */}
+                              <div className="text-base text-qoder-dark-text-secondary mt-2">
+                                {appointment.duracion} min {/* Agregar "min" a la duración */}
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
-              </div>
-            ) : (
-              <div className="text-center py-12 text-qoder-dark-text-secondary flex items-center justify-center">
-                No hay citas programadas para este día
-              </div>
-            )}
+                      );
+                    })}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-qoder-dark-text-secondary flex items-center justify-center">
+                  No hay citas programadas para este día
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
-      
+        )
+      }
+
       {/* Modal de Cita */}
       <FinalAppointmentModal
         open={isModalOpen}
         onOpenChange={handleCloseModal}
         initial={selectedAppointment || undefined}
       />
-    </div>
+    </div >
   );
 }

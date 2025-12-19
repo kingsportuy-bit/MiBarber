@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'OldEnglish';
-  src: url('/fonts/OLDENGL.TTF') format('truetype');
+  src: url('/fonts/old-english.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -8,7 +8,7 @@
 
 @font-face {
   font-family: 'Old English Text MT';
-  src: url('/fonts/OLDENGL.TTF') format('truetype');
+  src: url('/fonts/old-english.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;

@@ -56,12 +56,12 @@ a.nav-logo {
   box-sizing: border-box;
   transition: color 0.3s ease; /* Transición suave para el color */
   position: relative;
-  font-family: 'Old English Text MT', 'Roboto', 'Arial', sans-serif; /* Fuente personalizada */
+  font-family: 'Old English Text MT'; /* Fuente personalizada */
 }
 
 /* Estilo para nombres de clientes */
 .client-name {
-  font-family: 'Old English Text MT', 'Roboto', 'Arial', sans-serif; /* Fuente personalizada para nombres de clientes */
+  font-family: 'Old English Text MT'; /* Fuente personalizada para nombres de clientes */
 }
 
 a.nav-logo:hover {

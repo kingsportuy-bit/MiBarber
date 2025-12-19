@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import "./custom-styles.css";
 import "./responsive.css";
@@ -11,6 +12,12 @@ import { Portal } from '@radix-ui/react-portal';
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+});
+
+const oldEnglish = localFont({
+  src: "./fonts/old-english.ttf",
+  variable: "--font-old-english",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -28,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={inter.variable}>
+    <html lang="es" className={`${inter.variable} ${oldEnglish.variable}`}>
       <body className="min-h-screen flex flex-col min-w-0 font-sans custom-scrollbar" style={{ backgroundColor: 'transparent' }}>
         {/* Contenedor de fondo fijo con destellos naranjas intermitentes */}
         <div className="background-container">

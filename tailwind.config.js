@@ -44,6 +44,9 @@ module.exports = {
         'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
         'code-flow': 'code-flow 3s ease-in-out infinite',
       },
+      fontFamily: {
+        'old-english': ['var(--font-old-english)'],
+      },
     },
   },
   plugins: [],

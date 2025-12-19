@@ -4,6 +4,7 @@ import "./globals.css";
 import "./custom-styles.css";
 import "./responsive.css";
 import "./transitions.css";
+import "./fonts.css";
 import ClientLayout from "./client-layout";
 import { Portal } from '@radix-ui/react-portal';
 

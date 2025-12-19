@@ -49,7 +49,7 @@ a.nav-logo {
   justify-self: start;
   cursor: pointer;
   text-decoration: none;
-  font-size: 3rem; /* Doblamos el tamaño de la fuente */
+  font-size: 2rem; /* Doblamos el tamaño de la fuente */
   display: flex;
   align-items: center;
   font-weight: 700;

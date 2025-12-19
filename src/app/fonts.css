@@ -1,6 +1,14 @@
 @font-face {
+  font-family: 'OldEnglish';
+  src: url('/fonts/OLDENGL.TTF') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'Old English Text MT';
-  src: url('/OLDENGL.TTF') format('truetype');
+  src: url('/fonts/OLDENGL.TTF') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -8,5 +16,5 @@
 
 /* Aplicar específicamente al logo */
 .nav-logo, .barberox-barbero, .barberox-x, .client-name {
-  font-family: 'Old English Text MT' !important;
+  font-family: 'OldEnglish', 'Old English Text MT' !important;
 }

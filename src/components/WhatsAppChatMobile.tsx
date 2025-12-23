@@ -80,13 +80,21 @@ export function WhatsAppChatMobile() {
 
   // Función para obtener el nombre del cliente por su ID
   const getClientName = (sessionId: string) => {
-    const cliente = clients?.find((c: Client) => c.telefono === sessionId || c.id_cliente === sessionId);
+    const cliente = clients?.find((c: Client) => 
+      c.telefono === sessionId || 
+      c.id_cliente === sessionId || 
+      (c.id_conversacion && c.id_conversacion.toString() === sessionId)
+    );
     return cliente?.nombre || "Cliente desconocido";
   };
 
   // Función para obtener información del cliente
   const getClientInfo = (sessionId: string) => {
-    return clients?.find((c: Client) => c.telefono === sessionId || c.id_cliente === sessionId);
+    return clients?.find((c: Client) => 
+      c.telefono === sessionId || 
+      c.id_cliente === sessionId || 
+      (c.id_conversacion && c.id_conversacion.toString() === sessionId)
+    );
   };
   
   // Obtener IDs únicos de clientes de las conversaciones
@@ -204,6 +212,7 @@ export function WhatsAppChatMobile() {
       // Insertar mensaje en la tabla mibarber_historial
       const newMessage = {
         session_id: activeConv.session_id,
+        id_sucursal: barbero?.id_sucursal,
         message: {
           type: "ai",
           content: message,

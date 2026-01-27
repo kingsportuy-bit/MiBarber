@@ -16,13 +16,14 @@ export interface UseCitasPorRangoResult {
 export function useCitasPorRango({
   sucursalId,
   fechaInicio,
-  fechaFin
-}: CitasPorRangoParams): UseCitasPorRangoResult {
+  fechaFin,
+  barberoId
+}: CitasPorRangoParams & { barberoId?: string }): UseCitasPorRangoResult {
   const supabase = getSupabaseClient();
   const { barbero: barberoActual, isAdmin, idBarberia } = useBarberoAuth();
 
   const queryResult = useQuery({
-    queryKey: ["citas-rango", sucursalId, fechaInicio, fechaFin, barberoActual?.id_barbero, isAdmin],
+    queryKey: ["citas-rango", sucursalId, fechaInicio, fechaFin, barberoId || barberoActual?.id_barbero, isAdmin],
     queryFn: async () => {
       if (!fechaInicio || !fechaFin) {
         return [];
@@ -38,8 +39,12 @@ export function useCitasPorRango({
       // Filtrar por rango de fechas
       q = q.gte("fecha", fechaInicio).lte("fecha", fechaFin);
       
-      // Si el usuario no es administrador, solo mostrar sus propias citas
-      if (!isAdmin && barberoActual?.id_barbero) {
+      // Si se proporciona barberoId, filtrar por ese barbero
+      if (barberoId) {
+        q = q.eq("id_barbero", barberoId);
+      }
+      // Si no se proporciona barberoId y el usuario no es administrador, solo mostrar sus propias citas
+      else if (!isAdmin && barberoActual?.id_barbero) {
         q = q.eq("id_barbero", barberoActual.id_barbero);
       }
       

@@ -40,7 +40,7 @@ export function NavBar() {
 
     // Escuchar cambios en el hash
     window.addEventListener('hashchange', handleHashChange);
-    
+
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
     };
@@ -50,7 +50,7 @@ export function NavBar() {
   useEffect(() => {
     const handleScroll = () => {
       if (typeof window === 'undefined') return;
-      
+
       // Solo aplicar el comportamiento de ocultar en dispositivos móviles
       const isMobile = window.innerWidth < 768;
       if (!isMobile) {
@@ -58,19 +58,19 @@ export function NavBar() {
         setIsNavbarHidden(false);
         return;
       }
-      
+
       // Si estamos ocultando completamente el NavBar, no hacer nada
       if (shouldHideCompletely) return;
-      
+
       const currentScrollPosition = window.scrollY;
-      
+
       // Si el usuario está cerca de la parte superior, siempre mostrar la barra
       if (currentScrollPosition < 60) {
         setIsNavbarHidden(false);
         scrollPositionRef.current = currentScrollPosition;
         return;
       }
-      
+
       // Comparar la posición actual con la anterior para determinar la dirección del scroll
       if (currentScrollPosition > scrollPositionRef.current) {
         // Scroll hacia abajo - ocultar la barra
@@ -79,14 +79,14 @@ export function NavBar() {
         // Scroll hacia arriba - mostrar la barra
         setIsNavbarHidden(false);
       }
-      
+
       // Actualizar la posición de referencia
       scrollPositionRef.current = currentScrollPosition;
     };
 
     // Agregar el event listener para el scroll
     window.addEventListener('scroll', handleScroll);
-    
+
     // Limpiar el event listener al desmontar el componente
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -108,7 +108,7 @@ export function NavBar() {
   useEffect(() => {
     // Solo ejecutar en el cliente
     if (typeof window === 'undefined') return;
-    
+
     const checkAuth = () => {
       try {
         const sessionStr = localStorage.getItem("barber_auth_session");
@@ -217,7 +217,7 @@ export function NavBar() {
 
   // Mostrar la barra de navegación incluso si hay problemas con la autenticación
   const shouldHideNavBar = pathname?.startsWith("/login");
-  
+
   // Ocultar el NavBar cuando se está en la vista de chat individual de WhatsApp
   const shouldHideNavBarCompletely = shouldHideCompletely;
 
@@ -289,16 +289,28 @@ export function NavBar() {
       <div className="nav-container min-w-0">
         <Link
           href="/inicio"
-          className={`nav-logo font-bold ${pathname?.startsWith("/inicio") ? 'active' : ''}`}
-          style={{ 
-            paddingLeft: '20px', 
-            paddingRight: '20px' 
+          className="nav-logo"
+          style={{
+            paddingLeft: '10px',
+            paddingRight: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            flexShrink: 0
           }}
         >
-          <span className="barberox-barbero">Barbero</span>
-          <span className="barberox-x">x</span>
+          {/* Logo imagen con altura fija y sin encogerse */}
+          <img
+            src="/img/logogris.png"
+            alt="Barberox"
+            style={{
+              height: '30px',
+              width: 'auto',
+              minWidth: '100px', // Asegurar un ancho mínimo razonable
+              objectFit: 'contain'
+            }}
+          />
         </Link>
-        
+
         {/* Navegación de escritorio - ocultar en móviles */}
         <div className="hidden md:flex items-center gap-1 text-xs">
           {authState.isAuthenticated &&
@@ -306,7 +318,7 @@ export function NavBar() {
               const active = pathname?.startsWith(t.href);
               // Verificar si la página es exclusiva de administradores
               const isAdminPage = t.href === '/estadisticas' || t.href === '/admin' || t.href === '/admin/bloqueos' || t.href === '/v2/caja' || t.href === '/mi-barberia';
-              
+
               return (
                 <Link
                   key={t.href}
@@ -323,18 +335,18 @@ export function NavBar() {
               );
             })}
         </div>
-        
+
         <div className="ml-auto flex items-center gap-4">
           {/* Estadísticas y Mi Barbería se mueven al menú desplegable */}
-          
+
           {authState.isAuthenticated && authState.userName && (
-            <UserDropdownMenu 
+            <UserDropdownMenu
               userName={authState.userName}
               isAdmin={authState.isAdmin}
               onLogout={handleLogout}
             />
           )}
-          
+
           {authState.isAuthenticated ? (
             // El botón de salir se ha movido al menú desplegable del usuario
             null
@@ -346,15 +358,15 @@ export function NavBar() {
               Iniciar Sesión
             </Link>
           )}
-          
+
           {/* Menú móvil - ocultar en pantallas pequeñas donde aparece BottomNav */}
           <div className="md:hidden">
-            <MobileMenu 
+            <MobileMenu
               isOpen={isMobileMenuOpen}
               onClose={() => setIsMobileMenuOpen(false)}
             />
           </div>
-          
+
           {/* Eliminar el botón de logout para móviles ya que ahora está en el menú desplegable */}
         </div>
       </div>

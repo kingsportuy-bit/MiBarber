@@ -38,7 +38,7 @@ export default function LoginPage() {
             localStorage.removeItem('barber_auth_session');
           }
         }
-        
+
         // Si no está autenticado, mostrar el formulario de login
         console.log('❌ Login: Usuario no autenticado, mostrando formulario');
         setCheckingAuth(false);
@@ -56,7 +56,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    
+
     try {
       // Buscar al usuario en la tabla mibarber_barberos por username (normalizado a minúsculas)
       const normalizedUsername = username.toLowerCase();
@@ -65,22 +65,22 @@ export default function LoginPage() {
         .select('*')
         .eq('username', normalizedUsername)
         .single();
-      
+
       if (userError || !data) {
         setError("Usuario no encontrado");
         setLoading(false);
         return;
       }
-      
+
       const user = data as Barbero;
-      
+
       // Verificar la contraseña (en producción esto debería ser hasheado)
       if (user.password_hash !== password) {
         setError("Contraseña incorrecta");
         setLoading(false);
         return;
       }
-      
+
       // Crear una sesión de autenticación simulada
       const sessionData = {
         user: {
@@ -95,19 +95,21 @@ export default function LoginPage() {
         },
         expiresAt: Date.now() + (24 * 60 * 60 * 1000) // Expira en 24 horas
       };
-      
+
       // Guardar en localStorage para simular sesión persistente
       if (typeof window !== 'undefined') {
         localStorage.setItem('barber_auth_session', JSON.stringify(sessionData));
         // También establecer una cookie para que el middleware pueda detectar la sesión
         document.cookie = `barber_auth_session=${encodeURIComponent(JSON.stringify(sessionData))}; path=/; max-age=${24 * 60 * 60}; SameSite=Lax`;
-        
+
         // Disparar evento personalizado para notificar el cambio de autenticación
-        window.dispatchEvent(new CustomEvent('barberAuthChange', { 
-          detail: { user: data, action: 'login' 
-        } }));
+        window.dispatchEvent(new CustomEvent('barberAuthChange', {
+          detail: {
+            user: data, action: 'login'
+          }
+        }));
       }
-      
+
       // Esperar un momento para que los listeners actualicen su estado
       // antes de redirigir
       setTimeout(() => {
@@ -143,9 +145,12 @@ export default function LoginPage() {
     <div className="flex flex-col justify-center items-center min-h-screen bg-transparent p-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-qoder-dark-text-primary mb-2">
-            <span className="barberox-barbero">Barbero</span>
-            <span className="barberox-x">x</span>
+          <h1 className="flex justify-center mb-4 no-underline">
+            <img
+              src="/img/logogris.png"
+              alt="Barberox"
+              className="h-16 w-auto object-contain"
+            />
           </h1>
           <p className="text-qoder-dark-text-secondary">
             Sistema de gestión para barberías
@@ -166,7 +171,7 @@ export default function LoginPage() {
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-2">
               Contraseña
@@ -180,13 +185,13 @@ export default function LoginPage() {
               required
             />
           </div>
-          
+
           {error && (
             <div className="text-red-400 text-sm py-2">
               {error}
             </div>
           )}
-          
+
           <div className="flex justify-end pt-4">
             <button
               type="submit"

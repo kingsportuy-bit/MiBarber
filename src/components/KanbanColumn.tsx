@@ -50,7 +50,7 @@ export function KanbanColumn({ column, tasks, onEdit }: KanbanColumnProps) {
         - Número de tareas en la columna
         - Color de fondo según el tipo de columna
       */}
-      <h2 className={`text-lg font-bold p-2 rounded-t-lg ${getColumnColorClasses(column.color)} bg-opacity-50`}>
+      <h2 className={`text-lg font-bold p-2 rounded-t-lg ${getColumnColorClasses(column.color)} bg-opacity-15`}>
         {column.title} ({column.taskIds.length})
       </h2>
       

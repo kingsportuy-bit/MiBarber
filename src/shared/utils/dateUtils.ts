@@ -134,3 +134,23 @@ export function getFirstDayOfMonth(): string {
   
   return `${year}-${month}-${day}`;
 }
+
+/**
+ * Obtiene el último día del mes actual
+ */
+export function getLastDayOfMonth(): string {
+  const now = new Date();
+  // Ajustar manualmente a UTC-3 (Uruguay)
+  now.setMinutes(now.getMinutes() + now.getTimezoneOffset() + (-180));
+  
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1; // Mes siguiente
+  // Crear fecha del primer día del mes siguiente y restar un día
+  const lastDayDate = new Date(year, month, 0); // 0 da el último día del mes anterior
+  
+  const lastYear = lastDayDate.getFullYear();
+  const lastMonth = String(lastDayDate.getMonth() + 1).padStart(2, '0');
+  const lastDay = String(lastDayDate.getDate()).padStart(2, '0');
+  
+  return `${lastYear}-${lastMonth}-${lastDay}`;
+}

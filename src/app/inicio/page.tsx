@@ -7,7 +7,7 @@ import { useState, useCallback, useEffect } from "react";
 import type { Appointment } from "@/types/db";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
 import { GlobalFilters } from "@/components/shared/GlobalFilters";
-import { FinalAppointmentModal } from "@/components/FinalAppointmentModal";
+import { FinalAppointmentModalModificado } from "@/components/FinalAppointmentModalModificado";
 
 export default function DashboardPage() {
   usePageTitle("Barberox | Inicio");
@@ -94,7 +94,7 @@ export default function DashboardPage() {
       </div>
       
       {/* Modal de cita - Compartido entre vistas móvil y escritorio */}
-      <FinalAppointmentModal
+      <FinalAppointmentModalModificado
         open={isCreateModalOpen}
         onOpenChange={handleCloseModal}
         initial={selectedAppointment || undefined}

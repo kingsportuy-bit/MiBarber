@@ -66,7 +66,20 @@ export default function PerfilPage() {
           </div>
           
           <div className="flex-1 text-center md:text-left">
-            <h1 className="text-center text-2xl md:text-3xl font-bold mb-2 text-[var(--text-primary)]">
+            <h1 
+              className="text-center text-3xl md:text-4xl mb-2 text-[var(--text-primary)] client-name"
+              style={
+                {
+                  fontFamily: "'Old English Text MT', 'Roboto', 'Arial', sans-serif",
+                  fontSize: '1.8rem',
+                  textShadow: 'none',
+                  background: 'none',
+                  backgroundImage: 'none',
+                  WebkitTextFillColor: 'inherit',
+                  fontWeight: 'normal'
+                }
+              }
+            >
               {barberoData.nombre}
             </h1>
             <p className="text-sm text-[var(--text-muted)] mb-4">

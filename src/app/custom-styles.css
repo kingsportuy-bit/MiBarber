@@ -1,16 +1,24 @@
 :root {
-  --color-primary: #ff7700; /* Naranja principal */
-  --color-primary-dark: #cc5500; /* Naranja oscuro */
-  --color-background: #000000; /* Negro puro */
-  --color-background-transparent: rgba(0, 0, 0, 0.8); /* Negro con transparencia */
-  --color-text: rgba(255, 255, 255, 0.87); /* Texto blanco */
-  --color-text-secondary: rgba(255, 255, 255, 0.6); /* Texto blanco secundario */
-  --color-accent: #00CCC2; /* Azul turquesa para acentos */
+  --color-primary: #ff7700;
+  /* Naranja principal */
+  --color-primary-dark: #cc5500;
+  /* Naranja oscuro */
+  --color-background: #000000;
+  /* Negro puro */
+  --color-background-transparent: rgba(0, 0, 0, 0.8);
+  /* Negro con transparencia */
+  --color-text: rgba(255, 255, 255, 0.87);
+  /* Texto blanco */
+  --color-text-secondary: rgba(255, 255, 255, 0.6);
+  /* Texto blanco secundario */
+  --color-accent: #00CCC2;
+  /* Azul turquesa para acentos */
 }
 
 /* Navbar styles */
 .navbar {
-  background: rgba(0, 0, 0, 0.8); /* Fondo negro con 80% de opacidad */
+  background: rgba(0, 0, 0, 0.8);
+  /* Fondo negro con 80% de opacidad */
   height: 60px;
   display: flex;
   justify-content: center;
@@ -22,10 +30,12 @@
   right: 0;
   z-index: 999;
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 165, 0, 0.2); /* Borde naranja claro */
+  border-bottom: 1px solid rgba(255, 165, 0, 0.2);
+  /* Borde naranja claro */
   width: 100%;
   box-sizing: border-box;
-  font-family: 'Roboto', 'Arial', sans-serif; /* Fuente consistente para todo el navbar */
+  font-family: 'Roboto', 'Arial', sans-serif;
+  /* Fuente consistente para todo el navbar */
   transition: transform 300ms ease-in-out;
 }
 
@@ -49,19 +59,23 @@ a.nav-logo {
   justify-self: start;
   cursor: pointer;
   text-decoration: none;
-  font-size: 2rem; /* Doblamos el tamaño de la fuente */
+  font-size: 1.375rem;
+  /* Doblamos el tamaño de la fuente */
   display: flex;
   align-items: center;
   font-weight: 700;
   box-sizing: border-box;
-  transition: color 0.3s ease; /* Transición suave para el color */
+  transition: color 0.3s ease;
+  /* Transición suave para el color */
   position: relative;
-  font-family: 'OldEnglish', 'Old English Text MT'; /* Fuente personalizada */
+  font-family: 'OldEnglish', 'Old English Text MT';
+  /* Fuente personalizada */
 }
 
 /* Estilo para nombres de clientes */
 .client-name {
-  font-family: 'OldEnglish', 'Old English Text MT'; /* Fuente personalizada para nombres de clientes */
+  font-family: 'OldEnglish', 'Old English Text MT';
+  /* Fuente personalizada para nombres de clientes */
 }
 
 a.nav-logo:hover {
@@ -80,12 +94,13 @@ a.nav-logo.active::after {
   transform: translateX(-50%);
   width: 70%;
   height: 3px;
-  background: linear-gradient(90deg, #cc5500, #ff7700); /* Degradado naranja */
+  background: linear-gradient(90deg, #7d6a58, #9E8772);
+  /* Degradado beige */
 }
 
 /* Estilos personalizados para Barberox */
 .barberox-barbero {
-  color: #ff7700 !important;
+  color: #9E8772 !important;
   font-weight: bold;
 }
 
@@ -96,7 +111,8 @@ a.nav-logo.active::after {
 
 .logo-icon {
   margin-right: 10px;
-  color: #ff7700; /* Color naranja para el icono */
+  color: #9E8772;
+  /* Color beige para el icono */
 }
 
 .nav-menu {
@@ -105,7 +121,8 @@ a.nav-logo.active::after {
   text-align: center;
   margin: 0;
   padding: 0;
-  font-family: 'Roboto', 'Arial', sans-serif; /* Fuente consistente */
+  font-family: 'Roboto', 'Arial', sans-serif;
+  /* Fuente consistente */
 }
 
 .nav-item {
@@ -115,7 +132,8 @@ a.nav-logo.active::after {
 }
 
 a.nav-link {
-  color: #fff; /* Color blanco para los enlaces */
+  color: #fff;
+  /* Color blanco para los enlaces */
   display: flex;
   align-items: center;
   text-decoration: none;
@@ -123,17 +141,21 @@ a.nav-link {
   height: 100%;
   position: relative;
   font-weight: 500;
-  font-family: 'Roboto', 'Arial', sans-serif; /* Fuente consistente */
-  font-size: 1rem; /* Tamaño de fuente consistente */
+  font-family: 'Roboto', 'Arial', sans-serif;
+  /* Fuente consistente */
+  font-size: 1rem;
+  /* Tamaño de fuente consistente */
 }
 
 a.nav-link:hover {
-  color: #ff7700; /* Color naranja al pasar el mouse */
+  color: #ff7700;
+  /* Color naranja al pasar el mouse */
   text-decoration: none;
 }
 
 a.nav-link.active {
-  color: #ff7700; /* Color naranja cuando está activo */
+  color: #ff7700;
+  /* Color naranja cuando está activo */
 }
 
 a.nav-link::after {
@@ -144,16 +166,20 @@ a.nav-link::after {
   transform: translateX(-50%);
   width: 0;
   height: 3px;
-  background: linear-gradient(90deg, #cc5500, #ff7700); /* Degradado naranja */
-  transition: width 0.3s ease; /* Transición suave para el ancho */
+  background: linear-gradient(90deg, #cc5500, #ff7700);
+  /* Degradado naranja */
+  transition: width 0.3s ease;
+  /* Transición suave para el ancho */
 }
 
 a.nav-link:hover::after {
-  width: 70%; /* Barra inferior al 70% al pasar el mouse */
+  width: 70%;
+  /* Barra inferior al 70% al pasar el mouse */
 }
 
 a.nav-link.active::after {
-  width: 70%; /* Barra inferior al 70% cuando está activo */
+  width: 70%;
+  /* Barra inferior al 70% cuando está activo */
 }
 
 @media screen and (max-width: 768px) {
@@ -169,20 +195,24 @@ a.nav-link.active::after {
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
   }
-  
+
   a.nav-logo {
-    font-size: 1.5rem;
+    font-size: 1.1875rem;
   }
 }
 
 /* Estilos universales para menús desplegables */
 select {
-  background: rgba(255, 255, 255, 0.1); /* Fondo claro con transparencia */
-  border: 1px solid rgba(255, 255, 255, 0.2); /* Borde claro */
+  background: rgba(255, 255, 255, 0.1);
+  /* Fondo claro con transparencia */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* Borde claro */
   border-radius: 6px;
   padding: 10px 12px;
-  color: white; /* Texto blanco */
-  font-size: 1rem; /* Cambiado de 0.9rem a 1rem para prevenir zoom en iOS Safari */
+  color: white;
+  /* Texto blanco */
+  font-size: 1rem;
+  /* Cambiado de 0.9rem a 1rem para prevenir zoom en iOS Safari */
   width: 100%;
   box-sizing: border-box;
   appearance: none;
@@ -191,31 +221,41 @@ select {
   background-position: right 15px center;
   background-size: 14px;
   padding-right: 35px;
-  font-family: 'Roboto', 'Arial', sans-serif; /* Fuente principal */
+  font-family: 'Roboto', 'Arial', sans-serif;
+  /* Fuente principal */
 }
 
 select:focus {
   outline: none;
-  border-color: #ff7700; /* Borde naranja al enfocar */
-  box-shadow: 0 0 0 3px rgba(255, 119, 0, 0.2); /* Sombra naranja */
-  background: rgba(255, 255, 255, 0.08); /* Fondo ligeramente más oscuro */
+  border-color: #ff7700;
+  /* Borde naranja al enfocar */
+  box-shadow: 0 0 0 3px rgba(255, 119, 0, 0.2);
+  /* Sombra naranja */
+  background: rgba(255, 255, 255, 0.08);
+  /* Fondo ligeramente más oscuro */
 }
 
 select:hover {
-  background: rgba(255, 255, 255, 0.15); /* Fondo más claro al pasar el mouse */
-  border-color: rgba(255, 255, 255, 0.3); /* Borde más visible */
+  background: rgba(255, 255, 255, 0.15);
+  /* Fondo más claro al pasar el mouse */
+  border-color: rgba(255, 255, 255, 0.3);
+  /* Borde más visible */
 }
 
 select option {
-  background: rgba(30, 30, 30, 0.95); /* Fondo oscuro para opciones */
-  color: white; /* Texto blanco */
+  background: rgba(30, 30, 30, 0.95);
+  /* Fondo oscuro para opciones */
+  color: white;
+  /* Texto blanco */
   padding: 10px;
 }
 
 /* Estilos para menús contextuales y dropdowns */
 .dropdown-menu {
-  background: rgba(30, 30, 30, 0.95); /* Fondo oscuro con transparencia */
-  border: 1px solid rgba(255, 119, 0, 0.3); /* Borde naranja */
+  background: rgba(30, 30, 30, 0.95);
+  /* Fondo oscuro con transparencia */
+  border: 1px solid rgba(255, 119, 0, 0.3);
+  /* Borde naranja */
   border-radius: 6px;
   padding: 5px 0;
   min-width: 150px;
@@ -224,30 +264,37 @@ select option {
 
 .dropdown-item {
   padding: 12px 15px;
-  color: #ff7700; /* Texto naranja */
+  color: #ff7700;
+  /* Texto naranja */
   text-decoration: none;
   display: block;
-  transition: all 0.2s ease; /* Transición suave */
+  transition: all 0.2s ease;
+  /* Transición suave */
   font-weight: 500;
   background: transparent;
-  font-family: 'Roboto', 'Arial', sans-serif; /* Fuente consistente */
-  font-size: 1rem; /* Tamaño de fuente consistente */
+  font-family: 'Roboto', 'Arial', sans-serif;
+  /* Fuente consistente */
+  font-size: 1rem;
+  /* Tamaño de fuente consistente */
 }
 
 .dropdown-item:hover {
-  background: rgba(255, 119, 0, 0.3) !important; /* Fondo naranja al pasar el mouse */
+  background: rgba(255, 119, 0, 0.3) !important;
+  /* Fondo naranja al pasar el mouse */
   color: #ff7700;
   font-weight: 600;
 }
 
 .dropdown-item.active {
-  background: rgba(255, 119, 0, 0.5) !important; /* Fondo naranja más intenso cuando está activo */
+  background: rgba(255, 119, 0, 0.5) !important;
+  /* Fondo naranja más intenso cuando está activo */
   color: #ff7700;
   font-weight: 600;
 }
 
 .dropdown-item:focus {
-  background: rgba(255, 119, 0, 0.4) !important; /* Fondo naranja al enfocar */
+  background: rgba(255, 119, 0, 0.4) !important;
+  /* Fondo naranja al enfocar */
   color: #ff7700;
   outline: none;
 }
@@ -259,23 +306,30 @@ select option {
 }
 
 /* Estilos para checkboxes y radios */
-input[type="checkbox"], input[type="radio"] {
-  accent-color: #ff7700; /* Color naranja para los controles */
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: #ff7700;
+  /* Color naranja para los controles */
   width: 18px;
   height: 18px;
 }
 
-input[type="checkbox"]:focus, input[type="radio"]:focus {
-  outline: 2px solid #ff7700; /* Contorno naranja al enfocar */
+input[type="checkbox"]:focus,
+input[type="radio"]:focus {
+  outline: 2px solid #ff7700;
+  /* Contorno naranja al enfocar */
   outline-offset: 2px;
 }
 
 /* Estilos para botones de menú */
 .menu-button {
-  background: rgba(255, 255, 255, 0.1); /* Fondo claro con transparencia */
-  border: 1px solid rgba(255, 255, 255, 0.2); /* Borde claro */
+  background: rgba(255, 255, 255, 0.1);
+  /* Fondo claro con transparencia */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* Borde claro */
   border-radius: 6px;
-  color: white; /* Texto blanco */
+  color: white;
+  /* Texto blanco */
   padding: 10px 15px;
   cursor: pointer;
   font-size: 0.9rem;
@@ -283,22 +337,32 @@ input[type="checkbox"]:focus, input[type="radio"]:focus {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  font-family: 'Roboto', 'Arial', sans-serif; /* Fuente principal */
+  font-family: 'Roboto', 'Arial', sans-serif;
+  /* Fuente principal */
 }
 
 .menu-button:hover {
-  background: rgba(255, 255, 255, 0.15); /* Fondo más claro al pasar el mouse */
-  border-color: rgba(255, 255, 255, 0.3); /* Borde más visible */
+  background: rgba(255, 255, 255, 0.15);
+  /* Fondo más claro al pasar el mouse */
+  border-color: rgba(255, 255, 255, 0.3);
+  /* Borde más visible */
 }
 
 .menu-button:focus {
   outline: none;
-  border-color: #ff7700; /* Borde naranja al enfocar */
-  box-shadow: 0 0 0 3px rgba(255, 119, 0, 0.2); /* Sombra naranja */
+  border-color: #ff7700;
+  /* Borde naranja al enfocar */
+  box-shadow: 0 0 0 3px rgba(255, 119, 0, 0.2);
+  /* Sombra naranja */
 }
 
 /* Estilos de texto */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: #ffffff;
   font-weight: 700;
 }
@@ -317,8 +381,13 @@ h1::after {
   transform: translateX(-50%);
   width: 60px;
   height: 3px;
-  background: linear-gradient(90deg, #cc5500, #ff7700);
+  background: linear-gradient(90deg, #7d6a58, #9E8772);
   border-radius: 2px;
+}
+
+h1.no-underline::after {
+  content: none;
+  display: none;
 }
 
 /* Estilos de botones */
@@ -334,7 +403,8 @@ button {
   letter-spacing: 1px;
   font-size: 0.85rem;
   box-sizing: border-box;
-  font-family: 'Roboto', 'Arial', sans-serif; /* Fuente consistente */
+  font-family: 'Roboto', 'Arial', sans-serif;
+  /* Fuente consistente */
 }
 
 button:hover {
@@ -352,19 +422,24 @@ button.secondary:hover {
 }
 
 /* Estilos de formularios */
-input, select, textarea {
+input,
+select,
+textarea {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
   padding: 10px 12px;
   color: white;
-  font-size: 1rem; /* Cambiado de 0.9rem a 1rem para prevenir zoom en iOS Safari */
+  font-size: 1rem;
+  /* Cambiado de 0.9rem a 1rem para prevenir zoom en iOS Safari */
   width: 100%;
   box-sizing: border-box;
   font-family: 'Roboto', 'Arial', sans-serif;
 }
 
-input:focus, select:focus, textarea:focus {
+input:focus,
+select:focus,
+textarea:focus {
   outline: none;
   border-color: #ff7700;
   box-shadow: 0 0 0 3px rgba(255, 119, 0, 0.2);
@@ -374,7 +449,8 @@ input:focus, select:focus, textarea:focus {
 a {
   color: #ff7700;
   text-decoration: none;
-  font-family: 'Roboto', 'Arial', sans-serif; /* Fuente consistente */
+  font-family: 'Roboto', 'Arial', sans-serif;
+  /* Fuente consistente */
 }
 
 a:hover {
@@ -433,48 +509,50 @@ a:hover {
 
 /* Media queries for mobile devices (≤768px) */
 @media (max-width: 768px) {
+
   /* Ajustes para móviles */
   .dashboard {
     padding: 15px;
   }
-  
+
   .dashboard-grid {
     grid-template-columns: 1fr;
     gap: 15px;
   }
-  
+
   /* Ajustes de tipografía para móviles */
   h1 {
     font-size: 1.5rem;
   }
-  
+
   h2 {
     font-size: 1.25rem;
   }
-  
+
   /* Reducción de espaciado en móviles */
   .qoder-dark-container {
     padding: 0.75rem;
   }
-  
+
   .qoder-dark-card {
     padding: 0.75rem;
     margin-bottom: 0.75rem;
   }
-  
+
   .qoder-dark-window-content {
     padding: 0.75rem;
   }
-  
+
   /* Ajustes para inputs en móviles */
   .qoder-dark-input,
   .qoder-dark-select,
   .qoder-dark-search-box,
   .qoder-dark-filter-box {
     padding: 0.5rem;
-    font-size: 1rem; /* Mantener 1rem para prevenir zoom en iOS Safari */
+    font-size: 1rem;
+    /* Mantener 1rem para prevenir zoom en iOS Safari */
   }
-  
+
   /* Ajustes para botones en móviles */
   .qoder-dark-button,
   .qoder-dark-button-primary,
@@ -483,7 +561,7 @@ a:hover {
     padding: 0.75rem 1rem;
     font-size: 0.9rem;
   }
-  
+
   /* Ajustes para tablas en móviles */
   .qoder-dark-table th,
   .qoder-dark-table td {
@@ -497,30 +575,30 @@ a:hover {
   .dashboard {
     padding: 25px;
   }
-  
+
   .dashboard-grid {
     gap: 20px;
   }
-  
+
   /* Ajustes de tipografía para tablets y desktop */
   h1 {
     font-size: 1.75rem;
   }
-  
+
   h2 {
     font-size: 1.5rem;
   }
-  
+
   /* Ajustes para contenedores en tablets y desktop */
   .qoder-dark-container {
     padding: 1.25rem;
   }
-  
+
   .qoder-dark-card {
     padding: 1.25rem;
     margin-bottom: 1.25rem;
   }
-  
+
   .qoder-dark-window-content {
     padding: 1.25rem;
   }

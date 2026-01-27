@@ -31,8 +31,8 @@ export function useCitas(props?: UseCitasProps) {
   const deleteMutation = useDeleteCita();
   
   // Funciones para rango de fechas y horarios disponibles
-  const useCitasPorRangoFn = (sucursalId?: string, fechaInicio?: string, fechaFin?: string) => 
-    useCitasPorRango({ sucursalId, fechaInicio, fechaFin });
+  const useCitasPorRangoFn = (sucursalId?: string, fechaInicio?: string, fechaFin?: string, barberoId?: string) => 
+    useCitasPorRango({ sucursalId, fechaInicio, fechaFin, barberoId });
   
   const useHorariosDisponiblesFn = (sucursalId?: string, fecha?: string, barberoId?: string) => 
     useHorariosDisponiblesCompleto({ sucursalId, barberoId, fecha });

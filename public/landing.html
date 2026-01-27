@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="es" class="scroll-smooth">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barberox - La Barbería con IA</title>
-    <meta name="description" content="De WhatsApp caótico a agenda llena en 7 días. Barberox conecta tu barbería, tus clientes y tu equipo con IA.">
-    <!-- Google Fonts: Inter -->
+    <meta name="description"
+        content="De WhatsApp caótico a agenda llena en 7 días. Barberox conecta tu barbería, tus clientes y tu equipo con IA.">
+    <!-- Google Fonts: Outfit (More premium than Inter) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -18,33 +21,26 @@
                     colors: {
                         primary: {
                             DEFAULT: '#ff7700', // Barberox Orange
-                            dark: '#cc5500',
-                            light: '#ff9933',
+                            dim: 'rgba(255, 119, 0, 0.1)',
+                            glass: 'rgba(255, 119, 0, 0.05)',
                         },
-                        dark: {
-                            bg: '#000000',
-                            card: '#1a1a1a',
-                            border: '#333333',
-                            text: '#ffffff',
-                            muted: '#a3a3a3',
+                        black: {
+                            DEFAULT: '#050505',
+                            surface: '#0a0a0a',
+                            lighter: '#121212'
                         }
                     },
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                        'glass-gradient': 'linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.00) 100%)',
+                        'neon-glow': 'conic-gradient(from 180deg at 50% 50%, #ff7700 0deg, rgba(255,119,0,0) 180deg, #ff7700 360deg)',
                     },
                     boxShadow: {
-                        'glow': '0 0 20px rgba(255, 119, 0, 0.3)',
-                        'glow-strong': '0 0 30px rgba(255, 119, 0, 0.5)',
-                    },
-                    animation: {
-                        'float': 'float 6s ease-in-out infinite',
-                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-20px)' },
-                        }
+                        'neon': '0 0 20px rgba(255, 119, 0, 0.15), 0 0 40px rgba(255, 119, 0, 0.05)',
+                        'inner-light': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.05)',
                     }
                 }
             }
@@ -52,378 +48,1032 @@
     </script>
     <style>
         body {
-            background-color: #000000;
+            background-color: #050505;
             color: #ffffff;
+            overflow-x: hidden;
         }
-        .text-gradient {
-            background-clip: text;
+
+        /* Premium Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff7700;
+        }
+
+        /* Glass Surface Utility */
+        .glass-surface {
+            background: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-card-hover:hover {
+            border-color: rgba(255, 119, 0, 0.3);
+            box-shadow: 0 0 30px rgba(255, 119, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Text Gradient */
+        .text-gradient-gold {
+            background: linear-gradient(135deg, #ffffff 0%, #a3a3a3 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-image: linear-gradient(to right, #ff7700, #ffb84d);
         }
-        .glass-card {
-            background: rgba(26, 26, 26, 0.6);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(51, 51, 51, 0.5);
+
+        .text-gradient-orange {
+            background: linear-gradient(135deg, #ff7700 0%, #ffb84d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Animations */
+        .animate-fade-up {
+            animation: fadeUp 1s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .delay-100 {
+            animation-delay: 0.1s;
+        }
+
+        .delay-200 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-300 {
+            animation-delay: 0.3s;
+        }
+
+        details>summary {
+            list-style: none;
+        }
+
+        details>summary::-webkit-details-marker {
+            display: none;
         }
     </style>
 </head>
-<body class="antialiased font-sans overflow-x-hidden">
 
-    <!-- Header / Navbar -->
-    <nav class="fixed w-full z-50 bg-black/80 backdrop-blur-md border-b border-white/10">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="text-2xl font-bold tracking-tighter">
-                Barber<span class="text-primary">ox</span>
+<body class="antialiased selection:bg-primary/30 selection:text-white">
+
+    <!-- Fixed Glass Navbar -->
+    <nav class="fixed top-0 w-full z-50 border-b border-white/5 bg-black/50 backdrop-blur-xl">
+        <div class="container mx-auto px-6 h-20 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <img src="img/logo.png" alt="Barberox" class="h-8 w-auto object-contain">
+                <span
+                    class="text-xs font-bold tracking-[0.2em] text-white/40 uppercase ml-2 border-l border-white/10 pl-2">Premium</span>
             </div>
-            <a href="#pricing" class="hidden md:block bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-full font-semibold transition-all shadow-glow hover:shadow-glow-strong">
-                Ver Planes
+            <a href="#pricing"
+                class="bg-white/5 hover:bg-primary/20 text-white text-sm font-medium px-6 py-2.5 rounded-full border border-white/10 hover:border-primary/50 transition-all duration-300 flex items-center gap-2 group">
+                Obtener Acceso
+                <svg class="w-4 h-4 text-white/50 group-hover:text-primary transition-colors" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3">
+                    </path>
+                </svg>
             </a>
         </div>
     </nav>
 
-    <!-- Héroe Section -->
-    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-        <!-- Background Elements -->
-        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-primary/20 rounded-full blur-[128px]"></div>
-        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-primary/10 rounded-full blur-[100px]"></div>
-
-        <div class="container mx-auto px-6 relative z-10">
-            <div class="flex flex-col lg:flex-row items-center gap-12">
-                <div class="lg:w-1/2 text-center lg:text-left">
-                    <div class="inline-block px-4 py-1 mb-6 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-semibold tracking-wide uppercase">
-                        La barbería con IA
-                    </div>
-                    <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-6">
-                        De WhatsApp caótico a <span class="text-gradient">agenda llena</span> en 7 días.
-                    </h1>
-                    <p class="text-xl text-dark-muted mb-8 leading-relaxed">
-                        Barberox conecta tu barbería, tus clientes y tu equipo: web de gestión integral + recepcionista IA 24/7 en WhatsApp + asistente inteligente. 
-                        <br class="hidden md:block">
-                        <span class="text-white font-medium">Volvé a ser barbero, no recepcionista.</span>
-                    </p>
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                        <a href="#pricing" class="bg-primary hover:bg-primary-dark text-white text-lg px-8 py-4 rounded-lg font-bold transition-all shadow-glow hover:scale-105">
-                            Quiero mi Demo
-                        </a>
-                        <a href="#features" class="border border-white/20 hover:border-white/50 hover:bg-white/5 text-white text-lg px-8 py-4 rounded-lg font-medium transition-all">
-                            Cómo funciona
-                        </a>
-                    </div>
-                    
-                    <div class="mt-8 flex items-center justify-center lg:justify-start gap-4 text-sm text-dark-muted">
-                        <div class="flex items-center gap-1">
-                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span>Agenda 24/7</span>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span>Sin comisiones</span>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span>Soporte VIP</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="lg:w-1/2 w-full relative">
-                    <!-- Hero Image Placeholder using CSS/SVG since generation failed -->
-                    <div class="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-dark-card aspect-[4/3] group">
-                        <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
-                        <!-- Placeholder Content depicting App -->
-                        <div class="absolute inset-4 bg-black rounded-xl border border-white/5 flex flex-col items-center justify-center p-8 text-center animate-float">
-                            <div class="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mb-4">
-                                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-                            </div>
-                            <h3 class="text-2xl font-bold mb-2">Barberox App</h3>
-                            <p class="text-dark-muted text-sm">Visualización de agenda llena gestionada por IA</p>
-                            <!-- Mock UI Elements -->
-                            <div class="mt-6 w-full max-w-[200px] space-y-2">
-                                <div class="h-8 bg-white/10 rounded w-full flex items-center px-2"><div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div><span class="text-xs text-white/50">Corte Clásico - 14:00</span></div>
-                                <div class="h-8 bg-white/10 rounded w-full flex items-center px-2"><div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div><span class="text-xs text-white/50">Barba Premium - 14:45</span></div>
-                                <div class="h-8 bg-primary/20 border border-primary/50 rounded w-full flex items-center px-2"><div class="w-2 h-2 bg-primary rounded-full mr-2 animate-pulse"></div><span class="text-xs text-white">IA Agendando...</span></div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Decor elements -->
-                    <div class="absolute -bottom-6 -right-6 lg:-right-12 bg-dark-card border border-white/10 p-4 rounded-xl shadow-glow animate-pulse-slow">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-                                <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </div>
-                            <div>
-                                <div class="text-xs text-dark-muted">Ingresos hoy</div>
-                                <div class="text-lg font-bold text-white">+$45,200</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- 1. Cinematic Hero Section -->
+    <section class="relative min-h-[90vh] flex items-center justify-center pt-20 overflow-hidden">
+        <!-- Ambient Glow -->
+        <div
+            class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/10 rounded-full blur-[150px] opacity-40 pointer-events-none">
         </div>
-    </section>
-
-    <!-- Pain Points Section -->
-    <section class="py-20 bg-dark-card border-y border-white/5">
-        <div class="container mx-auto px-6">
-            <h2 class="text-3xl md:text-4xl font-bold text-center mb-16">
-                ¿Tu barbería se siente <span class="text-gray-500 line-through">atrapada</span> en el pasado?
-            </h2>
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Pain 1 -->
-                <div class="p-6 rounded-xl bg-black border border-white/10 hover:border-primary/50 transition-colors group">
-                    <div class="w-12 h-12 bg-red-500/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3 text-white">WhatsApp Caótico</h3>
-                    <p class="text-dark-muted text-sm">Mensajes sin responder, turnos perdidos, doble reservas y clientes clavados en visto por horas.</p>
-                </div>
-                <!-- Pain 2 -->
-                <div class="p-6 rounded-xl bg-black border border-white/10 hover:border-primary/50 transition-colors group">
-                    <div class="w-12 h-12 bg-red-500/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3 text-white">Agenda Desordenada</h3>
-                    <p class="text-dark-muted text-sm">Todo en la cabeza o en papel. Es imposible ver el día completo o planificar la semana.</p>
-                </div>
-                <!-- Pain 3 -->
-                <div class="p-6 rounded-xl bg-black border border-white/10 hover:border-primary/50 transition-colors group">
-                    <div class="w-12 h-12 bg-red-500/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3 text-white">Caja Poco Clara</h3>
-                    <p class="text-dark-muted text-sm">No sabés cuánto facturás realmente. El dinero entra y sale sin control ni reportes.</p>
-                </div>
-                <!-- Pain 4 -->
-                <div class="p-6 rounded-xl bg-black border border-white/10 hover:border-primary/50 transition-colors group">
-                    <div class="w-12 h-12 bg-red-500/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3 text-white">Falta de Diferenciación</h3>
-                    <p class="text-dark-muted text-sm">Te sentís "una más". Tu servicio es premium, pero tu sistema de reservas es amateur.</p>
-                </div>
-            </div>
+        <div
+            class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay pointer-events-none">
         </div>
-    </section>
 
-    <!-- Solution / Benefits Section -->
-    <section id="features" class="py-20 relative overflow-hidden">
-        <div class="absolute top-1/4 left-0 w-64 h-64 bg-primary/10 rounded-full blur-[100px]"></div>
-        
-        <div class="container mx-auto px-6">
-            <div class="text-center max-w-3xl mx-auto mb-20">
-                <h2 class="text-3xl md:text-5xl font-bold mb-6">
-                    Tu barbería, <span class="text-primary">automatizada</span>.
-                </h2>
-                <p class="text-xl text-dark-muted">
-                    Digitalizá tu negocio con herramientas diseñadas para barberos que quieren crecer.
-                </p>
+        <div class="container mx-auto px-6 relative z-10 text-center">
+            <div
+                class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-md mb-8 animate-fade-up">
+                <div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+                <span class="text-xs font-medium tracking-widest uppercase text-white/70">La Nueva Era de la
+                    Barbería</span>
             </div>
 
-            <!-- Feature 1: Web Gestion -->
-            <div class="flex flex-col md:flex-row items-center gap-12 mb-24">
-                <div class="md:w-1/2 order-2 md:order-1 relative">
-                     <!-- Mockup Web Gestion -->
-                     <div class="bg-dark-card border border-white/10 rounded-lg shadow-2xl p-4 aspect-video transform md:-rotate-2 hover:rotate-0 transition-all duration-500">
-                        <div class="h-full w-full bg-black/50 rounded flex items-center justify-center relative overflow-hidden">
-                            <div class="absolute top-0 left-0 w-full h-8 bg-black border-b border-white/10 flex items-center px-4 space-x-2">
-                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                            </div>
-                            <div class="text-center">
-                                <span class="text-primary text-4xl block mb-2">📊</span>
-                                <p class="text-white font-bold">Dashboard Integral</p>
-                            </div>
-                        </div>
-                     </div>
-                </div>
-                <div class="md:w-1/2 order-1 md:order-2">
-                    <h3 class="text-2xl font-bold mb-4 text-white">Plataforma Web Todo-en-Uno</h3>
-                    <ul class="space-y-4 text-dark-muted">
-                        <li class="flex items-start">
-                            <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span><strong class="text-white">Multi-sucursal & Gestión de Equipo:</strong> Centralizá todo tu negocio en un solo lugar.</span>
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span><strong class="text-white">Caja Clara:</strong> Reportes automáticos de ingresos, egresos y comisiones.</span>
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span><strong class="text-white">Fichas de Clientes:</strong> Conocé a tu cliente, su historial y preferencias.</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+            <h1 class="text-6xl md:text-8xl font-bold tracking-tight mb-8 leading-none animate-fade-up delay-100">
+                <span class="block text-white">AGENDA</span>
+                <span class="block text-gradient-orange">AUTOMÁTICA.</span>
+            </h1>
 
-            <!-- Feature 2: IA Recepcionista -->
-            <div class="flex flex-col md:flex-row items-center gap-12 mb-24">
-                <div class="md:w-1/2">
-                    <h3 class="text-2xl font-bold mb-4 text-white">Recepcionista IA 24/7 en WhatsApp</h3>
-                    <p class="mb-6 text-dark-muted">Olvidate de responder mensajes a las 2 AM. Nuestra IA lo hace por vos.</p>
-                    <ul class="space-y-4 text-dark-muted">
-                        <li class="flex items-start">
-                            <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span><strong class="text-white">Entiende Intención:</strong> Sabe si el cliente quiere reservar, cancelar o consultar.</span>
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span><strong class="text-white">Calcula Horarios:</strong> Cruza datos en tiempo real con tu agenda para evitar huecos.</span>
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-6 h-6 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span><strong class="text-white">Recordatorios Automáticos:</strong> Reduce el ausentismo prácticamente a cero.</span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="md:w-1/2 relative">
-                    <!-- Mockup WhatsApp -->
-                    <div class="bg-dark-card border border-white/10 rounded-3xl shadow-glow p-4 max-w-xs mx-auto transform hover:scale-105 transition-all duration-500">
-                        <div class="aspect-[9/16] bg-black rounded-2xl overflow-hidden relative">
-                            <!-- Chat Header -->
-                            <div class="bg-[#202c33] p-3 flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center font-bold text-xs">BX</div>
-                                <div class="text-xs">
-                                    <div class="font-bold text-white">Barberox Bot</div>
-                                    <div class="text-gray-400">en línea</div>
-                                </div>
-                            </div>
-                            <!-- Chat Body -->
-                            <div class="p-4 space-y-4 bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-opacity-10">
-                                <div class="flex justify-start">
-                                    <div class="bg-[#202c33] text-white text-xs p-2 rounded-lg rounded-tl-none max-w-[80%]">
-                                        Hola! 👋 Soy el asistente de Barberox. ¿Querés agendar un turno?
-                                    </div>
-                                </div>
-                                <div class="flex justify-end">
-                                    <div class="bg-[#005c4b] text-white text-xs p-2 rounded-lg rounded-tr-none max-w-[80%]">
-                                        Sí, para mañana a la tarde.
-                                    </div>
-                                </div>
-                                <div class="flex justify-start">
-                                    <div class="bg-[#202c33] text-white text-xs p-2 rounded-lg rounded-tl-none max-w-[80%]">
-                                        Perfecto. Tengo disponible a las 16:00 y 17:30 con Fito. ¿Cuál preferís?
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Chat Input -->
-                            <div class="absolute bottom-0 w-full bg-[#202c33] p-3">
-                                <div class="h-8 bg-[#2a3942] rounded-full"></div>
-                            </div>
-                        </div>
+            <p class="text-xl md:text-2xl text-white/50 max-w-2xl mx-auto mb-12 font-light animate-fade-up delay-200">
+                Tu recepcionista IA gestiona citas, responde dudas y llena tu calendario 24/7.
+            <p class="text-xl md:text-2xl text-white/20 max-w-2xl mx-auto mb-12 font-light animate-fade-up delay-200">
+                ¡Tu agenda se llena y solo te preocupas por cortar!</p>
+            <br class="hidden md:block">
+
+            </p>
+
+            <div class="flex flex-col md:flex-row items-center justify-center gap-6 animate-fade-up delay-300">
+                <a href="#pricing"
+                    class="group relative px-8 py-4 bg-white text-black font-bold rounded-full overflow-hidden w-full md:w-auto hover:scale-105 transition-transform duration-300">
+                    <div
+                        class="absolute inset-0 bg-primary/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Pricing / Stacks Section -->
-    <section id="pricing" class="py-20 bg-dark-card border-t border-white/10">
-        <div class="container mx-auto px-6">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-5xl font-bold mb-4">Planes Simples. Resultados Claros.</h2>
-                <p class="text-dark-muted">Elegí el nivel de automatización que tu barbería necesita hoy.</p>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto items-center">
-                
-                <!-- Plan Gestion Web -->
-                <div class="p-8 rounded-xl bg-black border border-white/10 hover:border-white/30 transition-all opacity-80 hover:opacity-100">
-                    <h3 class="text-xl font-bold text-white mb-2">Plan Gestión Web</h3>
-                    <div class="text-3xl font-bold text-white mb-6">USD 50<span class="text-sm font-normal text-dark-muted">/mes</span></div>
-                    <p class="text-sm text-dark-muted mb-8 h-10">Para empezar ordenando agenda, caja y clientes desde la web.</p>
-                    
-                    <ul class="space-y-3 mb-8 text-sm">
-                        <li class="flex items-center text-white"><span class="text-primary mr-2">✓</span> Agenda Web</li>
-                        <li class="flex items-center text-white"><span class="text-primary mr-2">✓</span> Control de Caja</li>
-                        <li class="flex items-center text-white"><span class="text-primary mr-2">✓</span> Base de Clientes</li>
-                        <li class="flex items-center text-white"><span class="text-primary mr-2">✓</span> Reportes Básicos</li>
-                    </ul>
-
-                    <a href="#" class="block w-full py-3 px-4 border border-white/20 rounded-lg text-center text-white font-medium hover:bg-white/5 transition-all">
-                        Elegir Plan
-                    </a>
-                </div>
-
-                <!-- Plan Automatización (Destacado) -->
-                <div class="p-8 rounded-xl bg-gradient-to-b from-[#2a2a2a] to-black border-2 border-primary relative transform md:scale-105 shadow-glow z-10">
-                    <div class="absolute top-0 right-0 bg-primary text-black text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg">MÁS ELEGIDO</div>
-                    <h3 class="text-xl font-bold text-white mb-2">Plan Automatización</h3>
-                    <div class="text-4xl font-bold text-primary mb-6">USD 100<span class="text-sm font-normal text-dark-muted">/mes</span></div>
-                    <p class="text-sm text-gray-300 mb-8 h-10">Web integral + recepcionista IA 24/7 en WhatsApp.</p>
-                    
-                    <ul class="space-y-3 mb-8 text-sm">
-                        <li class="flex items-center text-white"><span class="text-primary mr-2">✓</span> <strong class="ml-1">Todo Gestión Web</strong></li>
-                        <li class="flex items-center text-white"><span class="text-primary mr-2">✓</span> Recepcionista IA 24/7</li>
-                        <li class="flex items-center text-white"><span class="text-primary mr-2">✓</span> Recordatorios WhatsApp</li>
-                        <li class="flex items-center text-white"><span class="text-primary mr-2">✓</span> <strong>Bonus:</strong> Setup 1:1 WhatsApp</li>
-                    </ul>
-
-                    <a href="#" class="block w-full py-3 px-4 bg-primary hover:bg-primary-dark rounded-lg text-center text-white font-bold transition-all shadow-lg">
-                        Empezar con IA
-                    </a>
-                    
-                    <div class="mt-4 text-center text-xs text-primary/80 font-medium">
-                        Garantía: 10x ROI en 30 días o no pagás el 2do mes.
-                    </div>
-                </div>
-
-                <!-- Plan Barbería con IA -->
-                <div class="p-8 rounded-xl bg-black border border-white/10 hover:border-white/30 transition-all opacity-80 hover:opacity-100">
-                    <h3 class="text-xl font-bold text-white mb-2">Barbería con IA</h3>
-                    <div class="text-3xl font-bold text-white mb-6">USD 120<span class="text-sm font-normal text-dark-muted">/mes</span></div>
-                    <p class="text-sm text-dark-muted mb-8 h-10">Experiencia completa VIP + Asistente para barberos.</p>
-                    
-                    <ul class="space-y-3 mb-8 text-sm">
-                        <li class="flex items-center text-white"><span class="text-primary mr-2">✓</span> <strong>Todo Automatización</strong></li>
-                        <li class="flex items-center text-white"><span class="text-primary mr-2">✓</span> Asistente IA Barbero</li>
-                        <li class="flex items-center text-white"><span class="text-primary mr-2">✓</span> Métricas Avanzadas</li>
-                        <li class="flex items-center text-white"><span class="text-primary mr-2">✓</span> Kit "Barbería con IA"</li>
-                    </ul>
-
-                    <a href="#" class="block w-full py-3 px-4 border border-white/20 rounded-lg text-center text-white font-medium hover:bg-white/5 transition-all">
-                        Elegir Plan VIP
-                    </a>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- Guarantee Section -->
-    <section class="py-20 bg-black relative">
-        <div class="container mx-auto px-6 text-center">
-            <div class="inline-block p-6 border border-white/10 rounded-2xl bg-dark-card max-w-2xl mx-auto shadow-glow">
-                <h3 class="text-2xl font-bold mb-4">🛡️ Garantía de Resultados</h3>
-                <p class="text-lg text-gray-300">
-                    Te acompañamos 30 días para que recuperes al menos <strong class="text-white">10x el valor de la suscripción</strong> en facturación extra o <span class="text-primary underline">no pagás el segundo mes</span>.
-                </p>
-                <p class="mt-4 text-sm text-dark-muted">Sin letra chica. Queremos que crezcas.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Final CTA -->
-    <section class="py-24 bg-gradient-to-t from-primary/10 to-black">
-        <div class="container mx-auto px-6 text-center relative z-10">
-            <h2 class="text-4xl md:text-6xl font-extrabold mb-8">
-                Tu barbería puede ser chica, <br><span class="text-primary">pero tu sistema no.</span>
-            </h2>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <a href="#pricing" class="bg-primary hover:bg-primary-dark text-white text-xl px-10 py-5 rounded-lg font-bold transition-all shadow-glow hover:scale-105">
-                    Sé la primera Barbería con IA
+                    <span class="relative z-10 flex items-center justify-center gap-2">
+                        EMPEZAR AHORA
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
+                    </span>
                 </a>
             </div>
-            <p class="mt-6 text-dark-muted">Cupos limitados por ciudad para el Plan VIP.</p>
+
+            <!-- Floating Elements -->
+            <div
+                class="absolute w-full max-w-lg left-1/2 -translate-x-1/2 bottom-10 opacity-50 animate-bounce delay-1000">
+                <svg class="w-6 h-6 mx-auto text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                </svg>
+            </div>
         </div>
     </section>
 
-    <footer class="py-8 border-t border-white/10 bg-black text-center text-dark-muted text-sm">
+    <!-- 2. The Great Divide (Comparison) - HIGH CONVERSION -->
+    <section class="py-24 bg-black relative border-t border-white/5">
         <div class="container mx-auto px-6">
-            <p>&copy; 2024 Barberox. Todos los derechos reservados.</p>
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-bold mb-4">La Gran División</h2>
+                <p class="text-white/50">¿Links aburridos o Conversación Real?</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 max-w-7xl mx-auto">
+                <!-- Level 1: The Past (Manual) -->
+                <div
+                    class="p-8 rounded-3xl border border-white/5 bg-[#0a0a0a] grayscale opacity-50 hover:opacity-100 transition-opacity relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-red-800"></div>
+                    <h3
+                        class="text-lg font-bold text-white/40 mb-6 uppercase tracking-widest border-b border-white/5 pb-4">
+                        1. El Pasado (Manual)</h3>
+                    <ul class="space-y-4 text-white/50 text-sm">
+                        <li class="flex items-start gap-3">
+                            <svg class="w-4 h-4 text-red-800 shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            <span>WhatsApp colapsado. Perdés horas contestando "precios?".</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="w-4 h-4 text-red-800 shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            <span>Interrumpir cortes = Cliente enojado + Corte mediocre.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="w-4 h-4 text-red-800 shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            <span>Si te escriben a las 2 AM, perdés el cliente.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Level 2: The Trap (Links/Apps) -->
+                <div
+                    class="p-8 rounded-3xl border border-white/5 bg-[#0a0a0a] opacity-70 hover:opacity-100 transition-opacity relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-yellow-600"></div>
+                    <h3
+                        class="text-lg font-bold text-white/60 mb-6 uppercase tracking-widest border-b border-white/5 pb-4">
+                        2. La Trampa (Apps)</h3>
+                    <ul class="space-y-4 text-white/60 text-sm">
+                        <li class="flex items-start gap-3">
+                            <svg class="w-4 h-4 text-yellow-600 shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                </path>
+                            </svg>
+                            <span>Tu cliente debe <b>salir de WhatsApp</b> (Alta Fricción).</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="w-4 h-4 text-yellow-600 shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                </path>
+                            </svg>
+                            <span>Requiere registrarse o bajar apps. El cliente lo odia.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="w-4 h-4 text-yellow-600 shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                </path>
+                            </svg>
+                            <span>Es frío. Si tienen dudas del corte, no pueden preguntar.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Level 3: The Future (Barberox AI) -->
+                <div
+                    class="p-8 rounded-3xl border border-primary/40 bg-gradient-to-br from-[#0a0a0a] to-primary/10 relative overflow-hidden ring-1 ring-primary/30 shadow-neon transform md:-translate-y-4 z-10">
+                    <div
+                        class="absolute top-0 right-0 px-4 py-1 bg-primary text-white text-[10px] font-bold uppercase rounded-bl-xl">
+                        El Futuro</div>
+                    <div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
+                    <h3
+                        class="text-xl font-bold text-white mb-6 uppercase tracking-widest border-b border-white/10 pb-4">
+                        3. Barberox (IA)</h3>
+                    <ul class="space-y-4 text-white">
+                        <li class="flex items-start gap-3">
+                            <div class="p-1 bg-green-500/20 rounded-full"><svg class="w-3 h-3 text-green-500"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7"></path>
+                                </svg></div>
+                            <span><b>Invisible:</b> Todo pasa en el chat. Cero Fricción.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="p-1 bg-green-500/20 rounded-full"><svg class="w-3 h-3 text-green-500"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7"></path>
+                                </svg></div>
+                            <span>Conversacional: "Hola bro, tenés lugar hoy?" -> Agendado.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="p-1 bg-green-500/20 rounded-full"><svg class="w-3 h-3 text-green-500"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7"></path>
+                                </svg></div>
+                            <span>La IA cierra la venta, responde dudas y re-confirma 2hs antes.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="p-1 bg-green-500/20 rounded-full"><svg class="w-3 h-3 text-green-500"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7"></path>
+                                </svg></div>
+                            <span>Sin apps. Sin logins. Solo máxima facturación.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. AI Revolution (FOMO) - HIGH CONVERSION -->
+    <section class="py-24 relative overflow-hidden">
+        <div class="absolute inset-0 bg-primary/5"></div>
+        <div class="container mx-auto px-6 relative z-10 text-center">
+            <h2 class="text-4xl md:text-6xl font-black mb-8 leading-tight">
+                LA IA NO VA A <br> <span class="text-primary">REEMPLAZARTE.</span>
+            </h2>
+            <p class="text-2xl md:text-3xl font-light text-white/80 max-w-3xl mx-auto mb-12">
+                Pero un barbero que use IA <b class="text-white">sí te va a reemplazar.</b>
+            </p>
+
+            <div
+                class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto border-t border-b border-white/10 py-12">
+                <div>
+                    <div class="text-4xl font-bold text-white mb-2">80%</div>
+                    <div class="text-sm text-white/40 uppercase tracking-widest">Barberías Líderes</div>
+                    <p class="text-xs text-white/30 mt-2">Ya están automatizando citas.</p>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold text-white mb-2">+15hs</div>
+                    <div class="text-sm text-white/40 uppercase tracking-widest">Ahorradas Semanales</div>
+                    <p class="text-xs text-white/30 mt-2">De gestión manual de WhatsApp.</p>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold text-white mb-2">24/7</div>
+                    <div class="text-sm text-white/40 uppercase tracking-widest">Disponibilidad</div>
+                    <p class="text-xs text-white/30 mt-2">Jamás pierdes un cliente nocturno.</p>
+                </div>
+            </div>
+
+            <p class="mt-12 text-white/50 italic">"Adaptarse o desaparecer. El mercado no espera."</p>
+        </div>
+    </section>
+
+    <!-- 4. The Solution (Bento Grid) -->
+    <section id="features" class="py-32 relative bg-black">
+        <div class="container mx-auto px-6">
+            <div class="mb-20">
+                <span class="text-primary text-xs font-bold tracking-[0.2em] uppercase mb-4 block">La Solución</span>
+                <h2 class="text-4xl md:text-6xl font-bold mb-6">INTELIGENCIA <br><span class="text-white/30">QUE SE
+                        SIENTE.</span></h2>
+            </div>
+
+            <!-- Animated Phone Section -->
+            <div class="flex flex-col lg:flex-row items-center gap-16">
+                <!-- Left: Copy & Value -->
+                <div class="lg:w-1/2 space-y-8">
+                    <div>
+                        <h3 class="text-3xl font-bold mb-4">Es como tener una secretaria 24/7.</h3>
+                        <p class="text-white/60 text-lg">Tu asistente IA nunca duerme, nunca se enferma y nunca contesta
+                            mal. Atiende a 100 clientes a la vez en menos de 2 segundos.</p>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                                <svg class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-bold">Respuesta Instantánea</h4>
+                                <p class="text-white/50 text-sm">El cliente dice "Hola" y ya tiene respuesta. La
+                                    velocidad cierra ventas.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                                <svg class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-bold">Sincronización Real</h4>
+                                <p class="text-white/50 text-sm">Lo que pasa en WhatsApp, aparece en tu agenda Web al
+                                    instante.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: The Animated Phone -->
+                <div class="lg:w-1/2 relative flex justify-center">
+                    <!-- Glow behind phone -->
+                    <div class="absolute inset-0 bg-primary/20 blur-[100px] rounded-full"></div>
+
+                    <!-- iPhone High-Fidelity Mockup -->
+                    <div
+                        class="relative w-[300px] h-[600px] bg-[#010101] border-[8px] border-[#1a1a1a] rounded-[3.5rem] shadow-[0_0_50px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.1)] overflow-hidden z-10">
+                        <!-- Sensors / Dynamic Island -->
+                        <div
+                            class="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-7 bg-black rounded-full z-30 flex items-center justify-end px-3 gap-1">
+                            <div class="w-1 h-1 rounded-full bg-blue-900/40"></div>
+                            <div class="w-2 h-2 rounded-full bg-blue-900/60"></div>
+                        </div>
+
+                        <!-- Side Buttons (Visual Only) -->
+                        <div class="absolute -left-[10px] top-24 w-[2px] h-8 bg-[#222] rounded-r-sm"></div>
+                        <div class="absolute -left-[10px] top-36 w-[2px] h-12 bg-[#222] rounded-r-sm"></div>
+                        <div class="absolute -left-[10px] top-52 w-[2px] h-12 bg-[#222] rounded-r-sm"></div>
+                        <div class="absolute -right-[10px] top-32 w-[2px] h-20 bg-[#222] rounded-l-sm"></div>
+
+                        <!-- Screen Content -->
+                        <div class="w-full h-full bg-[#0b141a] flex flex-col font-sans relative">
+                            <!-- Helper Style for Animation -->
+                            <style>
+                                @keyframes msgFadeIn {
+                                    from {
+                                        opacity: 0;
+                                        transform: translateY(10px);
+                                    }
+
+                                    to {
+                                        opacity: 1;
+                                        transform: translateY(0);
+                                    }
+                                }
+
+                                .msg-anim {
+                                    opacity: 0;
+                                    animation: msgFadeIn 0.5s forwards;
+                                }
+
+                                .delay-1 {
+                                    animation-delay: 1s;
+                                }
+
+                                .delay-2 {
+                                    animation-delay: 2s;
+                                }
+
+                                .delay-3 {
+                                    animation-delay: 4s;
+                                }
+
+                                .delay-4 {
+                                    animation-delay: 5s;
+                                }
+
+                                .delay-5 {
+                                    animation-delay: 7s;
+                                }
+
+                                .delay-6 {
+                                    animation-delay: 8s;
+                                }
+                            </style>
+
+                            <!-- WhatsApp Header -->
+                            <div class="bg-[#202c33] p-4 pt-10 flex items-center gap-3 shadow-md z-10">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border border-white/5">
+                                    <img src="img/logo.png" class="w-6 h-auto brightness-200" alt="Logo">
+                                </div>
+                                <div>
+                                    <div class="text-white text-sm font-bold tracking-wider">Barberox</div>
+                                    <div class="text-white/60 text-[10px]">en línea</div>
+                                </div>
+                            </div>
+                            <!-- Chat Area -->
+                            <div class="flex-1 p-4 space-y-4 overflow-hidden relative">
+                                <!-- Background Doodle Pattern Overlay -->
+                                <div
+                                    class="absolute inset-0 opacity-5 bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-repeat">
+                                </div>
+
+                                <!-- Msg 1 (Client) -->
+                                <div class="flex justify-end msg-anim delay-1 relative z-10">
+                                    <div
+                                        class="bg-[#005c4b] text-white p-2 px-3 rounded-lg rounded-tr-none text-xs max-w-[80%] shadow-sm">
+                                        Hola! Quiero cortarme hoy.
+                                        <div class="text-[9px] text-white/50 text-right mt-1">10:00 ✓✓</div>
+                                    </div>
+                                </div>
+
+                                <!-- Msg 2 (Bot) -->
+                                <div class="flex justify-start msg-anim delay-2 relative z-10">
+                                    <div
+                                        class="bg-[#202c33] text-white p-2 px-3 rounded-lg rounded-tl-none text-xs max-w-[80%] shadow-sm">
+                                        Hola crack! 👋 Tengo estos lugares hoy:
+                                        <br>• 17:00
+                                        <br>• 18:30
+                                        <div class="text-[9px] text-white/50 text-right mt-1">10:00</div>
+                                    </div>
+                                </div>
+
+                                <!-- Msg 3 (Client) -->
+                                <div class="flex justify-end msg-anim delay-3 relative z-10">
+                                    <div
+                                        class="bg-[#005c4b] text-white p-2 px-3 rounded-lg rounded-tr-none text-xs max-w-[80%] shadow-sm">
+                                        A las 18:30 porfa.
+                                        <div class="text-[9px] text-white/50 text-right mt-1">10:01 ✓✓</div>
+                                    </div>
+                                </div>
+
+                                <!-- Msg 4 (Bot) -->
+                                <div class="flex justify-start msg-anim delay-4 relative z-10">
+                                    <div
+                                        class="bg-[#202c33] text-white p-2 px-3 rounded-lg rounded-tl-none text-xs max-w-[80%] shadow-sm">
+                                        Listo! Confirmado para hoy 18:30hs. ✂️
+                                        <br>Te aviso 2hs antes.
+                                        <div class="text-[9px] text-white/50 text-right mt-1">10:01</div>
+                                    </div>
+                                </div>
+
+                                <!-- Msg 5 (Future Reminder) -->
+                                <div class="flex justify-center msg-anim delay-5 relative z-10">
+                                    <div
+                                        class="bg-[#182229] text-white/40 text-[10px] py-1 px-3 rounded-full uppercase tracking-widest shadow-sm">
+                                        2 horas antes...
+                                    </div>
+                                </div>
+
+                                <!-- Msg 6 (Bot Reminder) -->
+                                <div class="flex justify-start msg-anim delay-6 relative z-10">
+                                    <div
+                                        class="bg-[#202c33] text-white p-2 px-3 rounded-lg rounded-tl-none text-xs max-w-[80%] shadow-sm">
+                                        Recordatorio: Te esperamos en 2hs para tu corte! 💈
+                                        <div class="text-[9px] text-white/50 text-right mt-1">16:30</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Capabilities Grid (Product Deep Dive) -->
+        <div class="grid md:grid-cols-4 gap-6 mt-24 pt-16 border-t border-white/5">
+            <div class="p-6 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/30 transition-colors">
+                <div class="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center mb-4 text-primary">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                </div>
+                <h4 class="text-lg font-bold text-white mb-2">Multi-Sucursal</h4>
+                <p class="text-white/50 text-sm">Gestiona múltiples locales y barberos desde un solo número de WhatsApp.
+                    La IA rutea cada turno al calendario correcto.</p>
+            </div>
+            <div class="p-6 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/30 transition-colors">
+                <div class="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center mb-4 text-primary">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                </div>
+                <h4 class="text-lg font-bold text-white mb-2">Entiende Contexto</h4>
+                <p class="text-white/50 text-sm">Detecta intenciones reales: "Quiero cancelar", "Cambíame el turno", o
+                    "Llego tarde". No es un menú fijo, es inteligencia.</p>
+            </div>
+            <div class="p-6 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/30 transition-colors">
+                <div class="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center mb-4 text-primary">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h4 class="text-lg font-bold text-white mb-2">Cálculo Real</h4>
+                <p class="text-white/50 text-sm">Analiza duración de servicios y huecos libres en tiempo real. Nunca
+                    ofrece horarios imposibles.</p>
+            </div>
+            <div class="p-6 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/30 transition-colors">
+                <div class="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center mb-4 text-primary">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                </div>
+                <h4 class="text-lg font-bold text-white mb-2">Notificaciones</h4>
+                <p class="text-white/50 text-sm">Te avisa al instante si alguien reserva o cancela. Mantienes el control
+                    total sin mirar la pantalla.</p>
+            </div>
+        </div>
+
+        </div>
+    </section>
+
+    <!-- 5. Bonus Stack Section -->
+    <!-- 5. Bonus 1: Web OS Deep Dive -->
+    <section class="py-24 bg-black border-t border-white/5 relative overflow-hidden">
+        <div class="absolute inset-0 bg-blue-500/5 blur-[100px]"></div>
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="flex flex-col md:flex-row items-center gap-16">
+                <!-- Text -->
+                <div class="md:w-1/2">
+                    <span class="text-blue-500 text-xs font-bold tracking-[0.2em] uppercase mb-4 block">Bonus #1 (Valor
+                        $100/mes)</span>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6">Tu Negocio.<br><span class="text-white/40">Bajo
+                            Control.</span></h2>
+                    <p class="text-white/60 text-lg mb-8">Gestión profesional multidispositivo. Centraliza agenda, caja
+                        y clientes en una sola plataforma diseñada para escalar.</p>
+
+                    <ul class="space-y-4">
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center"><svg
+                                    class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg></div>
+                            <span class="text-white/80"><b>Multi-Sucursal:</b> Gestiona barberos, servicios y horarios
+                                por local.</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center"><svg
+                                    class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg></div>
+                            <span class="text-white/80"><b>Caja Avanzada:</b> Conectada a turnos. Reportes por servicio
+                                y barbero.</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center"><svg
+                                    class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg></div>
+                            <span class="text-white/80"><b>Dashboard KPI:</b> Métricas de retención, Citas vs
+                                No-Show.</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center"><svg
+                                    class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg></div>
+                            <span class="text-white/80"><b>CRM 360:</b> Historial, Notas de corte y Sistema de
+                                Puntaje.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Visual Mockup (Real Screenshot Carousel) -->
+                <div class="md:w-1/2 w-full">
+                    <div class="relative group perspective-1000">
+                        <!-- Glow -->
+                        <div
+                            class="absolute -inset-1 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000">
+                        </div>
+
+                        <!-- Browser Frame Container -->
+                        <div
+                            class="relative bg-[#0f1115] border border-white/10 rounded-xl shadow-2xl overflow-hidden transform group-hover:rotate-x-2 transition-transform duration-500 h-[300px] md:h-[350px]">
+                            <!-- Browser Header -->
+                            <div
+                                class="h-8 bg-[#1a1d24] border-b border-white/5 flex items-center px-4 gap-2 z-20 relative">
+                                <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+                                <div class="ml-4 h-4 w-64 bg-white/5 rounded-full text-[10px] text-white/20 flex items-center px-2 font-mono"
+                                    id="browser-url">app.barberox.com/dashboard</div>
+                            </div>
+
+                            <!-- Carousel Images -->
+                            <div class="relative w-full h-full bg-[#0f1115]">
+                                <img src="img/screenshots/dashboard_citas.png"
+                                    class="screenshot-slide absolute inset-0 w-full h-full object-cover object-top opacity-0 transition-opacity duration-1000"
+                                    alt="Dashboard Citas">
+                                <img src="img/screenshots/calendario_mensual.png"
+                                    class="screenshot-slide absolute inset-0 w-full h-full object-cover object-top opacity-0 transition-opacity duration-1000"
+                                    alt="Calendario Mensual">
+                                <img src="img/screenshots/lista_clientes.png"
+                                    class="screenshot-slide absolute inset-0 w-full h-full object-cover object-top opacity-0 transition-opacity duration-1000"
+                                    alt="Lista Clientes">
+                                <img src="img/screenshots/whatsapp_web.png"
+                                    class="screenshot-slide absolute inset-0 w-full h-full object-cover object-top opacity-0 transition-opacity duration-1000"
+                                    alt="WhatsApp CRM">
+                                <img src="img/screenshots/dashboard_financiero.png"
+                                    class="screenshot-slide absolute inset-0 w-full h-full object-cover object-top opacity-0 transition-opacity duration-1000"
+                                    alt="Finanzas">
+                            </div>
+
+                            <!-- Carousel Script -->
+                            <script>
+                                document.addEventListener('DOMContentLoaded', () => {
+                                    const slides = document.querySelectorAll('.screenshot-slide');
+                                    const urlBar = document.getElementById('browser-url');
+                                    const urls = [
+                                        'app.barberox.com/agenda',
+                                        'app.barberox.com/calendario',
+                                        'app.barberox.com/clientes',
+                                        'app.barberox.com/mensajes',
+                                        'app.barberox.com/finanzas'
+                                    ];
+                                    let currentSlide = 0;
+
+                                    // Init first slide
+                                    if (slides.length > 0) {
+                                        slides[0].classList.remove('opacity-0');
+
+                                        setInterval(() => {
+                                            slides[currentSlide].classList.add('opacity-0');
+                                            currentSlide = (currentSlide + 1) % slides.length;
+                                            slides[currentSlide].classList.remove('opacity-0');
+
+                                            // Update URL bar for realism
+                                            if (urlBar) urlBar.textContent = urls[currentSlide];
+                                        }, 4000);
+                                    }
+                                });
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5b. Bonus 2: AI Assistant Deep Dive -->
+    <section class="py-24 bg-[#050505] border-t border-white/5 relative overflow-hidden">
+        <div class="absolute inset-0 bg-yellow-500/5 blur-[100px]"></div>
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="flex flex-col md:flex-row-reverse items-center gap-16">
+                <!-- Text -->
+                <div class="md:w-1/2">
+                    <span class="text-yellow-500 text-xs font-bold tracking-[0.2em] uppercase mb-4 block">Bonus #2
+                        (Valor $50/mes)</span>
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6">Tu Asistente<br><span
+                            class="text-white/40">Personal.</span></h2>
+                    <p class="text-white/60 text-lg mb-8">No solo atiende a tus clientes, trabaja para vos. Pídele lo
+                        que quieras por audio, como si fuera una secretaria real.</p>
+
+                    <ul class="space-y-4">
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center"><svg
+                                    class="w-4 h-4 text-yellow-500" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                </svg></div>
+                            <span class="text-white/80"><b>Bloqueos por Audio:</b> "Bloqueame el martes a la
+                                tarde".</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center"><svg
+                                    class="w-4 h-4 text-yellow-500" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                </svg></div>
+                            <span class="text-white/80"><b>Resumen Nocturno:</b> Recibe tu agenda de mañana cada
+                                noche.</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center"><svg
+                                    class="w-4 h-4 text-yellow-500" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg></div>
+                            <span class="text-white/80"><b>Notificaciones en Vivo:</b> Te avisa cada vez que alguien
+                                reserva.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Visual Mockup (High-Fidelity iPhone Notification Feed) -->
+                <div class="md:w-1/2 w-full flex justify-center perspective-1000">
+                    <div
+                        class="relative w-[300px] h-[600px] bg-[#010101] border-[8px] border-[#1a1a1a] rounded-[3.5rem] shadow-[0_0_50px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.1)] overflow-hidden z-10">
+                        <!-- Sensors / Dynamic Island -->
+                        <div
+                            class="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-7 bg-black rounded-full z-30 flex items-center justify-end px-3 gap-1">
+                            <div class="w-1 h-1 rounded-full bg-blue-900/40"></div>
+                            <div class="w-2 h-2 rounded-full bg-blue-900/60"></div>
+                        </div>
+
+                        <!-- WhatsApp Header -->
+                        <div
+                            class="absolute top-0 left-0 right-0 h-24 bg-[#202c33]/90 backdrop-blur-md flex items-center px-4 pt-10 gap-3 z-20 border-b border-white/5 text-left">
+                            <div
+                                class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border border-white/5">
+                                <img src="img/logo.png" class="w-8 h-auto brightness-200" alt="Logo">
+                            </div>
+                            <div>
+                                <div class="text-white font-bold text-sm tracking-tight">Barberox Asistente</div>
+                                <div class="text-primary text-xs font-medium">En línea</div>
+                            </div>
+                        </div>
+
+                        <!-- Animated Messages Stack -->
+                        <div id="asistente-messages"
+                            class="absolute inset-x-0 bottom-0 top-24 p-4 space-y-4 overflow-hidden flex flex-col justify-end bg-[#0b141a]">
+                            <!-- Persistent messages -->
+                            <div
+                                class="message-card-persistent bg-[#202c33] p-3 rounded-lg rounded-tl-none border border-white/5 shadow-md transform opacity-0 translate-y-4 transition-all duration-500 text-left">
+                                <p class="text-[11px] text-primary font-bold mb-1">Resumen de Mañana 🌙</p>
+                                <p class="text-[10px] text-white/90 whitespace-pre-line leading-relaxed">
+                                    ¡Buenas noches Jose!
+                                    Mañana tienes las siguientes citas agendadas:
+                                    - 09:00 - Diego Ferreira - Corte - 60m
+                                    - 10:00 - Fernando Rodriguez - Corte - 60m
+                                    - 11:00 - Santiago Gonzalez - Corte - 60m
+                                    - 12:00 - Gabriel Silvera - Corte - 60m
+                                    - 13:00 - Cristian Blanco - Corte - 60m
+                                    - ... y 6 turnos más por la tarde.
+                                </p>
+                                <div class="text-[9px] text-white/30 text-right mt-1">21:00</div>
+                            </div>
+                            <div
+                                class="message-card-persistent bg-[#202c33] p-3 rounded-lg rounded-tl-none border border-white/5 shadow-md transform opacity-0 translate-y-4 transition-all duration-500 text-left">
+                                <p class="text-[11px] text-green-400 font-bold mb-1">Nuevo Turno 💈</p>
+                                <p class="text-white/90 text-xs">Juan Román agendó <b>Corte</b> a las 18:00hs.</p>
+                                <div class="text-[9px] text-white/30 text-right mt-1">10:15</div>
+                            </div>
+                            <div
+                                class="message-card-persistent bg-[#202c33] p-3 rounded-lg rounded-tl-none border border-white/5 shadow-md transform opacity-0 translate-y-4 transition-all duration-500 text-left">
+                                <p class="text-[11px] text-red-400 font-bold mb-1">Turno Cancelado ❌</p>
+                                <p class="text-white/90 text-xs">Gustavo Gomez canceló su turno de las 16:00hs.</p>
+                                <div class="text-[9px] text-white/30 text-right mt-1">11:30</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const cards = document.querySelectorAll('.message-card-persistent');
+                    let current = 0;
+
+                    const showNext = () => {
+                        if (current < cards.length) {
+                            cards[current].classList.remove('opacity-0', 'translate-y-4');
+                            current++;
+                            setTimeout(showNext, 3000);
+                        } else {
+                            // Reset cycle: fade out all and restart
+                            setTimeout(() => {
+                                cards.forEach(c => c.classList.add('opacity-0', 'translate-y-4'));
+                                current = 0;
+                                setTimeout(showNext, 1000);
+                            }, 5000);
+                        }
+                    };
+                    showNext();
+                });
+            </script>
+            <style>
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(10px);
+                    }
+
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+            </style>
+        </div>
+        </div>
+        </div>
+    </section>
+
+    <!-- 6. Trust & FAQ (Objection Killing) - NEW -->
+    <section class="py-24 bg-[#0a0a0a]">
+        <div class="container mx-auto px-6 max-w-4xl">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold mb-4">Preguntas Frecuentes</h2>
+                <p class="text-white/50">Elimina tus dudas y empieza a crecer.</p>
+            </div>
+
+            <div class="space-y-4">
+                <!-- FAQ Item 1 -->
+                <details class="group bg-black border border-white/5 rounded-2xl open:border-primary/30 transition-all">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer list-none font-medium text-lg">
+                        <span>¿Es difícil de configurar?</span>
+                        <span class="transition group-open:rotate-180">
+                            <svg class="w-6 h-6 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="px-6 pb-6 text-white/50">
+                        Para nada. Si sabes usar WhatsApp, sabes usar Barberox. Nosotros te guiamos en el proceso y en
+                        menos de 24 horas tu sistema está operativo y agendando turnos.
+                    </div>
+                </details>
+
+                <!-- FAQ Item 2 -->
+                <details class="group bg-black border border-white/5 rounded-2xl open:border-primary/30 transition-all">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer list-none font-medium text-lg">
+                        <span>¿Mis clientes se van a molestar con un bot?</span>
+                        <span class="transition group-open:rotate-180">
+                            <svg class="w-6 h-6 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="px-6 pb-6 text-white/50">
+                        Al contrario. Los clientes aman la *inmediatez*. Odian esperar horas a que les contestes "si
+                        tienes turno". La IA les responde en 2 segundos y confirma su cita al instante.
+                    </div>
+                </details>
+
+                <!-- FAQ Item 3 -->
+                <details class="group bg-black border border-white/5 rounded-2xl open:border-primary/30 transition-all">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer list-none font-medium text-lg">
+                        <span>¿Qué pasa si no me funciona?</span>
+                        <span class="transition group-open:rotate-180">
+                            <svg class="w-6 h-6 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </span>
+                    </summary>
+                    <div class="px-6 pb-6 text-white/50">
+                        Tienes nuestra <b>Garantía de 30 días</b>. Si no ves resultados, te devolvemos tu dinero. Cero
+                        riesgo para vos.
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. FINAL SECTION: Pricing (The Offer) -->
+    <section id="pricing" class="pt-32 pb-20 relative bg-black flex flex-col items-center justify-center">
+        <div
+            class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/10 via-black to-black opacity-50 pointer-events-none">
+        </div>
+
+        <div class="container mx-auto px-6 relative z-10 w-full">
+            <div class="max-w-xl mx-auto">
+                <div class="text-center mb-10">
+                    <span class="text-primary text-xs font-bold tracking-[0.2em] uppercase mb-4 block">Oferta
+                        Limitada</span>
+                    <h2 class="text-4xl font-bold">Únete al Club.</h2>
+                </div>
+
+                <!-- Card Container -->
+                <div class="group relative perspective-1000">
+                    <!-- Glow Behind -->
+                    <div
+                        class="absolute -inset-1 bg-gradient-to-r from-primary via-white/20 to-primary rounded-[24px] blur opacity-20 group-hover:opacity-40 transition duration-1000 animate-pulse">
+                    </div>
+
+                    <!-- The Black Card -->
+                    <div
+                        class="relative bg-[#0a0a0a] border border-white/10 rounded-[20px] p-8 md:p-12 overflow-hidden shadow-2xl transition-transform duration-500 hover:rotate-x-2">
+                        <!-- Texture -->
+                        <div
+                            class="absolute inset-0 opacity-30 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
+                        </div>
+                        <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/5 rounded-full blur-[80px]">
+                        </div>
+
+                        <!-- Header -->
+                        <div class="relative z-10 flex justify-between items-start mb-12">
+                            <div>
+                                <img src="img/logo.png" alt="Barberox"
+                                    class="h-6 opacity-80 mb-2 grayscale brightness-200">
+                                <div class="text-[10px] text-white/40 uppercase tracking-[0.3em]">Founders Edition</div>
+                            </div>
+                            <!-- Chip -->
+                        </div>
+
+                        <!-- Price -->
+                        <div class="relative z-10 text-center py-8">
+                            <span
+                                class="text-6xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-500 tracking-tight">$5.000</span>
+                            <div class="text-sm text-white/30 uppercase tracking-widest mt-2">Mensuales</div>
+                        </div>
+
+                        <!-- Features Summary -->
+                        <div class="relative z-10 space-y-3 my-8 border-t border-white/5 pt-8">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-white/60">Agente IA WhatsApp</span>
+                                <span class="text-white font-medium">Incluido</span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-white/60">Recordatorios 2hs antes</span>
+                                <span class="text-white font-medium">Incluido</span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-white/60">Bonus: Asistente Barbero</span>
+                                <span class="text-white font-medium">Incluido</span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-white/60">Bonus: Sistema Web</span>
+                                <span class="text-white font-medium">Incluido</span>
+                            </div>
+                        </div>
+
+                        <!-- Action -->
+                        <div class="relative z-10 flex flex-col items-center">
+                            <a href="https://wa.me/message/TJKNS7LTAVVGN1"
+                                class="inline-flex items-center gap-3 bg-[#ff7700] hover:bg-[#ff8800] text-white px-8 py-5 rounded-full font-bold transition-all transform hover:scale-105 shadow-[0_0_30px_rgba(255,119,0,0.3)]">
+                                Quiero entrar a Barberox AI
+                            </a>
+                            <p class="text-[10px] text-center text-white/20 mt-4 uppercase tracking-widest">
+                                <span class="text-primary">Acceso Inmediato</span> a todo el ecosistema.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guarantee Badge -->
+            <div class="mt-16 text-center">
+                <div
+                    class="inline-flex items-center gap-3 px-6 py-2 rounded-full border border-white/5 bg-white/5 backdrop-blur-sm">
+                    <svg class="w-5 h-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                        </path>
+                    </svg>
+                    <span class="text-sm text-white/50">Garantía de 30 días. Sin riesgo.</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Minimal Footer -->
+    <footer class="py-5 border-t border-white/5 bg-black text-center text-sm text-[gray]">
+        <div class="container mx-auto px-6">
+            Todos los derechos reservados | &copy; 2025 <a href="https://codexa.uy"
+                class="text-[gray] hover:text-white transition-colors no-underline">Code<span
+                    class="text-[#00CCC2]">x</span>a.uy</a>
         </div>
     </footer>
 
 </body>
+
 </html>

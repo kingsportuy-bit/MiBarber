@@ -21,7 +21,7 @@ import { TablaMovimientos } from '@/components/caja/v2/TablaMovimientos';
 import { ResumenMovimientos } from '@/components/caja/v2/ResumenMovimientos';
 import { ModalMovimiento } from '@/components/caja/v2/ModalMovimiento';
 import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
-import { getFirstDayOfMonth } from '@/shared/utils/dateUtils';
+import { getFirstDayOfMonth, getLastDayOfMonth } from '@/shared/utils/dateUtils';
 import { formatearMonto } from '@/types/caja';
 import type { MovimientoCaja, FormularioMovimiento, TipoMovimiento, FiltrosCaja } from '@/types/caja';
 import { useCurrentDate } from '@/components/shared/CurrentDateProvider';
@@ -50,9 +50,10 @@ export default function CajaPage() {
   const filtrosCaja: FiltrosCaja = {
     idbarberia: idBarberia || '',
     fechaInicio: globalFilters.fechaInicio || getFirstDayOfMonth(),
-    fechaFin: globalFilters.fechaFin || currentDate,
+    fechaFin: globalFilters.fechaFin || getLastDayOfMonth(),
     idSucursal: globalFilters.sucursalId || undefined,
-    idBarbero: globalFilters.barberoId || undefined,
+    // Cuando barberoId es cadena vacía, significa "todos los barberos"
+    idBarbero: globalFilters.barberoId === "" ? null : (globalFilters.barberoId || undefined),
   };
 
   // Queries
@@ -218,7 +219,12 @@ export default function CajaPage() {
       {/* Filtros globales */}
       {esAdmin && (
         <div className="mb-6">
-          <GlobalFilters showBarberoFilter={true} />
+          <GlobalFilters 
+            showSucursalFilter={true}
+            showBarberoFilter={true}
+            showDateFilters={true}
+            showAllBarbersOption={true}
+          />
         </div>
       )}
 

@@ -40,9 +40,11 @@ export function useCaja(filtros: FiltrosCaja) {
       // Filtro por barbero (común) o por barbero seleccionado (admin)
       if (!isAdmin && barbero?.id_barbero) {
         query = query.eq('id_barbero', barbero.id_barbero);
-      } else if (isAdmin && filtros.idBarbero) {
+      } else if (isAdmin && filtros.idBarbero !== null && filtros.idBarbero !== undefined) {
+        // Solo aplicar filtro si idBarbero tiene un valor específico
         query = query.eq('id_barbero', filtros.idBarbero);
       }
+      // Si isAdmin y idBarbero es null, no aplicamos filtro de barbero (mostrar todos)
       
       // Filtro por sucursal (solo admin)
       if (isAdmin && filtros.idSucursal) {

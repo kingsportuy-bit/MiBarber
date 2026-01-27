@@ -9,13 +9,15 @@ interface GlobalFiltersProps {
   showSucursalFilter?: boolean;
   showBarberoFilter?: boolean;
   showDateFilters?: boolean;
+  showAllBarbersOption?: boolean; // Nueva prop para controlar opción "Todos los barberos"
 }
 
 export function GlobalFilters({ 
   className = "",
-  showSucursalFilter = true,
+  showSucursalFilter = false,
   showBarberoFilter = true,
-  showDateFilters = true
+  showDateFilters = false,
+  showAllBarbersOption = false // Por defecto false para mantener comportamiento actual
 }: GlobalFiltersProps) {
   const { 
     filters, 
@@ -126,7 +128,9 @@ export function GlobalFilters({
               <option>Cargando barberos...</option>
             ) : (
               <>
-                <option value="">Todos los barberos</option>
+                {showAllBarbersOption && (
+                  <option value="">Todos los barberos</option>
+                )}
                 {barberosFiltrados?.map((barbero: any) => (
                   <option key={barbero.id_barbero} value={barbero.id_barbero}>
                     {barbero.nombre}

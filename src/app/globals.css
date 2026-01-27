@@ -15,62 +15,102 @@ body {
 }
 
 :root {
-  --color-primary: #ff7700; /* Naranja principal */
-  --color-primary-dark: #cc5500; /* Naranja oscuro */
-  --color-background: #000000; /* Negro puro */
-  --color-background-transparent: rgba(0, 0, 0, 0.8); /* Negro con transparencia */
-  --color-text: rgba(255, 255, 255, 0.87); /* Texto blanco */
-  --color-text-secondary: rgba(255, 255, 255, 0.2); /* Texto blanco secundario */
-  --color-accent: #00CCC2; /* Azul turquesa para acentos */
-  
+  --color-primary: #ff7700;
+  /* Naranja principal */
+  --color-primary-dark: #cc5500;
+  /* Naranja oscuro */
+  --color-background: #000000;
+  /* Negro puro */
+  --color-background-transparent: rgba(0, 0, 0, 0.8);
+  /* Negro con transparencia */
+  --color-text: rgba(255, 255, 255, 0.87);
+  /* Texto blanco */
+  --color-text-secondary: rgba(255, 255, 255, 0.2);
+  /* Texto blanco secundario */
+  --color-accent: #00CCC2;
+  /* Azul turquesa para acentos */
+
   /* Variables existentes */
-  --qoder-dark-bg-primary: #000000;        /* Fondo principal (body) - Negro puro */
-  --qoder-dark-bg-secondary: #1a1a1a;      /* Paneles, secciones y tarjetas */
-  --qoder-dark-bg-tertiary: #2a2a2a;       /* Alternativa para paneles */
-  --qoder-dark-bg-quaternary: #3a3a3a;     /* Barras superiores, menús o sidebars */
-  --qoder-dark-bg-form: #1a1a1a;           /* Formularios y modales */
-  --qoder-dark-bg-modal: rgba(0, 0, 0, 0.95); /* Modales con 90% de opacidad */
-  --qoder-dark-bg-hover: #2a2a2a;          /* Hover states */
-  --qoder-dark-bg-header: #161717;         /* Color para headers de chat */
-  --qoder-dark-bg-black: #000000;          /* Negro puro para área de mensajes */
-  
+  --qoder-dark-bg-primary: #000000;
+  /* Fondo principal (body) - Negro puro */
+  --qoder-dark-bg-secondary: #1a1a1a;
+  /* Paneles, secciones y tarjetas */
+  --qoder-dark-bg-tertiary: #2a2a2a;
+  /* Alternativa para paneles */
+  --qoder-dark-bg-quaternary: #3a3a3a;
+  /* Barras superiores, menús o sidebars */
+  --qoder-dark-bg-form: #1a1a1a;
+  /* Formularios y modales */
+  --qoder-dark-bg-modal: rgba(0, 0, 0, 0.95);
+  /* Modales con 90% de opacidad */
+  --qoder-dark-bg-hover: #2a2a2a;
+  /* Hover states */
+  --qoder-dark-bg-header: #161717;
+  /* Color para headers de chat */
+  --qoder-dark-bg-black: #000000;
+  /* Negro puro para área de mensajes */
+
   /* Bordes y separadores */
-  --qoder-dark-border-primary: #333333;    /* Bordes y separadores */
-  --qoder-dark-border-secondary: #444444;  /* Inputs y campos de texto */
-  
+  --qoder-dark-border-primary: #333333;
+  /* Bordes y separadores */
+  --qoder-dark-border-secondary: #444444;
+  /* Inputs y campos de texto */
+
   /* Textos */
-  --qoder-dark-text-primary: #ffffff;      /* Texto principal - Blanco */
-  --qoder-dark-text-secondary: rgba(255, 255, 255, 0.8);    /* Texto secundario */
-  --qoder-dark-text-muted: rgba(255, 255, 255, 0.6);        /* Texto deshabilitado */
-  
+  --qoder-dark-text-primary: #ffffff;
+  /* Texto principal - Blanco */
+  --qoder-dark-text-secondary: rgba(255, 255, 255, 0.8);
+  /* Texto secundario */
+  --qoder-dark-text-muted: rgba(255, 255, 255, 0.6);
+  /* Texto deshabilitado */
+
   /* Botones */
-  --qoder-dark-button-primary: #333333;    /* Botón primario */
-  --qoder-dark-button-primary-text: #ffffff; /* Texto botón primario */
-  --qoder-dark-button-secondary: #2a2a2a;  /* Botón secundario */
-  --qoder-dark-button-secondary-text: #ffffff; /* Texto botón secundario */
-  --qoder-dark-button-hover: #ffa500;      /* Hover botón - Naranja */
-  --qoder-dark-button-secondary-hover: #ffa500; /* Hover botón secundario - Naranja */
-  
+  --qoder-dark-button-primary: #333333;
+  /* Botón primario */
+  --qoder-dark-button-primary-text: #ffffff;
+  /* Texto botón primario */
+  --qoder-dark-button-secondary: #2a2a2a;
+  /* Botón secundario */
+  --qoder-dark-button-secondary-text: #ffffff;
+  /* Texto botón secundario */
+  --qoder-dark-button-hover: #ffa500;
+  /* Hover botón - Naranja */
+  --qoder-dark-button-secondary-hover: #ffa500;
+  /* Hover botón secundario - Naranja */
+
   /* Inputs */
-  --qoder-dark-input-bg: #1a1a1a;          /* Fondo inputs */
-  --qoder-dark-input-border: #333333;      /* Borde inputs */
-  --qoder-dark-input-focus: #ffa500;       /* Borde inputs en foco - Naranja */
-  
+  --qoder-dark-input-bg: #1a1a1a;
+  /* Fondo inputs */
+  --qoder-dark-input-border: #333333;
+  /* Borde inputs */
+  --qoder-dark-input-focus: #ffa500;
+  /* Borde inputs en foco - Naranja */
+
   /* Colores de acento naranja */
-  --qoder-dark-accent-orange: #ffa500;     /* Naranja principal */
-  --qoder-dark-accent-orange-light: #ffb733; /* Naranja claro */
-  --qoder-dark-accent-orange-muted: rgba(255, 165, 0, 0.3); /* Naranja con transparencia */
-  
+  --qoder-dark-accent-orange: #ffa500;
+  /* Naranja principal */
+  --qoder-dark-accent-orange-light: #ffb733;
+  /* Naranja claro */
+  --qoder-dark-accent-orange-muted: rgba(255, 165, 0, 0.3);
+  /* Naranja con transparencia */
+
   /* Colores de acento generales */
-  --qoder-accent-primary: #ffa500;     /* Naranja */
-  --qoder-accent-secondary: #808080;   /* Gris medio */
-  --qoder-accent-success: #10b981;     /* Verde */
-  --qoder-accent-warning: #f59e0b;     /* Amarillo */
-  --qoder-accent-danger: #ef4444;      /* Rojo */
-  --qoder-accent-info: #0ea5e9;        /* Azul */
-  
+  --qoder-accent-primary: #ffa500;
+  /* Naranja */
+  --qoder-accent-secondary: #808080;
+  /* Gris medio */
+  --qoder-accent-success: #10b981;
+  /* Verde */
+  --qoder-accent-warning: #f59e0b;
+  /* Amarillo */
+  --qoder-accent-danger: #ef4444;
+  /* Rojo */
+  --qoder-accent-info: #0ea5e9;
+  /* Azul */
+
   /* Codexa X color */
-  --codexa-x-color: #00CCC2; /* Color para la X de Codexa */
+  --codexa-x-color: #00CCC2;
+  /* Color para la X de Codexa */
 }
 
 /* Base styles with Qoder Dark theme - Modernizado */
@@ -122,7 +162,8 @@ body {
   left: 10%;
   width: 200px;
   height: 200px;
-  background-color: #cc5500; /* Naranja más oscuro */
+  background-color: #7d6a58;
+  /* Beige más oscuro */
   border-radius: 50%;
   opacity: 0;
   animation: slowSparkle 32s infinite;
@@ -137,7 +178,8 @@ body {
   right: 10%;
   width: 300px;
   height: 300px;
-  background-color: #cc5500; /* Naranja más oscuro */
+  background-color: #7d6a58;
+  /* Beige más oscuro */
   border-radius: 50%;
   opacity: 0;
   animation: slowSparkle 32s infinite 16s;
@@ -151,82 +193,102 @@ body {
     opacity: 0;
     transform: scale(0.3);
   }
+
   5% {
     opacity: 0.6;
     transform: scale(0.8);
   }
+
   10% {
     opacity: 0.4;
     transform: scale(0.7);
   }
+
   15% {
     opacity: 0.7;
     transform: scale(1.0);
   }
+
   20% {
     opacity: 0.5;
     transform: scale(0.9);
   }
+
   25% {
     opacity: 0.8;
     transform: scale(1.2);
   }
+
   30% {
     opacity: 0.6;
     transform: scale(1.1);
   }
+
   35% {
     opacity: 0.9;
     transform: scale(1.4);
   }
+
   40% {
     opacity: 0.7;
     transform: scale(1.2);
   }
+
   45% {
     opacity: 0.5;
     transform: scale(1.0);
   }
+
   50% {
     opacity: 0.8;
     transform: scale(1.3);
   }
+
   55% {
     opacity: 0.6;
     transform: scale(1.1);
   }
+
   60% {
     opacity: 0.4;
     transform: scale(1.0);
   }
+
   65% {
     opacity: 0.7;
     transform: scale(1.2);
   }
+
   70% {
     opacity: 0.5;
     transform: scale(1.0);
   }
+
   75% {
     opacity: 0.3;
     transform: scale(0.8);
   }
+
   80% {
     opacity: 0.6;
     transform: scale(1.1);
   }
+
   85% {
     opacity: 0.4;
     transform: scale(0.9);
   }
+
   90% {
     opacity: 0.2;
     transform: scale(0.7);
   }
+
   95% {
     opacity: 0.5;
     transform: scale(0.9);
   }
+
   100% {
     opacity: 0;
     transform: scale(0.3);
@@ -243,7 +305,8 @@ body {
   box-sizing: border-box;
   background-color: transparent;
   min-height: 100vh;
-  margin-top: 60px; /* Espacio para la navbar fija */
+  margin-top: 60px;
+  /* Espacio para la navbar fija */
 }
 
 .dashboard-content {
@@ -288,7 +351,9 @@ body {
   font-size: 1rem;
 }
 
-.dashboard h1, .dashboard h2, .dashboard h3 {
+.dashboard h1,
+.dashboard h2,
+.dashboard h3 {
   color: var(--qoder-dark-text-primary);
   margin-bottom: 15px;
   font-size: 1.8rem;
@@ -323,7 +388,8 @@ body {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   width: 100%;
   box-sizing: border-box;
-  background-color: transparent; /* Fondo transparente para el footer */
+  background-color: transparent;
+  /* Fondo transparente para el footer */
 }
 
 /* Estilo especial para la X de Codexa */
@@ -336,11 +402,11 @@ body {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .stat-number {
     font-size: 2rem;
   }
-  
+
   .dashboard {
     padding: 15px;
   }
@@ -561,13 +627,15 @@ main {
   color: var(--qoder-dark-text-primary);
   padding: 0.5rem 0.75rem;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  font-size: 1rem; /* Prevenir zoom en iOS Safari */
+  font-size: 1rem;
+  /* Prevenir zoom en iOS Safari */
 }
 
 @media (min-width: 768px) {
   .qoder-dark-input {
     padding: 0.75rem 1rem;
-    font-size: 1rem; /* Mantener consistencia en todos los dispositivos */
+    font-size: 1rem;
+    /* Mantener consistencia en todos los dispositivos */
   }
 }
 
@@ -587,27 +655,33 @@ main {
 }
 
 /* Qoder Dark search and filter boxes - Modernizado */
-.qoder-dark-search-box, .qoder-dark-filter-box {
+.qoder-dark-search-box,
+.qoder-dark-filter-box {
   background-color: var(--qoder-dark-input-bg);
   border: 1px solid var(--qoder-dark-input-border);
   border-radius: 6px;
   color: var(--qoder-dark-text-primary);
   padding: 0.5rem 0.75rem;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  font-size: 1rem; /* Prevenir zoom en iOS Safari */
+  font-size: 1rem;
+  /* Prevenir zoom en iOS Safari */
 }
 
 @media (min-width: 768px) {
-  .qoder-dark-search-box, .qoder-dark-filter-box {
+
+  .qoder-dark-search-box,
+  .qoder-dark-filter-box {
     padding: 0.75rem 1rem;
   }
 }
 
-.qoder-dark-search-box::-webkit-input-placeholder, .qoder-dark-filter-box::-webkit-input-placeholder {
+.qoder-dark-search-box::-webkit-input-placeholder,
+.qoder-dark-filter-box::-webkit-input-placeholder {
   color: var(--qoder-dark-text-secondary);
 }
 
-.qoder-dark-search-box::-moz-placeholder, .qoder-dark-filter-box::-moz-placeholder {
+.qoder-dark-search-box::-moz-placeholder,
+.qoder-dark-filter-box::-moz-placeholder {
   color: var(--qoder-dark-text-secondary);
 }
 
@@ -894,8 +968,10 @@ main {
 .qoder-dark-sucursal-tab {
   position: relative;
   padding: 0.4rem 1.2rem;
-  background: rgba(0, 0, 0, 0,2);       /* negro 80% */
-  color: #6d6d6d;                       /* gris */
+  background: rgba(0, 0, 0, 0, 2);
+  /* negro 80% */
+  color: #6d6d6d;
+  /* gris */
   border-radius: 20px 20px 0 0;
   display: inline-flex;
   align-items: center;
@@ -910,8 +986,10 @@ main {
 
 /* Pestaña activa */
 .qoder-dark-sucursal-tab.active {
-  background: rgba(0, 0, 0, 0.5);                /* negro 50% */
-  color: white;        /* texto naranja */
+  background: rgba(0, 0, 0, 0.5);
+  /* negro 50% */
+  color: white;
+  /* texto naranja */
   border-left: 1px solid var(--qoder-dark-border-primary);
   border-right: 0px solid var(--qoder-dark-border-primary);
   border-top: 1px solid var(--qoder-dark-border-primary);
@@ -924,16 +1002,20 @@ main {
 
 /* Pestaña inactiva explícita (opcional, por si querés algo distinto del base) */
 .qoder-dark-sucursal-tab.inactive {
-  background: rgba(0, 0, 0, 1);   /* ya coincide con la base, aquí puedes ajustar si necesitás */
-  color: #3b3b3b;                   /* gris */
+  background: rgba(0, 0, 0, 1);
+  /* ya coincide con la base, aquí puedes ajustar si necesitás */
+  color: #3b3b3b;
+  /* gris */
   border-bottom: 1px solid var(--qoder-dark-border-primary);
   border-right: 0px solid var(--qoder-dark-border-primary);
   border-left: 1px solid var(--qoder-dark-border-primary);
   border-top: 1px solid var(--qoder-dark-bg-green);
 }
+
 .qoder-dark-bubble:hover {
   border-color: var(--qoder-dark-accent-orange);
 }
+
 .qoder-dark-bubble-sender {
   border-bottom-right-radius: 6px;
   margin-left: auto;
@@ -1602,11 +1684,11 @@ main {
     align-items: flex-start;
     gap: 0.5rem;
   }
-  
+
   .qoder-dark-window-content {
     padding: 1rem;
   }
-  
+
   .qoder-dark-table th,
   .qoder-dark-table td {
     padding: 0.75rem 1rem;
@@ -1706,34 +1788,41 @@ main {
 
 /* Estilos universales para menús desplegables */
 .dropdown-menu {
-  background-color: rgba(30, 30, 30, 0.95); /* Fondo oscuro con transparencia */
-  border: 1px solid rgba(255, 119, 0, 0.3); /* Borde naranja */
+  background-color: rgba(30, 30, 30, 0.95);
+  /* Fondo oscuro con transparencia */
+  border: 1px solid rgba(255, 119, 0, 0.3);
+  /* Borde naranja */
   border-radius: 6px;
 }
 
 .dropdown-item {
-  color: #ff7700; /* Texto naranja */
+  color: #ff7700;
+  /* Texto naranja */
   padding: 12px 15px;
-  border-radius: 0; /* Sin bordes redondeados */
+  border-radius: 0;
+  /* Sin bordes redondeados */
   transition: all 0.2s ease;
   font-weight: 500;
   background: transparent;
 }
 
 .dropdown-item:hover {
-  background: rgba(255, 119, 0, 0.3) !important; /* Fondo naranja al pasar el mouse */
+  background: rgba(255, 119, 0, 0.3) !important;
+  /* Fondo naranja al pasar el mouse */
   color: #ff7700;
   font-weight: 600;
 }
 
 .dropdown-item.active {
-  background: rgba(255, 119, 0, 0.5) !important; /* Fondo naranja más intenso cuando está activo */
+  background: rgba(255, 119, 0, 0.5) !important;
+  /* Fondo naranja más intenso cuando está activo */
   color: #ff7700;
   font-weight: 600;
 }
 
 .dropdown-item:focus {
-  background: rgba(255, 119, 0, 0.4) !important; /* Fondo naranja al enfocar */
+  background: rgba(255, 119, 0, 0.4) !important;
+  /* Fondo naranja al enfocar */
   color: #ff7700;
   outline: none;
 }
@@ -1743,6 +1832,7 @@ main {
 .dropdown-item * {
   background-color: transparent !important;
 }
+
 /* Override para botones del calendario - sin fondo naranja */
 button[class*="rounded"][class*="transition"] {
   background-color: transparent !important;

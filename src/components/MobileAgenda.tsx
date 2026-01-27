@@ -3,12 +3,14 @@
 import { useState, useEffect, useMemo } from "react";
 import { useCitas } from "@/hooks/useCitas";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
-import { FinalAppointmentModal } from "@/components/FinalAppointmentModal";
+import { FinalAppointmentModalModificado } from "@/components/FinalAppointmentModalModificado";
 import type { Appointment } from "@/types/db";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useClientesByIds } from "@/hooks/useClientes";
 import { Client } from "@/types/db";
+import { useGlobalFilters } from "@/hooks/useGlobalFilters";
+import { GlobalFilters } from "@/components/shared/GlobalFilters";
 
 // Función para convertir puntaje a estrellas con borde dorado y sin relleno
 const getStarsFromScore = (puntaje: number) => {
@@ -43,6 +45,7 @@ export function MobileAgenda() {
   // SIMPLIFICADO: Usar datos directos como /inicio
   // ========================================
   const { barbero: barberoActual, isAdmin } = useBarberoAuth();
+  const { filters } = useGlobalFilters();
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -57,17 +60,18 @@ export function MobileAgenda() {
   // CONSULTAR CITAS CON DATOS DIRECTOS (como KanbanBoard)
   // ========================================
   const citasQuery = useCitas({
-    sucursalId: barberoActual?.id_sucursal || undefined,
+    sucursalId: filters.sucursalId || barberoActual?.id_sucursal || undefined,
     fecha: getLocalDateString(selectedDate),
-    barberoId: barberoActual?.id_barbero || undefined,
+    barberoId: isAdmin ? filters.barberoId || undefined : barberoActual?.id_barbero || undefined,
   });
 
   const { data: citasData, isLoading, error, refetch } = citasQuery;
 
   const { data: citasMesData } = citasQuery.useCitasPorRango(
-    barberoActual?.id_sucursal || undefined,
+    filters.sucursalId || barberoActual?.id_sucursal || undefined,
     firstDayOfMonth.toISOString().split('T')[0],
-    lastDayOfMonth.toISOString().split('T')[0]
+    lastDayOfMonth.toISOString().split('T')[0],
+    isAdmin ? filters.barberoId || undefined : barberoActual?.id_barbero || undefined
   );
   console.log('🗓️ Datos de citas por rango:', citasMesData);
 
@@ -145,7 +149,15 @@ export function MobileAgenda() {
     const citasPorFecha: { [key: string]: Appointment[] } = {};
     if (citasMesData) {
       console.log('📋 Citas del mes antes de filtrar:', citasMesData);
-      const citasFiltradas = citasMesData.filter((cita: Appointment) => cita.estado !== "cancelado");
+        
+      // Aplicar filtro adicional por barbero si es necesario
+      let citasFiltradas = citasMesData.filter((cita: Appointment) => cita.estado !== "cancelado");
+        
+      // Si hay un barbero específico seleccionado, filtrar por ese barbero
+      if (isAdmin && filters.barberoId) {
+        citasFiltradas = citasFiltradas.filter((cita: Appointment) => cita.id_barbero === filters.barberoId);
+      }
+        
       console.log('✅ Citas del mes después de filtrar:', citasFiltradas);
       citasFiltradas.forEach((cita: Appointment) => {
         // Asegurarse de que la fecha esté en el formato correcto (YYYY-MM-DD)
@@ -227,7 +239,10 @@ export function MobileAgenda() {
         <h2 className="text-1xl font-bold text-left text-qoder-dark-text-primary">Agenda</h2>
       </div>
 
-      {/* Filtros - compartidos por ambas vistas */}
+      {/* Filtros Globales */}
+      <div className="mb-4">
+        <GlobalFilters />
+      </div>
 
       {/* Vista de Calendario */}
       {view === 'calendar' && (
@@ -409,7 +424,7 @@ export function MobileAgenda() {
       )}
 
       {/* Modal de Cita */}
-      <FinalAppointmentModal
+      <FinalAppointmentModalModificado
         open={isModalOpen}
         onOpenChange={handleCloseModal}
         initial={selectedAppointment || undefined}

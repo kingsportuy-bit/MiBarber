@@ -3,13 +3,15 @@
 import { useState, useEffect, useMemo } from "react";
 import { useCitas } from "@/hooks/useCitas";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
-import { FinalAppointmentModal } from "@/components/FinalAppointmentModal";
+import { FinalAppointmentModalModificado } from "@/components/FinalAppointmentModalModificado";
 import type { Appointment } from "@/types/db";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { CalendarWithBloqueos } from "@/components/CalendarWithBloqueos";
 import { useCliente, useClientesByIds } from "@/hooks/useClientes";
 import { Client } from "@/types/db";
+import { useGlobalFilters } from "@/hooks/useGlobalFilters";
+import { GlobalFilters } from "@/components/shared/GlobalFilters";
 
 // Función para convertir puntaje a estrellas con borde dorado y sin relleno
 const getStarsFromScore = (puntaje: number) => {
@@ -44,6 +46,7 @@ export function DesktopAgenda() {
   // SIMPLIFICADO: Usar datos directos como /inicio
   // ========================================
   const { barbero: barberoActual, isAdmin } = useBarberoAuth();
+  const { filters } = useGlobalFilters();
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -59,9 +62,9 @@ export function DesktopAgenda() {
   // CONSULTAR CITAS CON DATOS DIRECTOS (como KanbanBoard)
   // ========================================
   const citasQuery = useCitas({
-    sucursalId: barberoActual?.id_sucursal || undefined,
+    sucursalId: filters.sucursalId || barberoActual?.id_sucursal || undefined,
     fecha: getLocalDateString(selectedDate), // Agregar fecha como KanbanBoard
-    barberoId: barberoActual?.id_barbero || undefined,
+    barberoId: isAdmin ? filters.barberoId || undefined : barberoActual?.id_barbero || undefined,
   });
 
   const { data: citasData, isLoading, error, refetch } = citasQuery;
@@ -69,9 +72,10 @@ export function DesktopAgenda() {
 
   // Obtener citas para todo el mes usando el rango
   const { data: citasMesData } = citasQuery.useCitasPorRango(
-    barberoActual?.id_sucursal || undefined,
+    filters.sucursalId || barberoActual?.id_sucursal || undefined,
     firstDayOfMonth.toISOString().split('T')[0],
-    lastDayOfMonth.toISOString().split('T')[0]
+    lastDayOfMonth.toISOString().split('T')[0],
+    isAdmin ? filters.barberoId || undefined : barberoActual?.id_barbero || undefined
   );
   console.log('🗓️ Datos de citas por rango:', citasMesData);
 
@@ -125,12 +129,20 @@ export function DesktopAgenda() {
     // Usar citasMesData para el calendario (todo el mes) en lugar de citasData (solo un día)
     if (citasMesData) {
       console.log('📋 Citas del mes antes de filtrar:', citasMesData);
-      const citasFiltradas = citasMesData.filter(cita => cita.estado !== "cancelado");
+        
+      // Aplicar filtro adicional por barbero si es necesario
+      let citasFiltradas = citasMesData.filter(cita => cita.estado !== "cancelado");
+        
+      // Si hay un barbero específico seleccionado, filtrar por ese barbero
+      if (isAdmin && filters.barberoId) {
+        citasFiltradas = citasFiltradas.filter(cita => cita.id_barbero === filters.barberoId);
+      }
+        
       console.log('✅ Citas del mes después de filtrar:', citasFiltradas);
       citasFiltradas.forEach(cita => {
         const fechaParts = cita.fecha.split('T');
         const fechaStr = fechaParts[0];
-
+    
         if (!citasPorFecha[fechaStr]) {
           citasPorFecha[fechaStr] = [];
         }
@@ -223,15 +235,19 @@ export function DesktopAgenda() {
     <div className="flex flex-col w-full bg-transparent px-8 py-1">
       {/* Título de la agenda - compartido por ambas vistas */}
 
-
-      {/* Botón de Nuevo Turno */}
-      <div className="mb-8 flex justify-end">
-        <button
-          onClick={handleNewAppointment}
-          className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-600 hover:to-amber-600 text-white py-3 px-6 rounded-lg font-medium transition-all duration-200 whitespace-nowrap"
-        >
-          + Nuevo Turno
-        </button>
+      {/* Filtros Globales y Botón Nuevo Turno en la misma línea */}
+      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex-1">
+          <GlobalFilters />
+        </div>
+        <div>
+          <button
+            onClick={handleNewAppointment}
+            className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-600 hover:to-amber-600 text-white py-3 px-6 rounded-lg font-medium transition-all duration-200 whitespace-nowrap"
+          >
+            + Nuevo Turno
+          </button>
+        </div>
       </div>
 
       {/* Vista de Calendario */}
@@ -419,7 +435,7 @@ export function DesktopAgenda() {
       }
 
       {/* Modal de Cita */}
-      <FinalAppointmentModal
+      <FinalAppointmentModalModificado
         open={isModalOpen}
         onOpenChange={handleCloseModal}
         initial={selectedAppointment || undefined}

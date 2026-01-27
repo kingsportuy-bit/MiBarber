@@ -195,8 +195,9 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
         }));
       }
     
-      // Si no somos admin y tenemos un barbero, establecer el barberoId por defecto
-      if (!isAdmin && barbero?.id_barbero && !filters.barberoId) {
+      // Si tenemos un barbero logueado y no hay barbero seleccionado, establecer el barberoId por defecto
+      // Solo cuando barberoId es undefined (no null que significa "todos los barberos")
+      if (barbero?.id_barbero && filters.barberoId === undefined) {
         setFilters(prev => ({
           ...prev,
           barberoId: barbero.id_barbero
@@ -209,13 +210,6 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
           ...prev,
           sucursalId: barbero.id_sucursal
         }));
-      }
-      
-      // Para administradores, si no hay barbero seleccionado, dejarlo como null
-      // para mostrar todos los barberos, pero si ya hay uno seleccionado, mantenerlo
-      if (isAdmin && !filters.barberoId) {
-        // No hacemos nada aquí, dejamos que el usuario seleccione el barbero
-        // o que se seleccione mediante otros mecanismos
       }
     
       // Validar y corregir fechas si están invertidas
@@ -250,22 +244,9 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Solo ejecutar una vez por cambio de condición
     if (!adminFiltersAppliedRef.current) {
-      // Si somos admin y no tenemos un barbero específico seleccionado, asegurarnos de que barberoId sea null
-      // Pero si ya tenemos un barberoId seleccionado, no lo sobrescribimos
-      if (isAdmin && !barbero?.id_barbero && !filters.barberoId) {
-        setFilters(prev => {
-          if (prev.barberoId !== null) {
-            return {
-              ...prev,
-              barberoId: null
-            };
-          }
-          return prev;
-        });
-        adminFiltersAppliedRef.current = true;
-      }
-      // Si no somos admin pero tenemos un barbero logueado, establecerlo como filtro
-      else if (!isAdmin && barbero?.id_barbero && !filters.barberoId) {
+      // Si tenemos un barbero logueado y no hay barbero seleccionado, establecerlo como filtro
+      // Solo cuando barberoId es undefined (no null que significa "todos los barberos")
+      if (barbero?.id_barbero && filters.barberoId === undefined) {
         setFilters(prev => ({
           ...prev,
           barberoId: barbero.id_barbero
@@ -274,11 +255,11 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
       }
     }
     
-    // Resetear la bandera cuando cambia el barbero o el rol
-    if ((barbero?.id_barbero && !isAdmin) || (!barbero?.id_barbero)) {
+    // Resetear la bandera cuando cambia el barbero
+    if (!barbero?.id_barbero) {
       adminFiltersAppliedRef.current = false;
     }
-  }, [barbero?.id_barbero, isAdmin, setFilters, filters.barberoId]);
+  }, [barbero?.id_barbero, setFilters, filters.barberoId]);
 
   // Efecto para actualizar barberoIdFilter cuando cambia la sucursal
   useEffect(() => {

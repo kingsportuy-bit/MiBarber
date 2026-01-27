@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { KanbanColumn } from "@/components/KanbanColumn";
-import { FinalAppointmentModal } from "@/components/FinalAppointmentModal";
+import { FinalAppointmentModalModificado } from "@/components/FinalAppointmentModalModificado";
 import type { Appointment } from "@/types/db";
 import { useCitas } from "@/hooks/useCitas";
 import { useGlobalFilters } from "@/contexts/GlobalFiltersContext";
@@ -528,7 +528,7 @@ export function KanbanBoard({
       
       {/* Modal de nuevo turno */}
       {appointment && (
-        <FinalAppointmentModal
+        <FinalAppointmentModalModificado
           open={modalOpen}
           onOpenChange={(open: boolean) => {
             setModalOpen(open);

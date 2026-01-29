@@ -38,4 +38,3 @@ coverage/
 # Docker
 *.log
 docker-compose.yml
-Dockerfile.prod

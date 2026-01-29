@@ -300,7 +300,7 @@ export function NavBar() {
         >
           {/* Logo imagen con altura fija y sin encogerse */}
           <img
-            src="/img/logogris.png"
+            src="/logo-barberox.png"
             alt="Barberox"
             style={{
               height: '30px',

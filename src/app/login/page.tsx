@@ -147,7 +147,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <h1 className="flex justify-center mb-4 no-underline">
             <img
-              src="/img/logogris.png"
+              src="/logo-barberox.png"
               alt="Barberox"
               className="h-16 w-auto object-contain"
             />

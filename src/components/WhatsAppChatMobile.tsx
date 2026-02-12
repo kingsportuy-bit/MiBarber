@@ -5,6 +5,7 @@ import { useWhatsAppChats } from "@/hooks/useWhatsAppChats";
 import { useClientes, useClientesByIds } from "@/hooks/useClientes";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 import { useSucursales } from "@/hooks/useSucursales";
+import { useWhatsAppStatus } from "@/hooks/useWhatsAppStatus";
 import { formatWhatsAppTimestamp } from "@/utils/formatters";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 import type { ChatConversation, ChatMessage, Client } from "@/types/db";
@@ -38,18 +39,23 @@ export function WhatsAppChatMobile() {
   const [showAllSucursales, setShowAllSucursales] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Agregar estado para el término de búsqueda
   const supabase: any = getSupabaseClient();
-  
+
   // Para barberos comunes, usar la sucursal asociada
   // Para administradores, permitir seleccionar sucursal o ver todas
   const sucursalId = !isAdmin && barbero?.id_sucursal ? barbero.id_sucursal : selectedSucursal;
-  
+
+  // Estado de conexión de WhatsApp (QR y wpp_activo)
+  const statusSucursalId = barbero?.id_sucursal || selectedSucursal;
+  const { qrUrl, wppActivo } = useWhatsAppStatus(statusSucursalId);
+  const isWhatsAppConnected = wppActivo === "Conectado";
+
   const { grouped, isLoading, subscriptionError, refreshChats, isRefreshing, clients } = useWhatsAppChats(sucursalId, showAllSucursales);
   const [active, setActive] = useState<string | null>(null);
   const [message, setMessage] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [showChatList, setShowChatList] = useState<boolean>(true); // Controla qué panel mostrar
-  
+
   // Cambiar para que no seleccione automáticamente el primer chat
   const activeConv = grouped?.find((g: ChatConversation) => g.session_id === active) || null;
 
@@ -80,9 +86,9 @@ export function WhatsAppChatMobile() {
 
   // Función para obtener el nombre del cliente por su ID
   const getClientName = (sessionId: string) => {
-    const cliente = clients?.find((c: Client) => 
-      c.telefono === sessionId || 
-      c.id_cliente === sessionId || 
+    const cliente = clients?.find((c: Client) =>
+      c.telefono === sessionId ||
+      c.id_cliente === sessionId ||
       (c.id_conversacion && c.id_conversacion.toString() === sessionId)
     );
     return cliente?.nombre || "Cliente desconocido";
@@ -90,13 +96,13 @@ export function WhatsAppChatMobile() {
 
   // Función para obtener información del cliente
   const getClientInfo = (sessionId: string) => {
-    return clients?.find((c: Client) => 
-      c.telefono === sessionId || 
-      c.id_cliente === sessionId || 
+    return clients?.find((c: Client) =>
+      c.telefono === sessionId ||
+      c.id_cliente === sessionId ||
       (c.id_conversacion && c.id_conversacion.toString() === sessionId)
     );
   };
-  
+
   // Obtener IDs únicos de clientes de las conversaciones
   const clienteIds = useMemo(() => {
     if (!grouped) return [];
@@ -129,13 +135,13 @@ export function WhatsAppChatMobile() {
   // Filtrar conversaciones según el término de búsqueda
   const filteredConversations = useMemo(() => {
     if (!grouped || !searchTerm) return grouped || [];
-    
+
     const term = searchTerm.toLowerCase().trim();
     return grouped.filter((conversation: ChatConversation) => {
       const clientName = getClientName(conversation.session_id).toLowerCase();
       const clientInfo = getClientInfo(conversation.session_id);
       const phoneNumber = clientInfo?.telefono?.toLowerCase() || '';
-      
+
       return clientName.includes(term) || phoneNumber.includes(term);
     });
   }, [grouped, searchTerm, clients]);
@@ -143,9 +149,9 @@ export function WhatsAppChatMobile() {
   // Efecto principal para hacer scroll al final usando ref
   useLayoutEffect(() => {
     if (activeConv && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ 
+      messagesEndRef.current.scrollIntoView({
         behavior: "instant",
-        block: "end" 
+        block: "end"
       });
     }
   }, [activeConv?.session_id, activeConv?.messages]);
@@ -186,28 +192,28 @@ export function WhatsAppChatMobile() {
     // Verificar si el contenido contiene una URL de imagen
     const urlRegex = /(https?:\/\/[^\s&]+(?:\.(?:jpeg|jpg|png|gif|webp|bmp|svg))(?:\?[^\s&]*)?)/gi;
     const match = content.match(urlRegex);
-    
+
     if (match && match[0]) {
       const imageUrl = match[0];
       // Extraer el caption si existe (contenido entre &)
       const captionMatch = content.match(/&(.+)&/);
       const caption = captionMatch ? captionMatch[1] : '';
-      
+
       return { imageUrl, caption };
     }
-    
+
     // Si no encontramos una URL con &caption&, verificar si todo el contenido es una URL de imagen
     if (isImageUrl(content)) {
       return { imageUrl: content, caption: '' };
     }
-    
+
     return null;
   };
 
   // Manejar envío de mensaje
   const handleSendMessage = async () => {
     if (!message.trim() || !activeConv) return;
-    
+
     try {
       // Insertar mensaje en la tabla mibarber_historial
       const newMessage = {
@@ -263,7 +269,7 @@ export function WhatsAppChatMobile() {
           .update({ chat_humano: 1 })
           .eq("id_cliente", client.id_cliente);
       }
-      
+
       // Recargar los chats después de enviar el mensaje
       await refreshChats();
     } catch (error) {
@@ -274,7 +280,7 @@ export function WhatsAppChatMobile() {
   // Manejar cambio en el switch de control humano
   const handleControlHumanoChange = async (checked: boolean) => {
     if (!activeConv) return;
-    
+
     try {
       // Invertir la lógica: checked = true significa modo Humano (chat_humano = 1)
       const newValue = checked ? 1 : 0; // 1 = Humano, 0 = IA
@@ -284,7 +290,7 @@ export function WhatsAppChatMobile() {
           .from("mibarber_clientes")
           .update({ chat_humano: newValue })
           .eq("id_cliente", client.id_cliente);
-        
+
         if (error) {
           console.error("Error al actualizar control humano:", error);
         } else {
@@ -321,9 +327,9 @@ export function WhatsAppChatMobile() {
     // En móvil, hacer scroll al final para mantener el input visible
     setTimeout(() => {
       if (messagesEndRef.current) {
-        messagesEndRef.current.scrollIntoView({ 
-          behavior: "smooth", 
-          block: "end" 
+        messagesEndRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "end"
         });
       }
     }, 300); // Pequeño delay para que el teclado tenga tiempo de aparecer
@@ -331,22 +337,59 @@ export function WhatsAppChatMobile() {
 
   return (
     <>
+      {/* Modal QR cuando WhatsApp está desconectado (se mantiene abierto mientras actualiza el QR) */}
+      {wppActivo === "Desconectado" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#1e1f20] rounded-2xl p-4 max-w-md w-full mx-4 shadow-2xl border border-qoder-dark-border-primary text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <span className="inline-block w-3 h-3 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+              <span className="text-red-400 text-sm font-medium">Desconectado</span>
+            </div>
+            <h3 className="text-lg font-bold text-white mb-1">WhatsApp desconectado</h3>
+            <p className="text-qoder-dark-text-secondary text-sm mb-1">Escaneá el QR para conectarlo</p>
+            <p className="text-xs text-qoder-dark-text-secondary/60 mb-4">(Se regenera cada 40 segundos)</p>
+            {qrUrl ? (
+              <div className="bg-white rounded-xl p-3 inline-block mb-3">
+                <img src={qrUrl} alt="QR WhatsApp" className="object-contain" style={{ maxWidth: '100%', height: 'auto' }} />
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl p-3 inline-flex items-center justify-center mb-3 min-w-[250px] min-h-[250px]">
+                <p className="text-xs text-gray-400">Esperando QR...</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Contenedor principal del chat - diseño móvil */}
-      <div className={`flex flex-col w-full bg-[#161717] overflow-hidden min-w-0 ${showChatList ? 'h-[calc(100vh-64px)]' : 'h-dvh'}`}>
+      <div className={`flex flex-col w-full bg-[#161717] overflow-hidden min-w-0 ${showChatList ? 'h-[calc(100vh-64px)]' : 'h-dvh'} ${wppActivo === "Desconectado" ? 'opacity-40 pointer-events-none select-none' : ''}`}>
         {showChatList ? (
           // Vista de lista de chats (móvil)
           <div className="flex flex-col h-full w-full min-w-0">
             {/* Header del panel de chats */}
             <div className="p-3 bg-[#161717] min-w-0">
               <div className="flex items-center justify-between mb-2">
-                <h2 className="font-semibold text-qoder-dark-text-primary">WhatsApp</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="font-semibold text-qoder-dark-text-primary">WhatsApp</h2>
+                  {/* Indicador de estado de conexión */}
+                  {wppActivo && (
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className={`inline-block w-2.5 h-2.5 rounded-full ${isWhatsAppConnected ? 'bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]' : 'bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.6)]'}`}
+                      />
+                      <span className={`text-xs font-medium ${isWhatsAppConnected ? 'text-green-400' : 'text-red-400'}`}>
+                        {wppActivo}
+                      </span>
+                    </div>
+                  )}
+                </div>
                 <div className="flex items-center gap-1 ml-auto">
                   {isRefreshing && (
                     <div className="flex items-center gap-1 text-xs text-qoder-dark-text-secondary">
                       <div className="animate-spin rounded-full h-3 w-3 border-b border-qoder-dark-accent-primary"></div>
                     </div>
                   )}
-                  <button 
+                  <button
                     onClick={refreshChats}
                     disabled={isRefreshing}
                     className="boton-simple p-2 rounded-full hover:bg-qoder-dark-bg-hover transition-colors disabled:opacity-50"
@@ -358,7 +401,7 @@ export function WhatsAppChatMobile() {
                   </button>
                 </div>
               </div>
-              
+
               {/* Filtros para administradores y campo de búsqueda en la misma línea */}
               {isAdmin && sucursales && sucursales.length > 0 ? (
                 <div className="px-2 py-2">
@@ -389,7 +432,7 @@ export function WhatsAppChatMobile() {
                         ))}
                       </select>
                     </div>
-                    
+
                     {/* Campo de búsqueda */}
                     <div className="flex-1 min-w-0">
                       <label className="block text-xs text-qoder-dark-text-secondary mb-1.5">
@@ -451,19 +494,18 @@ export function WhatsAppChatMobile() {
                   <p className="text-sm text-qoder-dark-text-secondary">Cargando chats...</p>
                 </div>
               )}
-              
+
               {filteredConversations.map((conversation: ChatConversation) => {
                 const lastMessage = conversation.messages[conversation.messages.length - 1];
                 const clientName = getClientName(conversation.session_id);
                 const isActive = active === conversation.session_id;
-                
+
                 return (
                   <div
                     key={conversation.session_id}
                     onClick={() => handleSelectChat(conversation.session_id)}
-                    className={`w-full text-left p-3 hover:bg-qoder-dark-bg-hover transition-colors cursor-pointer ${
-                      isActive ? 'bg-qoder-dark-bg-hover' : ''
-                    }`}
+                    className={`w-full text-left p-3 hover:bg-qoder-dark-bg-hover transition-colors cursor-pointer ${isActive ? 'bg-qoder-dark-bg-hover' : ''
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       {/* Avatar del cliente */}
@@ -471,12 +513,12 @@ export function WhatsAppChatMobile() {
                         {(() => {
                           const clientInfo = getClientInfo(conversation.session_id);
                           const fotoPerfil = clientInfo?.foto_perfil;
-                          
+
                           if (fotoPerfil) {
                             return (
-                              <Image 
-                                src={fotoPerfil} 
-                                alt={clientName} 
+                              <Image
+                                src={fotoPerfil}
+                                alt={clientName}
                                 width={40}
                                 height={40}
                                 className="w-full h-full rounded-full object-cover"
@@ -498,7 +540,7 @@ export function WhatsAppChatMobile() {
                           }
                         })()}
                       </div>
-                      
+
                       <div className="flex-1 min-w-0">
                         {/* Nombre del cliente y timestamp */}
                         <div className="flex items-center justify-between mb-1">
@@ -518,7 +560,7 @@ export function WhatsAppChatMobile() {
                             {lastMessage ? formatWhatsAppTimestamp(lastMessage.timestamp) : ""}
                           </span>
                         </div>
-                        
+
                         {/* Último mensaje */}
                         <div className="text-sm text-qoder-dark-text-secondary truncate">
                           {lastMessage ? (
@@ -541,7 +583,7 @@ export function WhatsAppChatMobile() {
                   </div>
                 );
               })}
-              
+
               {!isLoading && filteredConversations.length === 0 && (
                 <div className="p-4 text-center text-qoder-dark-text-secondary">
                   <p>No hay chats disponibles</p>
@@ -557,7 +599,7 @@ export function WhatsAppChatMobile() {
               {activeConv && (
                 <div className="p-3 bg-[#161717] flex items-center justify-between min-w-0">
                   <div className="flex items-center gap-3">
-                    <button 
+                    <button
                       onClick={handleBackToChats}
                       className="boton-simple p-2 rounded-full hover:bg-qoder-dark-bg-hover transition-colors"
                     >
@@ -570,12 +612,12 @@ export function WhatsAppChatMobile() {
                         const clientInfo = getClientInfo(activeConv.session_id);
                         const fotoPerfil = clientInfo?.foto_perfil;
                         const clientName = getClientName(activeConv.session_id);
-                      
+
                         if (fotoPerfil) {
                           return (
-                            <img 
-                              src={fotoPerfil} 
-                              alt={clientName} 
+                            <img
+                              src={fotoPerfil}
+                              alt={clientName}
                               className="w-10 h-10 rounded-full object-cover"
                               onError={(e) => {
                                 // Si la imagen no carga, mostrar el avatar con inicial
@@ -614,15 +656,15 @@ export function WhatsAppChatMobile() {
                       </p>
                     </div>
                   </div>
-                
+
                   <div className="flex items-center gap-2">
                     {/* Control humano/IA */}
                     <div className="flex items-center gap-2 bg-qoder-dark-bg-primary px-3 py-1 rounded-full">
                       <span className="text-xs text-qoder-dark-text-secondary">IA</span>
                       <label className="relative inline-flex items-center cursor-pointer">
-                        <input 
-                          type="checkbox" 
-                          className="sr-only peer" 
+                        <input
+                          type="checkbox"
+                          className="sr-only peer"
                           checked={getClientInfo(activeConv.session_id)?.chat_humano === 1}
                           onChange={(e) => handleControlHumanoChange(e.target.checked)}
                         />
@@ -633,14 +675,14 @@ export function WhatsAppChatMobile() {
                   </div>
                 </div>
               )}
-            
+
               {/* Área de mensajes - WhatsApp Mobile Style */}
-              <div 
+              <div
                 className="flex-1 relative overflow-hidden min-w-0"
                 style={{ backgroundColor: '#161717' }}
               >
                 {/* Capa de fondo fijo con patrón */}
-                <div 
+                <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
                     backgroundImage: "url('https://i.postimg.cc/bwtp831q/m5BEg2K4OR4.png')",
@@ -651,12 +693,12 @@ export function WhatsAppChatMobile() {
                     mixBlendMode: 'overlay'
                   }}
                 />
-              
+
                 {/* Contenido scrollable sobre el fondo */}
-                <div 
+                <div
                   className="relative h-full overflow-y-auto p-4 custom-scrollbar scrollbar-styled bg-transparent min-w-0"
                   id="messages-container"
-                  style={{ 
+                  style={{
                     overscrollBehavior: 'contain',
                     backgroundColor: 'transparent'
                   }}
@@ -664,18 +706,17 @@ export function WhatsAppChatMobile() {
                   {activeConv ? (
                     <div className="space-y-2">
                       {activeConv.messages.map((msg: ChatMessage, index: number) => (
-                        <div 
-                          key={index} 
+                        <div
+                          key={index}
                           className={`flex ${(msg.type === 'ai' && msg.source === 'manual') || msg.type === 'ai' ? 'justify-end' : 'justify-start'} mb-2`}
                         >
-                          <div 
-                            className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl px-4 py-2 rounded-3xl ${
-                              (msg.type === 'ai' && msg.source === 'manual') 
-                                ? 'whatsapp-outgoing-bubble' 
-                                : (msg.type === 'ai' 
-                                    ? 'whatsapp-incoming-bubble' 
-                                    : 'whatsapp-client-bubble')
-                            }`}
+                          <div
+                            className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl px-4 py-2 rounded-3xl ${(msg.type === 'ai' && msg.source === 'manual')
+                              ? 'whatsapp-outgoing-bubble'
+                              : (msg.type === 'ai'
+                                ? 'whatsapp-incoming-bubble'
+                                : 'whatsapp-client-bubble')
+                              }`}
                           >
                             {/* Verificar si el contenido es una imagen */}
                             {isImageUrl(msg.content) ? (
@@ -683,9 +724,9 @@ export function WhatsAppChatMobile() {
                                 const imageData = parseImageMessage(msg.content);
                                 return (
                                   <div className="space-y-1 max-w-full">
-                                    <Image 
-                                      src={imageData?.imageUrl || msg.content} 
-                                      alt="Imagen del mensaje" 
+                                    <Image
+                                      src={imageData?.imageUrl || msg.content}
+                                      alt="Imagen del mensaje"
                                       width={256}
                                       height={256}
                                       className="max-w-full max-h-64 object-contain rounded cursor-pointer"
@@ -763,13 +804,13 @@ export function WhatsAppChatMobile() {
 
       {/* Modal para imagen en pantalla completa */}
       {fullscreenImage && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4 cursor-pointer min-w-0"
           onClick={() => setFullscreenImage(null)}
         >
-          <img 
-            src={fullscreenImage} 
-            alt="Imagen en pantalla completa" 
+          <img
+            src={fullscreenImage}
+            alt="Imagen en pantalla completa"
             className="max-w-full max-h-full object-contain"
             onClick={(e) => e.stopPropagation()}
           />

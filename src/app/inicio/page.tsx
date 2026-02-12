@@ -8,13 +8,14 @@ import type { Appointment } from "@/types/db";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
 import { GlobalFilters } from "@/components/shared/GlobalFilters";
 import { FinalAppointmentModalModificado } from "@/components/FinalAppointmentModalModificado";
+import { WhatsAppNotification } from "@/components/WhatsAppNotification";
 
 export default function DashboardPage() {
   usePageTitle("Barberox | Inicio");
-  
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Partial<Appointment> | null>(null);
-  
+
   const handleCreateNewAppointment = useCallback(() => {
     // Crear una nueva cita con la fecha actual
     const currentDate = getLocalDateTime();
@@ -24,11 +25,11 @@ export default function DashboardPage() {
       servicio: "",
       barbero: ""
     };
-    
+
     setSelectedAppointment(newAppointment);
     setIsCreateModalOpen(true);
   }, []);
-  
+
   // Efecto para escuchar el evento personalizado
   useEffect(() => {
     const handleOpenModal = () => {
@@ -41,23 +42,23 @@ export default function DashboardPage() {
         servicio: "",
         barbero: ""
       };
-      
+
       setSelectedAppointment(newAppointment);
       setIsCreateModalOpen(true);
     };
-    
+
     window.addEventListener('openNewAppointmentModal', handleOpenModal);
-    
+
     return () => {
       window.removeEventListener('openNewAppointmentModal', handleOpenModal);
     };
   }, []);
-  
+
   const handleEditAppointment = (cita: Appointment) => {
     setSelectedAppointment(cita);
     setIsCreateModalOpen(true);
   };
-  
+
   // Función para cerrar el modal
   const handleCloseModal = () => {
     setIsCreateModalOpen(false);
@@ -67,9 +68,9 @@ export default function DashboardPage() {
   return (
     // Contenedor principal para el tablero Kanban
     // Este contenedor será transparente y se adaptará al contenido
-    <div 
+    <div
       className="w-full flex flex-col flex-1 relative"
-      style={{ 
+      style={{
         backgroundColor: 'transparent'
       }}
     >
@@ -78,27 +79,28 @@ export default function DashboardPage() {
         <div className="h-full w-full overflow-x-auto md:overflow-x-visible">
           {/* Vista de escritorio - Tablero Kanban */}
           <div className="hidden md:block">
-            <KanbanBoard 
-              isCreateModalOpen={isCreateModalOpen} 
+            <KanbanBoard
+              isCreateModalOpen={isCreateModalOpen}
               setIsCreateModalOpen={setIsCreateModalOpen}
               selectedAppointment={selectedAppointment}
               setSelectedAppointment={setSelectedAppointment}
             />
           </div>
-          
+
           {/* Vista móvil - Lista de citas */}
           <div className="md:hidden">
             <MobileAppointmentList onEdit={handleEditAppointment} />
           </div>
         </div>
       </div>
-      
+
       {/* Modal de cita - Compartido entre vistas móvil y escritorio */}
       <FinalAppointmentModalModificado
         open={isCreateModalOpen}
         onOpenChange={handleCloseModal}
         initial={selectedAppointment || undefined}
       />
+      <WhatsAppNotification />
     </div>
   );
 }

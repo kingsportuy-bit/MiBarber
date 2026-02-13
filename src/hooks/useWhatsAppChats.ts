@@ -20,9 +20,9 @@ export function useWhatsAppChats(idSucursal?: string, showAllSucursales: boolean
   // 2. Si no es admin y el barbero tiene id_sucursal, usar el del barbero
   // 3. Si no, usar el idSucursal pasado como parámetro (puede ser undefined)
   // Nota: Si idSucursal es "undefined" como string, lo tratamos como undefined
-  const sucursalId = (idSucursal !== undefined && idSucursal !== "" && idSucursal !== "undefined") ? idSucursal : 
-                     (!isAdmin && barbero?.id_sucursal ? barbero.id_sucursal : undefined);
-  
+  const sucursalId = (idSucursal !== undefined && idSucursal !== "" && idSucursal !== "undefined") ? idSucursal :
+    (!isAdmin && barbero?.id_sucursal ? barbero.id_sucursal : undefined);
+
   // Mostrar información de depuración
   console.log('useWhatsAppChats - Parámetros:', { idBarberia, isAdmin, barbero, idSucursal, showAllSucursales, sucursalId });
 
@@ -30,22 +30,22 @@ export function useWhatsAppChats(idSucursal?: string, showAllSucursales: boolean
     queryKey: ["whatsapp_historial", idBarberia, sucursalId, showAllSucursales],
     queryFn: async (): Promise<HistoryLog[]> => {
       console.log('useWhatsAppChats - Iniciando consulta de historial:', { idBarberia, sucursalId, showAllSucursales });
-      
+
       let query = (supabase as any)
         .from("mibarber_historial")
         .select("id, session_id, message, timestamptz, id_sucursal")
         .order("id", { ascending: true });
-      
+
       // Si tenemos un idBarberia, filtrar por él
       if (idBarberia) {
         console.log('useWhatsAppChats - Filtrando por idBarberia:', idBarberia);
-        
+
         // Obtener todos los clientes de la barbería
         let clientesQuery = (supabase as any)
           .from("mibarber_clientes")
           .select("id_cliente, telefono, id_sucursal, id_conversacion")
           .eq("id_barberia", idBarberia);
-        
+
         // Si no se muestran todas las sucursales y tenemos un idSucursal, filtrar por él
         // Si se muestran todas las sucursales, usar el id_sucursal del barbero logueado
         if (!showAllSucursales && sucursalId) {
@@ -58,28 +58,28 @@ export function useWhatsAppChats(idSucursal?: string, showAllSucursales: boolean
           // También filtrar el historial por id_sucursal del barbero
           query = query.eq("id_sucursal", barbero.id_sucursal);
         }
-        
+
         const { data: clientesData, error: clientesError } = await clientesQuery;
-        
+
         if (clientesError) {
           console.error('useWhatsAppChats - Error obteniendo clientes:', clientesError);
           throw clientesError;
         }
-        
+
         console.log('useWhatsAppChats - Clientes obtenidos:', clientesData?.length);
-        
+
         // Filtrar id_conversacion válidos y teléfonos válidos
         const idsConversacion = clientesData
           .map((c: any) => c.id_conversacion)
           .filter((id: number | null) => id !== null && id !== undefined);
-        
+
         const telefonos = clientesData
           .map((c: any) => c.telefono)
           .filter((t: string | null) => t !== null && t !== undefined && t !== '');
-          
+
         console.log('useWhatsAppChats - IDs de conversación filtrados:', idsConversacion);
         console.log('useWhatsAppChats - Teléfonos filtrados:', telefonos);
-        
+
         // Combinar ambos arrays para filtrar
         if (idsConversacion.length > 0 || telefonos.length > 0) {
           // Convertir los IDs numéricos a strings para la comparación
@@ -92,13 +92,14 @@ export function useWhatsAppChats(idSucursal?: string, showAllSucursales: boolean
           return [];
         }
       }
-      
+
       const { data, error } = await query;
       if (error) {
-        console.error('useWhatsAppChats - Error obteniendo historial:', error);
-        throw error;
+        console.error('useWhatsAppChats - Error obteniendo historial:', JSON.stringify(error, null, 2));
+        // En lugar de lanzar error, devolvemos array vacío para no romper la UI
+        return [];
       }
-      
+
       console.log('useWhatsAppChats - Historial obtenido:', data?.length);
       return data as HistoryLog[];
     },
@@ -107,6 +108,7 @@ export function useWhatsAppChats(idSucursal?: string, showAllSucursales: boolean
     refetchOnReconnect: true,
     refetchInterval: false, // No refetch automático, solo cuando se invalida
     staleTime: 0, // Siempre considerar los datos como "stale" para refetch inmediato
+    enabled: !!idBarberia, // Solo ejecutar si tenemos idBarberia
   });
 
   // Obtener datos de clientes para timestamps
@@ -114,30 +116,31 @@ export function useWhatsAppChats(idSucursal?: string, showAllSucursales: boolean
     queryKey: ["whatsapp_clientes", idBarberia, sucursalId, showAllSucursales],
     queryFn: async (): Promise<Client[]> => {
       console.log('useWhatsAppChats - Iniciando consulta de clientes:', { idBarberia, sucursalId, showAllSucursales });
-      
+
       let query = (supabase as any)
         .from("mibarber_clientes")
         .select("id_cliente, ultima_interaccion, chat_humano, nombre, id_barberia, id_sucursal, telefono, foto_perfil, id_conversacion")
         .order("ultima_interaccion", { ascending: false }); // Order by ultima_interaccion descending
-      
+
       // Si tenemos un idBarberia, filtrar por él
       if (idBarberia) {
         console.log('useWhatsAppChats - Filtrando clientes por idBarberia:', idBarberia);
         query = query.eq("id_barberia", idBarberia);
       }
-      
+
       // Si no se muestran todas las sucursales y tenemos un idSucursal, filtrar por él
       if (!showAllSucursales && sucursalId) {
         console.log('useWhatsAppChats - Filtrando clientes por sucursalId:', sucursalId);
         query = query.eq("id_sucursal", sucursalId);
       }
-      
+
       const { data, error } = await query;
       if (error) {
-        console.error('useWhatsAppChats - Error obteniendo clientes:', error);
-        throw error;
+        console.error('useWhatsAppChats - Error obteniendo clientes:', JSON.stringify(error, null, 2));
+        // Devolver array vacío en caso de error para no romper la UI
+        return [];
       }
-      
+
       console.log('useWhatsAppChats - Clientes obtenidos para WhatsApp:', data?.length);
       return data as Client[];
     },
@@ -146,12 +149,13 @@ export function useWhatsAppChats(idSucursal?: string, showAllSucursales: boolean
     refetchOnReconnect: true,
     refetchInterval: false, // No refetch automático, solo cuando se invalida
     staleTime: 0, // Siempre considerar los datos como "stale" para refetch inmediato
+    enabled: !!idBarberia, // Solo ejecutar si tenemos idBarberia
   });
 
   // Función para refrescar manualmente los datos
   const refreshChats = async () => {
     if (isRefreshing) return;
-    
+
     setIsRefreshing(true);
     try {
       await qc.invalidateQueries({ queryKey: ['whatsapp_historial'] });
@@ -185,10 +189,10 @@ export function useWhatsAppChats(idSucursal?: string, showAllSucursales: boolean
       setSubscriptionError("Cliente Supabase no disponible");
       return;
     }
-    
+
     // Crear un nombre de canal único
     const channelName = `whatsapp-historial-changes-${Date.now()}`;
-    
+
     try {
       const channel = supabase
         .channel(channelName)
@@ -292,19 +296,19 @@ export function useWhatsAppChats(idSucursal?: string, showAllSucursales: boolean
         }
       });
     }
-    
+
     const conversations = new Map<string, ChatMessage[]>();
-    
+
     if (listQuery.data && Array.isArray(listQuery.data)) {
       listQuery.data.forEach((log: HistoryLog) => {
         try {
           const messageData = typeof log.message === 'string' ? JSON.parse(log.message) : log.message;
-          
+
           // Verificar que messageData tenga la estructura esperada
           if (messageData && (typeof messageData.content === 'string' || typeof messageData.content === 'object')) {
             let sessionId = '';
             let content = typeof messageData.content === 'object' ? JSON.stringify(messageData.content) : messageData.content;
-            
+
             // Debug: Mostrar información del mensaje
             console.log("Procesando mensaje:", {
               type: messageData.type,
@@ -312,19 +316,19 @@ export function useWhatsAppChats(idSucursal?: string, showAllSucursales: boolean
               logSessionId: log.session_id,
               sessionIdType: isNaN(Number(log.session_id)) ? 'phone' : 'conversation_id'
             });
-            
+
             // Para todos los mensajes, usar el session_id de la base de datos (que ahora es el id_conversacion)
             sessionId = log.session_id;
-            
+
             // Solo procesar mensajes con sessionId válido
             if (sessionId) {
               const messages = conversations.get(sessionId) || [];
-              
+
               // Usar timestamptz del registro de historial o fallback al timestamp del mensaje
               const recordTimestamp = log.timestamptz ? new Date(log.timestamptz).toISOString() : null;
               const messageTimestamp = messageData.timestamp || (log.id ? new Date(log.id * 1000).toISOString() : new Date().toISOString());
               const timestamp = recordTimestamp || messageTimestamp;
-                
+
               messages.push({
                 timestamp,
                 sender: messageData.type === 'human' ? 'client' : 'agent',
@@ -332,7 +336,7 @@ export function useWhatsAppChats(idSucursal?: string, showAllSucursales: boolean
                 type: messageData.type || 'message',
                 source: messageData.source
               });
-              
+
               conversations.set(sessionId, messages);
             } else {
               console.log("Mensaje ignorado por falta de sessionId válido:", { log, messageData });
@@ -345,7 +349,7 @@ export function useWhatsAppChats(idSucursal?: string, showAllSucursales: boolean
         }
       });
     }
-    
+
     // Convertir a formato de conversaciones
     const conversationList: ChatConversation[] = Array.from(conversations.entries())
       .map(([session_id, messages]) => {
@@ -353,13 +357,13 @@ export function useWhatsAppChats(idSucursal?: string, showAllSucursales: boolean
         const client = clientMap.get(session_id);
         // Usar el session_id tal como viene para mantener la asociación correcta
         const clientId = session_id;
-        
+
         // Ordenar mensajes por timestamp
         const sortedMessages = messages.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-        
+
         // Usar el timestamp del último mensaje como lastActivity
         const lastActivity = sortedMessages.length > 0 ? sortedMessages[sortedMessages.length - 1].timestamp : '';
-        
+
         return {
           session_id: clientId, // Usar el session_id tal como viene
           messages: sortedMessages,
@@ -367,10 +371,10 @@ export function useWhatsAppChats(idSucursal?: string, showAllSucursales: boolean
         }
       })
       .filter(conv => conv.messages.length > 0); // Solo conversaciones con mensajes
-    
+
     // Ordenar por última actividad descendente (más recientes primero)
     conversationList.sort((a, b) => b.lastActivity.localeCompare(a.lastActivity));
-    
+
     return conversationList;
   }, [listQuery.data, clientsQuery.data]);
 

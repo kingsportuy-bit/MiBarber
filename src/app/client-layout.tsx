@@ -18,7 +18,7 @@ export default function ClientLayout({
   const pathname = usePathname();
 
   // Detectar rutas V2
-  const v2Routes = ['/perfil', '/estadisticas', '/caja', '/agente-ia', '/plantilla', '/v2/inicio-v2'];
+  const v2Routes = ['/perfil', '/estadisticas', '/caja', '/agente-ia', '/plantilla', '/v2/inicio-v2', '/registro'];
   const isV2Route = v2Routes.some(route => pathname?.startsWith(route));
 
   if (isV2Route) {
@@ -32,7 +32,7 @@ export default function ClientLayout({
   }
 
   // Mostrar el botón flotante solo en la página de inicio
-  const showFloatingButton = pathname === '/inicio/'; 
+  const showFloatingButton = pathname === '/inicio/';
 
   return (
     <Providers>

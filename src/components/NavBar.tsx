@@ -216,7 +216,7 @@ export function NavBar() {
   }, [pathname, authState.isAuthenticated, authState.isAdmin, router]);
 
   // Mostrar la barra de navegación incluso si hay problemas con la autenticación
-  const shouldHideNavBar = pathname?.startsWith("/login");
+  const shouldHideNavBar = pathname?.startsWith("/login") || pathname?.startsWith("/registro");
 
   // Ocultar el NavBar cuando se está en la vista de chat individual de WhatsApp
   const shouldHideNavBarCompletely = shouldHideCompletely;

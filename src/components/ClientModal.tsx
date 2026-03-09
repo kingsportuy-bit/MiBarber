@@ -44,7 +44,7 @@ export function ClientModal({
               {isEdit ? "Editar cliente" : "Nuevo cliente"}
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button 
+              <button
                 className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl"
                 aria-label="Cerrar"
               >
@@ -137,7 +137,8 @@ export function ClientModal({
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                className="v2-btn v2-btn-secondary"
+                className="v2-btn v2-btn-secondary rounded-none uppercase tracking-widest"
+                style={{ fontFamily: 'var(--font-rasputin), serif', fontSize: '11px' }}
               >
                 <span>Cancelar</span>
               </button>
@@ -149,7 +150,7 @@ export function ClientModal({
                     alert("El formato del número de celular debe ser: 09xxxxxxx o +5989xxxxxxx");
                     return;
                   }
-                  
+
                   // Normalizar el número de teléfono antes de guardar
                   const normalizedValues = {
                     ...values,
@@ -157,7 +158,8 @@ export function ClientModal({
                   };
                   await onSave(normalizedValues);
                 }}
-                className="v2-btn v2-btn-primary"
+                className="v2-btn v2-btn-primary rounded-none uppercase tracking-widest"
+                style={{ fontFamily: 'var(--font-rasputin), serif', fontSize: '11px' }}
               >
                 <span>{isEdit ? "Actualizar" : "Crear cliente"}</span>
               </button>

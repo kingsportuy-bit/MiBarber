@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -14,41 +14,29 @@ export default function LoginPage() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [error, setError] = useState("");
 
-  // Verificar si ya está autenticado al cargar la página
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Verificar si hay una sesión activa en localStorage
         const sessionStr = localStorage.getItem('barber_auth_session');
         if (sessionStr) {
           try {
             const sessionData = JSON.parse(sessionStr);
-            // Verificar si la sesión aún es válida
             if (sessionData.expiresAt && Date.now() < sessionData.expiresAt) {
-              // Si ya está autenticado, redirigir a la página protegida
-              console.log('✅ Login: Usuario ya autenticado, redirigiendo a /inicio');
               router.replace("/inicio");
               return;
             } else {
-              // Sesión expirada, limpiar
               localStorage.removeItem('barber_auth_session');
             }
           } catch (error) {
-            // Datos inválidos, limpiar
             localStorage.removeItem('barber_auth_session');
           }
         }
-
-        // Si no está autenticado, mostrar el formulario de login
-        console.log('❌ Login: Usuario no autenticado, mostrando formulario');
         setCheckingAuth(false);
       } catch (error) {
-        console.error('💥 Login: Error verificando autenticación:', error);
+        console.error('Error verificando autenticaciÃ³n:', error);
         setCheckingAuth(false);
       }
     };
-
-    // Ejecutar inmediatamente la verificación
     checkAuth();
   }, [router]);
 
@@ -58,7 +46,6 @@ export default function LoginPage() {
     setError("");
 
     try {
-      // Buscar al usuario en la tabla mibarber_barberos por username (normalizado a minúsculas)
       const normalizedUsername = username.toLowerCase();
       const { data, error: userError } = await supabase
         .from('mibarber_barberos')
@@ -74,54 +61,41 @@ export default function LoginPage() {
 
       const user = data as Barbero;
 
-      // Verificar la contraseña (en producción esto debería ser hasheado)
       if (user.password_hash !== password) {
-        setError("Contraseña incorrecta");
+        setError("ContraseÃ±a incorrecta");
         setLoading(false);
         return;
       }
 
-      // Crear una sesión de autenticación simulada
       const sessionData = {
         user: {
           id: user.id_barbero,
           email: user.email,
           name: user.nombre,
-          username: user.username ? user.username.toLowerCase() : '', // Normalizar a minúsculas
-          nivel_permisos: user.nivel_permisos, // Incluir nivel_permisos en la sesión
-          admin: user.admin, // Incluir admin en la sesión
-          id_barberia: user.id_barberia, // Incluir id_barberia en la sesión
-          id_sucursal: user.id_sucursal // Incluir id_sucursal en la sesión
+          username: user.username ? user.username.toLowerCase() : '',
+          nivel_permisos: user.nivel_permisos,
+          admin: user.admin,
+          id_barberia: user.id_barberia,
+          id_sucursal: user.id_sucursal
         },
-        expiresAt: Date.now() + (24 * 60 * 60 * 1000) // Expira en 24 horas
+        expiresAt: Date.now() + (24 * 60 * 60 * 1000)
       };
 
-      // Guardar en localStorage para simular sesión persistente
       if (typeof window !== 'undefined') {
         localStorage.setItem('barber_auth_session', JSON.stringify(sessionData));
-        // También establecer una cookie para que el middleware pueda detectar la sesión
         document.cookie = `barber_auth_session=${encodeURIComponent(JSON.stringify(sessionData))}; path=/; max-age=${24 * 60 * 60}; SameSite=Lax`;
-
-        // Disparar evento personalizado para notificar el cambio de autenticación
         window.dispatchEvent(new CustomEvent('barberAuthChange', {
-          detail: {
-            user: data, action: 'login'
-          }
+          detail: { user: data, action: 'login' }
         }));
       }
 
-      // Esperar un momento para que los listeners actualicen su estado
-      // antes de redirigir
       setTimeout(() => {
-        // Verificar si el usuario necesita configuración inicial
         if (user.conf_inicial === "0" || user.conf_inicial === null) {
-          // Redirigir a la página de configuración inicial
           router.replace("/configuracion-inicial");
         } else {
-          // Redirigir a la página protegida
           router.replace("/inicio");
         }
-      }, 100); // Pequeño retraso para asegurar la actualización del estado
+      }, 100);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Error al iniciar sesión";
       setError(message);
@@ -129,79 +103,200 @@ export default function LoginPage() {
     }
   }
 
-  // Si está verificando la autenticación, mostrar pantalla de carga
   if (checkingAuth) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-transparent">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-qoder-dark-accent-primary mx-auto mb-4"></div>
-          <p className="text-qoder-dark-text-secondary">Verificando sesión...</p>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        background: 'transparent',
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="animate-spin" style={{
+            width: 40, height: 40, borderRadius: '50%',
+            border: '2px solid transparent',
+            borderTopColor: '#C5A059',
+            borderBottomColor: '#C5A059',
+            margin: '0 auto 16px',
+          }} />
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.875rem' }}>Verificando sesión...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen bg-transparent p-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <h1 className="flex justify-center mb-4 no-underline">
-            <img
-              src="/logo-barberox.png"
-              alt="Barberox"
-              className="h-16 w-auto object-contain"
-            />
-          </h1>
-          <p className="text-qoder-dark-text-secondary">
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh',
+      background: 'transparent',
+      padding: '24px',
+    }}>
+      <div style={{
+        width: '100%',
+        maxWidth: '380px',
+      }}>
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <img
+            src="/logo-barberox.png"
+            alt="Barberox"
+            style={{
+              height: '56px',
+              width: 'auto',
+              objectFit: 'contain',
+              margin: '0 auto 16px',
+              display: 'block',
+            }}
+          />
+          <p style={{
+            color: 'rgba(255,255,255,0.45)',
+            fontSize: '0.875rem',
+            fontFamily: "'Inter', 'Roboto', -apple-system, sans-serif",
+            letterSpacing: '0.02em',
+          }}>
             Sistema de gestión para barberías
           </p>
         </div>
 
-        <form onSubmit={onSubmit} className="space-y-6 bg-transparent p-6 rounded-none border-0">
+        {/* Form card */}
+        <form onSubmit={onSubmit} style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '24px',
+        }}>
           <div>
-            <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-2">
+            <label style={{
+              display: 'block',
+              fontSize: '0.8125rem',
+              fontWeight: 500,
+              color: 'rgba(255,255,255,0.6)',
+              marginBottom: '8px',
+              fontFamily: "'Inter', 'Roboto', -apple-system, sans-serif",
+            }}>
               Nombre de Usuario
             </label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="qoder-dark-input w-full p-3 rounded-lg"
-              placeholder="Ingresa tu nombre de usuario"
+              placeholder="tu.usuario"
               required
+              style={{
+                width: '100%',
+                padding: '14px 16px',
+                background: '#111',
+                border: '1px solid #222',
+                borderRadius: '10px',
+                color: '#fff',
+                fontSize: '1rem',
+                fontFamily: "'Inter', 'Roboto', -apple-system, sans-serif",
+                outline: 'none',
+                transition: 'border-color 0.2s ease',
+                boxSizing: 'border-box',
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#C5A059'}
+              onBlur={(e) => e.target.style.borderColor = '#222'}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-2">
+            <label style={{
+              display: 'block',
+              fontSize: '0.8125rem',
+              fontWeight: 500,
+              color: 'rgba(255,255,255,0.6)',
+              marginBottom: '8px',
+              fontFamily: "'Inter', 'Roboto', -apple-system, sans-serif",
+            }}>
               Contraseña
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="qoder-dark-input w-full p-3 rounded-lg"
-              placeholder="Ingresa tu contraseña"
+              placeholder="••••••••"
               required
+              style={{
+                width: '100%',
+                padding: '14px 16px',
+                background: '#111',
+                border: '1px solid #222',
+                borderRadius: '10px',
+                color: '#fff',
+                fontSize: '1rem',
+                fontFamily: "'Inter', 'Roboto', -apple-system, sans-serif",
+                outline: 'none',
+                transition: 'border-color 0.2s ease',
+                boxSizing: 'border-box',
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#C5A059'}
+              onBlur={(e) => e.target.style.borderColor = '#222'}
             />
           </div>
 
           {error && (
-            <div className="text-red-400 text-sm py-2">
+            <div style={{
+              padding: '10px 14px',
+              background: 'rgba(239,68,68,0.1)',
+              border: '1px solid rgba(239,68,68,0.2)',
+              borderRadius: '8px',
+              color: '#f87171',
+              fontSize: '0.8125rem',
+              fontFamily: "'Inter', 'Roboto', -apple-system, sans-serif",
+            }}>
               {error}
             </div>
           )}
 
-          <div className="flex justify-end pt-4">
-            <button
-              type="submit"
-              className="action-button w-full"
-              disabled={loading}
-            >
-              {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '14px',
+              background: loading ? '#333' : '#C5A059',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '10px',
+              fontSize: '0.9375rem',
+              fontWeight: 600,
+              cursor: loading ? 'not-allowed' : 'pointer',
+              fontFamily: "'Inter', 'Roboto', -apple-system, sans-serif",
+              letterSpacing: '0.03em',
+              textTransform: 'uppercase' as const,
+              transition: 'all 0.2s ease',
+              opacity: loading ? 0.6 : 1,
+              marginTop: '8px',
+            }}
+          >
+            {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
+          </button>
         </form>
+
+        {/* Footer */}
+        <p style={{
+          textAlign: 'center',
+          color: 'rgba(255,255,255,0.2)',
+          fontSize: '0.75rem',
+          marginTop: '48px',
+          fontFamily: "'Inter', 'Roboto', -apple-system, sans-serif",
+        }}>
+          Powered by{' '}
+          <a
+            href="https://codexa.uy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-link"
+            style={{ color: 'rgba(255,255,255,0.35)', textDecoration: 'none', transition: 'color 0.2s ease' }}
+          >
+            Code<span className="codexa-x">x</span>a
+          </a>
+        </p>
       </div>
     </div>
   );

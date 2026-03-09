@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import type { MovimientoCaja } from '@/types/caja';
-import { 
-  formatearMonto, 
-  formatearFecha, 
-  formatearHora, 
+import {
+  formatearMonto,
+  formatearFecha,
+  formatearHora,
   getColorTipo,
   puedeEditarMovimiento,
   puedeEliminarMovimiento,
@@ -63,7 +63,18 @@ export function TablaMovimientos({
           placeholder="🔍 Buscar por concepto, factura o barbero..."
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
-          className="v2-input w-full"
+          className="w-full 
+                     bg-[#1a1a1a] 
+                     text-white 
+                     placeholder-gray-500 
+                     border 
+                     border-[#333] 
+                     rounded-none
+                     px-4 
+                     py-2 
+                     focus:outline-none 
+                     focus:border-[#00CCC2] 
+                     transition-colors"
         />
       </div>
 
@@ -95,13 +106,13 @@ export function TablaMovimientos({
                 const puedeEliminar = puedeEliminarMovimiento(movimiento, userRole, userId);
 
                 // Crear una key única combinando idRegistro con el índice
-                const uniqueKey = movimiento.idRegistro ? 
-                  `${movimiento.idRegistro}-${index}` : 
+                const uniqueKey = movimiento.idRegistro ?
+                  `${movimiento.idRegistro}-${index}` :
                   `movimiento-${index}`;
 
                 return (
-                  <tr 
-                    key={uniqueKey} 
+                  <tr
+                    key={uniqueKey}
                     className="border-b border-gray-800 hover:bg-gray-800 transition-colors"
                   >
                     <td className="p-3 text-sm">{formatearFecha(movimiento.fecha)}</td>
@@ -117,9 +128,8 @@ export function TablaMovimientos({
                       </div>
                     </td>
                     <td className="p-3 text-sm">{movimiento.nombreBarbero}</td>
-                    <td className={`p-3 text-right font-bold ${
-                      movimiento.tipo === 'ingreso' ? 'v2-text-success' : 'v2-text-danger'
-                    }`}>
+                    <td className={`p-3 text-right font-bold ${movimiento.tipo === 'ingreso' ? 'v2-text-success' : 'v2-text-danger'
+                      }`}>
                       {movimiento.tipo === 'ingreso' ? '+' : '-'}
                       {formatearMonto(movimiento.monto)}
                     </td>
@@ -171,7 +181,7 @@ export function TablaMovimientos({
             <span className="opacity-60">Total: </span>
             <span className="font-bold">
               {formatearMonto(
-                movimientos.reduce((sum, m) => 
+                movimientos.reduce((sum, m) =>
                   sum + (m.tipo === 'ingreso' ? m.monto : -m.monto), 0
                 )
               )}

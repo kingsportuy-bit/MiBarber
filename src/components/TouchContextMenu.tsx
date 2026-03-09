@@ -55,7 +55,7 @@ export function TouchContextMenu({
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
     }
-    
+
     // Reset long press flag
     setIsLongPress(false);
   };
@@ -77,10 +77,10 @@ export function TouchContextMenu({
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
-    
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      
+
       // Clean up timer on unmount
       if (longPressTimer.current) {
         clearTimeout(longPressTimer.current);
@@ -93,24 +93,24 @@ export function TouchContextMenu({
     // Default position
     let x = position.x;
     let y = position.y;
-    
+
     // Menu dimensions (approximate)
     const menuWidth = 200;
     const menuHeight = items.length * 40 + 20; // Approximate height
-    
+
     // Adjust if menu goes off screen
     if (x + menuWidth > window.innerWidth) {
       x = window.innerWidth - menuWidth - 10;
     }
-    
+
     if (y + menuHeight > window.innerHeight) {
       y = window.innerHeight - menuHeight - 10;
     }
-    
+
     // Ensure menu doesn't go off left/top of screen
     x = Math.max(10, x);
     y = Math.max(10, y);
-    
+
     return {
       left: `${x}px`,
       top: `${y}px`
@@ -118,7 +118,7 @@ export function TouchContextMenu({
   };
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className={`relative ${className}`}
       onTouchStart={handleTouchStart}
@@ -126,15 +126,15 @@ export function TouchContextMenu({
       onTouchEnd={handleTouchEnd}
     >
       {children}
-      
+
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-50"
           style={{ pointerEvents: 'none' }}
         >
           <div
-            className="absolute bg-white rounded-lg shadow-lg border border-gray-200 py-2 min-w-[200px]"
-            style={{ 
+            className="absolute bg-white rounded-none shadow-lg border border-gray-200 py-2 min-w-[200px]"
+            style={{
               ...getMenuStyle(),
               pointerEvents: 'auto'
             }}
@@ -144,11 +144,10 @@ export function TouchContextMenu({
                 key={index}
                 onClick={() => handleItemClick(item)}
                 disabled={item.disabled}
-                className={`w-full text-left px-4 py-2 text-sm flex items-center ${
-                  item.disabled 
-                    ? 'text-gray-400 cursor-not-allowed' 
+                className={`w-full text-left px-4 py-2 text-sm flex items-center ${item.disabled
+                    ? 'text-gray-400 cursor-not-allowed'
                     : 'text-gray-700 hover:bg-gray-100'
-                }`}
+                  }`}
               >
                 {item.icon && <span className="mr-2">{item.icon}</span>}
                 {item.label}

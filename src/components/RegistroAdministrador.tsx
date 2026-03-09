@@ -28,19 +28,19 @@ export function RegistroAdministrador({ onRegistroCompleto }: RegistroAdministra
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validar que las contraseñas coincidan
     if (formData.password !== formData.confirmPassword) {
       toast.error("Las contraseñas no coinciden");
       return;
     }
-    
+
     // Validar que todos los campos requeridos estén llenos
     if (!formData.nombreAdministrador || !formData.username || !formData.password || !formData.email) {
       toast.error("Por favor complete todos los campos");
       return;
     }
-    
+
     try {
       await crearBarberia.mutateAsync({
         nombreAdministrador: formData.nombreAdministrador,
@@ -48,7 +48,7 @@ export function RegistroAdministrador({ onRegistroCompleto }: RegistroAdministra
         password: formData.password,
         email: formData.email
       });
-      
+
       toast.success("Barbería y administrador creados correctamente");
       onRegistroCompleto();
     } catch (error: any) {
@@ -79,12 +79,12 @@ export function RegistroAdministrador({ onRegistroCompleto }: RegistroAdministra
               name="nombreAdministrador"
               value={formData.nombreAdministrador}
               onChange={handleChange}
-              className="qoder-dark-input w-full p-3 rounded-lg"
+              className="qoder-dark-input w-full p-3 rounded-none"
               placeholder="Tu nombre completo"
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-1">
               Nombre de usuario
@@ -94,12 +94,12 @@ export function RegistroAdministrador({ onRegistroCompleto }: RegistroAdministra
               name="username"
               value={formData.username}
               onChange={handleChange}
-              className="qoder-dark-input w-full p-3 rounded-lg"
+              className="qoder-dark-input w-full p-3 rounded-none"
               placeholder="Nombre de usuario para login"
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-1">
               Email
@@ -109,12 +109,12 @@ export function RegistroAdministrador({ onRegistroCompleto }: RegistroAdministra
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="qoder-dark-input w-full p-3 rounded-lg"
+              className="qoder-dark-input w-full p-3 rounded-none"
               placeholder="Tu email"
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-1">
               Contraseña
@@ -124,12 +124,12 @@ export function RegistroAdministrador({ onRegistroCompleto }: RegistroAdministra
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="qoder-dark-input w-full p-3 rounded-lg"
+              className="qoder-dark-input w-full p-3 rounded-none"
               placeholder="Contraseña"
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-qoder-dark-text-secondary mb-1">
               Confirmar contraseña
@@ -139,12 +139,12 @@ export function RegistroAdministrador({ onRegistroCompleto }: RegistroAdministra
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="qoder-dark-input w-full p-3 rounded-lg"
+              className="qoder-dark-input w-full p-3 rounded-none"
               placeholder="Confirma tu contraseña"
               required
             />
           </div>
-          
+
           <div className="flex justify-end pt-4">
             <button
               type="submit"

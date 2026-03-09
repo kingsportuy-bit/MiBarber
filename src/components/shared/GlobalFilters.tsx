@@ -12,19 +12,19 @@ interface GlobalFiltersProps {
   showAllBarbersOption?: boolean; // Nueva prop para controlar opción "Todos los barberos"
 }
 
-export function GlobalFilters({ 
+export function GlobalFilters({
   className = "",
   showSucursalFilter = false,
   showBarberoFilter = true,
   showDateFilters = false,
   showAllBarbersOption = false // Por defecto false para mantener comportamiento actual
 }: GlobalFiltersProps) {
-  const { 
-    filters, 
-    setFilters, 
-    sucursales, 
-    barberos, 
-    isLoadingSucursales, 
+  const {
+    filters,
+    setFilters,
+    sucursales,
+    barberos,
+    isLoadingSucursales,
     isLoadingBarberos,
     isAdmin,
     barbero
@@ -46,9 +46,9 @@ export function GlobalFilters({
     );
   }
 
-  // Filtrar barberos por sucursal seleccionada
-  const barberosFiltrados = filters.sucursalId 
-    ? barberos?.filter((b: any) => b.id_sucursal === filters.sucursalId)
+  // Filtrar barberos por sucursal seleccionada (redundante por DB filter, pero por las dudas usamos igualdad no estricta)
+  const barberosFiltrados = filters.sucursalId
+    ? barberos?.filter((b: any) => String(b.id_sucursal) === String(filters.sucursalId))
     : barberos;
 
   const handleSucursalChange = (value: string | undefined) => {

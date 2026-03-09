@@ -17,26 +17,26 @@ interface SucursalesManagerProps {
 }
 
 export function SucursalesManager({ idBarberia, isAdmin }: SucursalesManagerProps) {
-  const { 
-    sucursales, 
-    isLoading, 
-    isError, 
+  const {
+    sucursales,
+    isLoading,
+    isError,
     error,
     createSucursal,
     updateSucursal,
     deleteSucursal
   } = useSucursales(idBarberia || undefined);
-  
-  const { 
-    servicios, 
-    isLoading: isLoadingServicios, 
-    isError: isErrorServicios, 
+
+  const {
+    servicios,
+    isLoading: isLoadingServicios,
+    isError: isErrorServicios,
     error: errorServicios,
     createServicio,
     updateServicio,
     deleteServicio
   } = useServicios(idBarberia);
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sucursalToEdit, setSucursalToEdit] = useState<Sucursal | null>(null);
   const [sucursalToDelete, setSucursalToDelete] = useState<Sucursal | null>(null);
@@ -85,7 +85,7 @@ export function SucursalesManager({ idBarberia, isAdmin }: SucursalesManagerProp
         if (!idBarberia) {
           throw new Error("ID de barbería no disponible");
         }
-        
+
         await createSucursal.mutateAsync({
           ...values,
           id_barberia: idBarberia
@@ -131,7 +131,8 @@ export function SucursalesManager({ idBarberia, isAdmin }: SucursalesManagerProp
         {isAdmin && (
           <button
             onClick={handleAddSucursal}
-            className="qoder-dark-button-primary px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+            className="qoder-dark-button-primary px-4 py-2 rounded-none uppercase tracking-widest flex items-center gap-2 hover-lift smooth-transition text-xs"
+            style={{ fontFamily: 'var(--font-rasputin), serif' }}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -149,7 +150,7 @@ export function SucursalesManager({ idBarberia, isAdmin }: SucursalesManagerProp
 
       {sucursales?.map((sucursal) => (
         <div key={sucursal.id} className="space-y-6">
-          <SucursalInfoCard 
+          <SucursalInfoCard
             sucursal={sucursal}
             onEdit={() => handleEditSucursal(sucursal)}
             onEditHorarios={() => {
@@ -157,20 +158,20 @@ export function SucursalesManager({ idBarberia, isAdmin }: SucursalesManagerProp
               // Por ahora, simplemente mostramos la sección de horarios
             }}
           />
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <SucursalHorariosSection 
-              idSucursal={sucursal.id} 
+            <SucursalHorariosSection
+              idSucursal={sucursal.id}
               nombreSucursal={sucursal.nombre_sucursal || `Sucursal ${sucursal.numero_sucursal}`}
             />
-            <SucursalBarberosSection 
-              sucursalId={sucursal.numero_sucursal} 
-              sucursalUuid={sucursal.id} 
+            <SucursalBarberosSection
+              sucursalId={sucursal.numero_sucursal}
+              sucursalUuid={sucursal.id}
               sucursalNombre={sucursal.nombre_sucursal || undefined}
               isAdmin={isAdmin}
             />
           </div>
-          
+
           <SucursalServiciosSection
             sucursalId={sucursal.id}
             idBarberia={idBarberia || ''}
@@ -180,7 +181,7 @@ export function SucursalesManager({ idBarberia, isAdmin }: SucursalesManagerProp
             onUpdateService={handleUpdateService}
             onDeleteService={handleDeleteService}
           />
-          
+
           {/* Sección de Información Adicional */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-qoder-dark-text-primary mb-3 flex items-center">
@@ -200,7 +201,7 @@ export function SucursalesManager({ idBarberia, isAdmin }: SucursalesManagerProp
               </svg>
               Información Adicional
             </h3>
-            <div className="bg-qoder-dark-bg-form rounded-lg p-4">
+            <div className="bg-qoder-dark-bg-form rounded-none border border-[#1a1a1a] p-4">
               <p className="text-qoder-dark-text-primary whitespace-pre-line">
                 {sucursal.info || "No se ha proporcionado información adicional para esta sucursal."}
               </p>
@@ -210,7 +211,7 @@ export function SucursalesManager({ idBarberia, isAdmin }: SucursalesManagerProp
       ))}
 
       {!isLoading && sucursales?.length === 0 && (
-        <div className="text-center py-8 bg-qoder-dark-bg-form rounded-lg border border-qoder-dark-border-primary">
+        <div className="text-center py-8 bg-qoder-dark-bg-form rounded-none border border-[#1a1a1a]">
           <p className="text-qoder-dark-text-secondary">
             No hay sucursales registradas
           </p>
@@ -238,13 +239,15 @@ export function SucursalesManager({ idBarberia, isAdmin }: SucursalesManagerProp
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setSucursalToDelete(null)}
-                className="qoder-dark-button px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+                className="qoder-dark-button px-4 py-2 rounded-none uppercase tracking-widest flex items-center gap-2 hover-lift smooth-transition text-xs"
+                style={{ fontFamily: 'var(--font-rasputin), serif' }}
               >
                 <span>Cancelar</span>
               </button>
               <button
                 onClick={confirmDeleteSucursal}
-                className="qoder-dark-button-danger px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+                className="qoder-dark-button-danger px-4 py-2 rounded-none uppercase tracking-widest flex items-center gap-2 hover-lift smooth-transition text-xs"
+                style={{ fontFamily: 'var(--font-rasputin), serif' }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

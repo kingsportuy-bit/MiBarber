@@ -22,7 +22,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(isOpen);
   const menuRef = useRef<HTMLDivElement>(null);
-  
+
   // Definir items del menú basados en el rol del usuario
   const tabs = useMemo(() => {
     // Para administradores, solo mostrar páginas exclusivas de administrador
@@ -33,7 +33,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         { href: "/mi-barberia", label: "Mi Barbería" }
       ];
     }
-    
+
     // Para barberos normales, no mostrar páginas en el menú hamburguesa
     // ya que están disponibles en la navegación inferior
     return [];
@@ -86,7 +86,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       {/* Botón de menú hamburguesa */}
       <button
         onClick={toggleMenu}
-        className="p-2 rounded-md text-qoder-dark-text-primary hover:bg-qoder-dark-bg-hover focus:outline-none"
+        className="p-2 rounded-none text-qoder-dark-text-primary hover:bg-qoder-dark-bg-hover focus:outline-none"
         aria-label="Menú"
         style={{ fontFamily: "'Roboto', 'Arial', sans-serif" }}
       >
@@ -100,35 +100,35 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           </svg>
         )}
       </button>
-      
+
       {/* Efecto de difuminado que ocupa toda la pantalla excepto el menú */}
       {menuOpen && (
         <>
           {/* Overlay difuminado para toda la pantalla */}
-          <div 
+          <div
             className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm z-40"
             onClick={closeMenu}
           />
-          
+
           {/* Menú desplegable con recorte para evitar el difuminado en el área del menú */}
-          <div 
-            ref={menuRef} 
+          <div
+            ref={menuRef}
             className="dropdown-menu absolute top-12 left-0 right-0 z-50 animate-fadeInDown"
             style={{ backdropFilter: 'none' }}
           >
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-qoder-dark-bg-secondary rounded-b-lg border border-qoder-dark-border-primary">
+            <div className="px-2 pt-2 pb-3 space-y-1 bg-qoder-dark-bg-secondary rounded-none border border-qoder-dark-border-primary">
               {/* Nombre del barbero logueado */}
               {barbero && (
                 <div className="px-3 py-2 text-qoder-dark-text-primary border-b border-qoder-dark-border client-name" style={{ fontSize: '1.3125rem' }}>
                   {barbero.nombre}
                 </div>
               )}
-              
+
               {tabs.map((tab) => {
                 const active = pathname === tab.href;
                 // Verificar si la página es exclusiva de administradores
                 const isAdminPage = tab.href === '/estadisticas' || tab.href === '/admin' || tab.href === '/admin/bloqueos' || tab.href === '/v2/caja' || tab.href === '/mi-barberia';
-                
+
                 return (
                   <Link
                     key={tab.href}
@@ -145,9 +145,9 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                   </Link>
                 );
               })}
-              
 
-              
+
+
               {/* Botón de cerrar sesión */}
               <button
                 onClick={handleLogout}

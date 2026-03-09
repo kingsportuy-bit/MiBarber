@@ -6,6 +6,7 @@ import "./custom-styles.css";
 import "./responsive.css";
 import "./transitions.css";
 import "./fonts.css";
+import "./(v2)/globals-v2.css";
 import ClientLayout from "./client-layout";
 import { Portal } from '@radix-ui/react-portal';
 
@@ -19,6 +20,15 @@ const oldEnglish = localFont({
   variable: "--font-old-english",
   display: "swap",
 });
+
+const rasputin = localFont({
+  src: "./fonts/Rasputin.otf",
+  variable: "--font-rasputin",
+  display: "swap",
+});
+
+import { BackgroundScene } from "@/components/BackgroundScene";
+import { ShootingStars } from "@/components/ShootingStars";
 
 export const metadata: Metadata = {
   title: {
@@ -36,13 +46,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${inter.variable} ${oldEnglish.variable}`}>
-      <body className="min-h-screen flex flex-col min-w-0 font-sans custom-scrollbar" style={{ backgroundColor: 'transparent' }}>
-        {/* Contenedor de fondo fijo con destellos naranjas intermitentes */}
-        <div className="background-container">
-          <div className="sparkle-1"></div>
-          <div className="sparkle-2"></div>
-        </div>
+    <html lang="es" className={`${inter.variable} ${oldEnglish.variable} ${rasputin.variable}`} suppressHydrationWarning>
+      <body className="min-h-screen flex flex-col min-w-0 font-sans custom-scrollbar" style={{ backgroundColor: 'transparent' }} suppressHydrationWarning>
+        <BackgroundScene />
+        <ShootingStars />
         <ClientLayout>
           {children}
         </ClientLayout>

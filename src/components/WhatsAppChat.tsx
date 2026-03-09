@@ -33,9 +33,23 @@ const getStarsFromScore = (puntaje: number) => {
   return <span className="tracking-wide">{stars}</span>;
 };
 
+// Helper to format names: only first letter of each word capitalized
+function formatName(name: string): string {
+  if (!name) return name;
+  return name
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 export function WhatsAppChat() {
   const { idBarberia, isAdmin, barbero } = useBarberoAuth();
   const { sucursales } = useSucursales(idBarberia || undefined);
+  const [sidebarWidth, setSidebarWidth] = useState<number>(350);
+  const isResizing = useRef(false);
+  const startX = useRef(0);
+  const startWidth = useRef(0);
   const [selectedSucursal, setSelectedSucursal] = useState<string | undefined>(undefined);
   const [showAllSucursales, setShowAllSucursales] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Agregar estado para el término de búsqueda
@@ -345,10 +359,37 @@ export function WhatsAppChat() {
     }
   };
 
+  // Resize handlers for sidebar
+  const handleMouseDown = (e: React.MouseEvent) => {
+    isResizing.current = true;
+    startX.current = e.clientX;
+    startWidth.current = sidebarWidth;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing.current) return;
+      const diff = e.clientX - startX.current;
+      const newWidth = Math.max(280, Math.min(600, startWidth.current + diff));
+      setSidebarWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      isResizing.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
   return (
     <>
       {/* Versión desktop */}
-      <div className="hidden md:block h-screen w-full">
+      <div className="hidden md:block h-full w-full">
         {/* Modal QR cuando WhatsApp está desconectado (se mantiene abierto mientras actualiza el QR) */}
         {wppActivo === "Desconectado" && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
@@ -374,9 +415,9 @@ export function WhatsAppChat() {
         )}
 
         {/* Contenedor principal del chat */}
-        <div className={`flex h-[calc(100vh-60px)] w-full bg-qoder-dark-bg-secondary overflow-hidden min-w-0 mt-[60px] ${wppActivo === "Desconectado" ? 'opacity-40 pointer-events-none select-none' : ''}`}>
-          {/* Panel izquierdo - Lista de chats estilo WhatsApp */}
-          <aside className="w-[450px] border-r border-qoder-dark-border-primary flex flex-col bg-qoder-dark-bg-form md:w-[400px] sm:w-[350px] xs:w-full min-w-0 relative" style={{ fontSize: '1.2705em' }}>
+        <div className={`flex h-full w-full bg-qoder-dark-bg-secondary overflow-hidden min-w-0 ${wppActivo === "Desconectado" ? 'opacity-40 pointer-events-none select-none' : ''}`}>
+          {/* Panel izquierdo - Lista de chats estilo WhatsApp (resizable) */}
+          <aside className="border-r border-qoder-dark-border-primary flex flex-col bg-qoder-dark-bg-form relative flex-shrink-0" style={{ fontSize: '1.2705em', width: `${sidebarWidth}px`, minWidth: '280px', maxWidth: '600px' }}>
             {/* Header del panel de chats */}
             <div className="p-2 bg-qoder-dark-bg-header min-w-0 relative">
               <div className="flex items-center justify-between mb-2">
@@ -433,7 +474,7 @@ export function WhatsAppChat() {
                             setSelectedSucursal(e.target.value || undefined);
                           }
                         }}
-                        className="w-full h-10 qoder-dark-search-box py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-lg border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
+                        className="w-full h-10 qoder-dark-search-box py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-none border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
                       >
                         <option value="todas">Todos los chats</option>
                         {sucursales?.map((sucursal: any) => (
@@ -455,7 +496,7 @@ export function WhatsAppChat() {
                           placeholder="Buscar..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full h-10 py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-lg pr-10 bg-qoder-dark-bg-form border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
+                          className="w-full h-10 py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-none pr-10 bg-qoder-dark-bg-form border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
                         />
                         {searchTerm && (
                           <button
@@ -538,12 +579,12 @@ export function WhatsAppChat() {
                   <div
                     key={conversation.session_id}
                     onClick={() => setActive(conversation.session_id)}
-                    className={`w-full text-left p-2 rounded-lg transition-colors cursor-pointer mb-1 ${isActive ? 'bg-[#2D2E2E]' : 'hover:bg-[#2D2E2E]'
+                    className={`w-full text-left p-2 rounded-none transition-colors cursor-pointer mb-1 ${isActive ? 'bg-[#2D2E2E]' : 'hover:bg-[#2D2E2E]'
                       }`}
                   >
                     <div className="flex items-center gap-3">
                       {/* Avatar del cliente */}
-                      <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 p-0.5">
                         {(() => {
                           const clientInfo = getClientInfo(conversation.session_id);
                           const fotoPerfil = clientInfo?.foto_perfil;
@@ -556,8 +597,8 @@ export function WhatsAppChat() {
                                 width={40}
                                 height={40}
                                 className="rounded-full object-cover"
+                                style={{ width: '100%', height: '100%' }}
                                 onError={(e) => {
-                                  // Si la imagen no carga, mostrar el avatar con inicial
                                   e.currentTarget.onerror = null;
                                   if (e.currentTarget.parentElement) {
                                     e.currentTarget.parentElement.innerHTML = `<span class="text-white font-semibold">${clientName.charAt(0).toUpperCase()}</span>`;
@@ -578,8 +619,8 @@ export function WhatsAppChat() {
                       <div className="flex-1 min-w-0">
                         {/* Nombre del cliente y timestamp */}
                         <div className="flex items-center justify-between mb-1">
-                          <h3 className="font-normal text-qoder-dark-text-primary truncate" style={{ fontSize: '1.09375rem' }}>
-                            {clientName}
+                          <div className="font-normal text-qoder-dark-text-primary truncate" style={{ fontSize: '1.09375rem' }}>
+                            {formatName(clientName)}
                             {(() => {
                               const clientInfo = getClientInfo(conversation.session_id);
                               const clientData = clientInfo?.id_cliente ? clientesMap[clientInfo.id_cliente] : undefined;
@@ -589,7 +630,7 @@ export function WhatsAppChat() {
                                 </span>
                               ) : null;
                             })()}
-                          </h3>
+                          </div>
                           <span className="text-xs text-qoder-dark-text-secondary flex-shrink-0">
                             {lastMessage ? formatWhatsAppTimestamp(lastMessage.timestamp) : ""}
                           </span>
@@ -625,6 +666,15 @@ export function WhatsAppChat() {
               )}
             </div>
           </aside>
+
+          {/* Resize handle */}
+          <div
+            onMouseDown={handleMouseDown}
+            className="flex-shrink-0 cursor-col-resize hover:bg-qoder-dark-accent-primary/30 transition-colors relative group"
+            style={{ width: '4px', background: 'transparent' }}
+          >
+            <div className="absolute inset-y-0 left-0 w-1 bg-qoder-dark-border-primary group-hover:bg-qoder-dark-accent-primary transition-colors" />
+          </div>
 
           {/* Panel derecho - Ventana de chat */}
           <div className="flex-1 flex flex-col min-w-0 relative" style={{ backgroundColor: '#161717' }}>
@@ -688,7 +738,7 @@ export function WhatsAppChat() {
                     })()}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-qoder-dark-text-primary">{getClientName(activeConv.session_id)}</h3>
+                    <div className="font-semibold text-qoder-dark-text-primary text-lg">{formatName(getClientName(activeConv.session_id))}</div>
                     <p className="text-xs text-qoder-dark-text-secondary">
                       {getClientInfo(activeConv.session_id)?.telefono || 'Número no disponible'}
                     </p>
@@ -795,6 +845,19 @@ export function WhatsAppChat() {
                     className="flex-1 py-4 px-4 focus:outline-none focus:ring-0 focus:ring-transparent focus:border-transparent bg-[#242626] relative pill-effect border-0"
                     style={{ backgroundColor: '#242626' }}
                   />
+                  <button
+                    onClick={handleSendMessage}
+                    disabled={!message.trim()}
+                    title="Enviar mensaje"
+                    className={`h-full aspect-square min-h-[56px] min-w-[56px] rounded-full flex items-center justify-center transition-colors ${message.trim()
+                      ? 'bg-qoder-dark-accent-primary text-white hover:bg-opacity-90'
+                      : 'bg-[#242626] text-gray-500 cursor-not-allowed'
+                      }`}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                    </svg>
+                  </button>
                 </div>
               </div>
             )}

@@ -12,7 +12,7 @@ interface ResumenMovimientosProps {
  */
 export function ResumenMovimientos({ movimientos, className = '' }: ResumenMovimientosProps) {
   // Calcular totales
-  const totales = movimientos.reduce(
+  const totales = (movimientos || []).reduce(
     (acc, movimiento) => {
       const monto = movimiento.monto || 0;
       if (movimiento.tipo === 'ingreso') {

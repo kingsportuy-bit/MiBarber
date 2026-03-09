@@ -21,16 +21,19 @@ export function useClientes(
 ) {
   const supabase = getSupabaseClient();
   const qc = useQueryClient();
-  const { idBarberia, isAdmin } = useBarberoAuth();
+  const { idBarberia, idSucursal: authIdSucursal, isAdmin } = useBarberoAuth();
 
   console.log('🔍 useClientes - idBarberia:', idBarberia);
   console.log('🔍 useClientes - isAdmin:', isAdmin);
 
+  // Determinar la sucursal activa a usar (si se proporciona una explícitamente se usa, si no, para barberos normales se usa su sucursal)
+  const activeSucursalId = idSucursal || (!isAdmin ? authIdSucursal : undefined);
+
   const listQuery = useQuery({
-    queryKey: ["clientes", { search, sortBy, idBarberia, idSucursal }],
+    queryKey: ["clientes", { search, sortBy, idBarberia, activeSucursalId }],
     queryFn: async (): Promise<Client[]> => {
       let q = (supabase as any).from("mibarber_clientes").select("*");
-      
+
       console.log("🔍 Consulta de clientes:", {
         idBarberia,
         idSucursal,
@@ -45,9 +48,9 @@ export function useClientes(
       }
 
       // Filtrar por sucursal - siempre aplicar si está disponible
-      if (idSucursal) {
-        console.log("🔍 Filtrando por idSucursal:", idSucursal);
-        q = q.eq("id_sucursal", idSucursal);
+      if (activeSucursalId) {
+        console.log("🔍 Filtrando por idSucursal activa:", activeSucursalId);
+        q = q.eq("id_sucursal", activeSucursalId);
       }
 
       // Aplicar ordenamiento
@@ -77,10 +80,10 @@ export function useClientes(
       if (search && search.trim()) {
         const s = search.trim().toLowerCase();
         console.log("🔍 Aplicando búsqueda:", s);
-        
+
         // Primero ejecutar la consulta con los filtros existentes
         const { data, error } = await q;
-        
+
         if (error) {
           console.error("❌ Error consultando clientes:", error);
           console.error("❌ Detalles del error:", {
@@ -91,7 +94,7 @@ export function useClientes(
           });
           throw error;
         }
-        
+
         // Filtrar los resultados localmente
         if (data && data.length > 0) {
           const filteredData = data.filter(
@@ -99,13 +102,13 @@ export function useClientes(
               try {
                 // Verificar que cliente tenga los campos necesarios
                 if (!cliente) return false;
-                
+
                 // Buscar en nombre (coincidencia parcial)
                 if (cliente.nombre && cliente.nombre.toLowerCase().includes(s)) {
                   console.log("✅ Coincidencia en nombre:", cliente.nombre);
                   return true;
                 }
-                
+
                 // Buscar en teléfono (solo si la búsqueda contiene números)
                 if (cliente.telefono && /\d/.test(s)) {
                   // Normalizar solo si la búsqueda contiene dígitos
@@ -118,25 +121,25 @@ export function useClientes(
                     }
                   }
                 }
-                
+
                 // Buscar en teléfono (coincidencia parcial para búsquedas que no son solo números)
                 if (cliente.telefono && !/\d/.test(s) && cliente.telefono.toLowerCase().includes(s)) {
                   console.log("✅ Coincidencia en teléfono (texto):", cliente.telefono);
                   return true;
                 }
-                
+
                 // Buscar en id_cliente
                 if (cliente.id_cliente && cliente.id_cliente.toLowerCase().includes(s)) {
                   console.log("✅ Coincidencia en ID:", cliente.id_cliente);
                   return true;
                 }
-                
+
                 // Buscar en notas
                 if (cliente.notas && cliente.notas.toLowerCase().includes(s)) {
                   console.log("✅ Coincidencia en notas:", cliente.notas);
                   return true;
                 }
-                
+
                 return false;
               } catch (filterError) {
                 console.error("❌ Error filtrando cliente:", filterError);
@@ -147,7 +150,7 @@ export function useClientes(
           console.log("✅ Clientes obtenidos y filtrados:", filteredData.length);
           return filteredData as Client[];
         }
-        
+
         console.log("✅ Clientes obtenidos:", data?.length || 0);
         return data as Client[];
       }
@@ -194,11 +197,11 @@ export function useClientes(
     };
   }, [qc, supabase]);
 
-  // ✅ Obtener datos del barbero autenticado
-  const { idBarberia: authIdBarberia, idSucursal: authIdSucursal } = useBarberoAuth();
-  
-  console.log('🔍 useClientes - authIdBarberia:', authIdBarberia);
-  console.log('🔍 useClientes - authIdSucursal:', authIdSucursal);
+  // ✅ Obtener datos del barbero autenticado (ya obtenidos al inicio del hook)
+  const authIdBarberia = idBarberia;
+
+  console.log('🔍 useClientes - authIdBarberia para mutacion:', authIdBarberia);
+  console.log('🔍 useClientes - authIdSucursal para mutacion:', authIdSucursal);
 
   const createMutation = useMutation({
     mutationFn: async (payload: Partial<Client>) => {
@@ -210,14 +213,14 @@ export function useClientes(
       // ✅ Fallback: Si authIdBarberia es null, intentar obtenerlo
       if (!finalIdBarberia) {
         console.warn('⚠️ authIdBarberia es null, intentando obtenerlo de la sesión...');
-        
+
         const session = AuthService.loadSession();
-        
+
         // Intentar múltiples ubicaciones
-        finalIdBarberia = 
+        finalIdBarberia =
           session?.user.id_barberia ||
           null;
-        
+
         if (!finalIdBarberia && session?.user.email) {
           // Si aún es null, buscar en la base de datos
           const { data: barberoData, error } = await supabase
@@ -225,14 +228,14 @@ export function useClientes(
             .select('id_barberia')
             .eq('email', session.user.email)
             .single();
-          
+
           if (error) {
             console.error("❌ Error obteniendo barbero por email:", error);
           }
-          
+
           finalIdBarberia = (barberoData as any)?.id_barberia || null;
         }
-        
+
         if (!finalIdBarberia) {
           throw new Error('No se pudo obtener id_barberia. Por favor, cierre sesión y vuelva a iniciar.');
         }
@@ -329,24 +332,24 @@ export function useClientes(
 // Hook para obtener un cliente por su ID
 export function useCliente(id_cliente: string | null) {
   const supabase = getSupabaseClient();
-  
+
   return useQuery({
     queryKey: ["cliente", id_cliente],
     queryFn: async () => {
       if (!id_cliente) {
         return null;
       }
-      
+
       const { data, error } = await supabase
         .from("mibarber_clientes")
         .select("*")
         .eq("id_cliente", id_cliente)
         .single();
-      
+
       if (error) {
         throw error;
       }
-      
+
       return data as Client;
     },
     enabled: !!id_cliente
@@ -356,23 +359,23 @@ export function useCliente(id_cliente: string | null) {
 // Hook para obtener múltiples clientes por sus IDs
 export function useClientesByIds(ids: string[]) {
   const supabase = getSupabaseClient();
-  
+
   return useQuery({
     queryKey: ["clientes", "byIds", ids],
     queryFn: async () => {
       if (ids.length === 0) {
         return [];
       }
-      
+
       const { data, error } = await supabase
         .from("mibarber_clientes")
         .select("*")
         .in("id_cliente", ids);
-      
+
       if (error) {
         throw error;
       }
-      
+
       return data as Client[];
     },
     enabled: ids.length > 0

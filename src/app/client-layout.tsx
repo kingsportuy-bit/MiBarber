@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { Providers } from '@/components/Providers';
 import { GlobalFiltersProvider } from '@/contexts/GlobalFiltersContext';
+import { CurrentDateProvider } from '@/components/shared/CurrentDateProvider';
 import { ConditionalNavBar } from '@/components/ConditionalNavBar';
 import { GeneralLayout } from '@/components/GeneralLayout';
 import { BottomNav } from '@/components/BottomNav';
@@ -17,34 +18,21 @@ export default function ClientLayout({
 }) {
   const pathname = usePathname();
 
-  // Detectar rutas V2
-  const v2Routes = ['/perfil', '/estadisticas', '/caja', '/agente-ia', '/plantilla', '/v2/inicio-v2', '/registro'];
-  const isV2Route = v2Routes.some(route => pathname?.startsWith(route));
-
-  if (isV2Route) {
-    return (
-      <Providers>
-        <GlobalFiltersProvider>
-          {children}
-        </GlobalFiltersProvider>
-      </Providers>
-    );
-  }
-
   // Mostrar el botón flotante solo en la página de inicio
   const showFloatingButton = pathname === '/inicio/';
 
   return (
     <Providers>
       <GlobalFiltersProvider>
-        <ConditionalNavBar />
-        <GeneralLayout>
-          {children}
-        </GeneralLayout>
-        <BottomNav />
-        <OfflineIndicator />
-        {showFloatingButton && <FloatingNewAppointmentButton />}
-        <Portal />
+        <CurrentDateProvider>
+          <ConditionalNavBar />
+          <GeneralLayout>
+            {children}
+          </GeneralLayout>
+          <BottomNav />
+          <OfflineIndicator />
+          <Portal />
+        </CurrentDateProvider>
       </GlobalFiltersProvider>
     </Providers>
   );

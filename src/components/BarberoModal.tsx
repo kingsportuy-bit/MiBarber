@@ -22,12 +22,12 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
   const isEdit = Boolean(initial?.id_barbero);
   const { useServiciosPorSucursal } = useBarberiaInfo();
   const { data: servicios, isLoading: serviciosLoading, isError: serviciosError } = useServiciosPorSucursal(sucursalUuid);
-  
+
   console.log("BarberoModal - sucursalUuid recibido:", sucursalUuid);
   console.log("BarberoModal - servicios cargados:", servicios);
   console.log("BarberoModal - isLoading:", serviciosLoading);
   console.log("BarberoModal - isError:", serviciosError);
-  
+
   const [nombre, setNombre] = useState(initial?.nombre || "");
   const [telefono, setTelefono] = useState(initial?.telefono || "");
   const [email, setEmail] = useState(initial?.email || "");
@@ -38,7 +38,7 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
   const [password, setPassword] = useState(""); // Nuevo campo para contraseña
   const [confirmPassword, setConfirmPassword] = useState(""); // Nuevo campo para confirmar contraseña
   const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Resetear el formulario cuando se abre el modal
@@ -60,26 +60,26 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
   // Validar el formulario
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!nombre.trim()) {
       newErrors.nombre = "El nombre es obligatorio";
     }
-    
+
     if (!telefono.trim()) {
       newErrors.telefono = "El teléfono es obligatorio";
     }
-    
+
     if (!email.trim()) {
       newErrors.email = "El email es obligatorio";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       newErrors.email = "El email no es válido";
     }
-    
+
     // Validar nombre de usuario
     if (!username.trim()) {
       newErrors.username = "El nombre de usuario es obligatorio";
     }
-    
+
     // Validar contraseña solo para nuevos barberos
     if (!isEdit) {
       if (!password.trim()) {
@@ -87,12 +87,12 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
       } else if (password.length < 6) {
         newErrors.password = "La contraseña debe tener al menos 6 caracteres";
       }
-      
+
       if (password !== confirmPassword) {
         newErrors.confirmPassword = "Las contraseñas no coinciden";
       }
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -101,7 +101,7 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
     setEspecialidades(prev => {
       const newEspecialidades = [...prev];
       const index = newEspecialidades.indexOf(servicioId);
-      
+
       if (index >= 0) {
         // Si ya está seleccionado, lo removemos
         newEspecialidades.splice(index, 1);
@@ -109,7 +109,7 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
         // Si no está seleccionado, lo agregamos
         newEspecialidades.push(servicioId);
       }
-      
+
       return newEspecialidades;
     });
   };
@@ -118,7 +118,7 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
     if (!validate()) {
       return;
     }
-    
+
     try {
       const barberData: any = {
         nombre,
@@ -133,7 +133,7 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
         id_sucursal: sucursalUuid || undefined, // Incluir id_sucursal en los datos
         id_barberia: idBarberia || undefined // Incluir id_barberia en los datos
       };
-      
+
       // Incluir la contraseña si es un nuevo barbero o si se está cambiando para un barbero existente
       if (!isEdit && password) {
         barberData.password_hash = password; // En producción esto debería ser hasheado
@@ -141,9 +141,9 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
         // Para barberos existentes, incluir la nueva contraseña si se proporciona
         barberData.password_hash = password; // En producción esto debería ser hasheado
       }
-      
+
       console.log("BarberoModal: Guardando datos del barbero:", barberData);
-      
+
       await onSave(barberData);
       toast.success(isEdit ? "Barbero actualizado" : "Barbero creado");
       onOpenChange(false);
@@ -163,7 +163,7 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
               {isEdit ? "Editar barbero" : "Nuevo barbero"}
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button 
+              <button
                 className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl"
                 aria-label="Cerrar"
               >
@@ -175,38 +175,38 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="col-span-2">
                 <label className="v2-label">Nombre</label>
-                <input 
-                  className={`v2-input ${errors.nombre ? "border-red-500" : ""}`} 
-                  value={nombre} 
-                  onChange={(e) => setNombre(e.target.value)} 
+                <input
+                  className={`v2-input ${errors.nombre ? "border-red-500" : ""}`}
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
                   placeholder="Nombre completo"
                 />
                 {errors.nombre && <p className="text-red-500 text-xs mt-1">{errors.nombre}</p>}
               </div>
-              
+
               <div className="col-span-2">
                 <label className="v2-label">Teléfono</label>
-                <input 
-                  className={`v2-input ${errors.telefono ? "border-red-500" : ""}`} 
-                  value={telefono} 
-                  onChange={(e) => setTelefono(e.target.value)} 
+                <input
+                  className={`v2-input ${errors.telefono ? "border-red-500" : ""}`}
+                  value={telefono}
+                  onChange={(e) => setTelefono(e.target.value)}
                   placeholder="Ej: +59891234567"
                 />
                 {errors.telefono && <p className="text-red-500 text-xs mt-1">{errors.telefono}</p>}
               </div>
-              
+
               <div className="col-span-2">
                 <label className="v2-label">Email</label>
-                <input 
+                <input
                   type="email"
-                  className={`v2-input ${errors.email ? "border-red-500" : ""}`} 
-                  value={email} 
-                  onChange={(e) => setEmail(e.target.value)} 
+                  className={`v2-input ${errors.email ? "border-red-500" : ""}`}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="Ej: barbero@ejemplo.com"
                 />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
-              
+
               <div className="col-span-2">
                 <label className="v2-label">Especialidades</label>
                 <div className="border border-[var(--border-primary)] rounded-lg p-3 max-h-40 overflow-y-auto">
@@ -234,7 +234,7 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
                 </div>
                 <p className="text-xs text-[var(--text-muted)] mt-1">Seleccione los servicios que este barbero puede realizar</p>
               </div>
-              
+
               {/* Solo mostrar opción de administrador si el usuario actual es administrador 
                   y no es el barbero principal (protegido) */}
               {isAdminUser && !isBarberoPrincipal && (
@@ -242,19 +242,19 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
                   <label className="v2-label">Rol</label>
                   <div className="flex items-center gap-4 mt-1">
                     <label className="flex items-center gap-2">
-                      <input 
-                        type="radio" 
-                        checked={isAdminRole} 
-                        onChange={() => setIsAdminRole(true)} 
+                      <input
+                        type="radio"
+                        checked={isAdminRole}
+                        onChange={() => setIsAdminRole(true)}
                         className="v2-radio"
                       />
                       <span className="text-[var(--text-primary)]">Administrador</span>
                     </label>
                     <label className="flex items-center gap-2">
-                      <input 
-                        type="radio" 
-                        checked={!isAdminRole} 
-                        onChange={() => setIsAdminRole(false)} 
+                      <input
+                        type="radio"
+                        checked={!isAdminRole}
+                        onChange={() => setIsAdminRole(false)}
                         className="v2-radio"
                       />
                       <span className="text-[var(--text-primary)]">Barbero Normal</span>
@@ -262,7 +262,7 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
                   </div>
                 </div>
               )}
-              
+
               {/* Mostrar indicador de permisos para barberos principales (protegidos) */}
               {isBarberoPrincipal && (
                 <div className="col-span-2">
@@ -280,30 +280,30 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
                   </div>
                 </div>
               )}
-              
+
               {/* Campo de nombre de usuario para todos los barberos */}
               <div className="col-span-2">
                 <label className="v2-label">Nombre de Usuario</label>
-                <input 
-                  className={`v2-input ${errors.username ? "border-red-500" : ""}`} 
-                  value={username} 
-                  onChange={(e) => setUsername(e.target.value)} 
+                <input
+                  className={`v2-input ${errors.username ? "border-red-500" : ""}`}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   placeholder="Nombre de usuario para iniciar sesión"
                 />
                 {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username}</p>}
               </div>
-              
+
               {/* Campos de contraseña - para nuevos barberos o para edición */}
               {!isEdit ? (
                 <>
                   <div className="col-span-2">
                     <label className="v2-label">Contraseña</label>
                     <div className="relative">
-                      <input 
+                      <input
                         type="password"
-                        className={`v2-input ${errors.password ? "border-red-500" : ""}`} 
-                        value={password} 
-                        onChange={(e) => setPassword(e.target.value)} 
+                        className={`v2-input ${errors.password ? "border-red-500" : ""}`}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         placeholder="Contraseña"
                       />
                       <button
@@ -324,15 +324,15 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
                     </div>
                     {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
                   </div>
-                  
+
                   <div className="col-span-2">
                     <label className="v2-label">Confirmar Contraseña</label>
                     <div className="relative">
-                      <input 
+                      <input
                         type="password"
-                        className={`v2-input ${errors.confirmPassword ? "border-red-500" : ""}`} 
-                        value={confirmPassword} 
-                        onChange={(e) => setConfirmPassword(e.target.value)} 
+                        className={`v2-input ${errors.confirmPassword ? "border-red-500" : ""}`}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
                         placeholder="Confirmar contraseña"
                       />
                       <button
@@ -359,11 +359,11 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
                 <div className="col-span-2">
                   <label className="v2-label">Nueva Contraseña (opcional)</label>
                   <div className="relative">
-                    <input 
+                    <input
                       type="password"
-                      className="v2-input" 
-                      value={password} 
-                      onChange={(e) => setPassword(e.target.value)} 
+                      className="v2-input"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       placeholder="Dejar en blanco para no cambiar"
                     />
                     <button
@@ -385,13 +385,13 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
                   <p className="text-xs text-[var(--text-muted)] mt-1">Solo complete si desea cambiar la contraseña</p>
                 </div>
               )}
-              
+
               <div className="col-span-2">
                 <label className="flex items-center gap-2">
-                  <input 
-                    type="checkbox" 
-                    checked={activo} 
-                    onChange={(e) => setActivo(e.target.checked)} 
+                  <input
+                    type="checkbox"
+                    checked={activo}
+                    onChange={(e) => setActivo(e.target.checked)}
                     className="v2-checkbox"
                   />
                   <span className="text-[var(--text-primary)]">Activo</span>
@@ -403,14 +403,16 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="v2-btn v2-btn-secondary"
+              className="v2-btn v2-btn-secondary rounded-none uppercase tracking-widest"
+              style={{ fontFamily: 'var(--font-rasputin), serif', fontSize: '11px' }}
             >
               Cancelar
             </button>
             <button
               type="button"
               onClick={handleSubmit}
-              className="v2-btn v2-btn-primary"
+              className="v2-btn v2-btn-primary rounded-none uppercase tracking-widest"
+              style={{ fontFamily: 'var(--font-rasputin), serif', fontSize: '11px' }}
             >
               {isEdit ? "Actualizar" : "Crear barbero"}
             </button>

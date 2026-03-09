@@ -8,10 +8,10 @@ interface ProfileHeroProps {
   editButtonText?: string;
 }
 
-export function ProfileHero({ 
-  name, 
-  username, 
-  email, 
+export function ProfileHero({
+  name,
+  username,
+  email,
   phone,
   avatarUrl,
   onEdit,
@@ -25,8 +25,8 @@ export function ProfileHero({
       <div className="flex items-center gap-4">
         {/* Avatar */}
         {avatarUrl ? (
-          <img 
-            src={avatarUrl} 
+          <img
+            src={avatarUrl}
             alt={name}
             className="w-16 h-16 rounded-full object-cover"
           />
@@ -35,7 +35,7 @@ export function ProfileHero({
             {initial}
           </div>
         )}
-        
+
         {/* Info */}
         <div>
           <h1 className="text-2xl font-bold text-white">{name}</h1>
@@ -49,12 +49,13 @@ export function ProfileHero({
           )}
         </div>
       </div>
-      
+
       {/* Botón de editar */}
       {onEdit && (
-        <button 
+        <button
           onClick={onEdit}
-          className="qoder-dark-button-primary px-6 py-3 rounded-lg whitespace-nowrap"
+          className="qoder-dark-button px-4 py-2 rounded-none uppercase tracking-widest text-xs whitespace-nowrap"
+          style={{ fontFamily: 'var(--font-rasputin), serif' }}
         >
           {editButtonText}
         </button>

@@ -38,7 +38,7 @@ export default function AssignmentStep({ data, updateData, onNext, onBack }: Ass
 
     return (
         <motion.div
-            className="space-y-6 h-[calc(100vh-240px)] sm:h-[60vh] overflow-y-auto pr-2 custom-scrollbar"
+            className="space-y-6"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4 }}
@@ -74,7 +74,7 @@ export default function AssignmentStep({ data, updateData, onNext, onBack }: Ass
                             >
                                 <button
                                     onClick={() => setExpandedBarberId(isExpanded ? null : barber.id)}
-                                    className="w-full p-4 flex items-center justify-between text-left"
+                                    className="w-full p-4 flex items-center justify-between text-left bg-none bg-transparent"
                                 >
                                     <div className="flex items-center gap-4">
                                         <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg transition-colors duration-300
@@ -127,12 +127,12 @@ export default function AssignmentStep({ data, updateData, onNext, onBack }: Ass
                                                                     relative flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 group
                                                                     ${isAssigned
                                                                         ? 'bg-violet-500/20 border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.15)]'
-                                                                        : 'bg-slate-900/50 border-white/5 hover:bg-slate-800'
+                                                                        : 'bg-none bg-slate-900/50 border-white/5 hover:bg-slate-800'
                                                                     }
                                                                 `}
                                                             >
                                                                 <div className={`
-                                                                    w-6 h-6 rounded-lg flex items-center justify-center border transition-all duration-300
+                                                                    w-6 h-6 rounded-none flex items-center justify-center border transition-all duration-300
                                                                     ${isAssigned
                                                                         ? 'bg-violet-500 border-violet-500 scale-110'
                                                                         : 'border-slate-600 group-hover:border-slate-400'
@@ -167,7 +167,8 @@ export default function AssignmentStep({ data, updateData, onNext, onBack }: Ass
             <div className="flex justify-between pt-4 pb-2">
                 <button
                     onClick={onBack}
-                    className="px-6 py-2 rounded-lg text-slate-500 hover:text-white transition-colors"
+                    className="px-6 py-2 rounded-none text-slate-500 hover:text-white transition-colors bg-none uppercase tracking-widest text-xs"
+                    style={{ fontFamily: 'var(--font-rasputin), serif' }}
                 >
                     Atrás
                 </button>
@@ -175,7 +176,7 @@ export default function AssignmentStep({ data, updateData, onNext, onBack }: Ass
                     onClick={onNext}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-8 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-violet-500/20 transition-all duration-300"
+                    className="px-8 py-3 !bg-gradient-to-r !from-violet-600 !to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-violet-500/20 transition-all duration-300"
                 >
                     Finalizar
                 </motion.button>

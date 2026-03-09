@@ -10,6 +10,20 @@ module.exports = {
       colors: {
         background: 'var(--background)',
         foreground: 'var(--foreground)',
+        // Override orange palette → Barberox12 gold
+        orange: {
+          50: '#FDF8F0',
+          100: '#F8EDDA',
+          200: '#EDD7B0',
+          300: '#E2C186',
+          400: '#D4B068',
+          500: '#C5A059',  // Primary gold — was #ff7700
+          600: '#A8863D',
+          700: '#8B6D2E',
+          800: '#6E5422',
+          900: '#513C18',
+          950: '#342510',
+        },
         // Qoder professional grayscale palette
         'qoder-dark-bg-primary': 'var(--qoder-dark-bg-primary)',
         'qoder-dark-bg-secondary': 'var(--qoder-dark-bg-secondary)',
@@ -46,6 +60,7 @@ module.exports = {
       },
       fontFamily: {
         'old-english': ['var(--font-old-english)'],
+        'rasputin': ['var(--font-rasputin)'],
       },
     },
   },

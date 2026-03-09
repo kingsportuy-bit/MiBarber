@@ -4,11 +4,9 @@ import { Droppable } from "@hello-pangea/dnd";
 import { TaskCard } from "@/components/TaskCard";
 import type { Appointment } from "@/types/db";
 
-// Interfaces para definir la estructura de datos
 interface Task {
   id: string;
   content: string;
-  // Agregar datos completos de la cita para la edición
   cita?: Appointment;
 }
 
@@ -20,73 +18,115 @@ interface Column {
 }
 
 interface KanbanColumnProps {
-  column: Column; // Datos de la columna a renderizar
-  tasks: Task[];  // Tareas que pertenecen a esta columna
-  onEdit?: (cita: Appointment) => void; // Función para editar una cita
+  column: Column;
+  tasks: Task[];
+  onEdit?: (cita: Appointment) => void;
 }
 
 export function KanbanColumn({ column, tasks, onEdit }: KanbanColumnProps) {
-  // Función para obtener las clases de color según el tipo de columna
-  // Esto permite aplicar estilos específicos según el estado de la columna
-  const getColumnColorClasses = (color: string) => {
+  const getColumnStyles = (color: string) => {
     switch (color) {
       case "orange":
-        return "bg-orange-800"; // Color para columnas de tareas pendientes
+        return {
+          headerBg: "rgba(197, 160, 89, 0.12)",
+          headerBorder: "#C5A059",
+          headerText: "#C5A059",
+          dropBg: "rgba(197, 160, 89, 0.03)",
+          countBg: "rgba(197, 160, 89, 0.2)",
+        };
+      case "blue":
+        return {
+          headerBg: "rgba(59, 130, 246, 0.12)",
+          headerBorder: "#3b82f6",
+          headerText: "#3b82f6",
+          dropBg: "rgba(59, 130, 246, 0.03)",
+          countBg: "rgba(59, 130, 246, 0.2)",
+        };
       case "green":
-        return "bg-green-800";  // Color para columnas de tareas completadas
+        return {
+          headerBg: "rgba(16, 185, 129, 0.12)",
+          headerBorder: "#10b981",
+          headerText: "#10b981",
+          dropBg: "rgba(16, 185, 129, 0.03)",
+          countBg: "rgba(16, 185, 129, 0.2)",
+        };
       case "gray":
-        return "bg-gray-800";   // Color para columnas de tareas canceladas
+        return {
+          headerBg: "rgba(239, 68, 68, 0.10)",
+          headerBorder: "#ef4444",
+          headerText: "#ef4444",
+          dropBg: "rgba(239, 68, 68, 0.02)",
+          countBg: "rgba(239, 68, 68, 0.2)",
+        };
       default:
-        return "bg-gray-800";   // Color por defecto
+        return {
+          headerBg: "rgba(138, 138, 138, 0.1)",
+          headerBorder: "#8A8A8A",
+          headerText: "#8A8A8A",
+          dropBg: "rgba(138, 138, 138, 0.02)",
+          countBg: "rgba(138, 138, 138, 0.2)",
+        };
     }
   };
 
+  const styles = getColumnStyles(column.color);
+
   return (
-    // Contenedor principal de la columna que ocupa todo el alto disponible
     <div className="flex flex-col h-full w-full">
-      {/* 
-        Encabezado de la columna con:
-        - Título de la columna
-        - Número de tareas en la columna
-        - Color de fondo según el tipo de columna
-      */}
-      <h2 className={`text-lg font-bold p-2 rounded-t-lg ${getColumnColorClasses(column.color)} bg-opacity-15`}>
-        {column.title} ({column.taskIds.length})
-      </h2>
-      
-      {/* 
-        Área droppable donde se pueden soltar las tareas
-        - droppableId: identificador único de la columna para el drag and drop
-      */}
+      {/* Header con borde izquierdo coloreado */}
+      <div
+        style={{
+          background: styles.headerBg,
+          borderLeft: `3px solid ${styles.headerBorder}`,
+          padding: "12px 16px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <h2
+          style={{
+            fontSize: "0.9375rem",
+            fontWeight: 600,
+            margin: 0,
+            color: styles.headerText,
+            letterSpacing: "0.04em",
+            fontFamily: "var(--font-rasputin), serif",
+          }}
+        >
+          {column.title}
+        </h2>
+        <span
+          style={{
+            background: styles.countBg,
+            color: styles.headerText,
+            fontSize: "0.75rem",
+            fontWeight: 700,
+            padding: "2px 8px",
+            fontFamily: "var(--font-body)",
+          }}
+        >
+          {column.taskIds.length}
+        </span>
+      </div>
+
       <Droppable droppableId={column.id}>
-        {/* 
-          Render props de Droppable:
-          - provided: contiene props necesarios para la funcionalidad de droppable
-          - snapshot: contiene información sobre el estado actual del droppable
-        */}
         {(provided, snapshot) => (
-          // Contenedor del área droppable
           <div
-            // Ref necesaria para que @hello-pangea/dnd pueda manipular el DOM
             ref={provided.innerRef}
-            // Props necesarios para la funcionalidad de droppable
             {...provided.droppableProps}
-            className="flex-1 rounded-b-xl px-4 py-4 space-y-4"
-            style={{ backgroundColor: 'rgba(30, 31, 31, 0.3)' }}
+            className="flex-1 px-3 py-3 space-y-3"
+            style={{
+              backgroundColor: snapshot.isDraggingOver
+                ? styles.headerBg
+                : styles.dropBg,
+              transition: "background-color 0.2s ease",
+              minHeight: 100,
+            }}
           >
-            {/* 
-              Mapeamos y renderizamos las tareas de la columna
-              - key: identificador único para React
-              - task: datos de la tarea
-              - index: posición de la tarea en la columna (necesario para drag and drop)
-            */}
             {tasks.map((task, index) => (
               <TaskCard key={task.id} task={task} index={index} onEdit={onEdit} />
             ))}
-            {/* 
-              Placeholder necesario para que @hello-pangea/dnd funcione correctamente
-              Se ocupa del espacio durante las operaciones de drag and drop
-            */}
             {provided.placeholder}
           </div>
         )}

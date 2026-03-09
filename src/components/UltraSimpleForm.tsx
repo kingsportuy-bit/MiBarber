@@ -5,8 +5,8 @@ interface UltraSimpleFormProps {
   onSubmit?: (e: React.FormEvent) => void;
 }
 
-export function UltraSimpleForm({ 
-  children, 
+export function UltraSimpleForm({
+  children,
   onSubmit
 }: UltraSimpleFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
@@ -28,8 +28,8 @@ interface UltraSimpleFormGroupProps {
   style?: React.CSSProperties;
 }
 
-export function UltraSimpleFormGroup({ 
-  children, 
+export function UltraSimpleFormGroup({
+  children,
   style = {}
 }: UltraSimpleFormGroupProps) {
   return (
@@ -47,12 +47,12 @@ interface UltraSimpleLabelProps {
   htmlFor?: string;
 }
 
-export function UltraSimpleLabel({ 
-  children, 
+export function UltraSimpleLabel({
+  children,
   htmlFor
 }: UltraSimpleLabelProps) {
   return (
-    <label 
+    <label
       htmlFor={htmlFor}
       style={{
         display: 'block',
@@ -81,14 +81,14 @@ interface UltraSimpleInputProps {
   min?: string;
 }
 
-export function UltraSimpleInput({ 
-  type = 'text', 
-  value, 
-  onChange, 
-  placeholder, 
-  id, 
-  name, 
-  required, 
+export function UltraSimpleInput({
+  type = 'text',
+  value,
+  onChange,
+  placeholder,
+  id,
+  name,
+  required,
   disabled,
   style = {},
   step,
@@ -132,14 +132,14 @@ interface UltraSimpleSelectProps {
   disabled?: boolean;
 }
 
-export function UltraSimpleSelect({ 
-  value, 
-  onChange, 
-  children, 
-  id, 
-  name, 
-  required, 
-  disabled 
+export function UltraSimpleSelect({
+  value,
+  onChange,
+  children,
+  id,
+  name,
+  required,
+  disabled
 }: UltraSimpleSelectProps) {
   return (
     <select
@@ -184,13 +184,13 @@ interface UltraSimpleTextareaProps {
   rows?: number;
 }
 
-export function UltraSimpleTextarea({ 
-  value, 
-  onChange, 
-  placeholder, 
-  id, 
-  name, 
-  required, 
+export function UltraSimpleTextarea({
+  value,
+  onChange,
+  placeholder,
+  id,
+  name,
+  required,
   disabled,
   rows = 3
 }: UltraSimpleTextareaProps) {
@@ -230,22 +230,22 @@ interface UltraSimpleButtonProps {
   disabled?: boolean;
 }
 
-export function UltraSimpleButton({ 
-  children, 
-  onClick, 
-  type = 'button', 
-  variant = 'primary', 
-  disabled 
+export function UltraSimpleButton({
+  children,
+  onClick,
+  type = 'button',
+  variant = 'primary',
+  disabled
 }: UltraSimpleButtonProps) {
   const baseStyle: React.CSSProperties = {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     padding: '0.5rem 1rem',
-    borderRadius: '4px',
+    borderRadius: '0px',
     fontWeight: 600,
-    fontSize: '1rem',
-    fontFamily: 'inherit',
+    fontSize: '11px',
+    fontFamily: 'var(--font-rasputin), serif',
     cursor: disabled ? 'not-allowed' : 'pointer',
     border: 'none',
     transition: 'all 0.3s',
@@ -254,7 +254,7 @@ export function UltraSimpleButton({
     lineHeight: 1,
     minHeight: '40px',
     textTransform: 'uppercase',
-    letterSpacing: '0.5px',
+    letterSpacing: '0.1em',
   };
 
   const variantStyles: Record<string, React.CSSProperties> = {
@@ -296,8 +296,8 @@ interface UltraSimpleModalFooterProps {
   style?: React.CSSProperties;
 }
 
-export function UltraSimpleModalFooter({ 
-  children, 
+export function UltraSimpleModalFooter({
+  children,
   style = {}
 }: UltraSimpleModalFooterProps) {
   return (

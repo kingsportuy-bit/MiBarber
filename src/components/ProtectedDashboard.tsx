@@ -16,11 +16,11 @@ export function ProtectedDashboard({ onEdit, onCreate }: ProtectedDashboardProps
   const auth = useBarberoAuth();
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
-  
+
   useEffect(() => {
     setIsClient(true);
   }, []);
-  
+
   // Redirigir a la página de login si no está autenticado
   useEffect(() => {
     // Solo redirigir si ya terminamos de cargar y no estamos autenticados
@@ -29,7 +29,7 @@ export function ProtectedDashboard({ onEdit, onCreate }: ProtectedDashboardProps
       router.push("/login");
     }
   }, [auth.isLoading, auth.isAuthenticated, isClient, router]);
-  
+
   // Mostrar estado de carga si aún no estamos en el cliente o si la autenticación está cargando
   if (!isClient || auth.isLoading) {
     return (
@@ -38,7 +38,7 @@ export function ProtectedDashboard({ onEdit, onCreate }: ProtectedDashboardProps
       </div>
     );
   }
-  
+
   // Si no está autenticado, mostrar mensaje o redirigir
   if (!auth.isAuthenticated) {
     return (
@@ -49,9 +49,9 @@ export function ProtectedDashboard({ onEdit, onCreate }: ProtectedDashboardProps
       </div>
     );
   }
-  
+
   console.log("ProtectedDashboard renderizado, onEdit:", typeof onEdit);
-  
+
   // Si está autenticado, mostrar el tablero Kanban
   return (
     <div className="flex flex-col h-full">
@@ -59,9 +59,10 @@ export function ProtectedDashboard({ onEdit, onCreate }: ProtectedDashboardProps
         <h2 className="text-xl md:text-2xl font-bold text-qoder-dark-text-primary">Tablero de Turnos</h2>
         {onCreate && (
           <div className="hidden md:block">
-            <button 
+            <button
               onClick={onCreate}
-              className="qoder-dark-button-primary px-4 py-3 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+              className="qoder-dark-button-primary px-4 py-3 rounded-none uppercase tracking-widest text-xs flex items-center gap-2 hover-lift smooth-transition"
+              style={{ fontFamily: 'var(--font-rasputin), serif' }}
             >
               <span>+</span>
               <span>Nuevo Turno</span>
@@ -69,13 +70,13 @@ export function ProtectedDashboard({ onEdit, onCreate }: ProtectedDashboardProps
           </div>
         )}
       </div>
-      
+
       {onCreate && (
         <div className="md:hidden">
           <ResponsiveNewAppointmentButton onCreate={onCreate} />
         </div>
       )}
-      
+
       <KanbanBoardDndKit onEdit={onEdit} />
     </div>
   );

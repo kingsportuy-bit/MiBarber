@@ -79,20 +79,19 @@ export function TestDragAndDrop() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6 text-qoder-dark-text-primary">Prueba de Arrastrar y Soltar</h1>
-      
+
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {columnStates.map((column) => (
             <Droppable key={column.id} droppableId={column.id}>
               {(provided, snapshot) => (
-                <div 
+                <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
-                  className={`rounded-xl p-4 transition-all duration-200 ${
-                    snapshot.isDraggingOver 
-                      ? `${column.bgColor} border-2 border-dashed ${column.color.replace('text', 'border')}` 
+                  className={`rounded-xl p-4 transition-all duration-200 ${snapshot.isDraggingOver
+                      ? `${column.bgColor} border-2 border-dashed ${column.color.replace('text', 'border')}`
                       : 'bg-qoder-dark-bg-secondary'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center justify-between mb-3">
                     <h3 className={`font-bold ${column.color}`}>
@@ -102,7 +101,7 @@ export function TestDragAndDrop() {
                       {items[column.id].length}
                     </span>
                   </div>
-                  
+
                   <div className="space-y-3 min-h-[100px]">
                     {items[column.id].map((item, index) => (
                       <Draggable key={item.id} draggableId={item.id} index={index}>
@@ -111,11 +110,10 @@ export function TestDragAndDrop() {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            className={`qoder-dark-card rounded-lg p-4 shadow-sm transition-all duration-200 ${
-                              snapshot.isDragging 
-                                ? 'shadow-lg scale-[102%] z-10' 
+                            className={`qoder-dark-card rounded-none p-4 shadow-sm transition-all duration-200 ${snapshot.isDragging
+                                ? 'shadow-lg scale-[102%] z-10'
                                 : 'hover:shadow-md hover-lift'
-                            }`}
+                              }`}
                           >
                             <div className="font-medium text-qoder-dark-text-primary">
                               {item.content}
@@ -126,7 +124,7 @@ export function TestDragAndDrop() {
                     ))}
                     {provided.placeholder}
                     {items[column.id].length === 0 && (
-                      <div className="text-center py-8 text-qoder-dark-text-secondary text-sm rounded-lg border-2 border-dashed border-qoder-dark-border">
+                      <div className="text-center py-8 text-qoder-dark-text-secondary text-sm rounded-none border-2 border-dashed border-qoder-dark-border">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mx-auto text-qoder-dark-text-secondary/30 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>

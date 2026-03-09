@@ -9,9 +9,9 @@ interface MobileLoaderProps {
   onTimeout?: () => void;
 }
 
-export function MobileLoader({ 
-  isLoading, 
-  message = "Cargando...", 
+export function MobileLoader({
+  isLoading,
+  message = "Cargando...",
   timeout = 10000,
   onTimeout
 }: MobileLoaderProps) {
@@ -62,7 +62,7 @@ export function MobileLoader({
         const hideTimer = setTimeout(() => {
           setShowLoader(false);
         }, 300);
-        
+
         return () => clearTimeout(hideTimer);
       }
     }
@@ -72,11 +72,11 @@ export function MobileLoader({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
-      <div className="flex flex-col items-center p-6 rounded-lg bg-gray-900 border border-gray-700">
+      <div className="flex flex-col items-center p-6 rounded-none bg-gray-900 border border-gray-700">
         {/* Spinner de carga */}
         <div className="relative w-12 h-12 mb-4">
           <div className="absolute inset-0 rounded-full border-4 border-gray-700"></div>
-          <div 
+          <div
             className="absolute inset-0 rounded-full border-4 border-t-orange-500 animate-spin"
             style={{
               borderTopColor: '#ff7700',
@@ -86,18 +86,18 @@ export function MobileLoader({
             }}
           ></div>
         </div>
-        
+
         {/* Mensaje */}
         <p className="text-white text-center mb-4">{message}</p>
-        
+
         {/* Barra de progreso */}
         <div className="w-48 h-2 bg-gray-700 rounded-full overflow-hidden">
-          <div 
+          <div
             className="h-full bg-orange-500 transition-all duration-300 ease-out"
             style={{ width: `${progress}%` }}
           ></div>
         </div>
-        
+
         {/* Porcentaje */}
         <span className="text-orange-500 text-sm mt-2">{Math.round(progress)}%</span>
       </div>

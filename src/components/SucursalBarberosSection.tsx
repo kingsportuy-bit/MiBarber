@@ -18,9 +18,9 @@ interface SucursalBarberosSectionProps {
   isAdmin: boolean;
 }
 
-export function SucursalBarberosSection({ 
-  sucursalId, 
-  sucursalUuid, 
+export function SucursalBarberosSection({
+  sucursalId,
+  sucursalUuid,
   sucursalNombre,
   isAdmin
 }: SucursalBarberosSectionProps) {
@@ -39,7 +39,7 @@ export function SucursalBarberosSection({
       setIsModalOpen(true);
       setBarberoToEdit(null);
     };
-    
+
     window.addEventListener('openBarberoModal', handleOpenModal);
     return () => {
       window.removeEventListener('openBarberoModal', handleOpenModal);
@@ -67,7 +67,7 @@ export function SucursalBarberosSection({
 
   const confirmDelete = async () => {
     if (!barberoToDelete) return;
-    
+
     try {
       await barberosQuery.deleteBarbero.mutateAsync(barberoToDelete.id_barbero);
       toast.success("Barbero eliminado correctamente");
@@ -96,7 +96,7 @@ export function SucursalBarberosSection({
           id_barberia: idBarberia || undefined,
           id_sucursal: sucursalUuid || undefined
         } as Omit<Barbero, "id_barbero">;
-        
+
         await barberosQuery.createBarbero.mutateAsync(barberoData);
         toast.success("Barbero creado correctamente");
       }
@@ -135,7 +135,8 @@ export function SucursalBarberosSection({
             setIsModalOpen(true);
             setBarberoToEdit(null);
           }}
-          className="qoder-dark-button-primary px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+          className="qoder-dark-button-primary px-4 py-2 rounded-none uppercase text-xs tracking-widest flex items-center gap-2 hover-lift smooth-transition"
+          style={{ fontFamily: 'var(--font-rasputin), serif' }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -213,24 +214,23 @@ export function SucursalBarberosSection({
                 </td>
                 {/* Celda de Rol - ocultar en móvil */}
                 <td className="px-4 py-3 text-sm text-qoder-dark-text-primary md:table-cell hidden">
-                  <BarberoNivelPermisos 
-                    barbero={barbero} 
-                    onUpdate={() => {}}
+                  <BarberoNivelPermisos
+                    barbero={barbero}
+                    onUpdate={() => { }}
                   />
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-qoder-dark-text-primary">
-                  <span className={`px-2 py-1 rounded text-xs ${
-                    barbero.activo 
-                      ? "bg-green-900 text-green-300" 
-                      : "bg-red-900 text-red-300"
-                  }`}>
+                  <span className={`px-2 py-1 rounded text-xs ${barbero.activo
+                    ? "bg-green-900 text-green-300"
+                    : "bg-red-900 text-red-300"
+                    }`}>
                     {barbero.activo ? 'Activo' : 'Inactivo'}
                   </span>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end space-x-2">
                     {/* Icono de ojo para ver detalles */}
-                    <button 
+                    <button
                       onClick={(e) => { e.stopPropagation(); handleShowFicha(barbero); }}
                       className="text-gray-500 hover:text-gray-300 bg-transparent !bg-none border-none p-1"
                       title="Ver detalles"
@@ -240,7 +240,7 @@ export function SucursalBarberosSection({
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
                     </button>
-                    <button 
+                    <button
                       onClick={(e) => { e.stopPropagation(); handleEdit(barbero); }}
                       className="text-blue-500 hover:text-blue-300 bg-transparent !bg-none border-none p-1"
                       title="Editar barbero"
@@ -249,13 +249,12 @@ export function SucursalBarberosSection({
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
-                    <button 
+                    <button
                       onClick={(e) => { e.stopPropagation(); handleDelete(barbero); }}
-                      className={`${
-                        isBarberoProtegido(barbero) 
-                          ? "text-gray-500 cursor-not-allowed bg-transparent !bg-none border-none p-1" 
-                          : "text-red-500 hover:text-red-300 bg-transparent !bg-none border-none p-1"
-                      }`}
+                      className={`${isBarberoProtegido(barbero)
+                        ? "text-gray-500 cursor-not-allowed bg-transparent !bg-none border-none p-1"
+                        : "text-red-500 hover:text-red-300 bg-transparent !bg-none border-none p-1"
+                        }`}
                       disabled={isBarberoProtegido(barbero)}
                       title={isBarberoProtegido(barbero) ? "No se puede eliminar" : "Eliminar barbero"}
                     >
@@ -304,13 +303,15 @@ export function SucursalBarberosSection({
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setBarberoToDelete(null)}
-                className="qoder-dark-button px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+                className="qoder-dark-button px-4 py-2 rounded-none uppercase tracking-widest text-xs flex items-center gap-2 hover-lift smooth-transition"
+                style={{ fontFamily: 'var(--font-rasputin), serif' }}
               >
                 <span>Cancelar</span>
               </button>
               <button
                 onClick={confirmDelete}
-                className="qoder-dark-button-danger px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+                className="qoder-dark-button-danger px-4 py-2 rounded-none uppercase tracking-widest text-xs flex items-center gap-2 hover-lift smooth-transition"
+                style={{ fontFamily: 'var(--font-rasputin), serif' }}
               >
                 <span>Eliminar</span>
               </button>

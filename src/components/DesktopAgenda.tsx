@@ -6,7 +6,7 @@ import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 import { FinalAppointmentModalModificado } from "@/components/FinalAppointmentModalModificado";
 import type { Appointment } from "@/types/db";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, ChevronRightIcon, FunnelIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { CalendarWithBloqueos } from "@/components/CalendarWithBloqueos";
 import { useCliente, useClientesByIds } from "@/hooks/useClientes";
 import { Client } from "@/types/db";
@@ -129,20 +129,20 @@ export function DesktopAgenda() {
     // Usar citasMesData para el calendario (todo el mes) en lugar de citasData (solo un día)
     if (citasMesData) {
       console.log('📋 Citas del mes antes de filtrar:', citasMesData);
-        
+
       // Aplicar filtro adicional por barbero si es necesario
       let citasFiltradas = citasMesData.filter(cita => cita.estado !== "cancelado");
-        
+
       // Si hay un barbero específico seleccionado, filtrar por ese barbero
       if (isAdmin && filters.barberoId) {
         citasFiltradas = citasFiltradas.filter(cita => cita.id_barbero === filters.barberoId);
       }
-        
+
       console.log('✅ Citas del mes después de filtrar:', citasFiltradas);
       citasFiltradas.forEach(cita => {
         const fechaParts = cita.fecha.split('T');
         const fechaStr = fechaParts[0];
-    
+
         if (!citasPorFecha[fechaStr]) {
           citasPorFecha[fechaStr] = [];
         }
@@ -243,7 +243,7 @@ export function DesktopAgenda() {
         <div>
           <button
             onClick={handleNewAppointment}
-            className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-600 hover:to-amber-600 text-white py-3 px-6 rounded-lg font-medium transition-all duration-200 whitespace-nowrap"
+            className="bg-[#C5A059] hover:bg-[#D4B068] text-black py-3 px-6 rounded-lg font-bold transition-all duration-200 whitespace-nowrap"
           >
             + Nuevo Turno
           </button>
@@ -297,9 +297,9 @@ export function DesktopAgenda() {
                 >
                   <div
                     onClick={() => handleDaySelect(day)}
-                    className={`flex flex-col items-center justify-center text-base w-full h-full rounded transition-all duration-200 cursor-pointer transform hover:-translate-y-1 hover:shadow-lg ${day.isToday ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white' :
+                    className={`flex flex-col items-center justify-center text-base w-full h-full rounded transition-all duration-200 cursor-pointer transform hover:-translate-y-1 hover:shadow-lg ${day.isToday ? 'bg-[#C5A059] text-black font-bold' :
                       day.isSelected && !day.isToday ? 'bg-gray-700' : 'bg-transparent'
-                      } hover:bg-orange-500 hover:bg-opacity-50 hover:text-white`}
+                      } hover:bg-[#D4B068] hover:text-black`}
                     style={{
                       opacity: day.isCurrentMonth ? 1 : 0.5,
                       border: '1px solid rgba(75, 85, 99, 0.2)' // Gris con 20% opacidad
@@ -308,7 +308,7 @@ export function DesktopAgenda() {
                     <span className="text-lg font-semibold">{day.date.getDate()}</span>
                     {citaCount > 0 && (
                       <div className="mt-1 flex items-center justify-center">
-                        <span className="bg-orange-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                        <span className="bg-[#111] text-[#C5A059] border border-[#C5A059] text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                           {citaCount}
                         </span>
                       </div>
@@ -351,6 +351,14 @@ export function DesktopAgenda() {
                 <ChevronLeftIcon className="h-5 w-5 mr-2" />
                 Volver
               </button>
+              <button
+                onClick={handleNewAppointment}
+                className="flex items-center gap-2 bg-[#C5A059] hover:bg-[#D4B068] text-black px-6 py-2.5 rounded-none font-bold hover:shadow-[0_0_15px_rgba(197,160,89,0.3)] transition-all uppercase tracking-widest text-xs"
+                style={{ fontFamily: 'var(--font-rasputin), serif' }}
+              >
+                <PlusIcon className="w-5 h-5" />
+                <span>+ Nuevo Turno</span>
+              </button>
 
               <h2 className="text-xl font-semibold text-qoder-dark-text-primary">
                 {formatDate(selectedDate)}
@@ -385,38 +393,129 @@ export function DesktopAgenda() {
                       // Obtener información del cliente del mapa
                       const clientData = appointment.id_cliente ? clientesMap[appointment.id_cliente] : undefined;
 
+                      // Status color mapping
+                      const statusColors: Record<string, { bg: string; text: string; border: string; dot: string }> = {
+                        completado: { bg: 'rgba(16,185,129,0.08)', text: '#10b981', border: 'rgba(16,185,129,0.3)', dot: '#10b981' },
+                        pendiente: { bg: 'rgba(197,160,89,0.08)', text: '#C5A059', border: 'rgba(197,160,89,0.3)', dot: '#C5A059' },
+                        confirmado: { bg: 'rgba(59,130,246,0.08)', text: '#3b82f6', border: 'rgba(59,130,246,0.3)', dot: '#3b82f6' },
+                      };
+                      const colors = statusColors[appointment.estado] || statusColors.pendiente;
+
+                      const estadoLabel = appointment.estado === 'completado' ? 'Completado' : appointment.estado === 'confirmado' ? 'Confirmado' : 'Pendiente';
+
                       return (
                         <div
                           key={appointment.id_cita}
                           onClick={() => handleAppointmentClick(appointment)}
-                          className="bg-qoder-dark-bg-form rounded-xl p-5 border border-qoder-dark-border cursor-pointer hover:shadow-lg transition-shadow duration-200"
+                          className="cursor-pointer transition-all duration-200 hover:shadow-[0_4px_20px_rgba(197,160,89,0.1)]"
+                          style={{
+                            background: '#0a0a0a',
+                            border: '1px solid #1a1a1a',
+                            borderLeft: `3px solid ${colors.dot}`,
+                            padding: 0,
+                            overflow: 'hidden',
+                          }}
                         >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <div className="font-semibold text-qoder-dark-text-primary text-lg">
-                                {appointment.cliente_nombre}
-                                {clientData && clientData.puntaje !== null && clientData.puntaje !== undefined && (
-                                  <span className="ml-2">
-                                    {getStarsFromScore(clientData.puntaje)}
+                          <div style={{ display: 'flex', alignItems: 'stretch' }}>
+                            {/* Time block */}
+                            <div style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              padding: '16px 20px',
+                              borderRight: '1px solid #1a1a1a',
+                              minWidth: 80,
+                              background: 'rgba(255,255,255,0.02)',
+                            }}>
+                              <span style={{
+                                fontSize: '1.25rem',
+                                fontWeight: 700,
+                                color: '#F5F0EB',
+                                fontFamily: 'var(--font-body)',
+                                letterSpacing: '0.02em',
+                              }}>
+                                {appointment.hora.substring(0, 5)}
+                              </span>
+                              <span style={{
+                                fontSize: '0.6875rem',
+                                color: '#8A8A8A',
+                                fontFamily: 'var(--font-body)',
+                                marginTop: 2,
+                              }}>
+                                {appointment.duracion} min
+                              </span>
+                            </div>
+
+                            {/* Content */}
+                            <div style={{ flex: 1, padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                  <span style={{
+                                    fontWeight: 600,
+                                    color: '#F5F0EB',
+                                    fontSize: '1rem',
+                                    fontFamily: 'var(--font-body)',
+                                  }}>
+                                    {appointment.cliente_nombre}
                                   </span>
+                                  {clientData && clientData.puntaje !== null && clientData.puntaje !== undefined && (
+                                    <span style={{ marginLeft: 2 }}>
+                                      {getStarsFromScore(clientData.puntaje)}
+                                    </span>
+                                  )}
+                                </div>
+                                <div style={{
+                                  color: '#8A8A8A',
+                                  fontSize: '0.8125rem',
+                                  marginTop: 4,
+                                  fontFamily: 'var(--font-body)',
+                                }}>
+                                  {appointment.servicio}
+                                </div>
+                                {/* Notas */}
+                                {appointment.nota && (
+                                  <div style={{
+                                    marginTop: 4,
+                                    fontSize: '0.75rem',
+                                    color: 'rgba(255,255,255,0.35)',
+                                    fontStyle: 'italic',
+                                    fontFamily: 'var(--font-body)',
+                                    maxWidth: 280,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                  }}>
+                                    {appointment.nota}
+                                  </div>
                                 )}
                               </div>
-                              <div className="text-base text-qoder-dark-text-secondary mt-2">
-                                {appointment.servicio}
-                              </div>
-                              {/* Mostrar notas de forma sutil si existen */}
-                              {appointment.nota && (
-                                <div className="mt-2 text-sm text-qoder-dark-text-muted italic truncate max-w-xs">
-                                  {appointment.nota}
-                                </div>
-                              )}
-                            </div>
-                            <div className="text-right">
-                              <div className="font-semibold text-qoder-dark-text-primary text-lg">
-                                {appointment.hora.substring(0, 5)} {/* Formato HH:MM */}
-                              </div>
-                              <div className="text-base text-qoder-dark-text-secondary mt-2">
-                                {appointment.duracion} min {/* Agregar "min" a la duración */}
+
+                              {/* Status badge */}
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 6,
+                                background: colors.bg,
+                                border: `1px solid ${colors.border}`,
+                                padding: '5px 12px',
+                                flexShrink: 0,
+                              }}>
+                                <span style={{
+                                  width: 6,
+                                  height: 6,
+                                  borderRadius: '50%',
+                                  background: colors.dot,
+                                  display: 'inline-block',
+                                }} />
+                                <span style={{
+                                  fontSize: '0.75rem',
+                                  fontWeight: 500,
+                                  color: colors.text,
+                                  fontFamily: 'var(--font-body)',
+                                }}>
+                                  {estadoLabel}
+                                </span>
                               </div>
                             </div>
                           </div>

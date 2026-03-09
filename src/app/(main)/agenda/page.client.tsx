@@ -18,7 +18,7 @@ import { EnhancedFinalAppointmentModal } from "@/components/EnhancedFinalAppoint
 import { DesktopAgenda } from "@/components/DesktopAgenda";
 
 export default function AgendaPageClient() {
-  usePageTitle("Barberox | Agenda");
+  usePageTitle("Barberox | Calendario");
 
   const { idBarberia, barbero, isAdmin } = useBarberoAuth();
   const { filters } = useGlobalFilters();
@@ -60,13 +60,13 @@ export default function AgendaPageClient() {
         servicio: "",
         barbero: ""
       };
-      
+
       setSelectedAppointment(newAppointment as Appointment);
       setIsModalOpen(true);
     };
-    
+
     window.addEventListener('openNewAppointmentModal', handleOpenModalEvent);
-    
+
     return () => {
       window.removeEventListener('openNewAppointmentModal', handleOpenModalEvent);
     };
@@ -79,7 +79,7 @@ export default function AgendaPageClient() {
       refetch();
     }
   }, [idBarberia, filters.sucursalId, filters.barberoId, refetch]);
-  
+
   // Efecto adicional para asegurar que se refetch cuando los datos estén listos
   useEffect(() => {
     // Verificar si tenemos todos los datos necesarios
@@ -97,7 +97,7 @@ export default function AgendaPageClient() {
     return (
       <>
         <Head>
-          <title>Barberox | Agenda</title>
+          <title>Barberox | Calendario</title>
         </Head>
         <MobileAgenda />
         {/* <SingleFormAppointmentModalWithSucursal
@@ -118,7 +118,7 @@ export default function AgendaPageClient() {
   return (
     <>
       <Head>
-        <title>Barberox | Agenda</title>
+        <title>Barberox | Calendario</title>
       </Head>
       <DesktopAgenda />
       {/* <SingleFormAppointmentModalWithSucursal

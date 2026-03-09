@@ -1,18 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  LegacyV2Modal, 
-  LegacyV2Form, 
-  LegacyV2FormSection, 
-  LegacyV2FormGroup, 
-  LegacyV2Label, 
-  LegacyV2Input, 
-  LegacyV2Select,
-  LegacyV2Button,
-  LegacyV2ModalFooter
-} from './LegacyV2Modal';
+import React, { useState, useEffect } from "react";
 import type { Barbero, Service } from "@/types/db";
 import { getSupabaseClient } from "@/lib/supabaseClient";
-import { useQueryClient } from "@tanstack/react-query";
+
+// Import Qoder UI components
+import { QoderSlideOver } from "@/components/ui/QoderSlideOver";
+import { QoderInput } from "@/components/ui/QoderInput";
+import { QoderButton } from "@/components/ui/QoderButton";
+import { QoderSwitch } from "@/components/ui/QoderSwitch";
 
 interface LegacyEditarBarberoModalProps {
   open: boolean;
@@ -21,20 +15,21 @@ interface LegacyEditarBarberoModalProps {
   onSave: (data: Partial<Barbero>) => Promise<void>;
 }
 
-export function LegacyEditarBarberoModal({ 
-  open, 
-  onOpenChange, 
+export function LegacyEditarBarberoModal({
+  open,
+  onOpenChange,
   barbero,
-  onSave 
+  onSave,
 }: LegacyEditarBarberoModalProps) {
   const [formData, setFormData] = useState({
     username: barbero.username || "",
     email: barbero.email || "",
     telefono: barbero.telefono || "",
-    especialidades: barbero.especialidades || [] as string[]
+    especialidades: barbero.especialidades || ([] as string[]),
   });
-  
+
   const [serviciosDisponibles, setServiciosDisponibles] = useState<Service[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (open && barbero.id_sucursal) {
@@ -43,13 +38,15 @@ export function LegacyEditarBarberoModal({
   }, [open, barbero.id_sucursal]);
 
   useEffect(() => {
-    setFormData({
-      username: barbero.username || "",
-      email: barbero.email || "",
-      telefono: barbero.telefono || "",
-      especialidades: barbero.especialidades || []
-    });
-  }, [barbero]);
+    if (open) {
+      setFormData({
+        username: barbero.username || "",
+        email: barbero.email || "",
+        telefono: barbero.telefono || "",
+        especialidades: barbero.especialidades || [],
+      });
+    }
+  }, [open, barbero]);
 
   const loadServiciosDisponibles = async () => {
     try {
@@ -57,7 +54,7 @@ export function LegacyEditarBarberoModal({
       const { data, error } = await supabase
         .from("mibarber_servicios")
         .select("*")
-        .eq("id_sucursal", barbero.id_sucursal || '')
+        .eq("id_sucursal", barbero.id_sucursal || "")
         .eq("activo", true)
         .order("nombre");
 
@@ -71,137 +68,112 @@ export function LegacyEditarBarberoModal({
 
   const handleEspecialidadChange = (servicioId: string, checked: boolean) => {
     if (checked) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        especialidades: [...prev.especialidades, servicioId]
+        especialidades: [...prev.especialidades, servicioId],
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        especialidades: prev.especialidades.filter(id => id !== servicioId)
+        especialidades: prev.especialidades.filter((id) => id !== servicioId),
       }));
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSubmit = async () => {
+    setIsSaving(true);
     try {
       await onSave(formData);
       onOpenChange(false);
     } catch (error) {
       console.error("Error al guardar los cambios:", error);
       alert("Error al guardar los cambios");
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleClose = () => {
-    // Resetear los valores a los originales
-    setFormData({
-      username: barbero.username || "",
-      email: barbero.email || "",
-      telefono: barbero.telefono || "",
-      especialidades: barbero.especialidades || []
-    });
     onOpenChange(false);
   };
 
   return (
-    <LegacyV2Modal
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Editar Información Personal"
-    >
-      <LegacyV2Form onSubmit={handleSubmit}>
-        <LegacyV2FormSection>
-          <div className="v2-form-grid">
-            <LegacyV2FormGroup>
-              <LegacyV2Label>Nombre</LegacyV2Label>
-              <div className="w-full qoder-dark-bg-form p-3 rounded-lg text-qoder-dark-text-primary">
-                {barbero.nombre}
-              </div>
-              <p className="text-xs text-qoder-dark-text-muted mt-1">
-                El nombre no puede ser modificado. Contacta a un administrador si necesitas cambiarlo.
-              </p>
-            </LegacyV2FormGroup>
-
-            <LegacyV2FormGroup>
-              <LegacyV2Label>Nombre de Usuario</LegacyV2Label>
-              <LegacyV2Input
-                type="text"
-                value={formData.username}
-                onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
-                placeholder="Nombre de usuario"
-              />
-            </LegacyV2FormGroup>
-
-            <LegacyV2FormGroup>
-              <LegacyV2Label>Email</LegacyV2Label>
-              <LegacyV2Input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                placeholder="tu@email.com"
-              />
-            </LegacyV2FormGroup>
-
-            <LegacyV2FormGroup>
-              <LegacyV2Label>Teléfono</LegacyV2Label>
-              <LegacyV2Input
-                type="tel"
-                value={formData.telefono}
-                onChange={(e) => setFormData(prev => ({ ...prev, telefono: e.target.value }))}
-                placeholder="099 123 456"
-              />
-            </LegacyV2FormGroup>
-
-            <div className="md:col-span-2">
-              <LegacyV2Label>Servicios que Ofrezco</LegacyV2Label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {serviciosDisponibles.length > 0 ? (
-                  serviciosDisponibles.map((servicio) => {
-                    const isChecked = formData.especialidades.includes(servicio.id_servicio);
-                    return (
-                      <div key={servicio.id_servicio} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id={`servicio-${servicio.id_servicio}`}
-                          checked={isChecked}
-                          onChange={(e) => handleEspecialidadChange(servicio.id_servicio, e.target.checked)}
-                          className="qoder-dark-checkbox h-5 w-5 rounded border-qoder-dark-border bg-qoder-dark-bg-form text-qoder-dark-accent-primary focus:ring-qoder-dark-accent-primary"
-                        />
-                        <label 
-                          htmlFor={`servicio-${servicio.id_servicio}`} 
-                          className="ml-2 text-qoder-dark-text-primary"
-                        >
-                          {servicio.nombre}
-                        </label>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <p className="text-qoder-dark-text-muted text-sm col-span-3">
-                    No hay servicios disponibles en tu sucursal
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        </LegacyV2FormSection>
-
-        <LegacyV2ModalFooter>
-          <LegacyV2Button 
-            type="button" 
-            variant="secondary" 
-            onClick={handleClose}
-          >
+    <QoderSlideOver
+      isOpen={open}
+      onClose={handleClose}
+      title="Editar Perfil"
+      subtitle={`Configurando cuenta de ${barbero.nombre}`}
+      footer={
+        <div className="flex gap-3 justify-end items-center">
+          <QoderButton variant="ghost" onClick={handleClose} disabled={isSaving}>
             Cancelar
-          </LegacyV2Button>
-          <LegacyV2Button type="submit" variant="primary">
+          </QoderButton>
+          <QoderButton variant="primary" onClick={handleSubmit} isLoading={isSaving}>
             Guardar Cambios
-          </LegacyV2Button>
-        </LegacyV2ModalFooter>
-      </LegacyV2Form>
-    </LegacyV2Modal>
+          </QoderButton>
+        </div>
+      }
+    >
+      <div className="flex flex-col gap-6">
+        <div className="bg-[#111] border border-[#222] rounded-xl p-4 flex flex-col gap-1">
+          <span className="text-[13px] text-[#8a8a8a] font-[family-name:var(--font-body)]">Nombre Completo</span>
+          <span className="text-white font-medium font-[family-name:var(--font-body)]">{barbero.nombre}</span>
+          <p className="text-xs text-[#555] mt-1 italic">Contacta al administrador para modificar este campo legal.</p>
+        </div>
+
+        <QoderInput
+          label="Usuario (Alias)"
+          value={formData.username}
+          onChange={(e) => setFormData((prev) => ({ ...prev, username: e.target.value }))}
+          placeholder="@tu_usuario"
+        />
+
+        <QoderInput
+          label="Email de Contacto"
+          type="email"
+          value={formData.email}
+          onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+          placeholder="email@ejemplo.com"
+        />
+
+        <QoderInput
+          label="Teléfono"
+          type="tel"
+          value={formData.telefono}
+          onChange={(e) => setFormData((prev) => ({ ...prev, telefono: e.target.value }))}
+          placeholder="099 123 456"
+        />
+
+        <div className="pt-4 border-t border-[#1a1a1a]">
+          <h3 className="text-lg font-bold font-[family-name:var(--font-rasputin)] text-[#F5F0EB] mb-1">
+            Servicios que Ofrezco
+          </h3>
+          <p className="text-[13.5px] text-[#8a8a8a] mb-5 font-[family-name:var(--font-body)]">
+            Activa los servicios que este barbero está capacitado para realizar.
+          </p>
+
+          <div className="flex flex-col gap-4">
+            {serviciosDisponibles.length > 0 ? (
+              serviciosDisponibles.map((servicio) => {
+                const isChecked = formData.especialidades.includes(servicio.id_servicio);
+                return (
+                  <QoderSwitch
+                    key={servicio.id_servicio}
+                    checked={isChecked}
+                    onCheckedChange={(checked) => handleEspecialidadChange(servicio.id_servicio, checked)}
+                    label={servicio.nombre}
+                    description={`Servicio disponible en la sucursal`}
+                  />
+                );
+              })
+            ) : (
+              <p className="text-[#555] text-[13.5px] italic">
+                No hay servicios cargados en esta sucursal.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    </QoderSlideOver>
   );
 }

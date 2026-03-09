@@ -8,7 +8,7 @@ interface WelcomeStepProps {
 
 export default function WelcomeStep({ onNext }: WelcomeStepProps) {
     return (
-        <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-8">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-8">
 
             {/* Logo Container with Glow */}
             <motion.div

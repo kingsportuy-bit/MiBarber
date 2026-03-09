@@ -125,7 +125,7 @@ export function TestDnd() {
   };
 
   return (
-    <div className="p-4 bg-gray-800 rounded-lg">
+    <div className="p-4 bg-gray-800 rounded-none">
       <h2 className="text-xl font-bold mb-4">Prueba de Arrastrar y Soltar</h2>
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -134,16 +134,15 @@ export function TestDnd() {
             const tasks = column.taskIds.map((taskId) => data.tasks[taskId]);
 
             return (
-              <div key={column.id} className="bg-gray-700 rounded-lg p-4">
+              <div key={column.id} className="bg-gray-700 rounded-none p-4">
                 <h3 className="font-semibold text-lg mb-3">{column.title}</h3>
                 <Droppable droppableId={column.id} isDropDisabled={false} isCombineEnabled={false} ignoreContainerClipping={false}>
                   {(provided, snapshot) => (
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className={`min-h-[100px] rounded-lg p-2 ${
-                        snapshot.isDraggingOver ? "bg-gray-600" : "bg-gray-800"
-                      }`}
+                      className={`min-h-[100px] rounded-none p-2 ${snapshot.isDraggingOver ? "bg-gray-600" : "bg-gray-800"
+                        }`}
                     >
                       {tasks.map((task, index) => (
                         <Draggable key={task.id} draggableId={task.id} index={index}>
@@ -152,9 +151,8 @@ export function TestDnd() {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className={`p-3 mb-2 rounded-lg ${
-                                snapshot.isDragging ? "bg-blue-500" : "bg-gray-900"
-                              }`}
+                              className={`p-3 mb-2 rounded-none ${snapshot.isDragging ? "bg-blue-500" : "bg-gray-900"
+                                }`}
                             >
                               {task.content}
                             </div>

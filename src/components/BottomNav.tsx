@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -11,113 +11,225 @@ interface NavItem {
   icon: React.ReactNode;
 }
 
-// Iconos SVG personalizados
-const HomeIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+// SVG icons â€” refined for bottom nav
+const IconCalendarCheck = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+    <line x1="16" x2="16" y1="2" y2="6" />
+    <line x1="8" x2="8" y1="2" y2="6" />
+    <line x1="3" x2="21" y1="10" y2="10" />
+    <path d="m9 16 2 2 4-4" />
   </svg>
 );
 
-const CalendarIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+const IconCalendar = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+    <line x1="16" x2="16" y1="2" y2="6" />
+    <line x1="8" x2="8" y1="2" y2="6" />
+    <line x1="3" x2="21" y1="10" y2="10" />
   </svg>
 );
 
-const PeopleIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+const IconMessageCircle = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
   </svg>
 );
 
-const ChatBubbleIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+const IconUser = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
   </svg>
 );
 
-const GearIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+const IconMore = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="1" />
+    <circle cx="19" cy="12" r="1" />
+    <circle cx="5" cy="12" r="1" />
   </svg>
 );
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
   const [isChatView, setIsChatView] = useState(false);
-  
-  // Verificar si estamos en la vista individual de chat de WhatsApp
+  const [showMoreSheet, setShowMoreSheet] = useState(false);
+
   useEffect(() => {
     const handleHashChange = () => {
       if (typeof window !== 'undefined') {
         setIsChatView(window.location.hash === '#chat-view');
       }
     };
-    
-    // Verificar el hash inicial
     handleHashChange();
-    
-    // Escuchar cambios en el hash
     window.addEventListener('hashchange', handleHashChange);
-    
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange);
-    };
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
-  
-  // Si no hay un barbero logueado, estamos en la página de admin, o estamos en la vista individual de chat, no mostrar el menú inferior
-  if (!isAuthenticated || pathname?.startsWith('/admin') || (pathname?.startsWith('/whatsapp') && isChatView)) {
+
+  // No mostrar en: no autenticado, admin, WhatsApp chat view, login
+  if (!isAuthenticated || pathname?.startsWith('/admin') || pathname?.startsWith('/login') || (pathname?.startsWith('/whatsapp') && isChatView)) {
     return null;
   }
-  
-  const navItems: NavItem[] = [
-    { href: "/inicio", label: "Inicio", icon: <HomeIcon className="h-5 w-5" /> },
-    { href: "/agenda", label: "Agenda", icon: <CalendarIcon className="h-5 w-5" /> },
-    { href: "/clientes", label: "Clientes", icon: <PeopleIcon className="h-5 w-5" /> },
-    { href: "/whatsapp", label: "WhatsApp", icon: <ChatBubbleIcon className="h-5 w-5" /> },
-    { href: "/perfil", label: "Perfil", icon: <GearIcon className="h-5 w-5" /> },
-  ];
+
+  // Barbero normal: Dashboard, Agenda, WhatsApp, Perfil
+  // Admin: Dashboard, Agenda, WhatsApp, Más (sheet con opciones admin)
+  const navItems: NavItem[] = isAdmin
+    ? [
+      { href: "/inicio", label: "Dashboard", icon: <IconCalendarCheck /> },
+      { href: "/turnos", label: "Agenda", icon: <IconCalendar /> },
+      { href: "/whatsapp", label: "WhatsApp", icon: <IconMessageCircle /> },
+      { href: "#more", label: "Más", icon: <IconMore /> },
+    ]
+    : [
+      { href: "/inicio", label: "Dashboard", icon: <IconCalendarCheck /> },
+      { href: "/turnos", label: "Agenda", icon: <IconCalendar /> },
+      { href: "/whatsapp", label: "WhatsApp", icon: <IconMessageCircle /> },
+      { href: "/perfil", label: "Perfil", icon: <IconUser /> },
+    ];
 
   const isActive = (href: string) => {
-    if (href === "/inicio") {
-      return pathname === href;
-    }
+    if (href === "#more") return showMoreSheet;
+    if (href === "/inicio") return pathname === href;
+    if (href === "/turnos") return pathname === href;
     return pathname?.startsWith(href);
   };
 
-  // Función para limpiar el hash al navegar
-  const handleNavigation = () => {
+  const handleNavigation = (href: string) => {
     if (typeof window !== 'undefined' && window.location.hash) {
       window.location.hash = '';
+    }
+    if (href === "#more") {
+      setShowMoreSheet(!showMoreSheet);
+    } else {
+      setShowMoreSheet(false);
     }
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 md:hidden z-50">
-      <div className="flex justify-around items-center h-16 bottom-nav">
-        {navItems.map((item) => {
-          const active = isActive(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={handleNavigation}
-              className={`flex flex-col items-center gap-1 w-full py-2 bottom-nav-item ${
-                active 
-                  ? "text-orange-500 active" 
-                  : "text-gray-400"
-              }`}
-            >
-              <div className={active ? "text-orange-500" : "text-gray-400"}>
-                {item.icon}
+    <>
+      {/* "Más" bottom sheet overlay */}
+      {showMoreSheet && (
+        <div
+          className="fixed inset-0 z-40 md:hidden"
+          onClick={() => setShowMoreSheet(false)}
+          style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
+        >
+          <div
+            className="absolute bottom-16 left-0 right-0 animate-slideUp"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'rgba(17,17,17,0.98)',
+              borderTop: '1px solid var(--qoder-dark-border-primary)',
+              borderRadius: '16px 16px 0 0',
+              padding: '12px 8px 8px',
+            }}
+          >
+            {/* Handle bar */}
+            <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.2)', margin: '0 auto 12px' }} />
+
+            {[
+              { href: "/caja", label: "Caja" },
+              { href: "/clientes", label: "Clientes" },
+              { href: "/estadisticas", label: "Estadísticas" },
+              { href: "/mi-barberia", label: "Mi Barbería" },
+              { href: "/perfil", label: "Perfil" },
+            ].map(item => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setShowMoreSheet(false)}
+                className="block"
+                style={{
+                  padding: '14px 20px',
+                  color: pathname?.startsWith(item.href) ? '#C5A059' : 'rgba(255,255,255,0.8)',
+                  fontSize: '0.9375rem',
+                  fontWeight: pathname?.startsWith(item.href) ? 600 : 400,
+                  borderRadius: '10px',
+                  background: pathname?.startsWith(item.href) ? 'rgba(255,119,0,0.08)' : 'transparent',
+                  textDecoration: 'none',
+                  fontFamily: "'Inter', 'Roboto', -apple-system, sans-serif",
+                }}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Bottom navigation bar */}
+      <nav className="fixed bottom-0 left-0 right-0 md:hidden z-50">
+        <div
+          className="flex justify-around items-center bottom-nav"
+          style={{ height: 'var(--bottomnav-height, 64px)' }}
+        >
+          {navItems.map((item) => {
+            const active = isActive(item.href);
+            const isMoreButton = item.href === "#more";
+
+            const content = (
+              <div
+                className={`flex flex-col items-center gap-0.5 w-full py-1.5 bottom-nav-item ${active ? "active" : ""
+                  }`}
+                style={{
+                  color: active ? '#C5A059' : 'rgba(255,255,255,0.4)',
+                  position: 'relative',
+                }}
+              >
+                {/* Active indicator bar */}
+                {active && (
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: '25%',
+                    right: '25%',
+                    height: 2,
+                    background: '#C5A059',
+                    borderRadius: '0 0 2px 2px',
+                  }} />
+                )}
+                <div style={{ color: active ? '#C5A059' : 'rgba(255,255,255,0.4)' }}>
+                  {item.icon}
+                </div>
+                <span style={{
+                  fontSize: '0.625rem',
+                  fontWeight: active ? 600 : 500,
+                  fontFamily: "'Inter', 'Roboto', -apple-system, sans-serif",
+                  letterSpacing: '0.01em',
+                }}>
+                  {item.label}
+                </span>
               </div>
-              <span className="text-xs font-medium">{item.label}</span>
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
+            );
+
+            if (isMoreButton) {
+              return (
+                <button
+                  key={item.href}
+                  onClick={() => handleNavigation(item.href)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', padding: 0, textTransform: 'none', letterSpacing: 'normal' }}
+                >
+                  {content}
+                </button>
+              );
+            }
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => handleNavigation(item.href)}
+                style={{ textDecoration: 'none', width: '100%' }}
+              >
+                {content}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+    </>
   );
 }

@@ -112,12 +112,13 @@ export default function HorariosStep({ data, updateData, onNext, onBack }: Horar
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             className={`
-                                relative flex flex-col items-center justify-center w-14 h-20 rounded-2xl border transition-all duration-300 group
+                                relative flex flex-col items-center justify-center w-14 h-20 rounded-2xl border transition-all duration-300 group bg-none uppercase
                                 ${isSelected
                                     ? 'bg-gradient-to-br from-violet-600 to-indigo-600 border-white/20 shadow-lg shadow-violet-500/30 scale-105'
                                     : 'bg-slate-900/50 border-slate-700 hover:bg-slate-800'
                                 }
                             `}
+                            style={{ fontFamily: 'var(--font-rasputin), serif' }}
                         >
                             <span className={`text-lg font-bold ${isSelected ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'}`}>
                                 {day.short}
@@ -266,7 +267,8 @@ export default function HorariosStep({ data, updateData, onNext, onBack }: Horar
                             onClick={copyToAllWeekdays}
                             whileHover={{ scale: 1.05, backgroundColor: "rgba(139, 92, 246, 0.1)" }}
                             whileTap={{ scale: 0.95 }}
-                            className="text-xs text-violet-400 hover:text-violet-300 flex items-center gap-2 px-4 py-2 rounded-lg transition-colors border border-transparent hover:border-violet-500/30"
+                            className="text-xs text-violet-400 hover:text-violet-300 flex items-center gap-2 px-4 py-2 rounded-none transition-colors border border-transparent hover:border-violet-500/30 bg-none uppercase tracking-widest"
+                            style={{ fontFamily: 'var(--font-rasputin), serif' }}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
                                 <path d="M7 3.5A1.5 1.5 0 018.5 2h3.879a1.5 1.5 0 011.06.44l3.122 3.12A1.5 1.5 0 0117 6.622V12.5a1.5 1.5 0 01-1.5 1.5h-1v-3.379a3 3 0 00-.879-2.121L10.5 5.379A3 3 0 008.379 4.5H7v-1z" />
@@ -281,7 +283,8 @@ export default function HorariosStep({ data, updateData, onNext, onBack }: Horar
             <div className="flex justify-between pt-4">
                 <button
                     onClick={onBack}
-                    className="px-6 py-2 rounded-lg text-slate-500 hover:text-white transition-colors"
+                    className="px-6 py-2 rounded-none text-slate-500 hover:text-white transition-colors bg-none uppercase tracking-widest text-xs"
+                    style={{ fontFamily: 'var(--font-rasputin), serif' }}
                 >
                     Atrás
                 </button>
@@ -289,7 +292,7 @@ export default function HorariosStep({ data, updateData, onNext, onBack }: Horar
                     onClick={onNext}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-8 py-3 rounded-xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-lg shadow-violet-500/20"
+                    className="px-8 py-3 rounded-xl font-bold !bg-gradient-to-r !from-violet-600 !to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-lg shadow-violet-500/20"
                 >
                     Siguiente
                 </motion.button>

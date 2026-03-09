@@ -11,8 +11,8 @@ interface SwipeTooltipProps {
   disabled?: boolean;
 }
 
-export function SwipeTooltip({ 
-  children, 
+export function SwipeTooltip({
+  children,
   content,
   position = 'top',
   threshold = 50,
@@ -30,7 +30,7 @@ export function SwipeTooltip({
   const handleTouchStart = (e: React.TouchEvent) => {
     // Solo activar en dispositivos móviles y si no está deshabilitado
     if (!isMobile || disabled) return;
-    
+
     setStartX(e.touches[0].clientX);
     setCurrentX(e.touches[0].clientX);
     setIsSwiping(true);
@@ -40,19 +40,19 @@ export function SwipeTooltip({
   const handleTouchMove = (e: React.TouchEvent) => {
     // Solo activar en dispositivos móviles y si no está deshabilitado
     if (!isMobile || disabled || !isSwiping) return;
-    
+
     const currentPosX = e.touches[0].clientX;
     setCurrentX(currentPosX);
-    
+
     const distance = currentPosX - startX;
-    
+
     // Verificar la dirección permitida según la posición
-    const isValidDirection = 
+    const isValidDirection =
       (position === 'left' && distance < 0) ||
       (position === 'right' && distance > 0) ||
       (position === 'top' && distance < 0) ||
       (position === 'bottom' && distance > 0);
-    
+
     if (isValidDirection) {
       e.preventDefault();
       setSwipeDistance(Math.abs(distance));
@@ -62,21 +62,21 @@ export function SwipeTooltip({
   const handleTouchEnd = (e: React.TouchEvent) => {
     // Solo activar en dispositivos móviles y si no está deshabilitado
     if (!isMobile || disabled || !isSwiping) return;
-    
+
     const distance = currentX - startX;
-    const isValidDirection = 
+    const isValidDirection =
       (position === 'left' && distance < 0) ||
       (position === 'right' && distance > 0) ||
       (position === 'top' && distance < 0) ||
       (position === 'bottom' && distance > 0);
-    
+
     if (Math.abs(distance) > threshold && isValidDirection) {
       // Mostrar el tooltip
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
         let x = 0;
         let y = 0;
-        
+
         switch (position) {
           case 'top':
             x = rect.left + rect.width / 2;
@@ -95,17 +95,17 @@ export function SwipeTooltip({
             y = rect.top + rect.height / 2;
             break;
         }
-        
+
         setTooltipPosition({ x, y });
         setShowTooltip(true);
-        
+
         // Ocultar el tooltip después de 3 segundos
         setTimeout(() => {
           setShowTooltip(false);
         }, 3000);
       }
     }
-    
+
     setIsSwiping(false);
     setSwipeDistance(0);
   };
@@ -154,7 +154,7 @@ export function SwipeTooltip({
   }, [disabled]);
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className="relative w-full h-full inline-block"
       onTouchStart={handleTouchStart}
@@ -162,38 +162,38 @@ export function SwipeTooltip({
       onTouchEnd={handleTouchEnd}
     >
       {children}
-      
+
       {/* Tooltip */}
       {showTooltip && (
-        <div 
-          className="fixed z-50 bg-gray-900 text-white text-sm rounded-lg px-3 py-2 shadow-lg animate-fadeIn"
+        <div
+          className="fixed z-50 bg-gray-900 text-white text-sm rounded-none px-3 py-2 shadow-lg animate-fadeIn"
           style={{
             left: `${tooltipPosition.x}px`,
             top: `${tooltipPosition.y}px`,
-            transform: 
+            transform:
               position === 'top' ? 'translate(-50%, -100%)' :
-              position === 'bottom' ? 'translate(-50%, 0)' :
-              position === 'left' ? 'translate(-100%, -50%)' :
-              'translate(0, -50%)',
+                position === 'bottom' ? 'translate(-50%, 0)' :
+                  position === 'left' ? 'translate(-100%, -50%)' :
+                    'translate(0, -50%)',
             minWidth: '120px',
             maxWidth: '200px'
           }}
         >
           {content}
-          <div 
+          <div
             className="absolute w-3 h-3 bg-gray-900 rotate-45"
             style={{
-              left: 
+              left:
                 position === 'top' || position === 'bottom' ? '50%' :
-                position === 'left' ? '-6px' : 'auto',
+                  position === 'left' ? '-6px' : 'auto',
               right: position === 'right' ? '-6px' : 'auto',
-              top: 
+              top:
                 position === 'left' || position === 'right' ? '50%' :
-                position === 'top' ? '-6px' : 'auto',
+                  position === 'top' ? '-6px' : 'auto',
               bottom: position === 'bottom' ? '-6px' : 'auto',
-              transform: 
+              transform:
                 position === 'top' || position === 'bottom' ? 'translate(-50%, 0)' :
-                'translate(0, -50%)'
+                  'translate(0, -50%)'
             }}
           />
         </div>

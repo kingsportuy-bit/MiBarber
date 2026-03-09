@@ -55,8 +55,8 @@ export default function BarberiaStep({ data, updateData, onNext }: BarberiaStepP
                     className={`
                         px-8 py-3 rounded-xl font-bold transition-all duration-300 shadow-lg
                         ${isValid
-                            ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-violet-500/20 hover:shadow-violet-500/40'
-                            : 'bg-slate-800 text-slate-600 cursor-not-allowed'
+                            ? '!bg-gradient-to-r !from-violet-600 !to-indigo-600 !text-white shadow-violet-500/20 hover:shadow-violet-500/40'
+                            : '!bg-none !bg-slate-800 !text-slate-600 cursor-not-allowed'
                         }
                     `}
                 >

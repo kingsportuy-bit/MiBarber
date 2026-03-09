@@ -243,16 +243,17 @@ export default function OnboardingWizard() {
     };
 
     return (
-        <div className="min-h-screen bg-[#030712] text-slate-100 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+        <div className="min-h-screen bg-[#030712] text-slate-100 flex flex-col items-center justify-start px-4 py-8 md:py-12 relative overflow-hidden">
 
             {/* Background Ambient Glows */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-violet-900/20 rounded-full blur-[120px] pointer-events-none" />
             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-cyan-900/10 rounded-full blur-[120px] pointer-events-none" />
 
-            <div className="w-full max-w-2xl relative z-10">
+            <div className="w-full max-w-2xl relative z-10 flex-1 flex flex-col">
+
                 {/* Progress Bar */}
                 {step > 0 && (
-                    <div className="mb-8">
+                    <div className="mb-6">
                         <div className="flex justify-between text-sm text-slate-400 mb-2 font-medium">
                             <span>Paso {step} de {totalSteps}</span>
                             <span>{Math.round((step / totalSteps) * 100)}% completado</span>
@@ -268,48 +269,42 @@ export default function OnboardingWizard() {
                     </div>
                 )}
 
-                <div className={`
-                    relative backdrop-blur-xl bg-[#0f172a]/60 border border-white/10 shadow-2xl shadow-black/50 overflow-hidden transition-all duration-700
-                    ${step === 0 ? 'rounded-3xl' : 'rounded-2xl'}
-                `}>
-                    {/* Header - Hide on Welcome Screen */}
-                    {step > 0 && (
-                        <div className="p-4 md:p-6 border-b border-white/5 bg-white/5">
-                            <div className="flex items-center justify-between mb-4">
-                                <AnimatePresence mode="wait">
-                                    <motion.h1
-                                        key={getStepTitle()}
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: 10 }}
-                                        transition={{ duration: 0.3 }}
-                                        className="text-2xl font-bold text-white tracking-wide"
-                                    >
-                                        {getStepTitle()}
-                                    </motion.h1>
-                                </AnimatePresence>
-                                <span className="text-sm text-slate-500 font-mono">
-                                    {Math.min(step, totalSteps - 1)} / {totalSteps - 1}
-                                </span>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className={step === 0 ? "" : "p-4 md:p-6"}>
+                {/* Step Title */}
+                {step > 0 && (
+                    <div className="flex items-center justify-between mb-6">
                         <AnimatePresence mode="wait">
-                            <motion.div
-                                key={step}
-                                initial="initial"
-                                animate="animate"
-                                exit="exit"
-                                variants={pageVariants}
-                                transition={pageTransition}
-                                className="w-full"
+                            <motion.h1
+                                key={getStepTitle()}
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                transition={{ duration: 0.3 }}
+                                className="text-2xl font-bold text-white tracking-wide"
                             >
-                                {getCurrentComponent()}
-                            </motion.div>
+                                {getStepTitle()}
+                            </motion.h1>
                         </AnimatePresence>
+                        <span className="text-sm text-slate-500 font-mono">
+                            {Math.min(step, totalSteps - 1)} / {totalSteps - 1}
+                        </span>
                     </div>
+                )}
+
+                {/* Step Content */}
+                <div className="flex-1">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={step}
+                            initial="initial"
+                            animate="animate"
+                            exit="exit"
+                            variants={pageVariants}
+                            transition={pageTransition}
+                            className="w-full"
+                        >
+                            {getCurrentComponent()}
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
             </div>
         </div>

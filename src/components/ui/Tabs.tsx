@@ -18,31 +18,36 @@ interface TabsProps {
  * @param defaultTab - ID de la pestaña activa por defecto
  * @param onValueChange - Callback cuando cambia la pestaña activa
  */
-export function Tabs({ 
-  tabs, 
-  defaultTab, 
+export function Tabs({
+  tabs,
+  defaultTab,
   onValueChange,
   className = ''
 }: TabsProps) {
   const [activeTab, setActiveTab] = useState<string>(defaultTab || tabs[0]?.id || '');
-  
+
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
     onValueChange?.(tabId);
   };
-  
+
   const classes = `v2-flex v2-flex-wrap gap-4 border-b border-[var(--border-primary)] ${className}`.trim();
-  
+
   return (
     <div className={classes}>
       {tabs.map((tab) => (
         <div
           key={tab.id}
-          className={`v2-pb-sm v2-transition v2-tabs-selector ${
-            activeTab === tab.id 
-              ? 'active' 
+          className={`v2-pb-sm v2-transition v2-tabs-selector ${activeTab === tab.id
+              ? 'active'
               : ''
-          }`}
+            }`}
+          style={{
+            fontFamily: 'var(--font-rasputin), serif',
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em',
+            fontSize: '0.8125rem'
+          }}
           onClick={() => handleTabChange(tab.id)}
         >
           {tab.label}
@@ -59,16 +64,16 @@ interface TabContentProps {
   className?: string;
 }
 
-export function TabContent({ 
-  value, 
-  activeTab, 
+export function TabContent({
+  value,
+  activeTab,
   children,
   className = ''
 }: TabContentProps) {
   if (value !== activeTab) return null;
-  
+
   const classes = className.trim();
-  
+
   return (
     <div className={classes}>
       {children}

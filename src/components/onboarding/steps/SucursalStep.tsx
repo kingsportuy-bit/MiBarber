@@ -48,7 +48,7 @@ export default function SucursalStep({ data, updateData, onNext, onBack }: Sucur
 
     return (
         <motion.div
-            className="space-y-8 h-[60vh] overflow-y-auto pr-2 custom-scrollbar"
+            className="space-y-8"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4 }}
@@ -158,7 +158,8 @@ export default function SucursalStep({ data, updateData, onNext, onBack }: Sucur
             <div className="flex justify-between pt-4">
                 <button
                     onClick={onBack}
-                    className="px-6 py-2 rounded-lg text-slate-400 hover:text-white transition-colors"
+                    className="px-6 py-2 rounded-none text-slate-400 hover:text-white transition-colors bg-none uppercase tracking-widest text-xs"
+                    style={{ fontFamily: 'var(--font-rasputin), serif' }}
                 >
                     Atrás
                 </button>
@@ -168,12 +169,13 @@ export default function SucursalStep({ data, updateData, onNext, onBack }: Sucur
                     whileHover={isValid ? { scale: 1.05 } : {}}
                     whileTap={isValid ? { scale: 0.95 } : {}}
                     className={`
-                        px-8 py-2.5 rounded-xl font-bold transition-all duration-300 shadow-lg
+                        px-8 py-3 rounded-none uppercase tracking-widest text-xs font-bold transition-all duration-300 shadow-lg
                         ${isValid
-                            ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-violet-500/20 hover:shadow-violet-500/40'
-                            : 'bg-slate-800 text-slate-600 cursor-not-allowed'
+                            ? '!bg-gradient-to-r !from-violet-600 !to-indigo-600 !text-white shadow-violet-500/20 hover:shadow-violet-500/40'
+                            : '!bg-none !bg-slate-800 !text-slate-600 cursor-not-allowed'
                         }
                     `}
+                    style={{ fontFamily: 'var(--font-rasputin), serif' }}
                 >
                     Siguiente
                 </motion.button>

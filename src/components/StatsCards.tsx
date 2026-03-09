@@ -3,7 +3,7 @@
 import { formatCurrency } from "@/utils/formatters";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
-const COLORS = ["#60a5fa", "#34d399", "#fbbf24", "#f87171", "#f472b6", "#a78bfa", "#22d3ee"]; 
+const COLORS = ["#60a5fa", "#34d399", "#fbbf24", "#f87171", "#f472b6", "#a78bfa", "#22d3ee"];
 
 export function StatsCards({
   totalServicios,
@@ -30,7 +30,7 @@ export function StatsCards({
         <Card title="Inactivos (90d)" value={String(inactivos)} />
       </div>
 
-      <div className="rounded-lg border border-white/10 p-3">
+      <div className="rounded-none border border-white/10 p-3">
         <div className="mb-2 text-sm opacity-80">Desglose por tipo de servicio</div>
         <div className="h-64">
           <ResponsiveContainer>

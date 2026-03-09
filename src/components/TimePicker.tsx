@@ -36,7 +36,7 @@ export function TimePicker({
 
   // Generate hours (0-23)
   const hours = Array.from({ length: 24 }, (_, i) => i);
-  
+
   // Generate minutes (0-59, step 5)
   const minutes = Array.from({ length: 12 }, (_, i) => i * 5);
 
@@ -47,7 +47,7 @@ export function TimePicker({
         type="time"
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
-        className={`w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${className}`}
+        className={`w-full p-3 border border-gray-300 rounded-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${className}`}
       />
     );
   }
@@ -57,7 +57,7 @@ export function TimePicker({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center justify-between w-full p-3 text-left bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${className}`}
+        className={`flex items-center justify-between w-full p-3 text-left bg-white border border-gray-300 rounded-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${className}`}
       >
         <span>{value}</span>
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
@@ -66,20 +66,20 @@ export function TimePicker({
       </button>
 
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end sm:items-center justify-center p-4"
           onTouchStart={handleTouchOutside}
         >
-          <div 
+          <div
             ref={modalRef}
-            className="bg-white rounded-t-xl sm:rounded-xl w-full max-w-md max-h-[80vh] overflow-hidden flex flex-col"
+            className="bg-white rounded-none w-full max-w-md max-h-[80vh] overflow-hidden flex flex-col"
             onTouchStart={(e) => e.stopPropagation()}
           >
             {/* Header */}
             <div className="p-4 border-b">
               <h3 className="text-lg font-semibold text-center">Seleccionar hora</h3>
             </div>
-            
+
             {/* Time selectors */}
             <div className="flex flex-col sm:flex-row flex-grow overflow-hidden">
               {/* Hours */}
@@ -94,11 +94,10 @@ export function TimePicker({
                       <button
                         key={hour}
                         onClick={() => setSelectedHour(hour)}
-                        className={`text-sm p-3 text-center transition-colors ${
-                          isSelected
+                        className={`text-sm p-3 text-center transition-colors ${isSelected
                             ? 'bg-blue-600 text-white'
                             : 'hover:bg-gray-100'
-                        }`}
+                          }`}
                       >
                         {hour.toString().padStart(2, '0')}
                       </button>
@@ -106,7 +105,7 @@ export function TimePicker({
                   })}
                 </div>
               </div>
-              
+
               {/* Minutes */}
               <div className="flex-1 overflow-auto">
                 <div className="p-2 text-center text-xs font-medium text-gray-500 bg-gray-50">
@@ -119,11 +118,10 @@ export function TimePicker({
                       <button
                         key={minute}
                         onClick={() => setSelectedMinute(minute)}
-                        className={`text-sm p-3 text-center transition-colors ${
-                          isSelected
+                        className={`text-sm p-3 text-center transition-colors ${isSelected
                             ? 'bg-blue-600 text-white'
                             : 'hover:bg-gray-100'
-                        }`}
+                          }`}
                       >
                         {minute.toString().padStart(2, '0')}
                       </button>
@@ -132,7 +130,7 @@ export function TimePicker({
                 </div>
               </div>
             </div>
-            
+
             {/* Footer */}
             <div className="p-4 border-t flex justify-end space-x-2">
               <button
@@ -143,7 +141,7 @@ export function TimePicker({
               </button>
               <button
                 onClick={handleTimeChange}
-                className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700"
+                className="px-4 py-2 bg-blue-600 text-white font-medium rounded-none hover:bg-blue-700"
               >
                 Confirmar
               </button>

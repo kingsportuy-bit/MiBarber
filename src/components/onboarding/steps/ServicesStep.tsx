@@ -42,7 +42,7 @@ export default function ServicesStep({ data, updateData, onNext, onBack }: Servi
 
     return (
         <motion.div
-            className="space-y-6 h-[calc(100vh-240px)] sm:h-[60vh] overflow-y-auto pr-2 custom-scrollbar"
+            className="space-y-6"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4 }}
@@ -88,7 +88,7 @@ export default function ServicesStep({ data, updateData, onNext, onBack }: Servi
                                 onClick={() => removeService(idx)}
                                 whileHover={{ scale: 1.1, backgroundColor: "rgba(244, 63, 94, 0.2)", color: "#f43f5e" }}
                                 whileTap={{ scale: 0.9 }}
-                                className="absolute top-4 right-4 sm:static sm:p-2 text-slate-600 rounded-full transition-colors"
+                                className="absolute top-4 right-4 sm:static sm:p-2 text-slate-600 rounded-full transition-colors bg-none"
                             >
                                 <TrashIcon className="w-5 h-5" />
                             </motion.button>
@@ -120,7 +120,7 @@ export default function ServicesStep({ data, updateData, onNext, onBack }: Servi
                     >
                         <div className="flex items-center justify-between border-b border-white/5 pb-4">
                             <h3 className="text-base font-bold text-white uppercase tracking-wider">Nuevo Servicio</h3>
-                            <button onClick={() => setIsAdding(false)} className="text-slate-500 hover:text-white text-sm flex items-center gap-1 transition-colors">
+                            <button onClick={() => setIsAdding(false)} className="text-slate-500 hover:text-white text-sm flex items-center gap-1 transition-colors bg-none">
                                 <XMarkIcon className="w-4 h-4" /> Cancelar
                             </button>
                         </div>
@@ -134,7 +134,7 @@ export default function ServicesStep({ data, updateData, onNext, onBack }: Servi
                                     autoFocus
                                     onChange={(e) => setNewService({ ...newService, nombre: e.target.value })}
                                     whileFocus={inputFocus}
-                                    className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3 text-white placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-all"
+                                    className="w-full bg-slate-900/50 border border-slate-700 rounded-none p-3 text-white placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-all"
                                 />
                             </div>
 
@@ -149,7 +149,7 @@ export default function ServicesStep({ data, updateData, onNext, onBack }: Servi
                                             value={newService.precio}
                                             onChange={(e) => setNewService({ ...newService, precio: e.target.value })}
                                             whileFocus={inputFocus}
-                                            className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3 pl-7 text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition-all"
+                                            className="w-full bg-slate-900/50 border border-slate-700 rounded-none p-3 pl-7 text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition-all"
                                         />
                                     </div>
                                 </div>
@@ -162,7 +162,7 @@ export default function ServicesStep({ data, updateData, onNext, onBack }: Servi
                                             value={newService.duracion}
                                             onChange={(e) => setNewService({ ...newService, duracion: e.target.value })}
                                             whileFocus={inputFocus}
-                                            className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition-all"
+                                            className="w-full bg-slate-900/50 border border-slate-700 rounded-none p-3 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition-all"
                                         />
                                         <span className="absolute right-3 top-3 text-slate-500 text-xs font-medium">min</span>
                                     </div>
@@ -176,7 +176,7 @@ export default function ServicesStep({ data, updateData, onNext, onBack }: Servi
                                     value={newService.descripcion}
                                     onChange={(e) => setNewService({ ...newService, descripcion: e.target.value })}
                                     whileFocus={inputFocus}
-                                    className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 resize-none transition-all"
+                                    className="w-full bg-slate-900/50 border border-slate-700 rounded-none p-3 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 resize-none transition-all"
                                     rows={3}
                                 />
                             </div>
@@ -187,31 +187,28 @@ export default function ServicesStep({ data, updateData, onNext, onBack }: Servi
                             disabled={!newService.nombre || !newService.precio || !newService.duracion}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            className="w-full py-3 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-xl text-white font-bold shadow-lg shadow-violet-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            className="w-full py-3 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-none text-white font-bold shadow-lg shadow-violet-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         >
                             Guardar Servicio
                         </motion.button>
                     </motion.div>
                 ) : (
-                    <motion.button
-                        key="add-btn"
+                    <button
                         onClick={() => setIsAdding(true)}
-                        whileHover={{ scale: 1.02, backgroundColor: "rgba(30, 41, 59, 0.8)", borderColor: "rgba(139, 92, 246, 0.4)" }}
-                        whileTap={{ scale: 0.98 }}
-                        className="w-full py-4 border border-dashed border-slate-700 bg-slate-900/20 rounded-2xl text-slate-400 flex flex-col items-center justify-center gap-3 group transition-all"
+                        className="w-full py-4 border-2 border-dashed border-slate-700 rounded-none text-slate-400 hover:text-white hover:border-violet-500 hover:bg-violet-500/5 transition-all flex items-center justify-center gap-2 group uppercase tracking-widest text-xs"
+                        style={{ fontFamily: 'var(--font-rasputin), serif' }}
                     >
-                        <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center group-hover:bg-violet-600 transition-colors">
-                            <PlusIcon className="w-6 h-6 text-slate-400 group-hover:text-white" />
-                        </div>
-                        <span className="font-medium group-hover:text-white transition-colors">Agregar Nuevo Servicio</span>
-                    </motion.button>
+                        <PlusIcon className="w-6 h-6 text-slate-400 group-hover:text-white" />
+                        Agregar Nuevo Servicio
+                    </button>
                 )}
             </AnimatePresence>
 
             <div className="flex justify-between pt-4 pb-2">
                 <button
                     onClick={onBack}
-                    className="px-6 py-2 rounded-lg text-slate-500 hover:text-white transition-colors"
+                    className="px-6 py-2 rounded-none text-slate-500 hover:text-white transition-colors bg-none uppercase tracking-widest text-xs"
+                    style={{ fontFamily: 'var(--font-rasputin), serif' }}
                 >
                     Atrás
                 </button>
@@ -221,12 +218,13 @@ export default function ServicesStep({ data, updateData, onNext, onBack }: Servi
                     whileHover={data.servicios.length > 0 ? { scale: 1.05 } : {}}
                     whileTap={data.servicios.length > 0 ? { scale: 0.95 } : {}}
                     className={`
-                        px-8 py-3 rounded-xl font-bold transition-all duration-300 shadow-lg
+                        px-6 py-2 rounded-none font-medium transition-all duration-300 uppercase tracking-widest text-xs
                         ${data.servicios.length > 0
-                            ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-violet-500/30 hover:shadow-violet-500/50'
-                            : 'bg-slate-800 text-slate-600 cursor-not-allowed'
+                            ? '!bg-gradient-to-r !from-violet-600 !to-indigo-600 !text-white shadow-lg shadow-violet-500/20 hover:shadow-violet-500/50'
+                            : '!bg-none !bg-slate-800 !text-slate-600 cursor-not-allowed'
                         }
                     `}
+                    style={{ fontFamily: 'var(--font-rasputin), serif' }}
                 >
                     Continuar
                 </motion.button>

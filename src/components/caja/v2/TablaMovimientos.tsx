@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import type { MovimientoCaja } from '@/types/caja';
-import { 
-  formatearMonto, 
-  formatearFecha, 
-  formatearHora, 
+import {
+  formatearMonto,
+  formatearFecha,
+  formatearHora,
   getColorTipo,
   puedeEditarMovimiento,
   puedeEliminarMovimiento,
@@ -54,30 +54,30 @@ export function TablaMovimientos({
 
   return (
     <div className={`p-6 ${className}`}>
-      {/* Buscador */}
-      <div className="mb-4">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Buscar por concepto, factura o barbero..."
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-            className="w-full px-3 py-2 pr-10 border border-[var(--border-primary)] rounded-md bg-[var(--bg-input)] text-[var(--text-primary)] focus:outline-none"
-          />
-          {busqueda && (
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-              <button
-                className="boton-simple"
-                onClick={() => setBusqueda('')}
-                title="Limpiar búsqueda"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          )}
-        </div>
+      <div className="relative flex-1">
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-qoder-dark-text-muted" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+          type="text"
+          placeholder="Buscar por concepto, factura o barbero..."
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          className="w-full pl-9 pr-4 py-2 bg-[var(--qoder-dark-bg-form)] border border-[#1a1a1a] rounded-none text-[#F5F0EB] placeholder:text-[#8A8A8A] focus:outline-none focus:border-[var(--color-primary)] transition-colors"
+        />
+        {busqueda && (
+          <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+            <button
+              className="boton-simple"
+              onClick={() => setBusqueda('')}
+              title="Limpiar búsqueda"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Tabla */}
@@ -108,13 +108,13 @@ export function TablaMovimientos({
                 const puedeEliminar = puedeEliminarMovimiento(movimiento, userRole, userId);
 
                 // Crear una key única combinando idRegistro con el índice
-                const uniqueKey = movimiento.idRegistro ? 
-                  `${movimiento.idRegistro}-${index}` : 
+                const uniqueKey = movimiento.idRegistro ?
+                  `${movimiento.idRegistro}-${index}` :
                   `movimiento-${index}`;
 
                 return (
-                  <tr 
-                    key={uniqueKey} 
+                  <tr
+                    key={uniqueKey}
                     className="border-b border-[var(--border-primary)] hover:bg-[var(--bg-hover)] transition-colors"
                   >
                     <td className="p-3 text-sm text-[var(--text-primary)]">{formatearFecha(movimiento.fecha)}</td>
@@ -130,9 +130,8 @@ export function TablaMovimientos({
                       </div>
                     </td>
                     <td className="p-3 text-sm text-[var(--text-primary)]">{movimiento.nombreBarberoRegistro || 'Barbero desconocido'}</td>
-                    <td className={`p-3 text-right font-bold ${
-                      movimiento.tipo === 'ingreso' ? 'text-green-500' : 'text-red-500'
-                    }`}>
+                    <td className={`p-3 text-right font-bold ${movimiento.tipo === 'ingreso' ? 'text-green-500' : 'text-red-500'
+                      }`}>
                       {movimiento.tipo === 'ingreso' ? '+' : '-'}
                       {formatearMonto(movimiento.monto)}
                     </td>
@@ -144,7 +143,7 @@ export function TablaMovimientos({
                     </td>
                     <td className="p-3">
                       <div className="flex space-x-2">
-                        <button 
+                        <button
                           className="text-blue-500 hover:text-blue-300 bg-transparent !bg-none border-none p-1"
                           onClick={() => onEditar(movimiento)}
                           disabled={!puedeEditar}
@@ -165,8 +164,8 @@ export function TablaMovimientos({
                             />
                           </svg>
                         </button>
-                        
-                        <button 
+
+                        <button
                           className="text-red-500 hover:text-red-300 bg-transparent !bg-none border-none p-1"
                           onClick={() => onEliminar(movimiento.idRegistro)}
                           disabled={!puedeEliminar}
@@ -207,7 +206,7 @@ export function TablaMovimientos({
             <span className="text-[var(--text-muted)]">Total: </span>
             <span className="font-bold text-[var(--text-primary)]">
               {formatearMonto(
-                movimientos.reduce((sum, m) => 
+                movimientos.reduce((sum, m) =>
                   sum + (m.tipo === 'ingreso' ? m.monto : -m.monto), 0
                 )
               )}

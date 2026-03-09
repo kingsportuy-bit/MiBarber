@@ -149,15 +149,15 @@ export function MobileAgenda() {
     const citasPorFecha: { [key: string]: Appointment[] } = {};
     if (citasMesData) {
       console.log('📋 Citas del mes antes de filtrar:', citasMesData);
-        
+
       // Aplicar filtro adicional por barbero si es necesario
       let citasFiltradas = citasMesData.filter((cita: Appointment) => cita.estado !== "cancelado");
-        
+
       // Si hay un barbero específico seleccionado, filtrar por ese barbero
       if (isAdmin && filters.barberoId) {
         citasFiltradas = citasFiltradas.filter((cita: Appointment) => cita.id_barbero === filters.barberoId);
       }
-        
+
       console.log('✅ Citas del mes después de filtrar:', citasFiltradas);
       citasFiltradas.forEach((cita: Appointment) => {
         // Asegurarse de que la fecha esté en el formato correcto (YYYY-MM-DD)
@@ -291,9 +291,9 @@ export function MobileAgenda() {
                 >
                   <div
                     onClick={() => handleDaySelect(day)}
-                    className={`flex flex-col items-center justify-center text-sm w-full h-full rounded transition-all duration-200 cursor-pointer ${day.isToday ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white' :
+                    className={`flex flex-col items-center justify-center text-sm w-full h-full rounded transition-all duration-200 cursor-pointer ${day.isToday ? 'bg-[#C5A059] text-black font-bold' :
                       day.isSelected && !day.isToday ? 'bg-gray-700' : 'bg-transparent'
-                      } hover:bg-orange-500 hover:bg-opacity-50 hover:text-white`}
+                      } hover:bg-[#D4B068] hover:text-black`}
                     style={{
                       opacity: day.isCurrentMonth ? 1 : 0.5,
                       border: '1px solid rgba(75, 85, 99, 0.2)' // Gris con 20% opacidad
@@ -302,7 +302,7 @@ export function MobileAgenda() {
                     <span className="font-semibold">{day.date.getDate()}</span>
                     {citaCount > 0 && (
                       <div className="mt-1 flex items-center justify-center">
-                        <span className="bg-orange-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                        <span className="bg-[#111] text-[#C5A059] border border-[#C5A059] text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
                           {citaCount}
                         </span>
                       </div>
@@ -313,13 +313,16 @@ export function MobileAgenda() {
             })}
           </div>
 
-          {/* Botón de Nueva Cita */}
-          <div className="mt-auto">
+          {/* Botón Flotante de Nueva Cita */}
+          <div className="fixed bottom-20 right-4 z-50 md:bottom-8 md:right-8">
             <button
               onClick={handleNewAppointment}
-              className="w-full bg-orange-500 text-white py-3 rounded-lg font-medium"
+              className="bg-[#C5A059] hover:bg-[#D4B068] text-black w-14 h-14 rounded-full flex items-center justify-center shadow-lg transform transition-transform hover:scale-105 active:scale-95"
+              title="Nuevo Turno"
             >
-              + Nuevo Turno
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
             </button>
           </div>
         </div>
@@ -375,7 +378,7 @@ export function MobileAgenda() {
                       <div
                         key={appointment.id_cita}
                         onClick={() => handleAppointmentClick(appointment)}
-                        className="bg-qoder-dark-bg-form rounded-lg p-4 border border-qoder-dark-border cursor-pointer"
+                        className="bg-qoder-dark-bg-form rounded-none p-4 border border-qoder-dark-border cursor-pointer"
                       >
                         <div className="flex justify-between items-start">
                           <div>
@@ -411,13 +414,16 @@ export function MobileAgenda() {
             )}
           </div>
 
-          {/* Botón de Nueva Cita */}
-          <div className="mt-2 pb-4">
+          {/* Botón Flotante de Nueva Cita */}
+          <div className="fixed bottom-20 right-4 z-50 md:bottom-8 md:right-8">
             <button
               onClick={handleNewAppointment}
-              className="w-full bg-orange-500 text-white py-3 rounded-lg font-medium"
+              className="bg-[#C5A059] hover:bg-[#D4B068] text-black w-14 h-14 rounded-full flex items-center justify-center shadow-lg transform transition-transform hover:scale-105 active:scale-95"
+              title="Nuevo Turno"
             >
-              + Nuevo Turno
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
             </button>
           </div>
         </div>

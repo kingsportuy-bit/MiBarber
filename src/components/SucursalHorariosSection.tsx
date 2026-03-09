@@ -20,7 +20,7 @@ interface SucursalHorariosSectionProps {
   nombreSucursal: string;
 }
 
-export function SucursalHorariosSection({ 
+export function SucursalHorariosSection({
   idSucursal,
   nombreSucursal
 }: SucursalHorariosSectionProps) {
@@ -36,7 +36,7 @@ export function SucursalHorariosSection({
     if (!isLoading && horarios) {
       const horariosIniciales: Record<number, HorarioForm> = {};
       const almuerzoFlags: Record<number, boolean> = {};
-      
+
       // Días de la semana con sus IDs y nombres
       const diasSemana = [
         { id: 0, nombre: "Domingo" },
@@ -47,10 +47,10 @@ export function SucursalHorariosSection({
         { id: 5, nombre: "Viernes" },
         { id: 6, nombre: "Sábado" },
       ];
-      
+
       diasSemana.forEach(dia => {
         const horarioExistente = horarios.find(h => h.id_dia === dia.id);
-        
+
         if (horarioExistente) {
           // Usar el horario existente
           horariosIniciales[dia.id] = {
@@ -63,7 +63,7 @@ export function SucursalHorariosSection({
             activo: horarioExistente.activo
           };
           almuerzoFlags[dia.id] = !!(
-            horarioExistente.hora_inicio_almuerzo && 
+            horarioExistente.hora_inicio_almuerzo &&
             horarioExistente.hora_fin_almuerzo
           );
         } else {
@@ -79,7 +79,7 @@ export function SucursalHorariosSection({
           almuerzoFlags[dia.id] = false;
         }
       });
-      
+
       setHorariosForm(horariosIniciales);
       setTieneAlmuerzo(almuerzoFlags);
     }
@@ -105,7 +105,7 @@ export function SucursalHorariosSection({
       ...prev,
       [idDia]: nuevoEstado
     }));
-    
+
     // Si se desactiva el almuerzo, limpiar los valores
     if (!nuevoEstado) {
       setHorariosForm(prev => ({
@@ -132,49 +132,49 @@ export function SucursalHorariosSection({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setGuardando(true);
-    
+
     try {
       // Validar que las horas de cierre no sean antes que las de apertura
       for (const horario of Object.values(horariosForm)) {
         if (horario.activo) {
           const apertura = horario.hora_apertura;
           const cierre = horario.hora_cierre;
-          
+
           if (apertura && cierre) {
             // Convertir a objetos Date para comparar
             const [hApertura, mApertura] = apertura.split(':').map(Number);
             const [hCierre, mCierre] = cierre.split(':').map(Number);
-            
+
             if (hCierre < hApertura || (hCierre === hApertura && mCierre < mApertura)) {
               throw new Error(`La hora de cierre no puede ser antes de la hora de apertura para el día ${["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"][horario.id_dia]}`);
             }
           }
-          
+
           // Validar horas de almuerzo si están activas
           if (tieneAlmuerzo[horario.id_dia] && horario.hora_inicio_almuerzo && horario.hora_fin_almuerzo) {
             const inicioAlmuerzo = horario.hora_inicio_almuerzo;
             const finAlmuerzo = horario.hora_fin_almuerzo;
-            
+
             const [hInicio, mInicio] = inicioAlmuerzo.split(':').map(Number);
             const [hFin, mFin] = finAlmuerzo.split(':').map(Number);
-            
+
             if (hFin < hInicio || (hFin === hInicio && mFin < mInicio)) {
               throw new Error(`La hora de fin de almuerzo no puede ser antes de la hora de inicio para el día ${["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"][horario.id_dia]}`);
             }
           }
         }
       }
-      
+
       // Guardar todos los horarios
-      const promesas = Object.values(horariosForm).map(horario => 
+      const promesas = Object.values(horariosForm).map(horario =>
         upsertHorario({
           ...horario,
           id_sucursal: idSucursal
         } as Omit<HorarioSucursal, "created_at" | "updated_at">)
       );
-      
+
       await Promise.all(promesas);
-      
+
       toast.success("Horarios guardados correctamente");
       setIsEditing(false);
     } catch (error: any) {
@@ -207,7 +207,7 @@ export function SucursalHorariosSection({
     <div className="p-0">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center">
-          <div className="bg-qoder-dark-accent-primary/10 p-0 rounded-lg mr-3">
+          <div className="bg-qoder-dark-accent-primary/10 p-0 rounded-none mr-3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5 text-qoder-dark-accent-primary"
@@ -230,7 +230,8 @@ export function SucursalHorariosSection({
         {!isEditing ? (
           <button
             onClick={() => setIsEditing(true)}
-            className="px-3 py-1 bg-qoder-dark-bg-secondary hover:bg-qoder-dark-accent-primary/20 text-qoder-dark-text-primary rounded-lg transition-colors duration-200 text-sm flex items-center"
+            className="px-3 py-1 bg-qoder-dark-bg-secondary hover:bg-qoder-dark-accent-primary/20 text-qoder-dark-text-primary rounded-none uppercase text-xs tracking-widest transition-colors duration-200 flex items-center"
+            style={{ fontFamily: 'var(--font-rasputin), serif' }}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -252,13 +253,15 @@ export function SucursalHorariosSection({
           <div className="flex space-x-2">
             <button
               onClick={() => setIsEditing(false)}
-              className="px-3 py-1 bg-qoder-dark-bg-secondary hover:bg-gray-600 text-qoder-dark-text-primary rounded-lg transition-colors duration-200 text-sm"
+              className="px-3 py-1 bg-qoder-dark-bg-secondary hover:bg-gray-600 text-qoder-dark-text-primary rounded-none uppercase text-xs tracking-widest transition-colors duration-200"
+              style={{ fontFamily: 'var(--font-rasputin), serif' }}
             >
               Cancelar
             </button>
             <button
               onClick={handleSubmit}
-              className="px-3 py-1 bg-qoder-dark-accent-primary hover:bg-qoder-dark-accent-primary/80 text-white rounded-lg transition-colors duration-200 text-sm"
+              className="px-3 py-1 bg-qoder-dark-accent-primary hover:bg-qoder-dark-accent-primary/80 text-white rounded-none uppercase text-xs tracking-widest transition-colors duration-200"
+              style={{ fontFamily: 'var(--font-rasputin), serif' }}
               disabled={guardando}
             >
               {guardando ? "Guardando..." : "Guardar"}
@@ -287,14 +290,14 @@ export function SucursalHorariosSection({
               ))}
             </nav>
           </div>
-          
+
           <div className="p-0">
             {diasSemana.map((dia) => (
-              <div 
-                key={dia.id} 
+              <div
+                key={dia.id}
                 className={`${activeTab === dia.id ? 'block' : 'hidden'}`}
               >
-                <div className="bg-qoder-dark-bg-primary p-0 rounded-lg">
+                <div className="bg-qoder-dark-bg-primary p-0 rounded-none">
                   <div className="flex items-center justify-between mb-0">
                     <h4 className="text-md font-semibold text-qoder-dark-text-primary">{dia.nombre}</h4>
                     <label className="flex items-center text-qoder-dark-text-primary cursor-pointer">
@@ -307,7 +310,7 @@ export function SucursalHorariosSection({
                       <span className="text-xs">Activo</span>
                     </label>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-1">
                     <div>
                       <label className="block text-xs font-medium text-qoder-dark-text-secondary mb-1">
@@ -321,7 +324,7 @@ export function SucursalHorariosSection({
                         disabled={!horariosForm[dia.id]?.activo}
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-xs font-medium text-qoder-dark-text-secondary mb-1">
                         Cierre
@@ -334,7 +337,7 @@ export function SucursalHorariosSection({
                         disabled={!horariosForm[dia.id]?.activo}
                       />
                     </div>
-                    
+
                     <div className="col-span-2">
                       <div className="flex items-center justify-between mb-1">
                         <label className="flex items-center text-qoder-dark-text-primary cursor-pointer">
@@ -348,7 +351,7 @@ export function SucursalHorariosSection({
                           <span className="text-xs">Almuerzo</span>
                         </label>
                       </div>
-                      
+
                       {tieneAlmuerzo[dia.id] && horariosForm[dia.id]?.activo && (
                         <div className="grid grid-cols-2 gap-1 mt-1">
                           <div>
@@ -362,7 +365,7 @@ export function SucursalHorariosSection({
                               className="w-full bg-qoder-dark-bg-form border border-qoder-dark-border-primary rounded px-2 py-1 text-qoder-dark-text-primary text-xs"
                             />
                           </div>
-                          
+
                           <div>
                             <label className="block text-xs font-medium text-qoder-dark-text-secondary mb-1">
                               Fin
@@ -421,26 +424,26 @@ function SucursalHorarioDisplay({ idSucursal }: { idSucursal: string }) {
 
   // Agrupar días consecutivos con el mismo horario
   const agruparDiasPorHorario = () => {
-    const grupos: { 
-      dias: { id: number; nombre: string }[]; 
+    const grupos: {
+      dias: { id: number; nombre: string }[];
       horario: HorarioSucursal;
       almuerzo?: { inicio: string; fin: string } | null;
     }[] = [];
-    
-    let grupoActual: { 
-      dias: { id: number; nombre: string }[]; 
+
+    let grupoActual: {
+      dias: { id: number; nombre: string }[];
       horario: HorarioSucursal;
       almuerzo?: { inicio: string; fin: string } | null;
     } | null = null;
 
     horariosOrdenados.forEach((horario) => {
       // Usar el nombre corto del día desde la base de datos, con fallback
-      const nombreCorto = horario.nombre_corto || 
-        (["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"][horario.id_dia]) || 
+      const nombreCorto = horario.nombre_corto ||
+        (["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"][horario.id_dia]) ||
         `Día ${horario.id_dia}`;
-      
+
       const diaInfo = { id: horario.id_dia, nombre: nombreCorto };
-      
+
       // Información de almuerzo
       const almuerzoInfo = horario.hora_inicio_almuerzo && horario.hora_fin_almuerzo ? {
         inicio: formatearHora(horario.hora_inicio_almuerzo),
@@ -469,17 +472,17 @@ function SucursalHorarioDisplay({ idSucursal }: { idSucursal: string }) {
           };
         } else {
           // Verificar si el horario coincide con el grupo actual
-          const mismoHorario = 
+          const mismoHorario =
             grupoActual.horario.hora_apertura === horario.hora_apertura &&
             grupoActual.horario.hora_cierre === horario.hora_cierre &&
             grupoActual.horario.activo === horario.activo;
-          
-          const mismoAlmuerzo = 
+
+          const mismoAlmuerzo =
             (grupoActual.almuerzo === null && almuerzoInfo === null) ||
             (grupoActual.almuerzo && almuerzoInfo &&
-             grupoActual.almuerzo.inicio === almuerzoInfo.inicio &&
-             grupoActual.almuerzo.fin === almuerzoInfo.fin);
-          
+              grupoActual.almuerzo.inicio === almuerzoInfo.inicio &&
+              grupoActual.almuerzo.fin === almuerzoInfo.fin);
+
           if (mismoHorario && mismoAlmuerzo) {
             // Agregar al grupo existente
             grupoActual.dias.push(diaInfo);
@@ -509,21 +512,21 @@ function SucursalHorarioDisplay({ idSucursal }: { idSucursal: string }) {
     if (dias.length === 1) {
       return dias[0].nombre;
     }
-    
+
     if (dias.length === 2) {
       return `${dias[0].nombre} y ${dias[1].nombre}`;
     }
-    
+
     // Para rangos más largos, verificar si son consecutivos
     const ids = dias.map(d => d.id).sort((a, b) => a - b);
-    const esConsecutivo = ids.every((id, index) => 
+    const esConsecutivo = ids.every((id, index) =>
       index === 0 || id === ids[index - 1] + 1
     );
-    
+
     if (esConsecutivo && dias.length > 2) {
       return `${dias[0].nombre} a ${dias[dias.length - 1].nombre}`;
     }
-    
+
     // Si no son consecutivos, listar todos
     return dias.map(d => d.nombre).join(", ");
   };
@@ -534,7 +537,7 @@ function SucursalHorarioDisplay({ idSucursal }: { idSucursal: string }) {
     <div className="space-y-2">
       {grupos.map((grupo, index) => {
         const rangoDias = formatearRangoDias(grupo.dias);
-        
+
         return (
           <div key={index} className="flex justify-between items-start text-sm">
             <span className="text-qoder-dark-text-secondary font-medium">{rangoDias}:</span>

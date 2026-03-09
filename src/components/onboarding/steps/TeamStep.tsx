@@ -59,7 +59,7 @@ export default function TeamStep({ data, updateData, onNext, onBack }: TeamStepP
 
     return (
         <motion.div
-            className="space-y-6 h-[60vh] overflow-y-auto pr-2 custom-scrollbar"
+            className="space-y-6"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4 }}
@@ -119,7 +119,7 @@ export default function TeamStep({ data, updateData, onNext, onBack }: TeamStepP
                                 onClick={() => removeBarber(idx)}
                                 whileHover={{ scale: 1.1, backgroundColor: "rgba(244, 63, 94, 0.2)", color: "#f43f5e" }}
                                 whileTap={{ scale: 0.9 }}
-                                className="p-2 text-slate-500 rounded-full transition-colors"
+                                className="p-2 text-slate-500 rounded-full transition-colors bg-none"
                             >
                                 <TrashIcon className="w-5 h-5" />
                             </motion.button>
@@ -173,46 +173,45 @@ export default function TeamStep({ data, updateData, onNext, onBack }: TeamStepP
                                     value={newBarber.email}
                                     onChange={(e) => setNewBarber({ ...newBarber, email: e.target.value })}
                                     whileFocus={inputFocus}
-                                    className="bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm col-span-1 md:col-span-2 focus:outline-none focus:border-cyan-500 transition-all placeholder-slate-500"
+                                    className="bg-slate-900 border border-slate-700 rounded-none p-3 text-white text-sm col-span-1 md:col-span-2 focus:outline-none focus:border-cyan-500 transition-all placeholder-slate-500"
                                 />
 
-                                <div className="col-span-1 md:col-span-2 flex items-center gap-3 bg-slate-900/50 p-3 rounded-lg border border-slate-700/50">
+                                <div className="col-span-1 md:col-span-2 flex items-center gap-3 bg-slate-900/50 p-3 rounded-none border border-slate-700/50">
                                     <input
                                         type="checkbox"
                                         id="isAdmin"
                                         checked={newBarber.isAdmin}
                                         onChange={(e) => setNewBarber({ ...newBarber, isAdmin: e.target.checked })}
-                                        className="rounded border-slate-600 w-4 h-4 text-violet-500 focus:ring-violet-500 bg-slate-800"
+                                        className="rounded-none border-slate-600 w-4 h-4 text-violet-500 focus:ring-violet-500 bg-slate-800"
                                     />
                                     <label htmlFor="isAdmin" className="text-sm text-slate-300 font-medium">Es Administrador (Acceso total)</label>
                                 </div>
                             </div>
                             <div className="flex justify-end gap-3 mt-4">
-                                <button onClick={cancelAdd} className="px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors">Cancelar</button>
+                                <button onClick={cancelAdd} className="px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors bg-none uppercase tracking-widest text-xs" style={{ fontFamily: 'var(--font-rasputin), serif' }}>Cancelar</button>
                                 <motion.button
                                     onClick={handleAdd}
                                     disabled={!newBarber.nombre || !newBarber.usuario || !newBarber.password}
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="px-6 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg hover:shadow-violet-500/20 disabled:opacity-50 disabled:shadow-none transition-all"
+                                    className="px-6 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-none text-sm font-bold shadow-lg hover:shadow-violet-500/20 disabled:opacity-50 disabled:shadow-none transition-all uppercase tracking-widest text-xs"
+                                    style={{ fontFamily: 'var(--font-rasputin), serif' }}
                                 >
                                     Guardar Barbero
                                 </motion.button>
                             </div>
                         </motion.div>
                     ) : (
-                        <motion.button
-                            key="add-button"
+                        <button
                             onClick={() => setIsAdding(true)}
-                            whileHover={{ scale: 1.02, backgroundColor: "rgba(30, 41, 59, 0.8)", borderColor: "rgba(139, 92, 246, 0.4)" }}
-                            whileTap={{ scale: 0.98 }}
-                            className="w-full py-4 border border-dashed border-slate-700 rounded-2xl text-slate-400 group hover:text-white hover:border-slate-500 transition-all flex items-center justify-center gap-3 bg-slate-900/20"
+                            className="w-full py-4 border-2 border-dashed border-slate-700 rounded-none text-slate-400 hover:text-white hover:border-violet-500 hover:bg-violet-500/5 transition-all flex items-center justify-center gap-2 group uppercase tracking-widest text-xs"
+                            style={{ fontFamily: 'var(--font-rasputin), serif' }}
                         >
-                            <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center group-hover:bg-violet-600 transition-colors">
+                            <div className="w-8 h-8 rounded-none bg-slate-800 flex items-center justify-center group-hover:bg-violet-600 transition-colors">
                                 <PlusIcon className="w-5 h-5 text-white" />
                             </div>
                             <span className="font-medium">Agregar Nuevo Barbero</span>
-                        </motion.button>
+                        </button>
                     )}
                 </AnimatePresence>
             </div>
@@ -220,7 +219,8 @@ export default function TeamStep({ data, updateData, onNext, onBack }: TeamStepP
             <div className="flex justify-between pt-4">
                 <button
                     onClick={onBack}
-                    className="px-6 py-2 rounded-lg text-slate-500 hover:text-white transition-colors"
+                    className="px-6 py-2 rounded-none text-slate-500 hover:text-white transition-colors bg-none uppercase tracking-widest text-xs"
+                    style={{ fontFamily: 'var(--font-rasputin), serif' }}
                 >
                     Atrás
                 </button>
@@ -228,7 +228,7 @@ export default function TeamStep({ data, updateData, onNext, onBack }: TeamStepP
                     onClick={onNext}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-8 py-3 rounded-xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-lg shadow-violet-500/20"
+                    className="px-8 py-3 rounded-xl font-bold !bg-gradient-to-r !from-violet-600 !to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-lg shadow-violet-500/20"
                 >
                     {data.barberos.length === 0 ? "Continuar sin equipo" : "Siguiente"}
                 </motion.button>

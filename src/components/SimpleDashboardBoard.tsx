@@ -123,12 +123,12 @@ export function SimpleDashboardBoard() {
     // Si se mueve a una columna diferente, actualizar el estado
     if (destination.droppableId !== source.droppableId) {
       // Actualizar el estado de la cita
-      const updatedAppointments = appointments.map(c => 
-        c.id_cita === draggableId 
-          ? { ...c, estado: destination.droppableId as Appointment["estado"] } 
+      const updatedAppointments = appointments.map(c =>
+        c.id_cita === draggableId
+          ? { ...c, estado: destination.droppableId as Appointment["estado"] }
           : c
       );
-      
+
       setAppointments(updatedAppointments);
       console.log("Estado de cita actualizado correctamente");
     }
@@ -145,16 +145,16 @@ export function SimpleDashboardBoard() {
   return (
     <div className="qoder-dark-card p-6">
       <h2 className="text-xl font-bold mb-4">Tablero Kanban Simplificado</h2>
-      
+
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {Object.keys(citasPorEstado).map((estado) => (
             <Droppable key={estado} droppableId={estado} isDropDisabled={false} isCombineEnabled={false} ignoreContainerClipping={false}>
               {(provided, snapshot) => (
-                <div 
+                <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
-                  className={`bg-qoder-dark-bg-secondary rounded-lg p-4 ${snapshot.isDraggingOver ? 'bg-opacity-80' : ''}`}
+                  className={`bg-qoder-dark-bg-secondary rounded-none p-4 ${snapshot.isDraggingOver ? 'bg-opacity-80' : ''}`}
                 >
                   <h3 className={`font-semibold ${columnColors[estado as keyof typeof columnColors]} mb-3`}>
                     {columnTitles[estado as keyof typeof columnTitles]} ({citasPorEstado[estado as keyof typeof citasPorEstado].length})
@@ -178,7 +178,7 @@ export function SimpleDashboardBoard() {
                                 ${cita.ticket}
                               </span>
                             </div>
-                            
+
                             <div className="flex justify-between items-center mt-2">
                               <span className="text-xs text-qoder-dark-text-secondary">
                                 {cita.barbero}

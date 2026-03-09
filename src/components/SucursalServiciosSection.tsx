@@ -17,10 +17,10 @@ interface SucursalServiciosSectionProps {
   onDeleteService: (id: string) => void;
 }
 
-export function SucursalServiciosSection({ 
+export function SucursalServiciosSection({
   sucursalId,
   idBarberia,
-  servicios, 
+  servicios,
   isLoading,
   onCreateService,
   onUpdateService,
@@ -31,15 +31,15 @@ export function SucursalServiciosSection({
   const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
   const [barberoIdSeleccionado, setBarberoIdSeleccionado] = useState<string | null>(null);
   const [barberosAsignaciones, setBarberosAsignaciones] = useState<Record<string, boolean>>({});
-  
+
   // Hook para actualizar especialidades de barbero
   const { mutateAsync: actualizarEspecialidades } = useActualizarEspecialidadesBarbero();
-  
+
   // Obtener barberos para la sucursal
   const { data: barberos } = useBarberosList(idBarberia, sucursalId);
 
   // Filtrar servicios por sucursal usando el UUID
-  const serviciosDeSucursal = servicios?.filter(servicio => 
+  const serviciosDeSucursal = servicios?.filter(servicio =>
     servicio.id_sucursal === sucursalId
   ) || [];
 
@@ -79,7 +79,7 @@ export function SucursalServiciosSection({
           ...values,
           updated_at: new Date().toISOString()
         });
-        
+
         // Manejar asignaciones de barberos para el servicio editado
         for (const [barberoId, asignar] of Object.entries(barberosAsignaciones)) {
           const barbero = barberos?.find(b => b.id_barbero === barberoId);
@@ -87,7 +87,7 @@ export function SucursalServiciosSection({
             try {
               // Obtener las especialidades actuales del barbero
               const especialidadesActuales = barbero.especialidades || [];
-              
+
               let nuevasEspecialidades: string[];
               if (asignar) {
                 // Agregar el servicio a las especialidades si no está ya presente
@@ -100,7 +100,7 @@ export function SucursalServiciosSection({
                 // Remover el servicio de las especialidades
                 nuevasEspecialidades = especialidadesActuales.filter(id => id !== serviceToEdit.id_servicio);
               }
-              
+
               // Actualizar las especialidades del barbero
               await actualizarEspecialidades({
                 id_barbero: barberoId,
@@ -112,7 +112,7 @@ export function SucursalServiciosSection({
             }
           }
         }
-        
+
         toast.success("Servicio actualizado correctamente");
       } else {
         // Crear nuevo servicio
@@ -121,9 +121,9 @@ export function SucursalServiciosSection({
           id_sucursal: sucursalId,
           id_barberia: idBarberia
         } as Omit<Service, "id_servicio" | "created_at" | "updated_at" | "activo">;
-        
+
         const servicioCreado = await onCreateService(serviceData);
-        
+
         // Si se seleccionó un barbero, asignar este servicio a sus especialidades
         if (barberoIdSeleccionado) {
           const barberoSeleccionado = barberos?.find(b => b.id_barbero === barberoIdSeleccionado);
@@ -131,19 +131,19 @@ export function SucursalServiciosSection({
             try {
               // Obtener las especialidades actuales del barbero
               const especialidadesActuales = barberoSeleccionado.especialidades || [];
-              
+
               // Agregar el ID del nuevo servicio a las especialidades si no está ya presente
               let nuevasEspecialidades = [...especialidadesActuales];
               if (!especialidadesActuales.includes(servicioCreado.id_servicio)) {
                 nuevasEspecialidades = [...especialidadesActuales, servicioCreado.id_servicio];
               }
-              
+
               // Actualizar las especialidades del barbero
               await actualizarEspecialidades({
                 id_barbero: barberoIdSeleccionado,
                 especialidades: nuevasEspecialidades
               });
-              
+
               toast.success(`Servicio asignado a ${barberoSeleccionado.nombre}`);
             } catch (error) {
               console.error("Error al asignar especialidad:", error);
@@ -151,7 +151,7 @@ export function SucursalServiciosSection({
             }
           }
         }
-        
+
         toast.success("Servicio creado correctamente");
       }
       setIsModalOpen(false);
@@ -179,7 +179,8 @@ export function SucursalServiciosSection({
         </h3>
         <button
           onClick={handleAddService}
-          className="qoder-dark-button-primary px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+          className="qoder-dark-button-primary px-4 py-2 rounded-none uppercase tracking-widest text-xs flex items-center gap-2 hover-lift smooth-transition"
+          style={{ fontFamily: 'var(--font-rasputin), serif' }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -296,13 +297,15 @@ export function SucursalServiciosSection({
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setServiceToDelete(null)}
-                className="qoder-dark-button px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+                className="qoder-dark-button px-4 py-2 rounded-none uppercase tracking-widest text-xs flex items-center gap-2 hover-lift smooth-transition"
+                style={{ fontFamily: 'var(--font-rasputin), serif' }}
               >
                 <span>Cancelar</span>
               </button>
               <button
                 onClick={confirmDeleteService}
-                className="qoder-dark-button-primary px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+                className="qoder-dark-button-primary px-4 py-2 rounded-none uppercase tracking-widest text-xs flex items-center gap-2 hover-lift smooth-transition"
+                style={{ fontFamily: 'var(--font-rasputin), serif' }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

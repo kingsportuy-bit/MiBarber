@@ -14,8 +14,8 @@ interface SwipeContextMenuProps {
   disabled?: boolean;
 }
 
-export function SwipeContextMenu({ 
-  children, 
+export function SwipeContextMenu({
+  children,
   menuItems,
   threshold = 50,
   disabled = false
@@ -32,7 +32,7 @@ export function SwipeContextMenu({
   const handleTouchStart = (e: React.TouchEvent) => {
     // Solo activar en dispositivos móviles y si no está deshabilitado
     if (!isMobile || disabled) return;
-    
+
     setStartX(e.touches[0].clientX);
     setCurrentX(e.touches[0].clientX);
     setIsSwiping(true);
@@ -42,12 +42,12 @@ export function SwipeContextMenu({
   const handleTouchMove = (e: React.TouchEvent) => {
     // Solo activar en dispositivos móviles y si no está deshabilitado
     if (!isMobile || disabled || !isSwiping) return;
-    
+
     const currentPosX = e.touches[0].clientX;
     setCurrentX(currentPosX);
-    
+
     const distance = currentPosX - startX;
-    
+
     // Solo permitir deslizamiento hacia la izquierda
     if (distance < 0) {
       e.preventDefault();
@@ -58,9 +58,9 @@ export function SwipeContextMenu({
   const handleTouchEnd = (e: React.TouchEvent) => {
     // Solo activar en dispositivos móviles y si no está deshabilitado
     if (!isMobile || disabled || !isSwiping) return;
-    
+
     const distance = currentX - startX;
-    
+
     if (Math.abs(distance) > threshold && distance < 0) {
       // Mostrar el menú contextual
       const touch = e.touches[0] || { clientX: window.innerWidth - 20, clientY: window.innerHeight / 2 };
@@ -70,7 +70,7 @@ export function SwipeContextMenu({
       });
       setShowMenu(true);
     }
-    
+
     setIsSwiping(false);
     setSwipeDistance(0);
   };
@@ -124,7 +124,7 @@ export function SwipeContextMenu({
   }, [disabled]);
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className="relative w-full h-full"
       onTouchStart={handleTouchStart}
@@ -132,11 +132,11 @@ export function SwipeContextMenu({
       onTouchEnd={handleTouchEnd}
     >
       {children}
-      
+
       {/* Menú contextual */}
       {showMenu && (
-        <div 
-          className="fixed z-50 bg-gray-900 border border-gray-700 rounded-lg shadow-lg py-2 animate-fadeIn"
+        <div
+          className="fixed z-50 bg-gray-900 border border-gray-700 rounded-none shadow-lg py-2 animate-fadeIn"
           style={{
             left: `${menuPosition.x}px`,
             top: `${menuPosition.y}px`,
@@ -156,10 +156,10 @@ export function SwipeContextMenu({
           ))}
         </div>
       )}
-      
+
       {/* Overlay para cerrar el menú */}
       {showMenu && (
-        <div 
+        <div
           className="fixed inset-0 z-40"
           onClick={() => setShowMenu(false)}
         />

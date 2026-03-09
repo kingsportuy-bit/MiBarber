@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -10,6 +10,98 @@ import { UserDropdownMenu } from "@/components/UserDropdownMenu";
 interface Tab {
   href: string;
   label: string;
+  icon: React.ReactNode;
+}
+
+// Sidebar icons â€” SVG inline
+const IconCalendarCheck = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+    <line x1="16" x2="16" y1="2" y2="6" />
+    <line x1="8" x2="8" y1="2" y2="6" />
+    <line x1="3" x2="21" y1="10" y2="10" />
+    <path d="m9 16 2 2 4-4" />
+  </svg>
+);
+
+const IconCalendar = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+    <line x1="16" x2="16" y1="2" y2="6" />
+    <line x1="8" x2="8" y1="2" y2="6" />
+    <line x1="3" x2="21" y1="10" y2="10" />
+  </svg>
+);
+
+const IconUsers = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
+
+const IconMessageCircle = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+  </svg>
+);
+
+const IconDollarSign = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" x2="12" y1="2" y2="22" />
+    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+  </svg>
+);
+
+const IconBarChart = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" x2="12" y1="20" y2="10" />
+    <line x1="18" x2="18" y1="20" y2="4" />
+    <line x1="6" x2="6" y1="20" y2="16" />
+  </svg>
+);
+
+const IconSettings = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const IconLogOut = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <polyline points="16 17 21 12 16 7" />
+    <line x1="21" x2="9" y1="12" y2="12" />
+  </svg>
+);
+
+const IconHome = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="7" height="9" />
+    <rect x="14" y="3" width="7" height="5" />
+    <rect x="14" y="12" width="7" height="9" />
+    <rect x="3" y="16" width="7" height="5" />
+  </svg>
+);
+
+const IconShield = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </svg>
+);
+
+// Helper to format names: only first letter of each word capitalized
+function formatBarberName(name: string): string {
+  if (!name) return name;
+  return name
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 }
 
 export function NavBar() {
@@ -19,81 +111,45 @@ export function NavBar() {
   const [shouldHideCompletely, setShouldHideCompletely] = useState(false);
   const scrollPositionRef = useRef(0);
 
-  // Efecto para ocultar completamente el NavBar cuando se está en la vista de chat individual
+  // Ocultar completamente en la vista de chat individual de WhatsApp (mobile)
   useEffect(() => {
     const handleHashChange = () => {
       if (typeof window !== 'undefined' && pathname?.startsWith("/whatsapp")) {
-        // Solo ocultar completamente en dispositivos móviles
         const isMobile = window.innerWidth < 768;
         if (isMobile) {
-          // Ocultar el NavBar tanto en la lista de chats como en la vista individual (solo en móvil)
           setShouldHideCompletely(window.location.hash === '#chat-view' || window.location.hash === '#chat-list');
         } else {
-          // En desktop, no ocultar completamente
           setShouldHideCompletely(false);
         }
       }
     };
-
-    // Verificar el hash inicial
     handleHashChange();
-
-    // Escuchar cambios en el hash
     window.addEventListener('hashchange', handleHashChange);
-
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange);
-    };
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, [pathname]);
 
-  // Efecto para detectar el scroll y ocultar/mostrar la barra de navegación
+  // Ocultar en scroll (solo mobile)
   useEffect(() => {
     const handleScroll = () => {
       if (typeof window === 'undefined') return;
-
-      // Solo aplicar el comportamiento de ocultar en dispositivos móviles
       const isMobile = window.innerWidth < 768;
-      if (!isMobile) {
-        // En desktop, siempre mostrar la barra
-        setIsNavbarHidden(false);
-        return;
-      }
-
-      // Si estamos ocultando completamente el NavBar, no hacer nada
+      if (!isMobile) { setIsNavbarHidden(false); return; }
       if (shouldHideCompletely) return;
 
       const currentScrollPosition = window.scrollY;
-
-      // Si el usuario está cerca de la parte superior, siempre mostrar la barra
       if (currentScrollPosition < 60) {
         setIsNavbarHidden(false);
         scrollPositionRef.current = currentScrollPosition;
         return;
       }
-
-      // Comparar la posición actual con la anterior para determinar la dirección del scroll
-      if (currentScrollPosition > scrollPositionRef.current) {
-        // Scroll hacia abajo - ocultar la barra
-        setIsNavbarHidden(true);
-      } else {
-        // Scroll hacia arriba - mostrar la barra
-        setIsNavbarHidden(false);
-      }
-
-      // Actualizar la posición de referencia
+      setIsNavbarHidden(currentScrollPosition > scrollPositionRef.current);
       scrollPositionRef.current = currentScrollPosition;
     };
-
-    // Agregar el event listener para el scroll
     window.addEventListener('scroll', handleScroll);
-
-    // Limpiar el event listener al desmontar el componente
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [shouldHideCompletely]);
 
-  // Estado local para la autenticación
+  // Auth state desde localStorage
   const [authState, setAuthState] = useState({
     isAuthenticated: false,
     isAdmin: false,
@@ -101,184 +157,115 @@ export function NavBar() {
     isChecking: true,
   });
 
-  // Estado del menú móvil
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Verificar autenticación desde localStorage
   useEffect(() => {
-    // Solo ejecutar en el cliente
     if (typeof window === 'undefined') return;
-
     const checkAuth = () => {
       try {
-        const sessionStr = localStorage.getItem("barber_auth_session");
+        let sessionStr = localStorage.getItem("barber_auth_session");
+        if (!sessionStr) {
+          const cookies = document.cookie.split(';');
+          for (const cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'barber_auth_session' && value) {
+              sessionStr = decodeURIComponent(value);
+              break;
+            }
+          }
+        }
 
         if (sessionStr) {
           const sessionData = JSON.parse(sessionStr);
-
-          // Verificar estructura de datos
           let userData;
           if (sessionData.user && typeof sessionData.user === "object") {
             userData = sessionData.user;
           } else if (typeof sessionData === "object" && sessionData.id) {
             userData = sessionData;
           } else {
-            setAuthState({
-              isAuthenticated: false,
-              isAdmin: false,
-              userName: "",
-              isChecking: false,
-            });
+            setAuthState({ isAuthenticated: false, isAdmin: false, userName: "", isChecking: false });
             return;
           }
-
-          // Verificar expiración
           if (sessionData.expiresAt && Date.now() > sessionData.expiresAt) {
             localStorage.removeItem("barber_auth_session");
-            setAuthState({
-              isAuthenticated: false,
-              isAdmin: false,
-              userName: "",
-              isChecking: false,
-            });
+            setAuthState({ isAuthenticated: false, isAdmin: false, userName: "", isChecking: false });
             return;
           }
-
-          // Verificar que userData tenga las propiedades necesarias
           if (!userData.id) {
-            setAuthState({
-              isAuthenticated: false,
-              isAdmin: false,
-              userName: "",
-              isChecking: false,
-            });
+            setAuthState({ isAuthenticated: false, isAdmin: false, userName: "", isChecking: false });
             return;
           }
-
-          // Determinar si es administrador basado en el campo admin
           const isAdmin = userData.admin === true;
           const userName = userData.name || userData.nombre || "Administrador";
-
-          setAuthState({
-            isAuthenticated: true,
-            isAdmin,
-            userName,
-            isChecking: false,
-          });
+          setAuthState({ isAuthenticated: true, isAdmin, userName, isChecking: false });
         } else {
-          setAuthState({
-            isAuthenticated: false,
-            isAdmin: false,
-            userName: "",
-            isChecking: false,
-          });
+          setAuthState({ isAuthenticated: false, isAdmin: false, userName: "", isChecking: false });
         }
       } catch (error) {
         console.error("Error checking auth:", error);
-        setAuthState({
-          isAuthenticated: false,
-          isAdmin: false,
-          userName: "",
-          isChecking: false,
-        });
+        setAuthState({ isAuthenticated: false, isAdmin: false, userName: "", isChecking: false });
       }
     };
-
     checkAuth();
-
-    // Escuchar cambios en el almacenamiento
-    const handleStorageChange = () => {
-      checkAuth();
-    };
-
-    const handleAuthChange = () => {
-      checkAuth();
-    };
-
+    const handleStorageChange = () => checkAuth();
+    const handleAuthChange = () => checkAuth();
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("barberAuthChange", handleAuthChange);
-
     return () => {
       window.removeEventListener("storage", handleStorageChange);
       window.removeEventListener("barberAuthChange", handleAuthChange);
     };
   }, []);
 
-  // Redirigir a barberos normales que intenten acceder a Caja
+  // Redirigir barberos normales de Caja
   useEffect(() => {
-    if (
-      authState.isAuthenticated &&
-      !authState.isAdmin &&
-      (pathname === "/v2/caja")
-    ) {
+    if (authState.isAuthenticated && !authState.isAdmin && pathname === "/v2/caja") {
       router.push("/agenda");
     }
   }, [pathname, authState.isAuthenticated, authState.isAdmin, router]);
 
-  // Mostrar la barra de navegación incluso si hay problemas con la autenticación
   const shouldHideNavBar = pathname?.startsWith("/login") || pathname?.startsWith("/registro");
+  if (shouldHideNavBar || shouldHideCompletely) return null;
 
-  // Ocultar el NavBar cuando se está en la vista de chat individual de WhatsApp
-  const shouldHideNavBarCompletely = shouldHideCompletely;
-
-  if (shouldHideNavBar || shouldHideNavBarCompletely) {
-    return null;
-  }
-
-  // Determinar qué tabs mostrar según el rol del usuario
+  // Tabs segÃºn rol
   let tabs: Tab[] = [];
   if (authState.isAuthenticated) {
     if (authState.isAdmin) {
       tabs = [
-        { href: "/agenda", label: "Agenda" },
-        { href: "/clientes", label: "Clientes" },
-        { href: "/whatsapp", label: "WhatsApp" },
-        { href: "/caja", label: "Caja" },
-        { href: "/estadisticas", label: "Estadísticas" },
-        { href: "/mi-barberia", label: "Mi Barbería" },
+        { href: "/inicio", label: "Dashboard", icon: <IconHome className="w-5 h-5" /> },
+        { href: "/turnos", label: "Agenda", icon: <IconCalendarCheck className="w-5 h-5" /> },
+        { href: "/agenda", label: "Calendario", icon: <IconCalendar className="w-5 h-5" /> },
+        { href: "/clientes", label: "Clientes", icon: <IconUsers className="w-5 h-5" /> },
+        { href: "/whatsapp", label: "WhatsApp", icon: <IconMessageCircle className="w-5 h-5" /> },
+        { href: "/caja", label: "Caja", icon: <IconDollarSign className="w-5 h-5" /> },
+        { href: "/bloqueos", label: "Bloqueos", icon: <IconShield className="w-5 h-5" /> },
+        { href: "/estadisticas", label: "Estadísticas", icon: <IconBarChart className="w-5 h-5" /> },
+        { href: "/mi-barberia", label: "Mi Barbería", icon: <IconSettings className="w-5 h-5" /> },
       ];
     } else {
       tabs = [
-        { href: "/agenda", label: "Agenda" },
-        { href: "/whatsapp", label: "WhatsApp" },
+        { href: "/inicio", label: "Dashboard", icon: <IconHome className="w-5 h-5" /> },
+        { href: "/turnos", label: "Agenda", icon: <IconCalendarCheck className="w-5 h-5" /> },
+        { href: "/agenda", label: "Calendario", icon: <IconCalendar className="w-5 h-5" /> },
+        { href: "/whatsapp", label: "WhatsApp", icon: <IconMessageCircle className="w-5 h-5" /> },
       ];
     }
   }
 
   const handleLogout = () => {
-    // Eliminar sesión de localStorage
     localStorage.removeItem("barber_auth_session");
-    // También eliminar la cookie
-    document.cookie =
-      "barber_auth_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-
-    // Actualizar estado local
-    setAuthState({
-      isAuthenticated: false,
-      isAdmin: false,
-      userName: "",
-      isChecking: false,
-    });
-
+    document.cookie = "barber_auth_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    setAuthState({ isAuthenticated: false, isAdmin: false, userName: "", isChecking: false });
     setIsMobileMenuOpen(false);
-
-    // Disparar evento personalizado para notificar el cambio
-    window.dispatchEvent(
-      new CustomEvent("barberAuthChange", {
-        detail: { user: null, action: "logout" },
-      }),
-    );
-
-    // Redirigir a la página de login
+    window.dispatchEvent(new CustomEvent("barberAuthChange", { detail: { user: null, action: "logout" } }));
     router.push("/login");
   };
 
-  // Mostrar estado de carga
   if (authState.isChecking) {
     return (
       <nav className={`navbar ${isNavbarHidden ? 'navbar-hidden' : ''}`}>
         <div className="nav-container min-w-0">
-          <div className="animate-pulse">Cargando...</div>
+          <div className="animate-pulse" style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.875rem' }}>Cargando...</div>
         </div>
       </nav>
     );
@@ -287,6 +274,7 @@ export function NavBar() {
   return (
     <nav className={`navbar ${isNavbarHidden ? 'navbar-hidden' : ''}`}>
       <div className="nav-container min-w-0">
+        {/* Logo */}
         <Link
           href="/inicio"
           className="nav-logo"
@@ -295,79 +283,113 @@ export function NavBar() {
             paddingRight: '10px',
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
             flexShrink: 0
           }}
         >
-          {/* Logo imagen con altura fija y sin encogerse */}
           <img
             src="/logo-barberox.png"
             alt="Barberox"
             style={{
-              height: '30px',
+              height: '28px',
               width: 'auto',
-              minWidth: '100px', // Asegurar un ancho mínimo razonable
+              minWidth: '90px',
               objectFit: 'contain'
             }}
           />
         </Link>
 
-        {/* Navegación de escritorio - ocultar en móviles */}
-        <div className="hidden md:flex items-center gap-1 text-xs">
-          {authState.isAuthenticated &&
-            tabs.map((t) => {
-              const active = pathname?.startsWith(t.href);
-              // Verificar si la página es exclusiva de administradores
-              const isAdminPage = t.href === '/estadisticas' || t.href === '/admin' || t.href === '/admin/bloqueos' || t.href === '/v2/caja' || t.href === '/mi-barberia';
-
+        {/* Desktop: sidebar navigation links */}
+        {authState.isAuthenticated && (
+          <div className="hidden md:flex sidebar-nav-section">
+            {tabs.map((t) => {
+              const active = t.href === "/inicio"
+                ? pathname === "/inicio" || pathname === "/"
+                : pathname?.startsWith(t.href);
               return (
                 <Link
                   key={t.href}
                   href={t.href}
-                  className={`nav-link ${active ? 'active' : ''} px-2 py-1 flex items-center gap-1`}
+                  className={`nav-link uppercase tracking-widest text-xs rounded-none ${active ? 'active' : ''}`}
+                  title={t.label}
+                  style={{ fontFamily: 'var(--font-rasputin), serif' }}
                 >
+                  {t.icon}
                   <span>{t.label}</span>
-                  {isAdminPage && authState.isAdmin && (
-                    <span className="text-[10px] bg-orange-500 text-white px-1 py-0.5 rounded">
-                      Admin
-                    </span>
-                  )}
                 </Link>
               );
             })}
+          </div>
+        )}
+
+        {/* Desktop: sidebar footer with user info */}
+        <div className="hidden md:block sidebar-footer">
+          {authState.isAuthenticated && (
+            <>
+              {/* Profile link */}
+              <Link
+                href="/perfil"
+                className={`nav-link ${pathname?.startsWith('/perfil') ? 'active' : ''}`}
+                style={{ marginBottom: '4px' }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                <span className="client-name" style={{
+                  textTransform: 'none',
+                  fontFamily: "'Old English Text MT', 'Roboto', 'Arial', sans-serif",
+                  fontSize: '1.2rem',
+                  letterSpacing: '0.02em',
+                }}>
+                  {formatBarberName(authState.userName) || 'Perfil'}
+                </span>
+              </Link>
+              {/* Logout */}
+              <button
+                onClick={handleLogout}
+                className="nav-link w-full text-left uppercase tracking-widest text-xs rounded-none"
+                style={{
+                  fontFamily: 'var(--font-rasputin), serif',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'rgba(255,255,255,0.45)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '10px 20px',
+                  fontWeight: 500,
+                  margin: '0 8px',
+                }}
+              >
+                <IconLogOut className="w-5 h-5" />
+                <span>Cerrar sesión</span>
+              </button>
+            </>
+          )}
         </div>
 
-        <div className="ml-auto flex items-center gap-4">
-          {/* Estadísticas y Mi Barbería se mueven al menú desplegable */}
-
+        {/* Mobile: right-side controls */}
+        <div className="ml-auto flex items-center gap-3 md:hidden">
           {authState.isAuthenticated && authState.userName && (
             <UserDropdownMenu
-              userName={authState.userName}
+              userName={formatBarberName(authState.userName)}
               isAdmin={authState.isAdmin}
               onLogout={handleLogout}
             />
           )}
 
-          {authState.isAuthenticated ? (
-            // El botón de salir se ha movido al menú desplegable del usuario
-            null
-          ) : (
-            <Link
-              href="/login"
-              className="hidden md:block nav-link"
-            >
-              Iniciar Sesión
+          {!authState.isAuthenticated && (
+            <Link href="/login" className="nav-link">
+              Iniciar SesiÃ³n
             </Link>
           )}
 
-          {/* Menú móvil - ocultar en pantallas pequeñas donde aparece BottomNav */}
-          <div className="md:hidden">
+          {authState.isAuthenticated && (
             <MobileMenu
               isOpen={isMobileMenuOpen}
               onClose={() => setIsMobileMenuOpen(false)}
             />
-          </div>
-
-          {/* Eliminar el botón de logout para móviles ya que ahora está en el menú desplegable */}
+          )}
         </div>
       </div>
     </nav>

@@ -17,7 +17,7 @@ export function useHorariosSucursales(idSucursal?: string) {
         console.log("useHorariosSucursales: No hay idSucursal, devolviendo array vacío");
         return [];
       }
-      
+
       try {
         // Obtener los horarios de la sucursal
         const { data, error } = await supabase
@@ -25,37 +25,17 @@ export function useHorariosSucursales(idSucursal?: string) {
           .select("*")
           .eq("id_sucursal", idSucursal)
           .order("id_dia", { ascending: true });
-        
+
         if (error) {
           console.error("Error al obtener horarios de sucursales:", error);
           throw error;
         }
-        
-        // Si necesitamos los nombres de los días, los obtenemos por separado
-        const { data: diasData, error: diasError } = await supabase
-          .from("mibarber_dias_semana")
-          .select("id_dia, nombre_dia, nombre_corto");
-        
-        if (diasError) {
-          console.error("Error al obtener días de la semana:", diasError);
-          // Devolver horarios sin nombres de días si hay error
-          return data as HorarioSucursal[];
-        }
-        
-        // Mapear los datos para incluir los nombres de los días
-        const diasMap = diasData.reduce((acc: any, dia: any) => {
-          acc[dia.id_dia] = {
-            nombre_dia: dia.nombre_dia,
-            nombre_corto: dia.nombre_corto
-          };
-          return acc;
-        }, {});
-        
-        // Agregar los nombres de los días a cada horario
-        return data.map((horario: any) => ({
+
+        // Ya no consultamos mibarber_dias_semana porque nombre_dia es una columna generada
+        // Mapeamos para agregar nombre_corto (los primeros 3 caracteres del nombre_dia)
+        return (data || []).map((horario: any) => ({
           ...horario,
-          nombre_dia: diasMap[horario.id_dia]?.nombre_dia || null,
-          nombre_corto: diasMap[horario.id_dia]?.nombre_corto || null
+          nombre_corto: horario.nombre_dia ? horario.nombre_dia.substring(0, 3) : null
         })) as HorarioSucursal[];
       } catch (error) {
         console.error("Error en fetch de horarios:", error);
@@ -72,43 +52,30 @@ export function useHorariosSucursales(idSucursal?: string) {
       try {
         // Crear una copia del horario sin las propiedades calculadas
         const { nombre_dia, nombre_corto, ...horarioParaGuardar } = horario as any;
-        
+
         // Asegurarse de que los campos de almuerzo sean null si están vacíos
         horarioParaGuardar.hora_inicio_almuerzo = horarioParaGuardar.hora_inicio_almuerzo || null;
         horarioParaGuardar.hora_fin_almuerzo = horarioParaGuardar.hora_fin_almuerzo || null;
         horarioParaGuardar.updated_at = new Date().toISOString();
-        
+
         const { data, error } = await supabase
           .from("mibarber_horarios_sucursales")
           .upsert(horarioParaGuardar)
           .select();
-        
+
         if (error) {
           console.error("Error al guardar horario:", error);
           throw new Error(`Error al guardar horario: ${error.message || JSON.stringify(error)}`);
         }
-        
+
         if (!data || data.length === 0) {
           throw new Error("No se recibió datos del servidor al guardar el horario");
         }
-        
-        // Obtener el nombre del día para el horario guardado
-        const { data: diaData, error: diaError } = await supabase
-          .from("mibarber_dias_semana")
-          .select("nombre_dia, nombre_corto")
-          .eq("id_dia", data[0].id_dia)
-          .single();
-        
-        if (diaError) {
-          console.warn("No se pudo obtener el nombre del día:", diaError);
-          return data[0] as HorarioSucursal;
-        }
-        
-        // Devolver el horario con los nombres de los días
+
+        // El nombre_dia es generado por el servidor, así que ya viene en el registro
         return {
           ...data[0],
-          nombre_dia: diaData.nombre_dia || null,
-          nombre_corto: diaData.nombre_corto || null
+          nombre_corto: data[0].nombre_dia ? data[0].nombre_dia.substring(0, 3) : null
         } as HorarioSucursal;
       } catch (error: any) {
         console.error("Error en upsert de horario:", error);
@@ -132,7 +99,7 @@ export function useHorariosSucursales(idSucursal?: string) {
           .from("mibarber_horarios_sucursales")
           .delete()
           .eq("id_horario", idHorario);
-        
+
         if (error) {
           console.error("Error al eliminar horario:", error);
           throw error;

@@ -15,114 +15,101 @@ body {
 }
 
 :root {
-  --color-primary: #ff7700;
-  /* Naranja principal */
-  --color-primary-dark: #cc5500;
-  /* Naranja oscuro */
+  /* === BARBEROX12 BRAND â€” Matching codexa.uy/barberox12 === */
+  --color-primary: #C5A059;
+  --color-primary-dark: #A8863D;
   --color-background: #000000;
-  /* Negro puro */
-  --color-background-transparent: rgba(0, 0, 0, 0.8);
-  /* Negro con transparencia */
-  --color-text: rgba(255, 255, 255, 0.87);
-  /* Texto blanco */
-  --color-text-secondary: rgba(255, 255, 255, 0.2);
-  /* Texto blanco secundario */
-  --color-accent: #00CCC2;
-  /* Azul turquesa para acentos */
+  --color-background-transparent: rgba(0, 0, 0, 0.9);
+  --color-text: #F5F0EB;
+  --color-text-secondary: #8A8A8A;
+  --color-accent: #C5A059;
 
-  /* Variables existentes */
+  /* Layout */
+  --sidebar-width: 220px;
+  --sidebar-collapsed-width: 64px;
+  --navbar-height: 56px;
+  --bottomnav-height: 64px;
+
+  /* Fondos */
   --qoder-dark-bg-primary: #000000;
-  /* Fondo principal (body) - Negro puro */
-  --qoder-dark-bg-secondary: #1a1a1a;
-  /* Paneles, secciones y tarjetas */
-  --qoder-dark-bg-tertiary: #2a2a2a;
-  /* Alternativa para paneles */
-  --qoder-dark-bg-quaternary: #3a3a3a;
-  /* Barras superiores, menús o sidebars */
-  --qoder-dark-bg-form: #1a1a1a;
-  /* Formularios y modales */
+  --qoder-dark-bg-secondary: #0a0a0a;
+  --qoder-dark-bg-tertiary: #111111;
+  --qoder-dark-bg-quaternary: #1a1a1a;
+  --qoder-dark-bg-form: #0a0a0a;
   --qoder-dark-bg-modal: rgba(0, 0, 0, 0.95);
-  /* Modales con 90% de opacidad */
-  --qoder-dark-bg-hover: #2a2a2a;
-  /* Hover states */
-  --qoder-dark-bg-header: #161717;
-  /* Color para headers de chat */
+  --qoder-dark-bg-hover: #111111;
+  --qoder-dark-bg-header: #000000;
   --qoder-dark-bg-black: #000000;
-  /* Negro puro para área de mensajes */
 
-  /* Bordes y separadores */
-  --qoder-dark-border-primary: #333333;
-  /* Bordes y separadores */
-  --qoder-dark-border-secondary: #444444;
-  /* Inputs y campos de texto */
+  /* Bordes â€” casi invisibles */
+  --qoder-dark-border-primary: #1a1a1a;
+  --qoder-dark-border-secondary: #222222;
 
-  /* Textos */
-  --qoder-dark-text-primary: #ffffff;
-  /* Texto principal - Blanco */
-  --qoder-dark-text-secondary: rgba(255, 255, 255, 0.8);
-  /* Texto secundario */
-  --qoder-dark-text-muted: rgba(255, 255, 255, 0.6);
-  /* Texto deshabilitado */
+  /* Textos â€” crema para headings, gris para body */
+  --qoder-dark-text-primary: #F5F0EB;
+  --qoder-dark-text-secondary: #8A8A8A;
+  --qoder-dark-text-muted: rgba(255, 255, 255, 0.35);
 
   /* Botones */
-  --qoder-dark-button-primary: #333333;
-  /* Botón primario */
-  --qoder-dark-button-primary-text: #ffffff;
-  /* Texto botón primario */
-  --qoder-dark-button-secondary: #2a2a2a;
-  /* Botón secundario */
-  --qoder-dark-button-secondary-text: #ffffff;
-  /* Texto botón secundario */
-  --qoder-dark-button-hover: #ffa500;
-  /* Hover botón - Naranja */
-  --qoder-dark-button-secondary-hover: #ffa500;
-  /* Hover botón secundario - Naranja */
+  --qoder-dark-button-primary: #C5A059;
+  --qoder-dark-button-primary-text: #000000;
+  --qoder-dark-button-secondary: #111111;
+  --qoder-dark-button-secondary-text: #F5F0EB;
+  --qoder-dark-button-hover: #D4B068;
+  --qoder-dark-button-secondary-hover: #C5A059;
 
   /* Inputs */
-  --qoder-dark-input-bg: #1a1a1a;
-  /* Fondo inputs */
-  --qoder-dark-input-border: #333333;
-  /* Borde inputs */
-  --qoder-dark-input-focus: #ffa500;
-  /* Borde inputs en foco - Naranja */
+  --qoder-dark-input-bg: #0a0a0a;
+  --qoder-dark-input-border: #1a1a1a;
+  --qoder-dark-input-focus: #C5A059;
 
-  /* Colores de acento naranja */
-  --qoder-dark-accent-orange: #ffa500;
-  /* Naranja principal */
-  --qoder-dark-accent-orange-light: #ffb733;
-  /* Naranja claro */
-  --qoder-dark-accent-orange-muted: rgba(255, 165, 0, 0.3);
-  /* Naranja con transparencia */
+  /* Acentos dorado â€” matching landing */
+  --qoder-dark-status-green: rgba(16, 185, 129, 0.15);
+  /* #10b981 con opacidad */
+  --qoder-dark-status-orange: rgba(245, 158, 11, 0.15);
+  /* #f59e0b con opacidad */
+  --qoder-dark-status-red: rgba(239, 68, 68, 0.15);
+  /* #ef4444 con opacidad */
+  --qoder-dark-status-blue: rgba(59, 130, 246, 0.15);
+  /* #3b82f6 con opacidad */
+  --qoder-dark-status-gray: rgba(107, 114, 128, 0.15);
+  /* #6b7280 con opacidad */
 
-  /* Colores de acento generales */
-  --qoder-accent-primary: #ffa500;
-  /* Naranja */
-  --qoder-accent-secondary: #808080;
-  /* Gris medio */
+  /* Textos de estado */
+  --qoder-dark-text-green: #10b981;
+  --qoder-dark-text-orange: #C5A059;
+  --qoder-dark-text-red: #ef4444;
+  --qoder-dark-text-blue: #3b82f6;
+  --qoder-dark-accent-orange: #C5A059;
+  --qoder-dark-accent-orange-light: #D4B068;
+  --qoder-dark-accent-orange-muted: rgba(197, 160, 89, 0.15);
+
+  /* Acentos generales */
+  --qoder-accent-primary: #C5A059;
+  --qoder-accent-secondary: #666666;
   --qoder-accent-success: #10b981;
-  /* Verde */
   --qoder-accent-warning: #f59e0b;
-  /* Amarillo */
   --qoder-accent-danger: #ef4444;
-  /* Rojo */
   --qoder-accent-info: #0ea5e9;
-  /* Azul */
 
-  /* Codexa X color */
+  /* Brand */
   --codexa-x-color: #00CCC2;
-  /* Color para la X de Codexa */
+
+  /* Typography */
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: var(--font-rasputin), serif;
 }
 
-/* Base styles with Qoder Dark theme - Modernizado */
+/* Base styles â€” Barberox12 ecosystem */
 html {
-  background-color: var(--color-background);
-  color: var(--color-text);
+  background-color: #000000;
+  color: #F5F0EB;
 }
 
 body {
   background-color: transparent;
-  color: var(--color-text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  color: #F5F0EB;
+  font-family: var(--font-body);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -131,7 +118,19 @@ body {
   padding: 0;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-rasputin), serif !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
 /* Contenedor de fondo fijo */
+/* Fondo estrellado */
 .background-container {
   position: fixed;
   top: 0;
@@ -143,7 +142,6 @@ body {
   overflow: hidden;
 }
 
-/* Capa negra opaca que cubre todo el fondo */
 .background-container::before {
   content: "";
   position: absolute;
@@ -151,268 +149,81 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
-  z-index: 1;
+  background-image:
+    radial-gradient(1px 1px at 10% 15%, rgba(255, 255, 255, 0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 25% 8%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 22%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 5%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 18%, rgba(255, 255, 255, 0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 12%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 15% 35%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 42%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 38%, rgba(255, 255, 255, 0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 65% 30%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 45%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 92% 35%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 5% 55%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 20% 62%, rgba(255, 255, 255, 0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 35% 58%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 48% 65%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 52%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 75% 60%, rgba(255, 255, 255, 0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 88% 55%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 8% 75%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 22% 82%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 38% 78%, rgba(255, 255, 255, 0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 52% 85%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 68% 72%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 82% 80%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 95% 75%, rgba(255, 255, 255, 0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 12% 92%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 28% 95%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 45% 90%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 62% 93%, rgba(255, 255, 255, 0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 78% 88%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 92%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 18% 28%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 42% 12%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 73% 42%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 33% 68%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 58% 78%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 87% 22%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 27% 48%, rgba(197, 160, 89, 0.6) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 65% 25%, rgba(197, 160, 89, 0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 83% 65%, rgba(197, 160, 89, 0.4) 0%, transparent 100%);
+  z-index: 0;
 }
 
-/* Primer destello naranja oscuro - posición superior izquierda */
 .sparkle-1 {
   position: absolute;
-  top: 10%;
-  left: 10%;
-  width: 200px;
-  height: 200px;
-  background-color: #7d6a58;
-  /* Beige más oscuro */
-  border-radius: 50%;
-  opacity: 0;
-  animation: slowSparkle 32s infinite;
+  bottom: 0;
+  left: 0;
+  width: 50%;
+  height: 40%;
+  background: radial-gradient(ellipse at 20% 80%, rgba(197, 160, 89, 0.04) 0%, transparent 60%);
   z-index: 0;
-  filter: blur(40px);
+  pointer-events: none;
 }
 
-/* Segundo destello naranja oscuro - posición inferior derecha */
 .sparkle-2 {
   position: absolute;
-  bottom: 10%;
-  right: 10%;
-  width: 300px;
-  height: 300px;
-  background-color: #7d6a58;
-  /* Beige más oscuro */
-  border-radius: 50%;
-  opacity: 0;
-  animation: slowSparkle 32s infinite 16s;
+  top: 0;
+  right: 0;
+  width: 40%;
+  height: 35%;
+  background: radial-gradient(ellipse at 80% 20%, rgba(197, 160, 89, 0.03) 0%, transparent 60%);
   z-index: 0;
-  filter: blur(60px);
+  pointer-events: none;
 }
 
-/* Animación muy lenta e intermitente */
-@keyframes slowSparkle {
-  0% {
-    opacity: 0;
-    transform: scale(0.3);
-  }
-
-  5% {
-    opacity: 0.6;
-    transform: scale(0.8);
-  }
-
-  10% {
-    opacity: 0.4;
-    transform: scale(0.7);
-  }
-
-  15% {
-    opacity: 0.7;
-    transform: scale(1.0);
-  }
-
-  20% {
-    opacity: 0.5;
-    transform: scale(0.9);
-  }
-
-  25% {
-    opacity: 0.8;
-    transform: scale(1.2);
-  }
-
-  30% {
-    opacity: 0.6;
-    transform: scale(1.1);
-  }
-
-  35% {
-    opacity: 0.9;
-    transform: scale(1.4);
-  }
-
-  40% {
-    opacity: 0.7;
-    transform: scale(1.2);
-  }
-
-  45% {
-    opacity: 0.5;
-    transform: scale(1.0);
-  }
-
-  50% {
-    opacity: 0.8;
-    transform: scale(1.3);
-  }
-
-  55% {
-    opacity: 0.6;
-    transform: scale(1.1);
-  }
-
-  60% {
-    opacity: 0.4;
-    transform: scale(1.0);
-  }
-
-  65% {
-    opacity: 0.7;
-    transform: scale(1.2);
-  }
-
-  70% {
-    opacity: 0.5;
-    transform: scale(1.0);
-  }
-
-  75% {
-    opacity: 0.3;
-    transform: scale(0.8);
-  }
-
-  80% {
-    opacity: 0.6;
-    transform: scale(1.1);
-  }
-
-  85% {
-    opacity: 0.4;
-    transform: scale(0.9);
-  }
-
-  90% {
-    opacity: 0.2;
-    transform: scale(0.7);
-  }
-
-  95% {
-    opacity: 0.5;
-    transform: scale(0.9);
-  }
-
-  100% {
-    opacity: 0;
-    transform: scale(0.3);
-  }
-}
-
-/* Dashboard styles - Estilo Codexa */
-.dashboard {
-  padding: 20px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  box-sizing: border-box;
-  background-color: transparent;
-  min-height: 100vh;
-  margin-top: 60px;
-  /* Espacio para la navbar fija */
-}
-
-.dashboard-content {
-  flex: 1;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 25px;
-  margin: 30px 0;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.stat-card {
-  background-color: var(--qoder-dark-bg-secondary);
-  padding: 20px;
-  border-radius: 8px;
-  text-align: center;
-  transition: transform 0.3s ease;
-  box-sizing: border-box;
-  border: 1px solid var(--qoder-dark-border-primary);
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  border-color: var(--qoder-dark-accent-orange);
-}
-
-.stat-number {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--qoder-dark-accent-orange);
-  margin: 15px 0;
-}
-
-.stat-description {
-  color: var(--qoder-dark-text-secondary);
-  font-size: 1rem;
-}
-
-.dashboard h1,
-.dashboard h2,
-.dashboard h3 {
-  color: var(--qoder-dark-text-primary);
-  margin-bottom: 15px;
-  font-size: 1.8rem;
-}
-
-.dashboard p {
-  color: var(--qoder-dark-text-secondary);
-  line-height: 1.6;
-  margin-bottom: 20px;
-}
-
-.dashboard ul {
-  padding-left: 20px;
-}
-
-.dashboard li {
-  padding: 8px 0;
-  border-bottom: none;
-  color: var(--qoder-dark-text-secondary);
-}
-
-.dashboard strong {
-  color: var(--qoder-dark-accent-orange);
-}
-
-.footer {
-  margin-top: auto;
-  text-align: center;
-  padding: 30px 0;
-  color: var(--qoder-dark-text-muted);
-  font-size: 0.9rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  width: 100%;
-  box-sizing: border-box;
-  background-color: transparent;
-  /* Fondo transparente para el footer */
-}
-
-/* Estilo especial para la X de Codexa */
-.codexa-x {
-  color: var(--codexa-x-color);
-}
 
 @media (max-width: 768px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .stat-number {
-    font-size: 2rem;
-  }
-
   .dashboard {
     padding: 15px;
   }
 }
 
-/* Contenedores principales (páginas, secciones grandes, paneles) - Modernizado */
+/* Contenedores principales (pÃ¡ginas, secciones grandes, paneles) - Modernizado */
 .qoder-dark-container {
   background: var(--qoder-dark-bg-secondary);
   border: 1px solid var(--qoder-dark-border-primary);
@@ -426,7 +237,7 @@ body {
   }
 }
 
-/* Tarjetas individuales (filas de tabla, cajas pequeñas, items de lista, paneles secundarios) - Modernizado */
+/* Tarjetas individuales (filas de tabla, cajas pequeÃ±as, items de lista, paneles secundarios) - Modernizado */
 .qoder-dark-card {
   background: var(--qoder-dark-bg-form);
   border: 1px solid var(--qoder-dark-border-primary);
@@ -470,7 +281,7 @@ body {
   border-color: var(--qoder-dark-accent-orange-light);
 }
 
-/* Tarjetas estáticas sin efecto hover - Para páginas de login y admin */
+/* Tarjetas estÃ¡ticas sin efecto hover - Para pÃ¡ginas de login y admin */
 .qoder-dark-card-static {
   background: var(--qoder-dark-bg-form);
   border: 1px solid var(--qoder-dark-border-primary);
@@ -609,12 +420,12 @@ main {
   overflow: hidden;
 }
 
-/* Estilo específico para los headers del chat */
+/* Estilo especÃ­fico para los headers del chat */
 .bg-qoder-dark-bg-header {
   background-color: var(--qoder-dark-bg-header);
 }
 
-/* Estilo específico para el área de mensajes en negro */
+/* Estilo especÃ­fico para el Ã¡rea de mensajes en negro */
 .bg-qoder-dark-bg-black {
   background-color: var(--qoder-dark-bg-black);
 }
@@ -857,10 +668,10 @@ main {
   transform: translateY(-2px);
 }
 
-/* Nuevo: Botón primario con acento naranja */
+/* Nuevo: BotÃ³n primario con acento naranja */
 .qoder-dark-button-primary {
   background-color: var(--qoder-dark-accent-orange);
-  color: #ffffff;
+  color: var(--qoder-dark-button-primary-text);
   border: none;
   border-radius: 6px;
   padding: 10px 16px;
@@ -887,10 +698,10 @@ main {
   transform: translateY(-2px);
 }
 
-/* Estilo para botones de acción (confirmar, crear, actualizar, etc.) */
+/* Estilo para botones de acciÃ³n (confirmar, crear, actualizar, etc.) */
 .action-button {
   background-color: var(--qoder-dark-accent-orange);
-  color: #ffffff;
+  color: var(--qoder-dark-button-primary-text);
   border: none;
   border-radius: 6px;
   padding: 10px 16px;
@@ -964,7 +775,7 @@ main {
   opacity: 0.2;
 }
 
-/* Base: pestaña inactiva por defecto */
+/* Base: pestaÃ±a inactiva por defecto */
 .qoder-dark-sucursal-tab {
   position: relative;
   padding: 0.4rem 1.2rem;
@@ -984,7 +795,7 @@ main {
   z-index: 1;
 }
 
-/* Pestaña activa */
+/* PestaÃ±a activa */
 .qoder-dark-sucursal-tab.active {
   background: rgba(0, 0, 0, 0.5);
   /* negro 50% */
@@ -1000,10 +811,10 @@ main {
   background: rgba(0, 0, 0, 0.5);
 }
 
-/* Pestaña inactiva explícita (opcional, por si querés algo distinto del base) */
+/* PestaÃ±a inactiva explÃ­cita (opcional, por si querÃ©s algo distinto del base) */
 .qoder-dark-sucursal-tab.inactive {
   background: rgba(0, 0, 0, 1);
-  /* ya coincide con la base, aquí puedes ajustar si necesitás */
+  /* ya coincide con la base, aquÃ­ puedes ajustar si necesitÃ¡s */
   color: #3b3b3b;
   /* gris */
   border-bottom: 1px solid var(--qoder-dark-border-primary);
@@ -1372,7 +1183,7 @@ main {
   background-color: var(--qoder-dark-bg-modal);
 }
 
-/* Estilo específico para modales de cliente */
+/* Estilo especÃ­fico para modales de cliente */
 .qoder-dark-client-modal {
   background-color: var(--qoder-dark-bg-modal);
   border-radius: 22px;
@@ -1618,12 +1429,12 @@ main {
   border-radius: 9999px 0px 0px 9999px !important;
 }
 
-/* Clase para efecto de píldora pronunciado */
+/* Clase para efecto de pÃ­ldora pronunciado */
 .pill-effect {
   border-radius: 25px !important;
 }
 
-/* Clase para pestañas simples */
+/* Clase para pestaÃ±as simples */
 .pest-simple {
   background: transparent !important;
   border: none !important;
@@ -1756,7 +1567,7 @@ main {
   width: 100%;
 }
 
-/* Estilos específicos para menús y navegación */
+/* Estilos especÃ­ficos para menÃºs y navegaciÃ³n */
 .nav-menu {
   background-color: rgba(0, 0, 0, 0.8);
 }
@@ -1786,17 +1597,17 @@ main {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Estilos universales para menús desplegables */
+/* Estilos universales para menÃºs desplegables */
 .dropdown-menu {
   background-color: rgba(30, 30, 30, 0.95);
   /* Fondo oscuro con transparencia */
-  border: 1px solid rgba(255, 119, 0, 0.3);
+  border: 1px solid rgba(197, 160, 89, 0.3);
   /* Borde naranja */
   border-radius: 6px;
 }
 
 .dropdown-item {
-  color: #ff7700;
+  color: #C5A059;
   /* Texto naranja */
   padding: 12px 15px;
   border-radius: 0;
@@ -1807,56 +1618,42 @@ main {
 }
 
 .dropdown-item:hover {
-  background: rgba(255, 119, 0, 0.3) !important;
+  background: rgba(197, 160, 89, 0.3) !important;
   /* Fondo naranja al pasar el mouse */
-  color: #ff7700;
+  color: #C5A059;
   font-weight: 600;
 }
 
 .dropdown-item.active {
-  background: rgba(255, 119, 0, 0.5) !important;
-  /* Fondo naranja más intenso cuando está activo */
-  color: #ff7700;
+  background: rgba(197, 160, 89, 0.5) !important;
+  /* Fondo naranja mÃ¡s intenso cuando estÃ¡ activo */
+  color: #C5A059;
   font-weight: 600;
 }
 
 .dropdown-item:focus {
-  background: rgba(255, 119, 0, 0.4) !important;
+  background: rgba(197, 160, 89, 0.4) !important;
   /* Fondo naranja al enfocar */
-  color: #ff7700;
+  color: #C5A059;
   outline: none;
 }
 
 /* Asegurar que no haya estilos heredados que causen fondo celeste */
 .dropdown-menu *,
 .dropdown-item * {
-  background-color: transparent !important;
-}
-
-/* Override para botones del calendario - sin fondo naranja */
-button[class*="rounded"][class*="transition"] {
-  background-color: transparent !important;
-}
-
-button[class*="rounded"][class*="transition"]:hover {
-  background-color: rgba(55, 65, 81, 0.5) !important;
-}
-
-button[class*="rounded"][class*="transition"]:disabled {
-  background-color: transparent !important;
-  opacity: 0.3;
+  background-color: transparent;
 }
 
 /* Quitar fondos naranjas heredados de estilos globales */
 .qoder-dark-button:not(.action-button):not(.cancel-button) {
-  background-color: var(--qoder-dark-button-secondary) !important;
+  background-color: var(--qoder-dark-button-secondary);
 }
 
 .qoder-dark-button:hover:not(.action-button):not(.cancel-button) {
   background-color: var(--qoder-dark-button-hover) !important;
 }
 
-/* Estilo específico para el botón de limpieza del buscador de WhatsApp */
+/* Estilo especÃ­fico para el botÃ³n de limpieza del buscador de WhatsApp */
 .whatsapp-clear-button {
   background: transparent !important;
   border: none !important;

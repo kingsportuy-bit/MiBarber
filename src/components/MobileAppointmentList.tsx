@@ -58,7 +58,7 @@ export function MobileAppointmentList({ onEdit }: MobileAppointmentListProps) {
 
   // Filtrar citas para mostrar solo pendientes y completadas (excluir canceladas)
   const citasFiltradas = useMemo(() => {
-    return citas.filter(cita => 
+    return citas.filter(cita =>
       cita.estado === "pendiente" || cita.estado === "completado"
     );
   }, [citas]);
@@ -127,11 +127,12 @@ export function MobileAppointmentList({ onEdit }: MobileAppointmentListProps) {
       <div className="qoder-dark-card p-6 text-center">
         <h3 className="text-lg font-medium text-red-500">Error al cargar las citas</h3>
         <p className="text-qoder-dark-text-secondary">No se pudieron cargar las citas. Intente refrescar la página.</p>
-        <button 
-          onClick={() => refetch()}
-          className="mt-4 qoder-dark-button-primary px-4 py-2 rounded-lg hover-lift smooth-transition"
+        <button
+          onClick={() => window.location.href = '/nueva-cita'}
+          className="mt-4 qoder-dark-button-primary px-4 py-2 rounded-none uppercase tracking-widest text-xs hover-lift smooth-transition"
+          style={{ fontFamily: 'var(--font-rasputin), serif' }}
         >
-          Reintentar
+          Nueva cita
         </button>
       </div>
     );
@@ -143,7 +144,7 @@ export function MobileAppointmentList({ onEdit }: MobileAppointmentListProps) {
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <div className="flex space-x-2">
-            <button 
+            <button
               onClick={goToPreviousDay}
               className="p-2 rounded-full qoder-dark-button"
               title="Día anterior"
@@ -152,33 +153,34 @@ export function MobileAppointmentList({ onEdit }: MobileAppointmentListProps) {
                 <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
             </button>
-            
+
             {getLocalDateString(currentDate) !== getLocalDateString(new Date()) && (
-              <button 
+              <button
                 onClick={goToToday}
-                className="px-3 py-2 rounded-lg qoder-dark-button text-sm font-medium"
+                className="px-3 py-2 rounded-none qoder-dark-button uppercase tracking-widest text-[10px]"
+                style={{ fontFamily: 'var(--font-rasputin), serif' }}
               >
                 Hoy
               </button>
             )}
           </div>
-          
+
           <div className="text-center">
             <h2 className="text-lg md:text-xl font-bold text-qoder-dark-text-primary">
-              {currentDate.toLocaleDateString('es-UY', { 
-                weekday: 'long', 
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric' 
+              {currentDate.toLocaleDateString('es-UY', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
               })}
             </h2>
             <p className="text-qoder-dark-text-secondary text-sm">
               {citasFiltradas?.length || 0} citas programadas
             </p>
           </div>
-          
+
           <div className="flex space-x-2">
-            <button 
+            <button
               onClick={goToNextDay}
               className="p-2 rounded-full qoder-dark-button"
               title="Día siguiente"
@@ -190,7 +192,7 @@ export function MobileAppointmentList({ onEdit }: MobileAppointmentListProps) {
           </div>
         </div>
       </div>
-      
+
       {/* Lista de citas en formato de tarjetas */}
       <div className="space-y-3 w-full">
         {citasFiltradas.length > 0 ? (
@@ -200,55 +202,55 @@ export function MobileAppointmentList({ onEdit }: MobileAppointmentListProps) {
               return a.hora.localeCompare(b.hora);
             })
             .map((cita) => {
-            // Obtener información del cliente del mapa
-            const clientData = cita.id_cliente ? clientesMap[cita.id_cliente] : undefined;
-            
-            return (
-              <div
-                key={cita.id_cita}
-                className="p-3 rounded-lg shadow-md bg-qoder-dark-bg-form cursor-pointer"
-                onClick={() => handleEditAppointment(cita)}
-              >
-                <div className="flex justify-between items-center">
-                  <div className="flex-1 min-w-0">
-                    {/* Hora y nombre - tamaño y color blanco */}
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-white font-medium">
-                        {cita.hora?.slice(0, 5) || 'Sin hora'}
-                      </span>
-                      <span className="text-white font-medium truncate flex items-center">
-                        {cita.cliente_nombre || 'Cliente'}
-                        {clientData && clientData.puntaje !== null && clientData.puntaje !== undefined && (
-                          <span className="ml-2">
-                            {getStarsFromScore(clientData.puntaje)}
+              // Obtener información del cliente del mapa
+              const clientData = cita.id_cliente ? clientesMap[cita.id_cliente] : undefined;
+
+              return (
+                <div
+                  key={cita.id_cita}
+                  className="p-3 rounded-none shadow-md bg-qoder-dark-bg-form cursor-pointer"
+                  onClick={() => handleEditAppointment(cita)}
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="flex-1 min-w-0">
+                      {/* Hora y nombre - tamaño y color blanco */}
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-white font-medium">
+                          {cita.hora?.slice(0, 5) || 'Sin hora'}
+                        </span>
+                        <span className="text-white font-medium truncate flex items-center">
+                          {cita.cliente_nombre || 'Cliente'}
+                          {clientData && clientData.puntaje !== null && clientData.puntaje !== undefined && (
+                            <span className="ml-2">
+                              {getStarsFromScore(clientData.puntaje)}
+                            </span>
+                          )}
+                        </span>
+                      </div>
+
+                      {/* Servicio y duración - 50% opacidad */}
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-white text-opacity-50 truncate">
+                          {cita.servicio || 'Sin servicio'}
+                        </span>
+                        {cita.duracion && (
+                          <span className="text-white text-opacity-50">
+                            {cita.duracion}min
                           </span>
                         )}
+                      </div>
+                    </div>
+
+                    {/* Precio al extremo derecho - menor tamaño, 50% opacidad */}
+                    <div className="text-right ml-2">
+                      <span className="text-white text-opacity-50 text-sm font-medium">
+                        ${cita.ticket || 0}
                       </span>
                     </div>
-                    
-                    {/* Servicio y duración - 50% opacidad */}
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-white text-opacity-50 truncate">
-                        {cita.servicio || 'Sin servicio'}
-                      </span>
-                      {cita.duracion && (
-                        <span className="text-white text-opacity-50">
-                          {cita.duracion}min
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Precio al extremo derecho - menor tamaño, 50% opacidad */}
-                  <div className="text-right ml-2">
-                    <span className="text-white text-opacity-50 text-sm font-medium">
-                      ${cita.ticket || 0}
-                    </span>
                   </div>
                 </div>
-              </div>
-            );
-          })
+              );
+            })
         ) : (
           <div className="text-center py-8 text-qoder-dark-text-secondary">
             No hay citas programadas para este día

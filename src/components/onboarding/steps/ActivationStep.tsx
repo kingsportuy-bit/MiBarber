@@ -50,7 +50,7 @@ export default function ActivationStep({ data, onBack }: ActivationStepProps) {
 
     return (
         <motion.div
-            className="space-y-8 h-[calc(100vh-240px)] sm:h-[60vh] overflow-y-auto custom-scrollbar text-center py-4 px-2"
+            className="space-y-8 text-center py-4 px-2"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4 }}
@@ -82,11 +82,11 @@ export default function ActivationStep({ data, onBack }: ActivationStepProps) {
                                 onClick={generateAssistant}
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="w-full px-8 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold text-xl rounded-full shadow-[0_0_30px_rgba(139,92,246,0.3)] hover:shadow-[0_0_50px_rgba(139,92,246,0.6)] transition-all duration-300"
+                                className="w-full px-8 py-4 !bg-gradient-to-r !from-violet-600 !to-indigo-600 text-white font-bold text-xl rounded-full shadow-[0_0_30px_rgba(139,92,246,0.3)] hover:shadow-[0_0_50px_rgba(139,92,246,0.6)] transition-all duration-300"
                             >
                                 Generar Asistente IA
                             </motion.button>
-                            <button onClick={onBack} className="text-slate-500 hover:text-white transition-colors text-sm">Volver a revisar</button>
+                            <button onClick={onBack} className="text-slate-500 hover:text-white transition-colors text-sm bg-none">Volver a revisar</button>
                         </div>
                     </motion.div>
                 )}
@@ -135,7 +135,7 @@ export default function ActivationStep({ data, onBack }: ActivationStepProps) {
                         <div className="flex justify-center gap-4 pt-4">
                             <button
                                 onClick={onBack}
-                                className="px-6 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                                className="px-6 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-colors bg-none"
                             >
                                 Revisar datos
                             </button>

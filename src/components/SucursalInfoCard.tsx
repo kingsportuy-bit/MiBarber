@@ -23,19 +23,21 @@ export function SucursalInfoCard({ sucursal, onEdit, onEditHorarios }: SucursalI
         <div className="flex space-x-2">
           <button
             onClick={onEditHorarios}
-            className="bg-qoder-dark-accent-primary hover:bg-qoder-dark-accent-hover text-white px-3 py-1 text-sm rounded-lg transition-colors duration-200"
+            className="bg-qoder-dark-accent-primary hover:bg-qoder-dark-accent-hover text-white px-3 py-1 text-xs rounded-none transition-colors duration-200 uppercase tracking-widest"
+            style={{ fontFamily: 'var(--font-rasputin), serif' }}
           >
             Editar horarios
           </button>
           <button
             onClick={onEdit}
-            className="bg-qoder-dark-accent-primary hover:bg-qoder-dark-accent-hover text-white px-3 py-1 text-sm rounded-lg transition-colors duration-200"
+            className="bg-qoder-dark-accent-primary hover:bg-qoder-dark-accent-hover text-white px-3 py-1 text-xs rounded-none transition-colors duration-200 uppercase tracking-widest"
+            style={{ fontFamily: 'var(--font-rasputin), serif' }}
           >
             Editar sucursal
           </button>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <h4 className="text-xs uppercase tracking-wider text-qoder-dark-text-secondary mb-1">
@@ -45,7 +47,7 @@ export function SucursalInfoCard({ sucursal, onEdit, onEditHorarios }: SucursalI
             {sucursal.telefono || "No especificado"}
           </p>
         </div>
-        
+
         <div>
           <h4 className="text-xs uppercase tracking-wider text-qoder-dark-text-secondary mb-1">
             Dirección
@@ -54,7 +56,7 @@ export function SucursalInfoCard({ sucursal, onEdit, onEditHorarios }: SucursalI
             {sucursal.direccion || "No especificada"}
           </p>
         </div>
-        
+
         <div>
           <h4 className="text-xs uppercase tracking-wider text-qoder-dark-text-secondary mb-1">
             Información Adicional

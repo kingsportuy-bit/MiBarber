@@ -52,21 +52,21 @@ export default function PerfilPage() {
   };
 
   return (
-    <>
+    <div style={{ padding: "0 20px 24px", width: "100%", margin: "0 auto" }}>
       {/* ⭐ MANTENER Card principal existente - NO MODIFICAR */}
       <Card className="mb-8">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6 p-4 md:p-6">
           <div className="flex-shrink-0">
-            <Avatar 
+            <Avatar
               src={(barberoCompleto || barberoAuth) ? (barberoCompleto || barberoAuth as any).foto || undefined : undefined}
               alt={barberoData.nombre}
               size="xl"
               className="w-20 h-20 md:w-24 md:h-24"
             />
           </div>
-          
+
           <div className="flex-1 text-center md:text-left">
-            <h1 
+            <h1
               className="text-center text-3xl md:text-4xl mb-2 text-[var(--text-primary)] client-name"
               style={
                 {
@@ -85,7 +85,7 @@ export default function PerfilPage() {
             <p className="text-sm text-[var(--text-muted)] mb-4">
               @{barberoData.username || 'Sin usuario'}
             </p>
-            
+
             <div className="space-y-3">
               <div>
                 <p className="text-xs uppercase text-[var(--text-muted)] mb-1 font-semibold">
@@ -95,7 +95,7 @@ export default function PerfilPage() {
                   {barberoData.email || 'No especificado'}
                 </p>
               </div>
-              
+
               <div>
                 <p className="text-xs uppercase text-[var(--text-muted)] mb-1 font-semibold">
                   TELÉFONO
@@ -108,8 +108,8 @@ export default function PerfilPage() {
           </div>
 
           <div className="flex-shrink-0 w-full md:w-auto">
-            <Button 
-              variant="primary" 
+            <Button
+              variant="primary"
               onClick={handleEditProfile}
               className="w-full md:w-auto uppercase text-sm font-semibold px-6"
             >
@@ -133,19 +133,19 @@ export default function PerfilPage() {
       <TabContent value="perfil" activeTab={activeTab}>
         {barberoAuth && idBarberia && (
           <>
-            <EstadisticasCards 
-              barberoId={barberoAuth.id_barbero} 
-              barberiaId={idBarberia} 
+            <EstadisticasCards
+              barberoId={barberoAuth.id_barbero}
+              barberiaId={idBarberia}
             />
-            
-            <ServiciosSection 
-              barberoId={barberoAuth.id_barbero} 
-              barberiaId={idBarberia} 
+
+            <ServiciosSection
+              barberoId={barberoAuth.id_barbero}
+              barberiaId={idBarberia}
             />
-            
-            <ClientesSection 
-              barberoId={barberoAuth.id_barbero} 
-              barberiaId={idBarberia} 
+
+            <ClientesSection
+              barberoId={barberoAuth.id_barbero}
+              barberiaId={idBarberia}
             />
           </>
         )}
@@ -155,14 +155,14 @@ export default function PerfilPage() {
       <TabContent value="horarios" activeTab={activeTab}>
         {barberoAuth && idBarberia && barberoAuth.id_sucursal && (
           <>
-            <BloqueosTable 
-              barberoId={barberoAuth.id_barbero} 
+            <BloqueosTable
+              barberoId={barberoAuth.id_barbero}
               barberiaId={idBarberia}
               sucursalId={barberoAuth.id_sucursal}
             />
-            
-            <DescansosList 
-              barberoId={barberoAuth.id_barbero} 
+
+            <DescansosList
+              barberoId={barberoAuth.id_barbero}
               barberiaId={idBarberia}
               sucursalId={barberoAuth.id_sucursal}
             />
@@ -177,6 +177,6 @@ export default function PerfilPage() {
           onClose={() => setShowEditModal(false)}
         />
       )}
-    </>
+    </div>
   );
 }

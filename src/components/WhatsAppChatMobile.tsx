@@ -32,6 +32,16 @@ const getStarsFromScore = (puntaje: number) => {
   return <span className="tracking-wide">{stars}</span>;
 };
 
+// Helper to format names: only first letter of each word capitalized
+function formatName(name: string): string {
+  if (!name) return name;
+  return name
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 export function WhatsAppChatMobile() {
   const { idBarberia, isAdmin, barbero } = useBarberoAuth();
   const { sucursales } = useSucursales(idBarberia || undefined);
@@ -422,7 +432,7 @@ export function WhatsAppChatMobile() {
                             setSelectedSucursal(e.target.value || undefined);
                           }
                         }}
-                        className="w-full h-10 qoder-dark-search-box py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-lg border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
+                        className="w-full h-10 qoder-dark-search-box py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-none border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
                       >
                         <option value="todas">Todos los chats</option>
                         {sucursales?.map((sucursal: any) => (
@@ -444,7 +454,7 @@ export function WhatsAppChatMobile() {
                           placeholder="Buscar..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full h-10 py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-lg pr-10 bg-qoder-dark-bg-form border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
+                          className="w-full h-10 py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-none pr-10 bg-qoder-dark-bg-form border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
                         />
                         {searchTerm && (
                           <button
@@ -544,8 +554,8 @@ export function WhatsAppChatMobile() {
                       <div className="flex-1 min-w-0">
                         {/* Nombre del cliente y timestamp */}
                         <div className="flex items-center justify-between mb-1">
-                          <h3 className="font-semibold text-qoder-dark-text-primary truncate flex items-center">
-                            {clientName}
+                          <div className="font-semibold text-qoder-dark-text-primary text-lg truncate flex items-center">
+                            {formatName(clientName)}
                             {(() => {
                               const clientInfo = getClientInfo(conversation.session_id);
                               const clientData = clientInfo?.id_cliente ? clientesMap[clientInfo.id_cliente] : undefined;
@@ -555,7 +565,7 @@ export function WhatsAppChatMobile() {
                                 </span>
                               ) : null;
                             })()}
-                          </h3>
+                          </div>
                           <span className="text-xs text-qoder-dark-text-secondary flex-shrink-0">
                             {lastMessage ? formatWhatsAppTimestamp(lastMessage.timestamp) : ""}
                           </span>
@@ -639,8 +649,8 @@ export function WhatsAppChatMobile() {
                       })()}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-qoder-dark-text-primary flex items-center">
-                        {getClientName(activeConv.session_id)}
+                      <div className="font-semibold text-qoder-dark-text-primary text-lg flex items-center">
+                        {formatName(getClientName(activeConv.session_id))}
                         {(() => {
                           const clientInfo = getClientInfo(activeConv.session_id);
                           const clientData = clientInfo?.id_cliente ? clientesMap[clientInfo.id_cliente] : undefined;
@@ -650,7 +660,7 @@ export function WhatsAppChatMobile() {
                             </span>
                           ) : null;
                         })()}
-                      </h3>
+                      </div>
                       <p className="text-xs text-qoder-dark-text-secondary">
                         {getClientInfo(activeConv.session_id)?.telefono || 'Número no disponible'}
                       </p>

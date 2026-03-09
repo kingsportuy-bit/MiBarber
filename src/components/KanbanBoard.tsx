@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
 
 // Definir tipos para las columnas del tablero Kanban
-type ColumnId = "pendientes" | "completadas" | "canceladas";
+type ColumnId = "pendientes" | "confirmadas" | "completadas" | "canceladas";
 type EstadoCita = "pendiente" | "confirmado" | "completado" | "cancelado";
 
 interface Column {
@@ -51,6 +51,12 @@ const COLUMNS: Record<ColumnId, Column> = {
     color: "orange",
     taskIds: [],
   },
+  confirmadas: {
+    id: "confirmadas",
+    title: "Confirmadas",
+    color: "blue",
+    taskIds: [],
+  },
   completadas: {
     id: "completadas",
     title: "Completadas",
@@ -65,8 +71,8 @@ const COLUMNS: Record<ColumnId, Column> = {
   },
 };
 
-export function KanbanBoard({ 
-  isCreateModalOpen, 
+export function KanbanBoard({
+  isCreateModalOpen,
   setIsCreateModalOpen,
   selectedAppointment,
   setSelectedAppointment
@@ -79,20 +85,20 @@ export function KanbanBoard({
     const localDate = getLocalDateTime();
     return localDate;
   });
-  
+
   // Estados locales para el modal si no se pasan como props
   const [localIsCreateModalOpen, localSetIsCreateModalOpen] = useState(false);
   const [localSelectedAppointment, localSetSelectedAppointment] = useState<Partial<Appointment> | null>(null);
-  
+
   // Usar props si se pasan, de lo contrario usar estados locales
   const modalOpen = isCreateModalOpen !== undefined ? isCreateModalOpen : localIsCreateModalOpen;
   const setModalOpen = setIsCreateModalOpen !== undefined ? setIsCreateModalOpen : localSetIsCreateModalOpen;
   const appointment = selectedAppointment !== undefined ? selectedAppointment : localSelectedAppointment;
   const setAppointment = setSelectedAppointment !== undefined ? setSelectedAppointment : localSetSelectedAppointment;
-  
+
   // Estado para las columnas
   const [columns, setColumns] = useState<Record<ColumnId, Column>>(() => COLUMNS);
-  
+
   // Obtener citas para la fecha actual
   // Para la página de inicio, siempre mostrar las citas del barbero logueado
   const { data: citas = [], isLoading, isError, refetch } = useCitas({
@@ -100,38 +106,40 @@ export function KanbanBoard({
     fecha: getLocalDateString(currentDate), // Usar nuestra función unificada
     barberoId: barberoActual?.id_barbero || undefined,
   });
-  
+
   // Hook para crear citas
   const { createMutation } = useCitas({
     sucursalId: barberoActual?.id_sucursal || undefined,
     barberoId: barberoActual?.id_barbero || undefined
   });
-  
+
   const { mutateAsync: updateCita } = useUpdateCita();
-  
+
   // Convertir citas a tareas para el tablero Kanban
   const kanbanTasks = useMemo(() => {
     const taskMap: Record<string, KanbanTask> = {};
-    
+
     citas.forEach(cita => {
       // Mapear el estado de la cita a una columna del tablero
       let columnId: ColumnId = "pendientes";
-      if (cita.estado === "completado") {
+      if (cita.estado === "confirmado") {
+        columnId = "confirmadas";
+      } else if (cita.estado === "completado") {
         columnId = "completadas";
       } else if (cita.estado === "cancelado") {
         columnId = "canceladas";
       }
-      
+
       taskMap[cita.id_cita] = {
         ...cita,
         id: cita.id_cita,
         columnId,
       };
     });
-    
+
     return taskMap;
   }, [citas]);
-  
+
   // Ref para rastrear las tareas anteriores y evitar actualizaciones innecesarias
   const prevKanbanTasksRef = useRef<Record<string, any>>({});
 
@@ -140,18 +148,19 @@ export function KanbanBoard({
     // Verificar si las tareas realmente cambiaron
     const prevTasks = prevKanbanTasksRef.current;
     const currentTasks = kanbanTasks;
-    
+
     // Comparar las tareas para ver si realmente cambiaron
     const hasChanged = Object.keys(currentTasks).length !== Object.keys(prevTasks).length ||
-      Object.keys(currentTasks).some(key => 
+      Object.keys(currentTasks).some(key =>
         currentTasks[key].id !== prevTasks[key]?.id ||
         currentTasks[key].columnId !== prevTasks[key]?.columnId
       );
-    
+
     if (hasChanged) {
       setColumns(prevColumns => {
         const columnTasks: Record<ColumnId, string[]> = {
           pendientes: [],
+          confirmadas: [],
           completadas: [],
           canceladas: [],
         };
@@ -165,6 +174,10 @@ export function KanbanBoard({
             ...COLUMNS.pendientes,
             taskIds: columnTasks.pendientes,
           },
+          confirmadas: {
+            ...COLUMNS.confirmadas,
+            taskIds: columnTasks.confirmadas,
+          },
           completadas: {
             ...COLUMNS.completadas,
             taskIds: columnTasks.completadas,
@@ -177,22 +190,22 @@ export function KanbanBoard({
 
         // Verificar si las columnas realmente cambiaron para evitar actualizaciones innecesarias
         const columnsChanged = (Object.keys(updatedColumns) as ColumnId[]).some(
-          columnId => 
+          columnId =>
             JSON.stringify(updatedColumns[columnId].taskIds) !== JSON.stringify(prevColumns[columnId].taskIds)
         );
 
         if (columnsChanged) {
           return updatedColumns;
         }
-        
+
         return prevColumns;
       });
     }
-    
+
     // Actualizar las tareas anteriores
     prevKanbanTasksRef.current = kanbanTasks;
   }, [kanbanTasks]);
-  
+
   // Convertir tareas de Kanban a tareas compatibles con TaskCard
   const convertToTaskCardFormat = (kanbanTask: KanbanTask): Task => {
     return {
@@ -201,7 +214,7 @@ export function KanbanBoard({
       cita: kanbanTask // Pasar los datos completos de la cita
     };
   };
-  
+
   // Handlers de navegación - usando la misma forma que la agenda
   const goToPreviousDay = useCallback(() => {
     setCurrentDate(prev => {
@@ -210,7 +223,7 @@ export function KanbanBoard({
       return newDate;
     });
   }, []);
-  
+
   const goToNextDay = useCallback(() => {
     setCurrentDate(prev => {
       const newDate = new Date(prev);
@@ -218,11 +231,11 @@ export function KanbanBoard({
       return newDate;
     });
   }, []);
-  
+
   const goToToday = useCallback(() => {
     setCurrentDate(getLocalDateTime());
   }, []);
-  
+
   // Manejar cambio de fecha desde el componente de navegación
   const handleDateChange = (date: string) => {
     // Convertir string a Date
@@ -230,7 +243,7 @@ export function KanbanBoard({
     const newDate = new Date(year, month - 1, day);
     setCurrentDate(newDate);
   };
-  
+
   const handleCreateNewAppointment = () => {
     const newAppointment: Partial<Appointment> = {
       fecha: getLocalDateString(currentDate),
@@ -238,11 +251,11 @@ export function KanbanBoard({
       servicio: "",
       barbero: ""
     };
-    
+
     setAppointment(newAppointment);
     setModalOpen(true);
   };
-  
+
   const handleSaveAppointment = async (values: Partial<Appointment>) => {
     try {
       // Verificar si es una actualización o creación
@@ -278,15 +291,15 @@ export function KanbanBoard({
           created_at: values.created_at || new Date().toISOString(),
           updated_at: values.updated_at || new Date().toISOString()
         };
-        
+
         await createMutation.mutateAsync(appointmentToCreate);
         toast.success("Turno creado correctamente");
       }
-      
+
       // Cerrar el modal y limpiar la cita seleccionada
       setModalOpen(false);
       setAppointment(null);
-      
+
       // Refrescar los datos
       await refetch();
     } catch (error) {
@@ -302,40 +315,44 @@ export function KanbanBoard({
       }
     }
   };
-  
+
   // Función para manejar la edición de una cita
   const handleEditAppointment = (cita: Appointment) => {
     setAppointment(cita);
     setModalOpen(true);
   };
-  
+
   const onDragEnd = async (result: DropResult) => {
     const { destination, source, draggableId } = result;
-    
+
     if (!destination) {
       return;
     }
-    
+
     if (
       destination.droppableId === source.droppableId &&
       destination.index === source.index
     ) {
       return;
     }
-    
+
     // Encontrar la tarea que se está moviendo
     const task = kanbanTasks[draggableId];
     if (!task) {
       return;
     }
-    
+
     let newEstado: EstadoCita = "pendiente";
     let newColumnId: ColumnId = "pendientes";
-    
+
     switch (destination.droppableId) {
       case "pendientes":
         newEstado = "pendiente";
         newColumnId = "pendientes";
+        break;
+      case "confirmadas":
+        newEstado = "confirmado";
+        newColumnId = "confirmadas";
         break;
       case "completadas":
         newEstado = "completado";
@@ -346,24 +363,24 @@ export function KanbanBoard({
         newColumnId = "canceladas";
         break;
     }
-    
+
     const sourceColumnId = source.droppableId as ColumnId;
     const destColumnId = destination.droppableId as ColumnId;
-    
+
     // 1) Actualizar columnas localmente (optimistic update)
     setColumns((prev) => {
       const newColumns = { ...prev };
-      
+
       const sourceColumn = newColumns[sourceColumnId];
       const destColumn = newColumns[destColumnId];
-      
+
       const sourceTaskIds = Array.from(sourceColumn.taskIds);
       sourceTaskIds.splice(source.index, 1);
-      
+
       if (sourceColumnId === destColumnId) {
         // Mover dentro de la misma columna
         sourceTaskIds.splice(destination.index, 0, draggableId);
-        
+
         newColumns[sourceColumnId] = {
           ...sourceColumn,
           taskIds: sourceTaskIds,
@@ -372,7 +389,7 @@ export function KanbanBoard({
         // Mover entre columnas distintas
         const destTaskIds = Array.from(destColumn.taskIds);
         destTaskIds.splice(destination.index, 0, draggableId);
-        
+
         newColumns[sourceColumnId] = {
           ...sourceColumn,
           taskIds: sourceTaskIds,
@@ -382,35 +399,35 @@ export function KanbanBoard({
           taskIds: destTaskIds,
         };
       }
-      
+
       return newColumns;
     });
-    
+
     // Guardar el estado original para posibles reversiones
     const originalEstado = task.estado;
     const originalColumnId = task.columnId;
-    
+
     try {
       // Actualizar el estado de la cita en la base de datos
       await updateCita({
         id_cita: task.id_cita,
         estado: newEstado
       });
-      
+
       toast.success("Cita actualizada correctamente");
-      
+
       // Refrescar los datos directamente sin setTimeout
       await refetch();
     } catch (error) {
       console.error("Error al actualizar la cita:", error);
       toast.error("Error al actualizar la cita");
-      
+
       // En caso de error, revertir el cambio local
       // Refrescar para restaurar el estado anterior
       await refetch();
     }
   };
-  
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -418,13 +435,13 @@ export function KanbanBoard({
       </div>
     );
   }
-  
+
   if (isError) {
     return (
       <div className="qoder-dark-card p-6 text-center">
         <h3 className="text-lg font-medium text-red-500">Error al cargar las citas</h3>
         <p className="text-qoder-dark-text-secondary">No se pudieron cargar las citas. Intente refrescar la página.</p>
-        <button 
+        <button
           onClick={() => refetch()}
           className="mt-4 qoder-dark-button-primary px-4 py-2 rounded-lg hover-lift smooth-transition"
         >
@@ -440,7 +457,7 @@ export function KanbanBoard({
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <div className="flex space-x-2">
-            <button 
+            <button
               onClick={goToPreviousDay}
               className="p-2 rounded-full qoder-dark-button"
               title="Día anterior"
@@ -449,9 +466,9 @@ export function KanbanBoard({
                 <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
             </button>
-            
+
             {getLocalDateString(currentDate) !== getLocalDateString(new Date()) && (
-              <button 
+              <button
                 onClick={goToToday}
                 className="px-3 py-2 rounded-lg qoder-dark-button text-sm font-medium"
               >
@@ -459,23 +476,23 @@ export function KanbanBoard({
               </button>
             )}
           </div>
-          
+
           <div className="text-center">
             <h2 className="text-lg md:text-xl font-bold text-qoder-dark-text-primary">
-              {currentDate.toLocaleDateString('es-UY', { 
-                weekday: 'long', 
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric' 
+              {currentDate.toLocaleDateString('es-UY', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
               })}
             </h2>
             <p className="text-qoder-dark-text-secondary text-sm">
               {citas?.length || 0} citas programadas
             </p>
           </div>
-          
+
           <div className="flex space-x-2">
-            <button 
+            <button
               onClick={goToNextDay}
               className="p-2 rounded-full qoder-dark-button"
               title="Día siguiente"
@@ -487,10 +504,10 @@ export function KanbanBoard({
           </div>
         </div>
       </div>
-      
+
       {/* Tablero Kanban principal - visible solo en pantallas medianas y grandes */}
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="hidden md:grid md:grid-cols-3 gap-6 w-full">
+        <div className="hidden md:grid md:grid-cols-4 gap-6 w-full">
           {Object.values(columns).map((column) => {
             const columnTasks = column.taskIds
               .map(taskId => kanbanTasks[taskId])
@@ -508,7 +525,7 @@ export function KanbanBoard({
           })}
         </div>
       </DragDropContext>
-      
+
       {/* Mensaje para dispositivos móviles */}
       <div className="md:hidden text-center py-8">
         <div className="bg-qoder-dark-bg-secondary rounded-lg p-6 max-w-md mx-auto">
@@ -517,7 +534,7 @@ export function KanbanBoard({
           </svg>
           <h3 className="text-xl font-bold text-qoder-dark-text-primary mb-2">Vista de Tablero No Disponible</h3>
           <p className="text-qoder-dark-text-secondary mb-4">
-            El tablero Kanban está optimizado para pantallas más grandes. 
+            El tablero Kanban está optimizado para pantallas más grandes.
             Para una mejor experiencia, accede desde una tablet o computadora.
           </p>
           <p className="text-sm text-qoder-dark-text-muted">
@@ -525,7 +542,7 @@ export function KanbanBoard({
           </p>
         </div>
       </div>
-      
+
       {/* Modal de nuevo turno */}
       {appointment && (
         <FinalAppointmentModalModificado

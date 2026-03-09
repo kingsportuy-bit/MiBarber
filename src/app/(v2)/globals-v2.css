@@ -1,22 +1,28 @@
-/* ============================================
+﻿/* ============================================
    MIBARBER V2 DESIGN SYSTEM
-   Sistema de diseño basado en tokens
+   Sistema de diseÃ±o basado en tokens
    ============================================ */
 
 /* ============================================
    V2 SYSTEM - RESET DE ESTILOS LEGACY
    ============================================ */
 
-/* Contenedor raíz de V2 */
+/* Contenedor raÃ­z de V2 */
 .v2-root {
   padding: 0 !important;
   margin: 0 !important;
   width: 100% !important;
   min-height: 100vh !important;
-  /* Fondo completamente transparente */
   background: transparent !important;
   background-color: transparent !important;
-  padding-top: 75px !important;
+  padding-top: var(--navbar-height, 56px) !important;
+}
+
+@media (min-width: 768px) {
+  .v2-root {
+    padding-top: 0 !important;
+    margin-left: var(--sidebar-width, 240px) !important;
+  }
 }
 
 /* Main de V2 */
@@ -25,22 +31,35 @@
   width: 100% !important;
   max-width: 100% !important;
   margin: 0 !important;
-  /* Fondo completamente transparente */
+  margin-top: 60px !important;
   background: transparent !important;
   background-color: transparent !important;
-  /* Sin bordes ni sombras */
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
-  /* Solo padding vertical (el lateral lo controla .v2-content) */
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  padding-top: 15px !important;
+  /* Replicar el padding base de .dashboard */
+  padding: 15px !important;
   padding-bottom: 80px !important;
   flex-direction: initial !important;
 }
 
-/* Contenedor interno para padding lateral */
+@media (min-width: 769px) {
+  .v2-main {
+    padding: 25px !important;
+    padding-top: 65px !important;
+    margin-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .v2-main {
+    padding: 40px !important;
+    padding-top: 65px !important;
+    margin-top: 0 !important;
+  }
+}
+
 .v2-content {
   width: 100% !important;
   /* Fondo completamente transparente */
@@ -50,23 +69,8 @@
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
-  /* Mobile: padding lateral 10px */
-  padding-left: 10px !important;
-  padding-right: 10px !important;
-}
-
-@media (min-width: 768px) {
-  .v2-content {
-    padding-left: 20px !important;
-    padding-right: 20px !important;
-  }
-}
-
-@media (min-width: 1024px) {
-  .v2-content {
-    padding-left: 30px !important;
-    padding-right: 30px !important;
-  }
+  /* Sin padding — las páginas controlan su propio padding inline */
+  padding: 0 !important;
 }
 
 /* Contenedor que no debe usar flex */
@@ -98,7 +102,7 @@
   .v2-main .grid.lg\:grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   }
-  
+
   .v2-main .grid.lg\:grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
@@ -119,7 +123,7 @@
 }
 
 /* ============================================
-   RESET BÁSICO
+   RESET BÃSICO
    ============================================ */
 *,
 *::before,
@@ -134,50 +138,50 @@
 
 /* ============================================
    CAPA 1: TOKENS PRIMITIVOS
-   Valores base sin contexto semántico
+   Valores base sin contexto semÃ¡ntico
    ============================================ */
 :root {
   /* === COLORES PRIMITIVOS === */
-  
-  /* Naranja (color principal de marca) */
-  --primitive-orange-primary: #ff7700;
-  --primitive-orange-dark: #cc5500;
-  --primitive-orange-hover: #ffa500;
-  --primitive-orange-light: #ffb733;
-  --primitive-orange-muted: rgba(255, 165, 0, 0.3);
-  
+
+  /* Naranja (color principal de marca) - Barberox12 Gold */
+  --primitive-orange-primary: #C5A059;
+  --primitive-orange-dark: #A58039;
+  --primitive-orange-hover: #D5B069;
+  --primitive-orange-light: #E5C079;
+  --primitive-orange-muted: rgba(197, 160, 89, 0.15);
+
   /* Cian (acento secundario) */
   --primitive-cyan-accent: #00CCC2;
-  
-  /* Escala de grises */
+
+  /* Escala de grises â€” mÃ¡s oscuros y sutiles */
   --primitive-black: #000000;
-  --primitive-gray-darkest: #1a1a1a;
-  --primitive-gray-darker: #2a2a2a;
-  --primitive-gray-dark: #3a3a3a;
-  --primitive-gray-medium: #808080;
-  --primitive-gray-border: #333333;
-  --primitive-gray-border-light: #444444;
-  
-  /* Blancos con opacidad */
+  --primitive-gray-darkest: #111111;
+  --primitive-gray-darker: #1a1a1a;
+  --primitive-gray-dark: #222222;
+  --primitive-gray-medium: #666666;
+  --primitive-gray-border: #1a1a1a;
+  --primitive-gray-border-light: #2a2a2a;
+
+  /* Blancos con opacidad â€” ajustados para look premium */
   --primitive-white: #ffffff;
-  --primitive-white-87: rgba(255, 255, 255, 0.87);
-  --primitive-white-80: rgba(255, 255, 255, 0.8);
-  --primitive-white-60: rgba(255, 255, 255, 0.6);
+  --primitive-white-87: rgba(255, 255, 255, 0.9);
+  --primitive-white-80: rgba(255, 255, 255, 0.7);
+  --primitive-white-60: rgba(255, 255, 255, 0.45);
   --primitive-white-20: rgba(255, 255, 255, 0.2);
-  
+
   /* Estados */
   --primitive-green-success: #10b981;
   --primitive-yellow-warning: #0a0907;
   --primitive-red-danger: #ef4444;
   --primitive-blue-info: #0ea5e9;
-  
-  /* Selectores de pestañas */
+
+  /* Selectores de pestaÃ±as */
   --primitive-tab-bg: transparent;
   --primitive-tab-bg-hover: rgba(255, 255, 255, 0.1);
-  --primitive-tab-bg-active: rgba(255, 119, 0, 0.5);
+  --primitive-tab-bg-active: rgba(197, 160, 89, 0.5);
   --primitive-tab-border: #333333;
-  --primitive-tab-border-active: #ff7700;
-  
+  --primitive-tab-border-active: #C5A059;
+
   /* === ESPACIADOS PRIMITIVOS === */
   --space-xs: 4px;
   --space-sm: 8px;
@@ -186,8 +190,8 @@
   --space-xl: 32px;
   --space-2xl: 48px;
   --space-3xl: 64px;
-  
-  /* === TIPOGRAFÍA PRIMITIVA === */
+
+  /* === TIPOGRAFÃA PRIMITIVA === */
   --font-size-xs: 12px;
   --font-size-sm: 14px;
   --font-size-base: 16px;
@@ -195,40 +199,40 @@
   --font-size-xl: 24px;
   --font-size-2xl: 32px;
   --font-size-3xl: 40px;
-  
+
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
-  
+
   --line-height-tight: 1.25;
   --line-height-normal: 1.5;
   --line-height-relaxed: 1.75;
-  
-  /* === RADIOS === */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
-  --radius-full: 9999px;
-  
+
+  /* === RADIOS (Barberox12 = Cuadrados, 0px) === */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-full: 0px;
+
   /* === SOMBRAS === */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
-  
+
   /* === BREAKPOINTS === */
   --breakpoint-mobile: 640px;
   --breakpoint-tablet: 768px;
   --breakpoint-desktop: 1024px;
   --breakpoint-wide: 1280px;
-  
+
   /* === TRANSICIONES === */
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
   --transition-slow: 350ms ease;
-  
+
   /* === Z-INDEX === */
   --z-base: 1;
   --z-dropdown: 1000;
@@ -241,19 +245,19 @@
 }
 
 /* ============================================
-   CAPA 2: TOKENS SEMÁNTICOS
+   CAPA 2: TOKENS SEMÃNTICOS
    Referencias con significado de uso
    ============================================ */
 :root {
-  /* === COLORES SEMÁNTICOS === */
-  
+  /* === COLORES SEMÃNTICOS === */
+
   /* Principales */
   --color-primary: var(--primitive-orange-primary);
   --color-primary-dark: var(--primitive-orange-dark);
   --color-primary-hover: var(--primitive-orange-hover);
   --color-primary-light: var(--primitive-orange-light);
   --color-accent: var(--primitive-cyan-accent);
-  
+
   /* Fondos */
   --bg-primary: var(--primitive-black);
   --bg-secondary: var(--primitive-gray-darkest);
@@ -261,35 +265,35 @@
   --bg-elevated: var(--primitive-gray-dark);
   --bg-input: var(--primitive-gray-darkest);
   --bg-hover: var(--primitive-gray-darker);
-  
+
   /* Bordes */
   --border-primary: var(--primitive-gray-border);
   --border-secondary: var(--primitive-gray-border-light);
   --border-focus: var(--color-primary);
-  
+
   /* Textos */
   --text-primary: var(--primitive-white);
   --text-secondary: var(--primitive-white-80);
   --text-muted: var(--primitive-white-60);
   --text-disabled: var(--primitive-white-20);
-  
+
   /* Estados */
   --color-success: var(--primitive-green-success);
   --color-warning: var(--primitive-yellow-warning);
   --color-danger: var(--primitive-red-danger);
   --color-info: var(--primitive-blue-info);
-  
-  /* Selectores de pestañas */
+
+  /* Selectores de pestaÃ±as */
   --tab-border: var(--primitive-tab-border);
   --tab-border-active: var(--primitive-tab-border-active);
-  
-  /* === ESPACIADOS SEMÁNTICOS === */
+
+  /* === ESPACIADOS SEMÃNTICOS === */
   --spacing-component: var(--space-md);
   --spacing-section: var(--space-2xl);
   --spacing-inline: var(--space-sm);
   --spacing-block: var(--space-lg);
-  
-  /* === TIPOGRAFÍA SEMÁNTICA === */
+
+  /* === TIPOGRAFÃA SEMÃNTICA === */
   --text-body: var(--font-size-base);
   --text-heading: var(--font-size-xl);
   --text-subheading: var(--font-size-lg);
@@ -311,8 +315,7 @@
 }
 
 .v2-card {
-  /* Fondo negro con 70% de opacidad */
-  background: rgba(0, 0, 0, 0.5) !important;
+  background: #000000 !important;
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
   padding: var(--spacing-component);
@@ -324,12 +327,13 @@
   transform: translateY(-2px);
 }
 
-/* Tarjetas pequeñas (clase1) */
+/* Tarjetas pequeÃ±as (clase1) */
 .v2-card-small {
   border: 1px solid var(--border-primary) !important;
   border-radius: var(--radius-md) !important;
   padding: var(--space-sm) !important;
-  padding-left: 2rem !important; /* ⭐ NUEVO: Padding izquierdo */
+  padding-left: 2rem !important;
+  /* â­ NUEVO: Padding izquierdo */
   min-height: 120px !important;
   transition: all var(--transition-normal) !important;
 }
@@ -341,10 +345,10 @@
 
 /* Tarjetas grandes (clase2) */
 .v2-card-large {
-  background: rgba(0, 0, 0, 0.5) !important;
+  background: #000000 !important;
   border: 1px solid var(--border-primary) !important;
   border-radius: var(--radius-lg) !important;
-  padding: var(--space-lg) !important;
+  padding: var(--spacing-lg) !important;
   min-height: 180px !important;
   transition: all var(--transition-normal) !important;
 }
@@ -382,13 +386,15 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-inline);
-  padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius-md);
-  font-weight: var(--font-weight-semibold);
+  padding: 16px 32px;
+  border-radius: 0px;
+  font-weight: var(--font-weight-bold);
   font-size: var(--text-body);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: var(--font-rasputin), serif;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   cursor: pointer;
-  border: none;
+  border: 1px solid transparent;
   transition: all var(--transition-normal);
   position: relative;
   overflow: hidden;
@@ -397,23 +403,26 @@
 
 .v2-btn-primary {
   background-color: var(--color-primary);
-  color: var(--primitive-white);
+  color: #000000;
+  box-shadow: 0px 0px 40px 0px rgba(197, 160, 89, 0.15);
 }
 
 .v2-btn-primary:hover:not(:disabled) {
   background-color: var(--color-primary-hover);
+  box-shadow: 0px 0px 60px 0px rgba(197, 160, 89, 0.3);
   transform: translateY(-2px);
 }
 
 .v2-btn-secondary {
-  background-color: var(--bg-tertiary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-primary);
+  background-color: transparent;
+  color: #F5F0EB;
+  border: 1px solid #2A2A2A;
 }
 
 .v2-btn-secondary:hover:not(:disabled) {
-  background-color: var(--bg-elevated);
+  background-color: rgba(197, 160, 89, 0.05);
   border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .v2-btn-danger {
@@ -432,7 +441,7 @@
   transform: none;
 }
 
-/* Tamaños de botones */
+/* TamaÃ±os de botones */
 .v2-btn-sm {
   padding: var(--space-xs) var(--space-sm);
   font-size: var(--font-size-sm);
@@ -453,12 +462,13 @@
 .v2-input {
   width: 100%;
   padding: var(--space-sm) var(--space-md);
-  background-color: var(--bg-input);
-  border: 1px solid var(--border-primary);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: 1rem; /* Cambiado de var(--text-body) a 1rem para prevenir zoom en iOS Safari */
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #000000;
+  border: 1px solid #1a1a1a;
+  border-radius: 0px;
+  color: #F5F0EB;
+  font-size: 1rem;
+  /* Cambiado de var(--text-body) a 1rem para prevenir zoom en iOS Safari */
+  font-family: var(--font-inter), sans-serif;
   transition: border-color var(--transition-fast);
   line-height: var(--line-height-normal);
 }
@@ -481,12 +491,13 @@
 .v2-textarea {
   width: 100%;
   padding: var(--space-sm) var(--space-md);
-  background-color: var(--bg-input);
-  border: 1px solid var(--border-primary);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: 1rem; /* Cambiado de var(--text-body) a 1rem para prevenir zoom en iOS Safari */
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #000000;
+  border: 1px solid #1a1a1a;
+  border-radius: 0px;
+  color: #F5F0EB;
+  font-size: 1rem;
+  /* Cambiado de var(--text-body) a 1rem para prevenir zoom en iOS Safari */
+  font-family: var(--font-inter), sans-serif;
   transition: border-color var(--transition-fast);
   line-height: var(--line-height-normal);
   resize: vertical;
@@ -505,12 +516,13 @@
 .v2-select {
   width: 100%;
   padding: var(--space-sm) var(--space-md);
-  background-color: var(--bg-input);
-  border: 1px solid var(--border-primary);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: 1rem; /* Cambiado de var(--text-body) a 1rem para prevenir zoom en iOS Safari */
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #000000;
+  border: 1px solid #1a1a1a;
+  border-radius: 0px;
+  color: #F5F0EB;
+  font-size: 1rem;
+  /* Cambiado de var(--text-body) a 1rem para prevenir zoom en iOS Safari */
+  font-family: var(--font-inter), sans-serif;
   transition: border-color var(--transition-fast);
   cursor: pointer;
 }
@@ -611,9 +623,18 @@
   color: var(--color-primary);
 }
 
-/* === TIPOGRAFÍA === */
+/* === TIPOGRAFÃA === */
 
-.v2-heading {
+.v2-heading,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-rasputin), serif !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
   font-size: var(--text-heading);
   font-weight: var(--font-weight-bold);
   color: var(--text-primary);
@@ -677,10 +698,10 @@
   overflow-y: auto;
   position: relative;
   z-index: var(--z-modal);
-  /* Añadimos estos estilos para asegurar la visibilidad */
+  /* AÃ±adimos estos estilos para asegurar la visibilidad */
   display: block;
   margin: auto;
-  /* Asegurar que el modal esté visible sobre otros elementos */
+  /* Asegurar que el modal estÃ© visible sobre otros elementos */
   isolation: isolate;
   /* Asegurar que el contenido del modal sea visible */
   color: var(--text-primary);
@@ -750,12 +771,10 @@
 /* === LOADING / SKELETON === */
 
 .v2-skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--bg-secondary) 0%,
-    var(--bg-tertiary) 50%,
-    var(--bg-secondary) 100%
-  );
+  background: linear-gradient(90deg,
+      var(--bg-secondary) 0%,
+      var(--bg-tertiary) 50%,
+      var(--bg-secondary) 100%);
   background-size: 200% 100%;
   animation: v2-skeleton-loading 1.5s ease-in-out infinite;
   border-radius: var(--radius-md);
@@ -765,6 +784,7 @@
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
@@ -785,13 +805,13 @@
   }
 }
 
-/* Selector de pestañas */
+/* Selector de pestaÃ±as */
 .v2-tabs-selector {
   transition: all var(--transition-fast) !important;
-  /* Tamaño de letra aumentado */
+  /* TamaÃ±o de letra aumentado */
   font-size: var(--font-size-lg) !important;
   font-weight: var(--font-weight-semibold) !important;
-    /* Mayor espacio entre selectores */
+  /* Mayor espacio entre selectores */
   margin-left: var(--space-md) !important;
   margin-right: var(--space-md) !important;
   /* Padding vertical reducido */
@@ -804,7 +824,7 @@
   color: var(--color-primary) !important;
 }
 
-/* Estilos específicos para modales de Radix UI */
+/* Estilos especÃ­ficos para modales de Radix UI */
 [data-radix-portal] .v2-overlay {
   position: fixed !important;
   inset: 0 !important;
@@ -898,7 +918,7 @@
   border-top: 1px solid #333333 !important;
 }
 
-/* Estilos para móviles */
+/* Estilos para mÃ³viles */
 @media (max-width: 767px) {
   .v2-tabs-selector {
     font-size: var(--font-size-base) !important;
@@ -939,15 +959,15 @@
   .v2-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .v2-container {
     padding: 0 var(--space-lg);
   }
-  
+
   .v2-card {
     padding: var(--space-lg);
   }
-  
+
   .v2-modal {
     padding: var(--space-lg);
   }
@@ -958,7 +978,7 @@
   .v2-grid {
     grid-template-columns: repeat(3, 1fr);
   }
-  
+
   :root {
     --spacing-section: var(--space-3xl);
   }
@@ -1010,42 +1030,113 @@
   text-align: left;
 }
 
-/* Márgenes */
-.v2-mt-xs { margin-top: var(--space-xs); }
-.v2-mt-sm { margin-top: var(--space-sm); }
-.v2-mt-md { margin-top: var(--space-md); }
-.v2-mt-lg { margin-top: var(--space-lg); }
-.v2-mt-xl { margin-top: var(--space-xl); }
+/* MÃ¡rgenes */
+.v2-mt-xs {
+  margin-top: var(--space-xs);
+}
 
-.v2-mb-xs { margin-bottom: var(--space-xs); }
-.v2-mb-sm { margin-bottom: var(--space-sm); }
-.v2-mb-md { margin-bottom: var(--space-md); }
-.v2-mb-lg { margin-bottom: var(--space-lg); }
-.v2-mb-xl { margin-bottom: var(--space-xl); }
+.v2-mt-sm {
+  margin-top: var(--space-sm);
+}
 
-.v2-ml-xs { margin-left: var(--space-xs); }
-.v2-ml-sm { margin-left: var(--space-sm); }
-.v2-ml-md { margin-left: var(--space-md); }
-.v2-ml-lg { margin-left: var(--space-lg); }
+.v2-mt-md {
+  margin-top: var(--space-md);
+}
 
-.v2-mr-xs { margin-right: var(--space-xs); }
-.v2-mr-sm { margin-right: var(--space-sm); }
-.v2-mr-md { margin-right: var(--space-md); }
-.v2-mr-lg { margin-right: var(--space-lg); }
+.v2-mt-lg {
+  margin-top: var(--space-lg);
+}
+
+.v2-mt-xl {
+  margin-top: var(--space-xl);
+}
+
+.v2-mb-xs {
+  margin-bottom: var(--space-xs);
+}
+
+.v2-mb-sm {
+  margin-bottom: var(--space-sm);
+}
+
+.v2-mb-md {
+  margin-bottom: var(--space-md);
+}
+
+.v2-mb-lg {
+  margin-bottom: var(--space-lg);
+}
+
+.v2-mb-xl {
+  margin-bottom: var(--space-xl);
+}
+
+.v2-ml-xs {
+  margin-left: var(--space-xs);
+}
+
+.v2-ml-sm {
+  margin-left: var(--space-sm);
+}
+
+.v2-ml-md {
+  margin-left: var(--space-md);
+}
+
+.v2-ml-lg {
+  margin-left: var(--space-lg);
+}
+
+.v2-mr-xs {
+  margin-right: var(--space-xs);
+}
+
+.v2-mr-sm {
+  margin-right: var(--space-sm);
+}
+
+.v2-mr-md {
+  margin-right: var(--space-md);
+}
+
+.v2-mr-lg {
+  margin-right: var(--space-lg);
+}
 
 /* Padding */
-.v2-p-xs { padding: var(--space-xs); }
-.v2-p-sm { padding: var(--space-sm); }
-.v2-p-md { padding: var(--space-md); }
-.v2-p-lg { padding: var(--space-lg); }
+.v2-p-xs {
+  padding: var(--space-xs);
+}
+
+.v2-p-sm {
+  padding: var(--space-sm);
+}
+
+.v2-p-md {
+  padding: var(--space-md);
+}
+
+.v2-p-lg {
+  padding: var(--space-lg);
+}
 
 /* Ancho */
-.v2-w-full { width: 100%; }
-.v2-w-auto { width: auto; }
+.v2-w-full {
+  width: 100%;
+}
+
+.v2-w-auto {
+  width: auto;
+}
 
 /* Cursor */
-.v2-cursor-pointer { cursor: pointer; }
-.v2-cursor-not-allowed { cursor: not-allowed; }
+.v2-cursor-pointer {
+  cursor: pointer;
+}
+
+.v2-cursor-not-allowed {
+  cursor: not-allowed;
+}
 
 /* Transiciones */
 .v2-transition {
@@ -1076,98 +1167,98 @@ BOTONES DE ACCIONES (Ver/Editar/Eliminar)
 ========================================== */
 
 .v2-action-buttons {
-display: flex;
-gap: 0.5rem;
-align-items: center;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .v2-action-btn {
-display: inline-flex;
-align-items: center;
-justify-content: center;
-width: 32px;
-height: 32px;
-border-radius: 6px;
-border: none;
-cursor: pointer;
-transition: all 0.2s ease;
-font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 16px;
 }
 
 .v2-action-btn:hover {
-transform: translateY(-2px);
+  transform: translateY(-2px);
 }
 
 .v2-action-btn:disabled {
-opacity: 0.5;
-cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .v2-action-btn-view {
-background-color: var(--color-info);
-color: white;
+  background-color: var(--color-info);
+  color: white;
 }
 
 .v2-action-btn-view:hover {
-background-color: var(--color-info-dark, #0056b3);
-box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+  background-color: var(--color-info-dark, #0056b3);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
 }
 
 .v2-action-btn-edit {
-background-color: var(--color-primary);
-color: white;
+  background-color: var(--color-primary);
+  color: white;
 }
 
 .v2-action-btn-edit:hover {
-background-color: var(--color-primary-dark, #cc5500);
-box-shadow: 0 4px 8px rgba(255, 119, 0, 0.3);
+  background-color: var(--color-primary-dark, #A8863D);
+  box-shadow: 0 4px 8px rgba(197, 160, 89, 0.3);
 }
 
 .v2-action-btn-delete {
-background-color: var(--color-danger);
-color: white;
+  background-color: var(--color-danger);
+  color: white;
 }
 
 .v2-action-btn-delete:hover {
-background-color: var(--color-danger-dark, #c82333);
-box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+  background-color: var(--color-danger-dark, #c82333);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
 }
 
 /* Botones de activar/desactivar */
 .v2-action-btn-activate {
-background-color: var(--color-success);
-color: white;
+  background-color: var(--color-success);
+  color: white;
 }
 
 .v2-action-btn-activate:hover {
-background-color: #0da271;
-box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+  background-color: #0da271;
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
 }
 
 .v2-action-btn-deactivate {
-background-color: var(--color-warning);
-color: white;
+  background-color: var(--color-warning);
+  color: white;
 }
 
 .v2-action-btn-deactivate:hover {
-background-color: #e67700;
-box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+  background-color: #e67700;
+  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
 }
 
 /* Iconos para los botones */
 .v2-icon-view::before {
-content: '👁';
+  content: 'ðŸ‘';
 }
 
 .v2-icon-edit::before {
-content: '✎';
+  content: 'âœŽ';
 }
 
 .v2-icon-delete::before {
-content: '🗑';
+  content: 'ðŸ—‘';
 }
 
-/* Botón simple - estilo minimalista para acciones como limpiar búsqueda */
+/* BotÃ³n simple - estilo minimalista para acciones como limpiar bÃºsqueda */
 .boton-simple {
   background: transparent;
   border: none;

@@ -23,7 +23,7 @@ export function formatDate(dateString: string): string {
       year: 'numeric',
     }).format(date);
   }
-  
+
   // Para otros formatos, usar el comportamiento original
   return new Intl.DateTimeFormat('es-UY', {
     day: '2-digit',
@@ -38,30 +38,31 @@ export function formatTime(timeString: string): string {
 }
 
 export function diasSemanaNombres(diasString: string): string {
-  // Primero verificamos si es un array de booleanos en formato JSON
+  if (!diasString) return '';
+
   try {
-    // Intentar parsear como JSON
-    const diasArray = JSON.parse(diasString);
-    
-    // Si es un array de booleanos
-    if (Array.isArray(diasArray) && diasArray.every(item => typeof item === 'boolean')) {
-      // El mapeo es: [lunes, martes, ..., domingo]
-      // 0=Lunes, 1=Martes, 2=Miércoles, 3=Jueves, 4=Viernes, 5=Sábado, 6=Domingo
-      const dias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-      
-      // Filtrar solo los días activos
-      const diasActivos = diasArray
-        .map((activo, index) => activo ? dias[index] : null)
+    // Si viene como string '0,1,2'
+    const diasArray = diasString.split(',').map(d => d.trim());
+    const nombresDias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+    // Verificamos si son números del 0 al 6
+    if (diasArray.every(d => !isNaN(Number(d)) && Number(d) >= 0 && Number(d) <= 6)) {
+      return diasArray.map(d => nombresDias[Number(d)]).join(', ');
+    }
+
+    // Comportamiento anterior para arrays booleanos en JSON
+    const parsedArray = JSON.parse(diasString);
+    if (Array.isArray(parsedArray) && parsedArray.every(item => typeof item === 'boolean')) {
+      const diasCortos = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+      const diasActivos = parsedArray
+        .map((activo, index) => activo ? diasCortos[index] : null)
         .filter(Boolean) as string[];
-      
       return diasActivos.join(', ');
     }
   } catch (e) {
-    // Si falla el parseo, continuar con el comportamiento original
-    console.warn('Error al parsear diasArray:', e);
+    // Si falla el parseo, continuar
   }
-  
-  // Si no es un array de booleanos, asumimos que ya es una cadena de texto con los nombres
-  // Podría ser algo como "Lun, Mar, Mié"
+
+  // Si no es un array de booleanos ni números, devolvemos el string original
   return diasString;
 }

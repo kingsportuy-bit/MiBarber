@@ -45,7 +45,7 @@ export default function AdminBarberStep({ data, updateData, onNext, onBack }: Ad
                         onChange={handleChange}
                         placeholder="Juan Pérez"
                         whileFocus={inputFocus}
-                        className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-violet-500 transition-all placeholder-slate-600"
+                        className="w-full bg-slate-900/50 border border-slate-700 rounded-none p-3 text-white focus:outline-none focus:border-violet-500 transition-all placeholder-slate-600"
                     />
                 </div>
 
@@ -57,7 +57,7 @@ export default function AdminBarberStep({ data, updateData, onNext, onBack }: Ad
                         onChange={handleChange}
                         placeholder="+598 99 111 222"
                         whileFocus={inputFocus}
-                        className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-violet-500 transition-all placeholder-slate-600"
+                        className="w-full bg-slate-900/50 border border-slate-700 rounded-none p-3 text-white focus:outline-none focus:border-violet-500 transition-all placeholder-slate-600"
                     />
                     <p className="text-xs text-slate-500 mt-1">Aquí recibirás reportes y agenda diaria.</p>
                 </div>
@@ -71,7 +71,7 @@ export default function AdminBarberStep({ data, updateData, onNext, onBack }: Ad
                         onChange={handleChange}
                         placeholder="juan@ejemplo.com"
                         whileFocus={inputFocus}
-                        className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-violet-500 transition-all placeholder-slate-600"
+                        className="w-full bg-slate-900/50 border border-slate-700 rounded-none p-3 text-white focus:outline-none focus:border-violet-500 transition-all placeholder-slate-600"
                     />
                 </div>
 
@@ -83,7 +83,7 @@ export default function AdminBarberStep({ data, updateData, onNext, onBack }: Ad
                         onChange={handleChange}
                         placeholder="juan.barber"
                         whileFocus={inputFocus}
-                        className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-violet-500 transition-all placeholder-slate-600"
+                        className="w-full bg-slate-900/50 border border-slate-700 rounded-none p-3 text-white focus:outline-none focus:border-violet-500 transition-all placeholder-slate-600"
                     />
                 </div>
 
@@ -96,7 +96,7 @@ export default function AdminBarberStep({ data, updateData, onNext, onBack }: Ad
                         onChange={handleChange}
                         placeholder="******"
                         whileFocus={inputFocus}
-                        className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-violet-500 transition-all placeholder-slate-600"
+                        className="w-full bg-slate-900/50 border border-slate-700 rounded-none p-3 text-white focus:outline-none focus:border-violet-500 transition-all placeholder-slate-600"
                     />
                     <p className="text-xs text-slate-500 mt-1">Mínimo 6 caracteres.</p>
                 </div>
@@ -105,7 +105,8 @@ export default function AdminBarberStep({ data, updateData, onNext, onBack }: Ad
             <div className="flex justify-between pt-4">
                 <button
                     onClick={onBack}
-                    className="px-6 py-2 rounded-lg text-slate-500 hover:text-white transition-colors"
+                    className="px-6 py-2 rounded-none text-slate-500 hover:text-white transition-colors bg-none uppercase tracking-widest text-xs"
+                    style={{ fontFamily: 'var(--font-rasputin), serif' }}
                 >
                     Atrás
                 </button>
@@ -115,12 +116,13 @@ export default function AdminBarberStep({ data, updateData, onNext, onBack }: Ad
                     whileHover={isValid ? { scale: 1.05 } : {}}
                     whileTap={isValid ? { scale: 0.95 } : {}}
                     className={`
-                        px-8 py-3 rounded-xl font-bold transition-all duration-300 shadow-lg
+                        px-8 py-3 rounded-none uppercase tracking-widest text-xs font-bold transition-all duration-300 shadow-lg
                         ${isValid
-                            ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-violet-500/20 hover:shadow-violet-500/40'
-                            : 'bg-slate-800 text-slate-600 cursor-not-allowed'
+                            ? '!bg-gradient-to-r !from-violet-600 !to-indigo-600 !text-white shadow-violet-500/20 hover:shadow-violet-500/40'
+                            : '!bg-none !bg-slate-800 !text-slate-600 cursor-not-allowed'
                         }
                     `}
+                    style={{ fontFamily: 'var(--font-rasputin), serif' }}
                 >
                     Siguiente
                 </motion.button>

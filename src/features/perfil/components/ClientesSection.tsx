@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { Card } from '@/components/ui/Card'
 import { useTopClientes } from '../hooks/useTopClientes'
 import { formatCurrency } from '../utils/formatters'
 import { ClienteStars } from './ClienteStars'
@@ -19,27 +18,39 @@ export function ClientesSection({ barberoId, barberiaId }: Props) {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
         {[1, 2].map((i) => (
-          <Card key={i} className="v2-card-large">
-            <div className="v2-skeleton h-60" />
-          </Card>
+          <div key={i} className="app-card" style={{ minHeight: 240 }}>
+            <div className="v2-skeleton" style={{ height: 200 }} />
+          </div>
         ))}
       </div>
     )
   }
 
   const renderCliente = (cliente: any, index: number) => (
-    <div key={cliente.id_cliente} className="flex items-center gap-3 p-2 hover:bg-[var(--bg-hover)] rounded transition-colors">
-      <span className="text-2xl font-bold text-[var(--text-muted)] w-8">
+    <div
+      key={cliente.id_cliente}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: 8,
+        borderRadius: 4,
+        transition: 'background 0.2s',
+      }}
+      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+    >
+      <span style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-muted, rgba(255,255,255,0.45))', width: 32 }}>
         #{index + 1}
       </span>
-      <div className="flex-1">
-        <div className="flex items-center gap-2">
-          <p className="font-semibold text-[var(--text-primary)]">{cliente.nombre}</p>
+      <div style={{ flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <p style={{ fontWeight: 600, color: 'var(--text-primary, #fff)', margin: 0 }}>{cliente.nombre}</p>
           <ClienteStars idCliente={cliente.id_cliente} />
         </div>
-        <p className="text-xs text-[var(--text-muted)]">
+        <p style={{ fontSize: 12, color: 'var(--text-muted, rgba(255,255,255,0.45))', margin: 0 }}>
           {cliente.cantidad_servicios} servicios - {formatCurrency(cliente.total_gastado)}
         </p>
       </div>
@@ -47,38 +58,38 @@ export function ClientesSection({ barberoId, barberiaId }: Props) {
   )
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
       {/* Top 5 Histórico */}
-      <Card className="v2-card-large">
-        <h3 className="text-lg font-semibold mb-4 text-[var(--text-primary)]">
+      <div className="app-card" style={{ padding: '24px', minHeight: 240 }}>
+        <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: 16, color: 'var(--text-primary, #fff)', textTransform: 'none' }}>
           Top 5 Clientes (Histórico)
         </h3>
-        <div className="space-y-2">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {topHistorico && topHistorico.length > 0 ? (
             topHistorico.map((cliente, index) => renderCliente(cliente, index))
           ) : (
-            <p className="text-sm text-[var(--text-muted)] text-center py-8">
+            <p style={{ fontSize: 14, color: 'var(--text-muted, rgba(255,255,255,0.45))', textAlign: 'center', padding: '32px 0' }}>
               No hay datos disponibles
             </p>
           )}
         </div>
-      </Card>
+      </div>
 
       {/* Top 5 del Mes */}
-      <Card className="v2-card-large">
-        <h3 className="text-lg font-semibold mb-4 text-[var(--text-primary)]">
+      <div className="app-card" style={{ padding: '24px', minHeight: 240 }}>
+        <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: 16, color: 'var(--text-primary, #fff)', textTransform: 'none' }}>
           Top 5 Clientes del Mes
         </h3>
-        <div className="space-y-2">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {topMes && topMes.length > 0 ? (
             topMes.map((cliente, index) => renderCliente(cliente, index))
           ) : (
-            <p className="text-sm text-[var(--text-muted)] text-center py-8">
+            <p style={{ fontSize: 14, color: 'var(--text-muted, rgba(255,255,255,0.45))', textAlign: 'center', padding: '32px 0' }}>
               No hay datos este mes
             </p>
           )}
         </div>
-      </Card>
+      </div>
     </div>
   )
 }

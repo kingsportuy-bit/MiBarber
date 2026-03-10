@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabaseClient'
 import type { Barbero } from '@/types/db'
+import { Checkbox } from '@/components/ui/app-checkbox'
 
 interface Servicio {
   id_servicio: string
@@ -81,8 +82,8 @@ export function EditarPerfilModal({ barbero, onClose }: EditarPerfilModalProps) 
         telefono: barberoActualizado.telefono || prev.telefono,
         email: barberoActualizado.email || prev.email,
         username: barberoActualizado.username || prev.username,
-        servicios: Array.isArray(barberoActualizado.especialidades) 
-          ? barberoActualizado.especialidades 
+        servicios: Array.isArray(barberoActualizado.especialidades)
+          ? barberoActualizado.especialidades
           : prev.servicios
       }))
     }
@@ -275,29 +276,29 @@ export function EditarPerfilModal({ barbero, onClose }: EditarPerfilModalProps) 
             {/* Servicios */}
             <div>
               <label className="v2-label">Servicios que ofreces</label>
-              <div className="max-h-[200px] overflow-y-auto v2-scrollbar border border-[var(--border-primary)] rounded-lg p-3 mt-2">
+              <div className="max-h-[200px] overflow-y-auto v2-scrollbar border border-[var(--border-primary)] rounded-none p-3 mt-2">
                 {serviciosDisponibles && serviciosDisponibles.length > 0 ? (
                   <div className="space-y-2">
                     {serviciosDisponibles.map((servicio) => (
-                      <label 
+                      <div
                         key={servicio.id_servicio}
-                        className="flex items-center gap-3 p-2 hover:bg-[var(--bg-hover)] rounded cursor-pointer"
                       >
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={formData.servicios.includes(servicio.id_servicio)}
                           onChange={() => toggleServicio(servicio.id_servicio)}
-                          className="v2-checkbox"
+                          label={
+                            <div className="flex-1 flex justify-between items-center gap-4">
+                              <span className="text-sm text-[var(--text-primary)]">
+                                {servicio.nombre}
+                              </span>
+                              <span className="text-sm text-[var(--text-muted)]">
+                                ${servicio.precio}
+                              </span>
+                            </div>
+                          }
+                          className="w-full"
                         />
-                        <div className="flex-1 flex justify-between items-center">
-                          <span className="text-sm text-[var(--text-primary)]">
-                            {servicio.nombre}
-                          </span>
-                          <span className="text-sm text-[var(--text-muted)]">
-                            ${servicio.precio}
-                          </span>
-                        </div>
-                      </label>
+                      </div>
                     ))}
                   </div>
                 ) : (
@@ -314,15 +315,15 @@ export function EditarPerfilModal({ barbero, onClose }: EditarPerfilModalProps) 
         </form>
 
         <div className="v2-modal-footer">
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
             onClick={onClose}
             disabled={actualizarPerfil.isPending}
           >
             Cancelar
           </Button>
-          <Button 
-            variant="primary" 
+          <Button
+            variant="primary"
             onClick={handleSubmit as any}
             disabled={actualizarPerfil.isPending}
           >

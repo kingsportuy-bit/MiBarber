@@ -251,7 +251,7 @@ export function MobileAgenda() {
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={goToPreviousMonth}
-              className="p-2 rounded-full hover:bg-qoder-dark-bg-secondary transition-colors duration-200"
+              className="p-2 rounded-none hover:bg-qoder-dark-bg-secondary transition-colors duration-200"
             >
               <ChevronLeftIcon className="h-5 w-5 text-qoder-dark-text-primary" />
             </button>
@@ -260,7 +260,7 @@ export function MobileAgenda() {
             </h2>
             <button
               onClick={goToNextMonth}
-              className="p-2 rounded-full hover:bg-qoder-dark-bg-secondary transition-colors duration-200"
+              className="p-2 rounded-none hover:bg-qoder-dark-bg-secondary transition-colors duration-200"
             >
               <ChevronRightIcon className="h-5 w-5 text-qoder-dark-text-primary" />
             </button>
@@ -292,8 +292,8 @@ export function MobileAgenda() {
                   <div
                     onClick={() => handleDaySelect(day)}
                     className={`flex flex-col items-center justify-center text-sm w-full h-full rounded transition-all duration-200 cursor-pointer ${day.isToday ? 'bg-[#C5A059] text-black font-bold' :
-                      day.isSelected && !day.isToday ? 'bg-gray-700' : 'bg-transparent'
-                      } hover:bg-[#D4B068] hover:text-black`}
+                      day.isSelected ? 'bg-gray-700' : 'bg-[#0a0a0a]/65'
+                      } hover:bg-[rgba(197,160,89,0.1)] hover:scale-[0.98]`}
                     style={{
                       opacity: day.isCurrentMonth ? 1 : 0.5,
                       border: '1px solid rgba(75, 85, 99, 0.2)' // Gris con 20% opacidad
@@ -302,7 +302,7 @@ export function MobileAgenda() {
                     <span className="font-semibold">{day.date.getDate()}</span>
                     {citaCount > 0 && (
                       <div className="mt-1 flex items-center justify-center">
-                        <span className="bg-[#111] text-[#C5A059] border border-[#C5A059] text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                        <span className="bg-[#111] text-[#C5A059] border border-[#C5A059] text-xs font-bold rounded-none h-4 w-4 flex items-center justify-center">
                           {citaCount}
                         </span>
                       </div>
@@ -317,7 +317,7 @@ export function MobileAgenda() {
           <div className="fixed bottom-20 right-4 z-50 md:bottom-8 md:right-8">
             <button
               onClick={handleNewAppointment}
-              className="bg-[#C5A059] hover:bg-[#D4B068] text-black w-14 h-14 rounded-full flex items-center justify-center shadow-lg transform transition-transform hover:scale-105 active:scale-95"
+              className="bg-[#C5A059] hover:bg-[#D4B068] text-black w-14 h-14 rounded-none flex items-center justify-center shadow-lg transform transition-transform hover:scale-105 active:scale-95"
               title="Nuevo Turno"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -418,7 +418,7 @@ export function MobileAgenda() {
           <div className="fixed bottom-20 right-4 z-50 md:bottom-8 md:right-8">
             <button
               onClick={handleNewAppointment}
-              className="bg-[#C5A059] hover:bg-[#D4B068] text-black w-14 h-14 rounded-full flex items-center justify-center shadow-lg transform transition-transform hover:scale-105 active:scale-95"
+              className="bg-[#C5A059] hover:bg-[#D4B068] text-black w-14 h-14 rounded-none flex items-center justify-center shadow-lg transform transition-transform hover:scale-105 active:scale-95"
               title="Nuevo Turno"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -39,7 +39,7 @@ export function AdministrarBarberos({ idBarberia, id_sucursal }: AdministrarBarb
         </h3>
         <button
           onClick={() => setModalOpen(true)}
-          className="qoder-dark-button-primary px-4 py-2 rounded-lg flex items-center gap-2 hover-lift smooth-transition"
+          className="qoder-dark-button-primary px-4 py-2 rounded-none flex items-center gap-2 hover-lift smooth-transition"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -92,7 +92,7 @@ export function AdministrarBarberos({ idBarberia, id_sucursal }: AdministrarBarb
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-qoder-dark-text-primary">
                   {barbero.nombre}
                   {barbero.admin && (
-                    <span className="ml-2 bg-qoder-dark-accent-primary/20 text-qoder-dark-accent-primary text-xs px-2 py-1 rounded-full">
+                    <span className="ml-2 bg-qoder-dark-accent-primary/20 text-qoder-dark-accent-primary text-xs px-2 py-1 rounded-none">
                       Admin
                     </span>
                   )}
@@ -116,11 +116,10 @@ export function AdministrarBarberos({ idBarberia, id_sucursal }: AdministrarBarb
                   </div>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm">
-                  <span className={`px-2 py-1 rounded text-xs ${
-                    barbero.activo 
-                      ? "bg-green-900 text-green-300" 
+                  <span className={`px-2 py-1 rounded text-xs ${barbero.activo
+                      ? "bg-green-900 text-green-300"
                       : "bg-red-900 text-red-300"
-                  }`}>
+                    }`}>
                     {barbero.activo ? 'Activo' : 'Inactivo'}
                   </span>
                 </td>

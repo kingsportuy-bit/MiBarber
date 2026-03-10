@@ -25,7 +25,7 @@ export const QoderInput = forwardRef<HTMLInputElement, QoderInputProps>(
                     )}
                     <input
                         ref={ref}
-                        className={`w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-[10px] py-3 text-white text-[15px] font-[family-name:var(--font-body)] transition-all duration-300 ease-in-out placeholder-[#444] focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]/30 hover:border-[#333] ${icon ? "pl-10 pr-4" : "px-4"
+                        className={`app-input ${icon ? "pl-10 pr-4" : "px-4"
                             } ${error ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/20" : ""} ${className}`}
                         {...props}
                     />

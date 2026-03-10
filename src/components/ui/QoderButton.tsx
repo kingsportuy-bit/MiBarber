@@ -29,8 +29,7 @@ export const QoderButton = forwardRef<HTMLButtonElement, QoderButtonProps>(
             "relative inline-flex items-center justify-center gap-2 font-[family-name:var(--font-body)] font-medium transition-all duration-300 ease-out active:scale-[0.98] outline-none disabled:opacity-50 disabled:pointer-events-none rounded-[10px] overflow-hidden";
 
         const variants = {
-            primary:
-                "bg-[#C5A059] text-black hover:bg-[#D4B068] hover:shadow-[0_0_15px_rgba(197,160,89,0.3)] border border-[#C5A059]/20 font-bold",
+            primary: "app-btn-primary",
             secondary:
                 "bg-[#111] text-[#F5F0EB] border border-[#222] hover:border-[#C5A059]/50 hover:bg-[#1a1a1a]",
             danger:

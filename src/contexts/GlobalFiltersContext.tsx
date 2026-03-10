@@ -34,7 +34,7 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
   const { idBarberia, barbero, isAdmin } = useBarberoAuth();
   const { sucursales, isLoading: isLoadingSucursales } = useSucursales(idBarberia || undefined);
   const [barberoIdFilter, setBarberoIdFilter] = useState<string | undefined>(undefined);
-  
+
   const { data: barberos, isLoading: isLoadingBarberos } = useBarberosList(
     idBarberia || undefined,
     barberoIdFilter
@@ -43,88 +43,45 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
   // Función para obtener las fechas por defecto
   const getDefaultDates = () => {
     const today = new Date();
+    // Ajustar a la zona horaria local para evitar problemas con ISO string
+    const now = new Date(today.getTime() - (today.getTimezoneOffset() * 60000));
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    
+    const firstDay = new Date(firstDayOfMonth.getTime() - (firstDayOfMonth.getTimezoneOffset() * 60000));
+
     return {
-      fechaInicio: firstDayOfMonth.toISOString().split('T')[0],
-      fechaFin: today.toISOString().split('T')[0]
+      fechaInicio: firstDay.toISOString().split('T')[0],
+      fechaFin: now.toISOString().split('T')[0]
     };
   };
 
   // Función para validar y corregir fechas
   const validateAndFixDates = (fechaInicio: string | null, fechaFin: string | null) => {
-    // Si alguna fecha es null, usar las fechas por defecto
-    if (!fechaInicio || !fechaFin) {
-      return getDefaultDates();
-    }
-    
-    try {
-      const startDate = new Date(fechaInicio);
-      const endDate = new Date(fechaFin);
-      const today = new Date();
-      
-      // Limpiar horas para comparación
-      startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(0, 0, 0, 0);
-      today.setHours(0, 0, 0, 0);
-      
-      // Si las fechas son futuras, corregirlas
-      if (startDate > today) {
-        console.warn('Fecha de inicio futura corregida a hoy');
-        startDate.setTime(today.getTime());
-      }
-      if (endDate > today) {
-        console.warn('Fecha de fin futura corregida a hoy');
-        endDate.setTime(today.getTime());
-      }
-      
-      // Si las fechas están invertidas, corregirlas
-      if (startDate > endDate) {
-        console.warn('Fechas invertidas corregidas');
-        // Intercambiar las fechas
-        const temp = new Date(startDate);
-        startDate.setTime(endDate.getTime());
-        endDate.setTime(temp.getTime());
-      }
-      
-      return {
-        fechaInicio: startDate.toISOString().split('T')[0],
-        fechaFin: endDate.toISOString().split('T')[0]
-      };
-    } catch (error) {
-      console.error('Error al validar fechas:', error);
-      return getDefaultDates();
-    }
+    const defaultDates = getDefaultDates();
+    return {
+      fechaInicio: fechaInicio || defaultDates.fechaInicio,
+      fechaFin: fechaFin || defaultDates.fechaFin
+    };
   };
 
   // Estado para los filtros globales con validación de fechas
   const [filters, setFilters] = useState<GlobalFilters>(() => {
+    const defaultDates = getDefaultDates();
+
     // Recuperar filtros del localStorage si existen
     if (typeof window !== "undefined") {
       const savedFilters = localStorage.getItem("globalFilters");
       if (savedFilters) {
         try {
           const parsedFilters = JSON.parse(savedFilters);
-          
-          // Validar y corregir fechas al cargar desde localStorage
-          if (parsedFilters.fechaInicio && parsedFilters.fechaFin) {
-            const startDate = new Date(parsedFilters.fechaInicio);
-            const endDate = new Date(parsedFilters.fechaFin);
-            
-            // Corregir fechas si están invertidas
-            if (startDate > endDate) {
-              console.warn('Corrigiendo fechas invertidas al cargar desde localStorage');
-              return {
-                ...parsedFilters,
-                fechaInicio: parsedFilters.fechaFin,
-                fechaFin: parsedFilters.fechaInicio
-              };
-            }
-          }
-          
-          return parsedFilters;
+
+          // Asegurar que siempre tengan fechas válidas según la nueva regla
+          // NOTA: Ignoramos las fechas guardadas en localStorage para forzar "1er día del mes a hoy"
+          return {
+            ...parsedFilters,
+            fechaInicio: defaultDates.fechaInicio,
+            fechaFin: defaultDates.fechaFin
+          };
         } catch {
-          const defaultDates = getDefaultDates();
           return {
             sucursalId: null,
             barberoId: null,
@@ -134,9 +91,7 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
         }
       }
     }
-    
-    // Valores por defecto con fechas preseleccionadas
-    const defaultDates = getDefaultDates();
+
     return {
       sucursalId: null,
       barberoId: null,
@@ -150,12 +105,12 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
     setFilters(prev => {
       // Obtener los nuevos filtros
       const nextFilters = typeof newFilters === 'function' ? newFilters(prev) : newFilters;
-      
+
       // Validar y corregir fechas si están invertidas
       if (nextFilters.fechaInicio && nextFilters.fechaFin) {
         const startDate = new Date(nextFilters.fechaInicio);
         const endDate = new Date(nextFilters.fechaFin);
-        
+
         // Si las fechas están invertidas, corregirlas
         if (startDate > endDate) {
           console.warn('Corrigiendo fechas invertidas al actualizar filtros');
@@ -166,7 +121,7 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
           };
         }
       }
-      
+
       return nextFilters;
     });
   }, []);
@@ -194,7 +149,7 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
           sucursalId: barbero.id_sucursal
         }));
       }
-    
+
       // Si tenemos un barbero logueado y no hay barbero seleccionado, establecer el barberoId por defecto
       // Solo cuando barberoId es undefined (no null que significa "todos los barberos")
       if (barbero?.id_barbero && filters.barberoId === undefined) {
@@ -203,7 +158,7 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
           barberoId: barbero.id_barbero
         }));
       }
-    
+
       // Para administradores también, si tienen una sucursal asignada, preseleccionarla
       if (isAdmin && barbero?.id_sucursal && !filters.sucursalId) {
         setFilters(prev => ({
@@ -211,13 +166,13 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
           sucursalId: barbero.id_sucursal
         }));
       }
-    
+
       // Validar y corregir fechas si están invertidas
       setFilters(prev => {
         if (prev.fechaInicio && prev.fechaFin) {
           const startDate = new Date(prev.fechaInicio);
           const endDate = new Date(prev.fechaFin);
-          
+
           // Si las fechas están invertidas, corregirlas
           if (startDate > endDate) {
             return {
@@ -229,11 +184,11 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
         }
         return prev;
       });
-    
+
       // Marcar que los filtros por defecto han sido aplicados
       defaultFiltersAppliedRef.current = true;
     }
-    
+
     // Resetear la bandera cuando cambia el barbero o el rol
     return () => {
       defaultFiltersAppliedRef.current = false;
@@ -254,7 +209,7 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
         adminFiltersAppliedRef.current = true;
       }
     }
-    
+
     // Resetear la bandera cuando cambia el barbero
     if (!barbero?.id_barbero) {
       adminFiltersAppliedRef.current = false;
@@ -280,7 +235,7 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
       fechaInicio: defaultDates.fechaInicio,
       fechaFin: defaultDates.fechaFin
     };
-    
+
     // Establecer valores por defecto nuevamente si tenemos datos
     if (sucursales && sucursales.length > 0) {
       if (!isAdmin && barbero?.id_sucursal) {
@@ -289,13 +244,13 @@ export function GlobalFiltersProvider({ children }: { children: ReactNode }) {
         newFilters.sucursalId = sucursales[0].id;
       }
     }
-    
+
     if (!isAdmin && barbero?.id_barbero) {
       newFilters.barberoId = barbero.id_barbero;
     }
-    
+
     setFilters(newFilters);
-    
+
     // Reiniciar el estado de filtros por defecto aplicados
     defaultFiltersAppliedRef.current = false;
   };

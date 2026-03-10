@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { Card } from '@/components/ui/Card'
 import { useServiciosBarbero } from '../hooks/useServiciosBarbero'
 import { useIngresosPorServicio } from '../hooks/useIngresosPorServicio'
 import { formatCurrency } from '../utils/formatters'
@@ -19,78 +18,59 @@ export function ServiciosSection({ barberoId, barberiaId }: Props) {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="v2-card-large">
-            <div className="v2-skeleton h-40" />
-          </Card>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
+        {[1, 2].map((i) => (
+          <div key={i} className="app-card" style={{ minHeight: 180 }}>
+            <div className="v2-skeleton" style={{ height: 160 }} />
+          </div>
         ))}
       </div>
     )
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
       {/* Card 1: Servicios Ofrecidos */}
-      <Card className="v2-card-large">
-        <h3 className="text-lg font-semibold mb-4 text-[var(--text-primary)]">
+      <div className="app-card" style={{ padding: '24px', minHeight: 180 }}>
+        <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: 16, color: 'var(--text-primary, #fff)', textTransform: 'none' }}>
           Servicios Ofrecidos
         </h3>
-        <div className="space-y-2 max-h-[200px] overflow-y-auto v2-scrollbar">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 200, overflowY: 'auto' }}>
           {servicios && servicios.length > 0 ? (
             servicios.map((servicio) => (
-              <div key={servicio.id_servicio} className="flex justify-between items-center">
-                <span className="text-sm text-[var(--text-secondary)]">{servicio.nombre}</span>
-                <span className="text-sm font-semibold text-[var(--color-primary)]">
+              <div key={servicio.id_servicio} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 14, color: 'var(--text-secondary, rgba(255,255,255,0.7))' }}>{servicio.nombre}</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-primary, #C5A059)' }}>
                   {formatCurrency(servicio.precio)}
                 </span>
               </div>
             ))
           ) : (
-            <p className="text-sm text-[var(--text-muted)]">No hay servicios configurados</p>
+            <p style={{ fontSize: 14, color: 'var(--text-muted, rgba(255,255,255,0.45))' }}>No hay servicios configurados</p>
           )}
         </div>
-      </Card>
+      </div>
 
       {/* Card 2: Ingresos por Servicio */}
-      <Card className="v2-card-large">
-        <h3 className="text-lg font-semibold mb-4 text-[var(--text-primary)]">
+      <div className="app-card" style={{ padding: '24px', minHeight: 180 }}>
+        <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: 16, color: 'var(--text-primary, #fff)', textTransform: 'none' }}>
           Ingresos por Servicio
         </h3>
-        <div className="space-y-2 max-h-[200px] overflow-y-auto v2-scrollbar">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 200, overflowY: 'auto' }}>
           {ingresos?.ingresos && ingresos.ingresos.length > 0 ? (
             ingresos.ingresos.map((item, index) => (
-              <div key={index} className="flex justify-between items-center">
-                <span className="text-sm text-[var(--text-secondary)]">{item.servicio}</span>
-                <span className="text-sm font-semibold text-[var(--text-primary)]">
+              <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 14, color: 'var(--text-secondary, rgba(255,255,255,0.7))' }}>{item.servicio}</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary, #fff)' }}>
                   {formatCurrency(item.total_ingresos)}
                 </span>
               </div>
             ))
           ) : (
-            <p className="text-sm text-[var(--text-muted)]">No hay datos este mes</p>
+            <p style={{ fontSize: 14, color: 'var(--text-muted, rgba(255,255,255,0.45))' }}>No hay datos este mes</p>
           )}
         </div>
-      </Card>
-
-      {/* Card 3: Servicios Más Realizados */}
-      <Card className="v2-card-large">
-        <h3 className="text-lg font-semibold mb-4 text-[var(--text-primary)]">
-          Servicios Más Realizados
-        </h3>
-        <div className="space-y-2 max-h-[200px] overflow-y-auto v2-scrollbar">
-          {ingresos?.masRealizados && ingresos.masRealizados.length > 0 ? (
-            ingresos.masRealizados.map((item, index) => (
-              <div key={index} className="flex justify-between items-center">
-                <span className="text-sm text-[var(--text-secondary)]">{item.servicio}</span>
-                <span className="text-sm text-[var(--text-muted)]">{item.cantidad_veces}x</span>
-              </div>
-            ))
-          ) : (
-            <p className="text-sm text-[var(--text-muted)]">No hay datos este mes</p>
-          )}
-        </div>
-      </Card>
+      </div>
     </div>
   )
 }

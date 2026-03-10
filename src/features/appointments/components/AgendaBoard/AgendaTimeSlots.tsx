@@ -24,15 +24,15 @@ export function AgendaTimeSlots({
   // Calcular la altura total del contenedor basado en los slots
   const containerHeight = useMemo(() => {
     if (!horarioDelDia) return 0;
-    
+
     const [horaApertura, minutoApertura] = horarioDelDia.hora_apertura.split(':').map(Number);
     const [horaCierre, minutoCierre] = horarioDelDia.hora_cierre.split(':').map(Number);
-    
+
     // Calcular minutos totales
     const minutosApertura = horaApertura * 60 + minutoApertura;
     const minutosCierre = horaCierre * 60 + minutoCierre;
     const minutosTotales = minutosCierre - minutosApertura;
-    
+
     // 64px por cada 30 minutos (altura base según la memoria)
     return (minutosTotales / 30) * 64;
   }, [horarioDelDia]);
@@ -56,37 +56,37 @@ export function AgendaTimeSlots({
 
   return (
     <div className="relative">
-      <div 
+      <div
         className="relative border-l border-qoder-dark-border-primary pl-4 md:pl-6"
         style={{ height: `${containerHeight}px` }}
       >
         {timeSlots.map((time) => {
           // Verificar si este slot está ocupado por una cita que se extiende
           const isOccupied = mapaOcupacion[time];
-          
+
           // Verificar si es hora de almuerzo
           const esHoraAlmuerzo = isLunchTime(time);
-          
+
           // Obtener citas para esta hora
           const citasEnHora = citasPorHora[time] || [];
-          
+
           // Calcular posición vertical
           const posicionVertical = getPosicionVertical(time);
-          
+
           // Si está ocupado por una cita extendida, no mostrar nada
           if (isOccupied && citasEnHora.length === 0) return null;
-          
-          console.log(`Renderizando slot ${time}:`, { 
-            isOccupied, 
-            esHoraAlmuerzo, 
-            citasEnHora: citasEnHora.length 
+
+          console.log(`Renderizando slot ${time}:`, {
+            isOccupied,
+            esHoraAlmuerzo,
+            citasEnHora: citasEnHora.length
           });
-          
+
           return (
-            <div 
-              key={time} 
-              className="absolute w-full flex items-start"
-              style={{ 
+            <div
+              key={time}
+              className="absolute w-full flex items-start group hover:bg-[rgba(197,160,89,0.08)] transition-colors duration-200"
+              style={{
                 top: `${posicionVertical}px`
               }}
             >
@@ -95,7 +95,7 @@ export function AgendaTimeSlots({
                   {time}
                 </span>
               </div>
-              
+
               <div className="flex-1 ml-3 md:ml-4">
                 {esHoraAlmuerzo ? (
                   <div className="flex items-center justify-center h-12 md:h-16">
@@ -110,12 +110,12 @@ export function AgendaTimeSlots({
                       const slotsOcupados = cita.slotsOcupados || 1;
                       // Calcular la altura basada en slots ocupados (cada slot = 64px aprox)
                       const alturaCalculada = slotsOcupados * 64;
-                      
-                      console.log(`Renderizando cita ${cita.id_cita}:`, { 
-                        alturaCalculada, 
-                        slotsOcupados 
+
+                      console.log(`Renderizando cita ${cita.id_cita}:`, {
+                        alturaCalculada,
+                        slotsOcupados
                       });
-                      
+
                       return (
                         <AgendaEventCard
                           key={cita.id_cita}

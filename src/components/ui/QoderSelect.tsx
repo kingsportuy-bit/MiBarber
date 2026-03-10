@@ -20,12 +20,12 @@ export const QoderSelect = forwardRef<HTMLSelectElement, QoderSelectProps>(
                 <div className="relative group">
                     <select
                         ref={ref}
-                        className={`w-full appearance-none bg-[#0a0a0a] border border-[#1a1a1a] rounded-[10px] py-3 pl-4 pr-10 text-white text-[15px] font-[family-name:var(--font-body)] transition-all duration-300 ease-in-out focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059]/30 hover:border-[#333] cursor-pointer ${error ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/20" : ""
+                        className={`app-input pr-10 ${error ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/20" : ""
                             } ${className}`}
                         {...props}
                     >
                         {options.map((opt) => (
-                            <option key={opt.value} value={opt.value} className="bg-[#111] text-white py-2">
+                            <option key={opt.value} value={opt.value} className="bg-black text-white py-2">
                                 {opt.label}
                             </option>
                         ))}

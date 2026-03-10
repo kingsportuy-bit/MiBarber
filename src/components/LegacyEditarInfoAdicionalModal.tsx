@@ -1,14 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  LegacyV2Modal, 
-  LegacyV2Form, 
-  LegacyV2FormSection, 
-  LegacyV2FormGroup, 
-  LegacyV2Label, 
-  LegacyV2Textarea,
-  LegacyV2Button,
-  LegacyV2ModalFooter
-} from './LegacyV2Modal';
 import type { Sucursal } from "@/types/db";
 import { toast } from "sonner";
 
@@ -20,17 +10,17 @@ interface LegacyEditarInfoAdicionalModalProps {
   onCancel?: () => void;
 }
 
-export function LegacyEditarInfoAdicionalModal({ 
-  open, 
-  onOpenChange, 
-  initial, 
-  onSave, 
-  onCancel 
+export function LegacyEditarInfoAdicionalModal({
+  open,
+  onOpenChange,
+  initial,
+  onSave,
+  onCancel
 }: LegacyEditarInfoAdicionalModalProps) {
   const isEdit = Boolean(initial?.id);
-  
+
   const [info, setInfo] = useState(initial?.info || "");
-  
+
   // Resetear el formulario cuando se abre el modal
   useEffect(() => {
     if (open) {
@@ -40,24 +30,24 @@ export function LegacyEditarInfoAdicionalModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       // Verificar que se tenga un ID válido antes de intentar actualizar
       if (!initial?.id) {
         throw new Error("No se puede actualizar la información adicional sin un ID de sucursal válido");
       }
-      
+
       const sucursalData = {
         id: initial.id, // Incluir el ID para actualizar la sucursal existente
         info,
       };
-      
+
       console.log("Datos a enviar para guardar información adicional:", sucursalData);
       // Guardar solo la información adicional
       await onSave(sucursalData);
-      
+
       toast.success("Información adicional actualizada");
-      
+
       onOpenChange(false);
     } catch (error) {
       console.error("Error al guardar:", error);
@@ -72,44 +62,47 @@ export function LegacyEditarInfoAdicionalModal({
     onOpenChange(false);
   };
 
+  if (!open) return null;
+
   return (
-    <LegacyV2Modal
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Editar Información Adicional"
-    >
-      <LegacyV2Form onSubmit={handleSubmit}>
-        <LegacyV2FormSection>
-          <div className="grid grid-cols-1 gap-4">
-            {/* Campo para información adicional */}
-            <LegacyV2FormGroup className="col-span-2">
-              <LegacyV2Label>Información Adicional</LegacyV2Label>
-              <LegacyV2Textarea 
-                value={info} 
-                onChange={(e) => setInfo(e.target.value)} 
+    <div className="v2-overlay" onClick={handleClose}>
+      <div className="v2-modal max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
+        <div className="v2-modal-header border-b border-[#1a1a1a] pb-4 mb-4">
+          <h2 className="text-xl font-bold font-[family-name:var(--font-rasputin)] text-[#F5F0EB] tracking-wide">
+            Editar Información Adicional
+          </h2>
+          <button onClick={handleClose} className="text-[#8a8a8a] hover:text-[#C5A059] transition-colors text-2xl leading-none">
+            &times;
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="v2-modal-body">
+          <div className="space-y-4">
+            <div className="flex flex-col gap-1.5 w-full">
+              <label className="text-[13px] font-medium text-[#8A8A8A] font-[family-name:var(--font-body)] tracking-wide">Información Adicional</label>
+              <textarea
+                className="app-input min-h-[120px]"
+                value={info}
+                onChange={(e) => setInfo(e.target.value)}
                 placeholder="Información adicional sobre la sucursal"
                 rows={6}
               />
-              <p className="text-[var(--text-secondary)] text-xs mt-1">
+              <p className="text-[11px] text-[#555] mt-1">
                 Puedes incluir detalles como políticas, servicios especiales, o cualquier otra información relevante.
               </p>
-            </LegacyV2FormGroup>
+            </div>
           </div>
-        </LegacyV2FormSection>
-        
-        <LegacyV2ModalFooter>
-          <LegacyV2Button 
-            type="button" 
-            variant="secondary" 
-            onClick={handleClose}
-          >
-            Cancelar
-          </LegacyV2Button>
-          <LegacyV2Button type="submit" variant="primary">
-            Actualizar Información
-          </LegacyV2Button>
-        </LegacyV2ModalFooter>
-      </LegacyV2Form>
-    </LegacyV2Modal>
+
+          <div className="v2-modal-footer flex gap-3 justify-end items-center mt-6 pt-4 border-t border-[#1a1a1a]">
+            <button type="button" onClick={handleClose} className="px-4 py-2 text-[14px] font-medium text-[#8a8a8a] hover:text-[#C5A059] transition-colors">
+              Cancelar
+            </button>
+            <button type="submit" className="app-btn-primary">
+              Actualizar Información
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }

@@ -46,9 +46,13 @@
     border-right: 1px solid var(--qoder-dark-border-primary);
     background: rgba(0, 0, 0, 0.95);
     transform: none !important;
-    /* Never hide sidebar on desktop */
     overflow-y: auto;
     overflow-x: hidden;
+    transition: width 0.3s ease;
+  }
+
+  .navbar.sidebar-collapsed {
+    width: var(--sidebar-collapsed-width, 70px);
   }
 
   .navbar.navbar-hidden {
@@ -76,6 +80,7 @@
     height: 100%;
     padding: 0;
     gap: 0;
+    position: relative;
   }
 }
 
@@ -92,13 +97,22 @@ a.nav-logo {
   position: relative;
   font-family: 'OldEnglish', 'Old English Text MT';
   flex-shrink: 0;
+  justify-content: center;
+  padding: 0 10px;
 }
 
 @media (min-width: 768px) {
   a.nav-logo {
-    padding: 20px 20px 16px;
+    padding: 24px 20px 20px 28px;
+    justify-content: flex-start;
     border-bottom: 1px solid var(--qoder-dark-border-primary);
     margin-bottom: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .sidebar-collapsed a.nav-logo {
+    padding: 24px 0 20px 0;
+    justify-content: center;
   }
 }
 
@@ -113,7 +127,13 @@ a.nav-logo.active::after {
 
 /* Estilo para nombres de clientes */
 .client-name {
-  font-family: 'OldEnglish', 'Old English Text MT';
+  font-family: var(--font-rasputin), serif;
+  color: #C5A059 !important;
+  /* Dorado */
+}
+
+.sidebar-collapsed .client-name {
+  display: none;
 }
 
 /* Barberox brand colors */
@@ -145,9 +165,10 @@ a.nav-logo.active::after {
   text-transform: uppercase;
   font-size: 0.8125rem;
   letter-spacing: 0.04em;
-  border-radius: 8px;
+  border-radius: 0;
   transition: all 0.2s ease;
   white-space: nowrap;
+  overflow: hidden;
 }
 
 @media (min-width: 768px) {
@@ -157,6 +178,22 @@ a.nav-logo.active::after {
     border-radius: 0;
     margin: 0 8px;
   }
+
+  .sidebar-collapsed .nav-link {
+    padding: 10px 0;
+    justify-content: center;
+    border-radius: 0;
+  }
+
+  .sidebar-collapsed .nav-link span {
+    display: none;
+  }
+
+  /* Increase icon sizes when collapsed for better tap area */
+  .sidebar-collapsed .nav-link svg {
+    width: 24px;
+    height: 24px;
+  }
 }
 
 .nav-link:hover {
@@ -165,13 +202,17 @@ a.nav-logo.active::after {
   text-decoration: none;
 }
 
+.sidebar-collapsed .nav-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .nav-link.active {
   color: #C5A059;
   background: rgba(197, 160, 89, 0.1);
 }
 
 .nav-link.active:hover {
-  background: rgba(197, 160, 89, 0.15);
+  background: rgba(197, 160, 89, 0.25);
   color: #C5A059;
 }
 
@@ -186,6 +227,7 @@ a.nav-logo.active::after {
   flex: 1;
   padding: 4px 0;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 @media (max-width: 767px) {
@@ -199,10 +241,66 @@ a.nav-logo.active::after {
   border-top: 1px solid var(--qoder-dark-border-primary);
   padding: 12px 8px;
   margin-top: auto;
+  transition: all 0.3s ease;
+}
+
+.sidebar-collapsed .sidebar-footer {
+  padding: 12px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Profile Icon Adjustment */
+.profile-icon {
+  width: 24px;
+  height: 24px;
+  transition: all 0.3s ease;
+}
+
+.sidebar-collapsed .profile-icon {
+  width: 28px;
+  height: 28px;
+  margin: 0;
+}
+
+/* Sidebar Collapse Toggle */
+.sidebar-collapse-btn {
+  position: absolute;
+  top: 24px;
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  background: var(--qoder-dark-bg-secondary);
+  border: 1px solid var(--qoder-dark-border-primary);
+  border-radius: 50%;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  color: var(--qoder-dark-text-secondary);
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.2s ease;
+}
+
+.sidebar-collapse-btn:hover {
+  color: var(--qoder-dark-accent-orange);
+  border-color: var(--qoder-dark-accent-orange);
+  transform: scale(1.1);
+}
+
+.sidebar-collapse-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.sidebar-collapsed .sidebar-collapse-btn svg {
+  transform: rotate(180deg);
 }
 
 @media (max-width: 767px) {
-  .sidebar-footer {
+
+  .sidebar-footer,
+  .sidebar-collapse-btn {
     display: none !important;
   }
 }
@@ -224,7 +322,7 @@ select {
   /* Fondo claro con transparencia */
   border: 1px solid rgba(255, 255, 255, 0.2);
   /* Borde claro */
-  border-radius: 6px;
+  border-radius: 0;
   padding: 10px 12px;
   color: white;
   /* Texto blanco */
@@ -273,7 +371,7 @@ select option {
   /* Fondo oscuro con transparencia */
   border: 1px solid rgba(197, 160, 89, 0.3);
   /* Borde naranja */
-  border-radius: 6px;
+  border-radius: 0;
   padding: 5px 0;
   min-width: 150px;
   z-index: 1000;
@@ -344,7 +442,7 @@ input[type="radio"]:focus {
   /* Fondo claro con transparencia */
   border: 1px solid rgba(255, 255, 255, 0.2);
   /* Borde claro */
-  border-radius: 6px;
+  border-radius: 0;
   color: white;
   /* Texto blanco */
   padding: 10px 15px;
@@ -403,61 +501,63 @@ h1.page-title::after {
   border-radius: 2px;
 }
 
-/* BotÃ³n primario â€” solo con clase explÃ­cita */
-.action-button {
-  background: #C5A059;
-  color: #000000;
+/* BotÃ³n primario â€” Redirigido al Sistema de DiseÃ±o Master */
+/* Alias para mantener compatibilidad con componentes previos */
+.action-button,
+.qoder-dark-button-primary {
+  /* Copying base logic to ensure no transition glitches if @apply isn't used */
+  background: var(--qoder-dark-button-primary);
+  color: var(--qoder-dark-button-primary-text);
   border: none;
   padding: 12px 24px;
-  border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
   font-size: 0.9375rem;
-  box-sizing: border-box;
-  font-family: 'Inter', 'Roboto', -apple-system, sans-serif;
+  font-family: var(--font-rasputin), serif;
   text-transform: uppercase;
   transition: all 0.2s ease;
+  letter-spacing: 0.05em;
 }
 
-.action-button:hover {
-  background: #D4B068;
+.action-button:hover,
+.qoder-dark-button-primary:hover {
+  background: var(--qoder-dark-button-hover);
 }
 
-.action-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* BotÃ³n secundario */
+/* BotÃ³n secundario â€” Redirigido al Sistema de DiseÃ±o */
 .btn-secondary {
-  background: transparent;
-  border: 1px solid #333;
-  color: rgba(255, 255, 255, 0.8);
+  background: var(--qoder-dark-button-secondary);
+  border: 1px solid var(--qoder-dark-border-primary);
+  color: var(--qoder-dark-button-secondary-text);
   padding: 10px 20px;
-  border-radius: 10px;
+  border-radius: 0;
   font-weight: 500;
   cursor: pointer;
   font-size: 0.875rem;
-  font-family: 'Inter', 'Roboto', -apple-system, sans-serif;
+  font-family: var(--font-rasputin), serif;
   transition: all 0.2s ease;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .btn-secondary:hover {
-  border-color: #C5A059;
-  color: #C5A059;
+  border-color: var(--qoder-dark-button-primary);
+  color: var(--qoder-dark-button-primary);
+  background: var(--qoder-dark-bg-hover);
 }
 
 /* Reset de botones â€” eliminar estilos heredados del navegador */
 button {
-  font-family: 'Inter', 'Roboto', -apple-system, sans-serif;
+  font-family: var(--font-rasputin), serif;
   cursor: pointer;
+  letter-spacing: 0.05em;
 }
 
 /* Formularios â€” solo con clase explÃ­cita */
 .form-input {
   background: #111;
   border: 1px solid #222;
-  border-radius: 10px;
+  border-radius: 0;
   padding: 12px 16px;
   color: white;
   font-size: 1rem;
@@ -515,6 +615,21 @@ a {
 /* Estilo especial para la X de Codexa */
 .codexa-x {
   color: #00CCC2;
+  transition: color 0.2s ease;
+}
+
+.codexa-link {
+  color: rgba(255, 255, 255, 0.35);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.codexa-link:hover {
+  color: #ffffff;
+}
+
+.codexa-link:hover .codexa-x {
+  color: #00CCC2;
 }
 
 /* Estilos para el menÃº desplegable de la aplicaciÃ³n */
@@ -542,6 +657,11 @@ a {
 .bottom-nav-item.active {
   color: #C5A059;
   transform: scale(1.05);
+}
+
+.bottom-nav-item.active:hover {
+  transform: scale(1.1);
+  filter: brightness(1.2);
 }
 
 /* Media queries for mobile devices (â‰¤768px) */

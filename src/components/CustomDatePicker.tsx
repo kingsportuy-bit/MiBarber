@@ -15,9 +15,9 @@ interface CustomDatePickerProps {
   isDateDisabled?: (date: Date) => boolean;
 }
 
-export function CustomDatePicker({ 
-  value, 
-  onChange, 
+export function CustomDatePicker({
+  value,
+  onChange,
   placeholder = "Seleccionar fecha",
   min,
   max,
@@ -38,7 +38,7 @@ export function CustomDatePicker({
   const [currentYearView, setCurrentYearView] = useState<number>(new Date().getFullYear());
   const calendarRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLDivElement>(null);
-  
+
   useOnClickOutside([calendarRef, inputRef], () => setIsOpen(false));
 
   useEffect(() => {
@@ -65,10 +65,10 @@ export function CustomDatePicker({
     };
 
     updatePosition();
-    
+
     window.addEventListener('scroll', updatePosition, true);
     window.addEventListener('resize', updatePosition);
-    
+
     return () => {
       window.removeEventListener('scroll', updatePosition, true);
       window.removeEventListener('resize', updatePosition);
@@ -79,7 +79,7 @@ export function CustomDatePicker({
     if (!disabled) {
       const willOpen = !isOpen;
       setIsOpen(willOpen);
-      
+
       if (willOpen) {
         setViewMode('days');
         if (value) {
@@ -97,11 +97,11 @@ export function CustomDatePicker({
   const handleDateSelect = (date: Date) => {
     if (min && date < new Date(min)) return;
     if (max && date > new Date(max)) return;
-    
+
     setSelectedDate(date);
     setCurrentDate(date);
     setIsOpen(false);
-    
+
     if (onChange) {
       // Formatear la fecha manteniendo la zona horaria local
       const year = date.getFullYear();
@@ -175,33 +175,33 @@ export function CustomDatePicker({
   const generateDays = () => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    
+
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const firstDayOfWeek = firstDay.getDay();
     const daysInMonth = lastDay.getDate();
-    
+
     const days = [];
-    
+
     const prevMonthLastDay = new Date(year, month, 0).getDate();
     for (let i = firstDayOfWeek - 1; i >= 0; i--) {
       const day = prevMonthLastDay - i;
       const date = new Date(year, month - 1, day);
       days.push({ date, isCurrentMonth: false });
     }
-    
+
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
       days.push({ date, isCurrentMonth: true });
     }
-    
+
     const totalCells = 42;
     const remainingCells = totalCells - days.length;
     for (let day = 1; day <= remainingCells; day++) {
       const date = new Date(year, month + 1, day);
       days.push({ date, isCurrentMonth: false });
     }
-    
+
     return days;
   };
 
@@ -216,7 +216,7 @@ export function CustomDatePicker({
     if (isDateDisabled && isDateDisabled(date)) {
       return true;
     }
-    
+
     if (disabledDates.length > 0) {
       // Formatear la fecha manteniendo la zona horaria local
       const year = date.getFullYear();
@@ -227,10 +227,10 @@ export function CustomDatePicker({
         return true;
       }
     }
-    
+
     if (min && date < new Date(min)) return true;
     if (max && date > new Date(max)) return true;
-    
+
     return false;
   };
 
@@ -248,29 +248,29 @@ export function CustomDatePicker({
 
   return (
     <div className="relative" ref={inputRef} style={{ transform: 'translateZ(0)' }}>
-      <div 
+      <div
         className={`w-full qoder-dark-input p-1 rounded cursor-pointer flex items-center justify-between ${disabled ? 'opacity-10 cursor-not-allowed' : ''}`}
         onClick={toggleCalendar}
       >
         <span className={selectedDate ? "text-qoder-dark-text-primary" : "text-qoder-dark-text-secondary"}>
           {selectedDate ? formatDate(selectedDate) : placeholder}
         </span>
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          className="h-5 w-5 text-qoder-dark-text-secondary" 
-          viewBox="0 0 20 20" 
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5 text-qoder-dark-text-secondary"
+          viewBox="0 0 20 20"
           fill="orange"
         >
-          <path 
-            fillRule="evenodd" 
-            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" 
-            clipRule="evenodd" 
+          <path
+            fillRule="evenodd"
+            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+            clipRule="evenodd"
           />
         </svg>
       </div>
 
       {isOpen && !disabled && typeof window !== 'undefined' && createPortal(
-        <div 
+        <div
           ref={calendarRef}
           style={{
             position: 'fixed',
@@ -285,7 +285,7 @@ export function CustomDatePicker({
           {/* Encabezado del calendario o navegación de años */}
           {viewMode === 'days' || viewMode === 'months' ? (
             <div className="flex items-center justify-between p-0 border-b border-qoder-dark-border">
-              <button 
+              <button
                 onClick={() => navigateMonth(-1)}
                 className="boton-simple p-0"
               >
@@ -293,15 +293,15 @@ export function CustomDatePicker({
                   <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               </button>
-              
-              <div 
-                className="text-qoder-dark-text-primary cursor-pointer hover:bg-qoder-dark-bg-secondary rounded px-1 py-0.5 text-sm" 
+
+              <div
+                className="text-qoder-dark-text-primary cursor-pointer hover:bg-qoder-dark-bg-secondary rounded px-1 py-0.5 text-sm"
                 onClick={switchToYearsView}
               >
                 {monthYear.charAt(0).toUpperCase() + monthYear.slice(1)}
               </div>
-              
-              <button 
+
+              <button
                 onClick={() => navigateMonth(1)}
                 className="boton-simple p-0"
               >
@@ -312,7 +312,7 @@ export function CustomDatePicker({
             </div>
           ) : (
             <div className="flex items-center justify-between p-1 border-b border-qoder-dark-border">
-              <button 
+              <button
                 onClick={() => navigateYearView(-1)}
                 className="boton-simple p-0"
               >
@@ -320,12 +320,12 @@ export function CustomDatePicker({
                   <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               </button>
-              
+
               <div className="text-qoder-dark-text-primary text-sm">
                 {currentYearView - 5} - {currentYearView + 6}
               </div>
-              
-              <button 
+
+              <button
                 onClick={() => navigateYearView(1)}
                 className="boton-simple p-0"
               >
@@ -335,7 +335,7 @@ export function CustomDatePicker({
               </button>
             </div>
           )}
-          
+
           {/* Vista de días */}
           {viewMode === 'days' && (
             <>
@@ -347,14 +347,14 @@ export function CustomDatePicker({
                   </div>
                 ))}
               </div>
-              
+
               {/* Días del mes */}
               <div className="grid grid-cols-7 gap-0 p-1">
                 {days.map((dayObj, index) => {
                   const { date, isCurrentMonth } = dayObj;
                   const isDisabled = isDateDisabledFunc(date);
                   const isSelected = isDateSelected(date);
-                  
+
                   return (
                     <button
                       key={index}
@@ -404,26 +404,26 @@ export function CustomDatePicker({
                     style={
                       currentDate.getMonth() === index
                         ? {
-                            background: '#374151',
-                            color: '#ffffff',
-                            border: 'none',
-                            padding: '0.25rem',
-                            borderRadius: '0.125rem',
-                            fontSize: '0.75rem',
-                            textAlign: 'center',
-                            cursor: 'pointer'
+                          background: '#374151',
+                          color: '#ffffff',
+                          border: 'none',
+                          padding: '0.25rem',
+                          borderRadius: '0.125rem',
+                          fontSize: '0.75rem',
+                          textAlign: 'center',
+                          cursor: 'pointer'
 
-                          }
+                        }
                         : {
-                            background: 'transparent',
-                            color: '#ffffff',
-                            border: 'none',
-                            padding: '0.25rem',
-                            borderRadius: '0.125rem',
-                            fontSize: '0.75rem',
-                            textAlign: 'center',
-                            cursor: 'pointer'
-                          }
+                          background: 'transparent',
+                          color: '#ffffff',
+                          border: 'none',
+                          padding: '0.25rem',
+                          borderRadius: '0.125rem',
+                          fontSize: '0.75rem',
+                          textAlign: 'center',
+                          cursor: 'pointer'
+                        }
                     }
                     onMouseEnter={(e) => {
                       if (currentDate.getMonth() !== index) {
@@ -453,26 +453,26 @@ export function CustomDatePicker({
                   style={
                     currentDate.getFullYear() === year
                       ? {
-                          background: '#374151',
-                          color: '#ffffff',
-                          border: 'none',
-                          padding: '0.25rem',
-                          borderRadius: '0.125rem',
-                          fontSize: '0.75rem',
-                          textAlign: 'center',
-                          cursor: 'pointer'
-                          
-                        }
+                        background: '#374151',
+                        color: '#ffffff',
+                        border: 'none',
+                        padding: '0.25rem',
+                        borderRadius: '0.125rem',
+                        fontSize: '0.75rem',
+                        textAlign: 'center',
+                        cursor: 'pointer'
+
+                      }
                       : {
-                          background: 'transparent',
-                          color: '#ffffff',
-                          border: 'none',
-                          padding: '0.25rem',
-                          borderRadius: '0.125rem',
-                          fontSize: '0.75rem',
-                          textAlign: 'center',
-                          cursor: 'pointer'
-                        }
+                        background: 'transparent',
+                        color: '#ffffff',
+                        border: 'none',
+                        padding: '0.25rem',
+                        borderRadius: '0.125rem',
+                        fontSize: '0.75rem',
+                        textAlign: 'center',
+                        cursor: 'pointer'
+                      }
                   }
                   onMouseEnter={(e) => {
                     if (currentDate.getFullYear() !== year) {
@@ -490,10 +490,10 @@ export function CustomDatePicker({
               ))}
             </div>
           )}
-          
+
           {/* Botones adicionales */}
           <div className="flex justify-between p-2 border-t border-qoder-dark-border">
-            <span 
+            <span
               onClick={() => {
                 setSelectedDate(null);
                 setIsOpen(false);
@@ -505,7 +505,7 @@ export function CustomDatePicker({
             >
               Borrar
             </span>
-            <span 
+            <span
               onClick={goToCurrentMonthYear}
               className="text-qoder-dark-text-muted text-sm cursor-pointer hover:text-qoder-dark-text-primary px-2"
             >

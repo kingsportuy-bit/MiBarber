@@ -17,10 +17,19 @@ import { BloqueosTable } from '@/features/perfil/components/BloqueosTable';
 import { DescansosList } from '@/features/perfil/components/DescansosList';
 import { EditarPerfilModal } from '@/features/perfil/components/EditarPerfilModal';
 
+// Helper: capitalize only first letter of first name and surname
+function formatName(name: string): string {
+  if (!name) return name;
+  const words = name.toLowerCase().split(' ').filter(w => w.length > 0);
+  if (words.length === 0) return '';
+  const capitalize = (w: string) => w.charAt(0).toUpperCase() + w.slice(1);
+  if (words.length === 1) return capitalize(words[0]);
+  return `${capitalize(words[0])} ${capitalize(words[1])}`;
+}
+
 export default function PerfilPage() {
   const { barbero: barberoAuth, idBarberia } = useAuth();
   const { data: barberoCompleto, isLoading: isLoadingBarbero } = useBarberoCompleto(barberoAuth?.id_barbero || null);
-  const [activeTab, setActiveTab] = useState('perfil');
   const [showEditModal, setShowEditModal] = useState(false);
 
   // Usar los datos completos del barbero si están disponibles, de lo contrario usar los de auth o mock
@@ -42,11 +51,6 @@ export default function PerfilPage() {
     updated_at: new Date().toISOString()
   };
 
-  const tabs = [
-    { id: 'perfil', label: 'Perfil' },
-    { id: 'horarios', label: 'Horarios' }
-  ];
-
   const handleEditProfile = () => {
     setShowEditModal(true);
   };
@@ -67,20 +71,23 @@ export default function PerfilPage() {
 
           <div className="flex-1 text-center md:text-left">
             <h1
-              className="text-center text-3xl md:text-4xl mb-2 text-[var(--text-primary)] client-name"
+              className="text-center text-3xl md:text-4xl mb-2"
               style={
                 {
-                  fontFamily: "'Old English Text MT', 'Roboto', 'Arial', sans-serif",
+                  fontFamily: "var(--font-rasputin), serif",
                   fontSize: '1.8rem',
                   textShadow: 'none',
                   background: 'none',
                   backgroundImage: 'none',
                   WebkitTextFillColor: 'inherit',
-                  fontWeight: 'normal'
+                  fontWeight: 'normal',
+                  textTransform: 'none',
+                  color: '#ffffff',
+                  letterSpacing: '0.02em'
                 }
               }
             >
-              {barberoData.nombre}
+              {formatName(barberoData.nombre)}
             </h1>
             <p className="text-sm text-[var(--text-muted)] mb-4">
               @{barberoData.username || 'Sin usuario'}
@@ -119,56 +126,25 @@ export default function PerfilPage() {
         </div>
       </Card>
 
-      {/* ⭐ MANTENER Pestañas - NO MODIFICAR */}
-      <div className="mb-6">
-        <Tabs
-          tabs={tabs}
-          defaultTab="perfil"
-          onValueChange={setActiveTab}
-          className="v2-tabs-selector"
-        />
-      </div>
+      {/* ⭐ Contenido de Estadísticas y Perfil */}
+      {barberoAuth && idBarberia && (
+        <div className="flex flex-col gap-6">
+          <EstadisticasCards
+            barberoId={barberoAuth.id_barbero}
+            barberiaId={idBarberia}
+          />
 
-      {/* ⭐ ACTUALIZAR: Contenido de la pestaña Perfil */}
-      <TabContent value="perfil" activeTab={activeTab}>
-        {barberoAuth && idBarberia && (
-          <>
-            <EstadisticasCards
-              barberoId={barberoAuth.id_barbero}
-              barberiaId={idBarberia}
-            />
+          <ServiciosSection
+            barberoId={barberoAuth.id_barbero}
+            barberiaId={idBarberia}
+          />
 
-            <ServiciosSection
-              barberoId={barberoAuth.id_barbero}
-              barberiaId={idBarberia}
-            />
-
-            <ClientesSection
-              barberoId={barberoAuth.id_barbero}
-              barberiaId={idBarberia}
-            />
-          </>
-        )}
-      </TabContent>
-
-      {/* ⭐ ACTUALIZAR: Contenido de la pestaña Horarios */}
-      <TabContent value="horarios" activeTab={activeTab}>
-        {barberoAuth && idBarberia && barberoAuth.id_sucursal && (
-          <>
-            <BloqueosTable
-              barberoId={barberoAuth.id_barbero}
-              barberiaId={idBarberia}
-              sucursalId={barberoAuth.id_sucursal}
-            />
-
-            <DescansosList
-              barberoId={barberoAuth.id_barbero}
-              barberiaId={idBarberia}
-              sucursalId={barberoAuth.id_sucursal}
-            />
-          </>
-        )}
-      </TabContent>
+          <ClientesSection
+            barberoId={barberoAuth.id_barbero}
+            barberiaId={idBarberia}
+          />
+        </div>
+      )}
 
       {/* Modal de editar perfil */}
       {showEditModal && barberoAuth && (

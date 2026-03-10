@@ -15,11 +15,11 @@ export function EstadisticasCards({ barberoId, barberiaId }: Props) {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
         {[1, 2, 3, 4].map((i) => (
-          <Card key={i} className="v2-card-small">
-            <div className="v2-skeleton h-20" />
-          </Card>
+          <div key={i} className="app-card" style={{ minHeight: 120 }}>
+            <div className="v2-skeleton" style={{ height: 80 }} />
+          </div>
         ))}
       </div>
     )
@@ -49,18 +49,22 @@ export function EstadisticasCards({ barberoId, barberiaId }: Props) {
   ]
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
       {stats.map((stat) => (
-        <Card key={stat.label} className="v2-card-small">
-          <div className="flex flex-col h-full justify-center">
-            <p className="text-xs text-[var(--text-muted)] uppercase font-semibold mb-2">
+        <div
+          key={stat.label}
+          className="app-card"
+          style={{ padding: '16px 24px', minHeight: 120 }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
+            <p style={{ fontSize: 12, color: 'var(--text-muted, rgba(255,255,255,0.45))', textTransform: 'uppercase', fontWeight: 600, marginBottom: 8 }}>
               {stat.label}
             </p>
-            <h2 className="text-3xl font-bold text-[var(--text-primary)]">
+            <h2 style={{ fontSize: '1.875rem', fontWeight: 700, color: 'var(--text-primary, #fff)', margin: 0, textTransform: 'none' }}>
               {stat.format(stat.value)}
             </h2>
           </div>
-        </Card>
+        </div>
       ))}
     </div>
   )

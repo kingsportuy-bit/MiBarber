@@ -431,7 +431,7 @@ export function KanbanBoard({
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-qoder-dark-accent-primary"></div>
+        <div className="animate-spin rounded-none h-12 w-12 border-t-2 border-b-2 border-qoder-dark-accent-primary"></div>
       </div>
     );
   }
@@ -443,7 +443,7 @@ export function KanbanBoard({
         <p className="text-qoder-dark-text-secondary">No se pudieron cargar las citas. Intente refrescar la página.</p>
         <button
           onClick={() => refetch()}
-          className="mt-4 qoder-dark-button-primary px-4 py-2 rounded-lg hover-lift smooth-transition"
+          className="mt-4 qoder-dark-button-primary px-4 py-2 rounded-none hover-lift smooth-transition"
         >
           Reintentar
         </button>
@@ -459,7 +459,7 @@ export function KanbanBoard({
           <div className="flex space-x-2">
             <button
               onClick={goToPreviousDay}
-              className="p-2 rounded-full qoder-dark-button"
+              className="p-2 rounded-none qoder-dark-button"
               title="Día anterior"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -470,7 +470,7 @@ export function KanbanBoard({
             {getLocalDateString(currentDate) !== getLocalDateString(new Date()) && (
               <button
                 onClick={goToToday}
-                className="px-3 py-2 rounded-lg qoder-dark-button text-sm font-medium"
+                className="px-3 py-2 rounded-none qoder-dark-button text-sm font-medium"
               >
                 Hoy
               </button>
@@ -494,7 +494,7 @@ export function KanbanBoard({
           <div className="flex space-x-2">
             <button
               onClick={goToNextDay}
-              className="p-2 rounded-full qoder-dark-button"
+              className="p-2 rounded-none qoder-dark-button"
               title="Día siguiente"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -528,7 +528,7 @@ export function KanbanBoard({
 
       {/* Mensaje para dispositivos móviles */}
       <div className="md:hidden text-center py-8">
-        <div className="bg-qoder-dark-bg-secondary rounded-lg p-6 max-w-md mx-auto">
+        <div className="bg-qoder-dark-bg-secondary rounded-none p-6 max-w-md mx-auto">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-qoder-dark-text-secondary mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
           </svg>

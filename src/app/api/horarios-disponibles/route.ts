@@ -21,12 +21,12 @@ function obtenerDiaDelaSemana(fecha: string): number {
   // La fecha viene en formato YYYY-MM-DD
   // Necesitamos asegurarnos de que se interprete correctamente en la zona horaria local
   // En lugar de new Date(fecha), usamos una forma que preserve el día
-  
+
   // Parsear la fecha manualmente
   const [year, month, day] = fecha.split('-').map(Number);
   // Crear una fecha en la zona horaria local (ajustando a mediodía para evitar problemas de DST)
   const date = new Date(year, month - 1, day, 12, 0, 0);
-  
+
   // 0=Domingo, 1=Lunes... 6=Sábado
   return date.getDay();
 }
@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
-    
+
     const { searchParams } = new URL(request.url);
     const idSucursal = searchParams.get("idSucursal");
     const idBarbero = searchParams.get("idBarbero");
@@ -155,16 +155,16 @@ export async function GET(request: NextRequest) {
     // Parsear la fecha manualmente para evitar problemas de zona horaria
     const [year, month, day] = fecha.split("-").map(Number);
     const fechaSolicitud = new Date(year, month - 1, day, 12, 0, 0);
-    
+
     // Ajustar la fecha de hoy a la misma zona horaria
     const hoyAjustado = new Date(fechaActual);
     hoyAjustado.setMinutes(hoyAjustado.getMinutes() + hoyAjustado.getTimezoneOffset() + (-180));
     hoyAjustado.setHours(0, 0, 0, 0);
-    
+
     // Comparar solo las fechas (sin horas)
     const fechaSolicitudSinHora = new Date(fechaSolicitud);
     fechaSolicitudSinHora.setHours(0, 0, 0, 0);
-    
+
     if (fechaSolicitudSinHora < hoyAjustado) {
       // Si la fecha es anterior a hoy, no mostrar horarios disponibles
       return NextResponse.json([]);
@@ -255,7 +255,13 @@ export async function GET(request: NextRequest) {
     if (!errorDescansos && descansosExtra && descansosExtra.length > 0) {
       descansosExtra.forEach((descanso) => {
         try {
-          const diasSemana = JSON.parse(descanso.dias_semana);
+          // Si ya es un objeto (array), lo usamos directamente
+          const diasSemana = typeof descanso.dias_semana === 'string'
+            ? JSON.parse(descanso.dias_semana)
+            : descanso.dias_semana;
+
+          if (!diasSemana) return;
+
           // diasSemana[0] es Lunes, necesitamos convertir de día JS
           // diaSemana JS: 0=Domingo, 1=Lunes, 2=Martes... 6=Sábado
           // Convertir a índice del array: 0=Lunes, 1=Martes... 5=Sábado, 6=Domingo
@@ -323,11 +329,11 @@ export async function GET(request: NextRequest) {
       // (hora actual menos 15 minutos de gracia para permitir agendar con un poco de anticipación)
       const horaActual = hoy.getHours() * 60 + hoy.getMinutes();
       const minutosGracia = 15;
-      
+
       horariosDisponibles = horariosDisponibles.filter((hora) => {
         const [h, m] = hora.split(":").map(Number);
         const minHora = h * 60 + m;
-        
+
         // Mostrar horarios futuros o muy recientes (con gracia de 15 minutos)
         return minHora >= horaActual - minutosGracia;
       });

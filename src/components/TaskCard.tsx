@@ -45,7 +45,7 @@ export function TaskCard({ task, index, onEdit }: TaskCardProps) {
   const clienteIds = task.cita?.id_cliente ? [task.cita.id_cliente] : [];
   const { data: clientesData } = useClientesByIds(clienteIds);
   const clientData = clientesData?.[0];
-  
+
   // Manejar doble clic para editar
   const handleDoubleClick = () => {
     if (task.cita && onEdit) {
@@ -65,7 +65,7 @@ export function TaskCard({ task, index, onEdit }: TaskCardProps) {
       */}
       {(provided, snapshot) => {
         const baseStyle = provided.draggableProps.style || {};
-        
+
         return (
           // Contenedor de la tarjeta de tarea
           <div
@@ -81,15 +81,14 @@ export function TaskCard({ task, index, onEdit }: TaskCardProps) {
               ...baseStyle,
               ...(snapshot.isDropAnimating
                 ? {
-                    // prácticamente sin animación al soltar
-                    transitionDuration: "0.05s",
-                    transitionTimingFunction: "linear",
-                  }
+                  // prácticamente sin animación al soltar
+                  transitionDuration: "0.05s",
+                  transitionTimingFunction: "linear",
+                }
                 : {}),
             }}
-            className={`mb-4 rounded-xl bg-qoder-dark-bg-secondary px-6 py-4 shadow-lg outline-none ${
-              snapshot.isDragging ? "ring-2 ring-qoder-dark-border-primary" : ""
-            }`}
+            className={`mb-4 rounded-xl bg-qoder-dark-bg-secondary px-6 py-4 shadow-lg outline-none border border-[#C5A059]/40 hover:border-[#C5A059]/70 transition-colors ${snapshot.isDragging ? "ring-2 ring-[#C5A059]" : ""
+              }`}
           >
             <div className="flex items-center justify-between mb-1">
               <span className="text-base font-semibold text-white">

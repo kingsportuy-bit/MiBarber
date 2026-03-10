@@ -3,6 +3,7 @@
 import React from "react";
 import { useGlobalFilters } from "@/contexts/GlobalFiltersContext";
 import { CustomDatePicker } from "@/components/CustomDatePicker";
+import { CustomSelect } from "@/components/shared/CustomSelect";
 
 interface GlobalFiltersProps {
   className?: string;
@@ -88,26 +89,19 @@ export function GlobalFilters({
           <label htmlFor="sucursal-filter" className="block text-xs font-medium text-qoder-dark-text-primary mb-1">
             Sucursal
           </label>
-          <select
-            id="sucursal-filter"
+          <CustomSelect
             value={filters.sucursalId || ""}
-            onChange={(e) => handleSucursalChange(e.target.value || undefined)}
-            className="qoder-dark-input w-full py-2 px-3 text-sm"
+            onValueChange={(value) => handleSucursalChange(value || undefined)}
+            options={[
+              { value: "", label: "Todas las sucursales" },
+              ...(sucursales?.map((s) => ({
+                value: String(s.id),
+                label: s.nombre_sucursal || `Sucursal ${s.numero_sucursal}`
+              })) || [])
+            ]}
             disabled={isLoadingSucursales}
-          >
-            {isLoadingSucursales ? (
-              <option>Cargando sucursales...</option>
-            ) : (
-              <>
-                <option value="">Todas las sucursales</option>
-                {sucursales.map((sucursal) => (
-                  <option key={sucursal.id} value={sucursal.id}>
-                    {sucursal.nombre_sucursal || `Sucursal ${sucursal.numero_sucursal}`}
-                  </option>
-                ))}
-              </>
-            )}
-          </select>
+            placeholder={isLoadingSucursales ? "Cargando sucursales..." : "Todas las sucursales"}
+          />
         </div>
       )}
 
@@ -117,28 +111,19 @@ export function GlobalFilters({
           <label htmlFor="barbero-filter" className="block text-xs font-medium text-qoder-dark-text-primary mb-1">
             Barbero
           </label>
-          <select
-            id="barbero-filter"
+          <CustomSelect
             value={filters.barberoId || ""}
-            onChange={(e) => handleBarberoChange(e.target.value || undefined)}
-            className="qoder-dark-input w-full py-2 px-3 text-sm"
+            onValueChange={(value) => handleBarberoChange(value || undefined)}
+            options={[
+              ...(showAllBarbersOption ? [{ value: "", label: "Todos los barberos" }] : []),
+              ...(barberosFiltrados?.map((b: any) => ({
+                value: String(b.id_barbero),
+                label: b.nombre
+              })) || [])
+            ]}
             disabled={isLoadingBarberos}
-          >
-            {isLoadingBarberos ? (
-              <option>Cargando barberos...</option>
-            ) : (
-              <>
-                {showAllBarbersOption && (
-                  <option value="">Todos los barberos</option>
-                )}
-                {barberosFiltrados?.map((barbero: any) => (
-                  <option key={barbero.id_barbero} value={barbero.id_barbero}>
-                    {barbero.nombre}
-                  </option>
-                ))}
-              </>
-            )}
-          </select>
+            placeholder={isLoadingBarberos ? "Cargando barberos..." : "Seleccionar barbero"}
+          />
         </div>
       )}
 

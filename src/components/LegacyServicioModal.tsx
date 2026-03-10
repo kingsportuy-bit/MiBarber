@@ -1,18 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import {
-  LegacyV2Modal,
-  LegacyV2Form,
-  LegacyV2FormSection,
-  LegacyV2FormGroup,
-  LegacyV2Label,
-  LegacyV2Input,
-  LegacyV2Button,
-  LegacyV2ModalFooter
-} from './LegacyV2Modal';
 import { toast } from "sonner";
 import type { Service, Barbero } from "@/types/db";
 import { useBarberosList } from "@/hooks/useBarberosList";
 import { useActualizarEspecialidadesBarbero } from "@/hooks/useActualizarEspecialidadesBarbero";
+import { Checkbox } from "./ui/app-checkbox";
 
 // Tipo para la información de asignación de barbero
 type BarberoAsignacionInfo = {
@@ -141,84 +132,93 @@ export function LegacyServicioModal({
     onOpenChange(false);
   };
 
+  if (!open) return null;
+
   return (
-    <LegacyV2Modal
-      open={open}
-      onOpenChange={onOpenChange}
-      title={isEdit ? "Editar servicio" : "Nuevo servicio"}
-    >
-      <LegacyV2Form onSubmit={handleSubmit}>
-        <LegacyV2FormSection>
-          <div className="v2-form-grid">
-            <LegacyV2FormGroup className="col-span-2">
-              <LegacyV2Label>Nombre del Servicio *</LegacyV2Label>
-              <LegacyV2Input
+    <div className="v2-overlay" onClick={handleClose}>
+      <div className="v2-modal max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
+        <div className="v2-modal-header border-b border-[#1a1a1a] pb-4 mb-4">
+          <h2 className="text-xl font-bold font-[family-name:var(--font-rasputin)] text-[#F5F0EB] tracking-wide">
+            {isEdit ? "Editar servicio" : "Nuevo servicio"}
+          </h2>
+          <button onClick={handleClose} type="button" className="text-[#8a8a8a] hover:text-[#C5A059] transition-colors text-2xl leading-none">
+            &times;
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="v2-modal-body">
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
+            <div className="flex flex-col gap-1.5 w-full">
+              <label className="text-[13px] font-medium text-[#8A8A8A] font-[family-name:var(--font-body)] tracking-wide">Nombre del Servicio <span className="text-[#C5A059]">*</span></label>
+              <input
+                type="text"
+                className={`app-input ${errors.nombre ? "border-red-500" : ""}`}
                 value={formData.nombre}
                 onChange={(e) => setFormData(prev => ({ ...prev, nombre: e.target.value }))}
                 placeholder="Ej: Corte de cabello"
-                className={errors.nombre ? "border-red-500" : ""}
               />
               {errors.nombre && <p className="text-red-500 text-xs mt-1">{errors.nombre}</p>}
-            </LegacyV2FormGroup>
+            </div>
 
-            <LegacyV2FormGroup className="col-span-2 md:col-span-1">
-              <LegacyV2Label>Precio ($) *</LegacyV2Label>
-              <LegacyV2Input
-                type="number"
-                value={formData.precio || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, precio: parseFloat(e.target.value) || 0 }))}
-                placeholder="Ej: 500"
-                className={errors.precio ? "border-red-500" : ""}
-              />
-              {errors.precio && <p className="text-red-500 text-xs mt-1">{errors.precio}</p>}
-            </LegacyV2FormGroup>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5 w-full">
+                <label className="text-[13px] font-medium text-[#8A8A8A] font-[family-name:var(--font-body)] tracking-wide">Precio ($) <span className="text-[#C5A059]">*</span></label>
+                <input
+                  type="number"
+                  className={`app-input ${errors.precio ? "border-red-500" : ""}`}
+                  value={formData.precio || ""}
+                  onChange={(e) => setFormData(prev => ({ ...prev, precio: parseFloat(e.target.value) || 0 }))}
+                  placeholder="Ej: 500"
+                />
+                {errors.precio && <p className="text-red-500 text-xs mt-1">{errors.precio}</p>}
+              </div>
 
-            <LegacyV2FormGroup className="col-span-2 md:col-span-1">
-              <LegacyV2Label>Duración (minutos)</LegacyV2Label>
-              <LegacyV2Input
-                type="number"
-                value={formData.duracion_minutos || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, duracion_minutos: parseInt(e.target.value) || 0 }))}
-                placeholder="Ej: 30"
-              />
-            </LegacyV2FormGroup>
+              <div className="flex flex-col gap-1.5 w-full">
+                <label className="text-[13px] font-medium text-[#8A8A8A] font-[family-name:var(--font-body)] tracking-wide">Duración (minutos)</label>
+                <input
+                  type="number"
+                  className="app-input"
+                  value={formData.duracion_minutos || ""}
+                  onChange={(e) => setFormData(prev => ({ ...prev, duracion_minutos: parseInt(e.target.value) || 0 }))}
+                  placeholder="Ej: 30"
+                />
+              </div>
+            </div>
 
-            <LegacyV2FormGroup className="col-span-2">
-              <LegacyV2Label>Descripción</LegacyV2Label>
-              <LegacyV2Input
+            <div className="flex flex-col gap-1.5 w-full">
+              <label className="text-[13px] font-medium text-[#8A8A8A] font-[family-name:var(--font-body)] tracking-wide">Descripción</label>
+              <input
+                type="text"
+                className="app-input"
                 value={formData.descripcion || ""}
                 onChange={(e) => setFormData(prev => ({ ...prev, descripcion: e.target.value }))}
                 placeholder="Descripción del servicio"
               />
-            </LegacyV2FormGroup>
+            </div>
 
             {/* Selector de barbero para asignar/desasignar especialidad */}
             {barberos && barberos.length > 0 && (
-              <LegacyV2FormGroup className="col-span-2">
-                <LegacyV2Label>Barberos que ofrecen este servicio</LegacyV2Label>
-                <div className="space-y-2 max-h-40 overflow-y-auto p-2 bg-[var(--bg-secondary)] rounded-none">
-                  {barberos.map((barbero) => {
-                    // Verificar si este barbero ya tiene este servicio en sus especialidades
-                    const tieneEspecialidad = isEdit
-                      ? barberosAsignaciones[barbero.id_barbero] !== undefined
-                        ? barberosAsignaciones[barbero.id_barbero]
-                        : barbero.especialidades?.includes(initial?.id_servicio || '') || false
-                      : formData.barberoId === barbero.id_barbero;
+              <div className="flex flex-col gap-1.5 w-full">
+                <label className="text-[13px] font-medium text-[#8A8A8A] font-[family-name:var(--font-body)] tracking-wide">Barberos que ofrecen este servicio</label>
+                <div className="border border-[#1a1a1a] bg-[#0a0a0a] rounded-lg p-3 max-h-40 overflow-y-auto custom-scrollbar">
+                  <div className="space-y-3 pl-1 py-1">
+                    {barberos.map((barbero) => {
+                      const tieneEspecialidad = isEdit
+                        ? barberosAsignaciones[barbero.id_barbero] !== undefined
+                          ? barberosAsignaciones[barbero.id_barbero]
+                          : barbero.especialidades?.includes(initial?.id_servicio || '') || false
+                        : formData.barberoId === barbero.id_barbero;
 
-                    return (
-                      <div key={barbero.id_barbero} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id={`barbero-${barbero.id_barbero}`}
+                      return (
+                        <Checkbox
+                          key={barbero.id_barbero}
                           checked={tieneEspecialidad}
                           onChange={(e) => {
                             if (isEdit) {
-                              // En modo edición, actualizar el estado local y notificar al componente padre
                               setBarberosAsignaciones(prev => ({
                                 ...prev,
                                 [barbero.id_barbero]: e.target.checked
                               }));
-
                               if (onBarberoSeleccionado) {
                                 onBarberoSeleccionado({
                                   barberoId: barbero.id_barbero,
@@ -227,54 +227,38 @@ export function LegacyServicioModal({
                                 });
                               }
                             } else {
-                              // En modo creación, solo permitir seleccionar un barbero
                               if (e.target.checked) {
                                 setFormData(prev => ({ ...prev, barberoId: barbero.id_barbero }));
-                                if (onBarberoSeleccionado) {
-                                  onBarberoSeleccionado(barbero.id_barbero);
-                                }
+                                if (onBarberoSeleccionado) onBarberoSeleccionado(barbero.id_barbero);
                               } else {
                                 setFormData(prev => ({ ...prev, barberoId: null }));
-                                if (onBarberoSeleccionado) {
-                                  onBarberoSeleccionado(null);
-                                }
+                                if (onBarberoSeleccionado) onBarberoSeleccionado(null);
                               }
                             }
                           }}
-                          className="qoder-dark-checkbox h-4 w-4 rounded-none border-qoder-dark-border bg-qoder-dark-bg-form text-qoder-dark-accent-primary focus:ring-qoder-dark-accent-primary mt-0.5"
+                          label={barbero.nombre}
                         />
-                        <label htmlFor={`barbero-${barbero.id_barbero}`} className="text-sm text-[var(--text-primary)]">
-                          {barbero.nombre}
-                        </label>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
                 {isLoadingBarberos && (
-                  <p className="text-xs text-[var(--text-secondary)] mt-1">Cargando barberos...</p>
+                  <p className="text-[11px] text-[#555] mt-1">Cargando barberos...</p>
                 )}
-              </LegacyV2FormGroup>
+              </div>
             )}
           </div>
-        </LegacyV2FormSection>
 
-        <LegacyV2ModalFooter>
-          <LegacyV2Button
-            type="button"
-            variant="secondary"
-            onClick={handleClose}
-          >
-            Cancelar
-          </LegacyV2Button>
-          <LegacyV2Button
-            type="submit"
-            variant="primary"
-            disabled={!formData.nombre || formData.precio <= 0}
-          >
-            {isEdit ? "Actualizar" : "Crear servicio"}
-          </LegacyV2Button>
-        </LegacyV2ModalFooter>
-      </LegacyV2Form>
-    </LegacyV2Modal>
+          <div className="v2-modal-footer flex gap-3 justify-end items-center mt-6 pt-4 border-t border-[#1a1a1a]">
+            <button type="button" onClick={handleClose} className="px-4 py-2 text-[14px] font-medium text-[#8a8a8a] hover:text-[#C5A059] transition-colors">
+              Cancelar
+            </button>
+            <button type="submit" disabled={!formData.nombre || formData.precio <= 0} className="app-btn-primary disabled:opacity-50 disabled:cursor-not-allowed">
+              {isEdit ? "Actualizar" : "Crear servicio"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }

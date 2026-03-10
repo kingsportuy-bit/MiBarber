@@ -243,7 +243,7 @@ export function DesktopAgenda() {
         <div>
           <button
             onClick={handleNewAppointment}
-            className="bg-[#C5A059] hover:bg-[#D4B068] text-black py-3 px-6 rounded-lg font-bold transition-all duration-200 whitespace-nowrap"
+            className="bg-[#C5A059] hover:bg-[#D4B068] text-black py-3 px-6 rounded-none font-bold transition-all duration-200 whitespace-nowrap"
           >
             + Nuevo Turno
           </button>
@@ -257,7 +257,7 @@ export function DesktopAgenda() {
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={goToPreviousMonth}
-              className="p-3 rounded-full hover:bg-qoder-dark-bg-secondary transition-colors duration-200"
+              className="p-3 rounded-none hover:bg-qoder-dark-bg-secondary transition-colors duration-200"
             >
               <ChevronLeftIcon className="h-6 w-6 text-qoder-dark-text-primary" />
             </button>
@@ -266,7 +266,7 @@ export function DesktopAgenda() {
             </h2>
             <button
               onClick={goToNextMonth}
-              className="p-3 rounded-full hover:bg-qoder-dark-bg-secondary transition-colors duration-200"
+              className="p-3 rounded-none hover:bg-qoder-dark-bg-secondary transition-colors duration-200"
             >
               <ChevronRightIcon className="h-6 w-6 text-qoder-dark-text-primary" />
             </button>
@@ -297,18 +297,20 @@ export function DesktopAgenda() {
                 >
                   <div
                     onClick={() => handleDaySelect(day)}
-                    className={`flex flex-col items-center justify-center text-base w-full h-full rounded transition-all duration-200 cursor-pointer transform hover:-translate-y-1 hover:shadow-lg ${day.isToday ? 'bg-[#C5A059] text-black font-bold' :
-                      day.isSelected && !day.isToday ? 'bg-gray-700' : 'bg-transparent'
-                      } hover:bg-[#D4B068] hover:text-black`}
+                    className={`flex flex-col items-center justify-center text-base w-full h-full rounded transition-all duration-200 cursor-pointer ${day.isToday ? 'bg-[#C5A059] text-black font-bold' :
+                      day.isSelected ? 'bg-gray-700 text-qoder-dark-text-primary' : 'bg-[#0a0a0a]/65 text-qoder-dark-text-primary'
+                      } hover:bg-[rgba(197,160,89,0.1)] hover:scale-[0.98]`}
                     style={{
                       opacity: day.isCurrentMonth ? 1 : 0.5,
-                      border: '1px solid rgba(75, 85, 99, 0.2)' // Gris con 20% opacidad
+                      border: '1px solid rgba(75, 85, 99, 0.2)',
+                      backdropFilter: 'blur(24px)',
+                      WebkitBackdropFilter: 'blur(24px)',
                     }}
                   >
                     <span className="text-lg font-semibold">{day.date.getDate()}</span>
                     {citaCount > 0 && (
                       <div className="mt-1 flex items-center justify-center">
-                        <span className="bg-[#111] text-[#C5A059] border border-[#C5A059] text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                        <span className="bg-[#111] text-[#C5A059] border border-[#C5A059] text-xs font-bold rounded-none h-5 w-5 flex items-center justify-center">
                           {citaCount}
                         </span>
                       </div>
@@ -346,18 +348,10 @@ export function DesktopAgenda() {
             <div className="flex items-center gap-4 mb-6">
               <button
                 onClick={() => setView("calendar")}
-                className="text-white text-base font-medium flex items-center bg-qoder-dark-button-secondary hover:bg-qoder-dark-button-secondary-hover py-2 px-4 rounded-lg transition-colors duration-200"
+                className="text-white text-base font-medium flex items-center bg-qoder-dark-button-secondary hover:bg-qoder-dark-button-secondary-hover py-2 px-4 rounded-none transition-colors duration-200"
               >
                 <ChevronLeftIcon className="h-5 w-5 mr-2" />
                 Volver
-              </button>
-              <button
-                onClick={handleNewAppointment}
-                className="flex items-center gap-2 bg-[#C5A059] hover:bg-[#D4B068] text-black px-6 py-2.5 rounded-none font-bold hover:shadow-[0_0_15px_rgba(197,160,89,0.3)] transition-all uppercase tracking-widest text-xs"
-                style={{ fontFamily: 'var(--font-rasputin), serif' }}
-              >
-                <PlusIcon className="w-5 h-5" />
-                <span>+ Nuevo Turno</span>
               </button>
 
               <h2 className="text-xl font-semibold text-qoder-dark-text-primary">
@@ -407,7 +401,7 @@ export function DesktopAgenda() {
                         <div
                           key={appointment.id_cita}
                           onClick={() => handleAppointmentClick(appointment)}
-                          className="cursor-pointer transition-all duration-200 hover:shadow-[0_4px_20px_rgba(197,160,89,0.1)]"
+                          className="transition-all duration-200"
                           style={{
                             background: '#0a0a0a',
                             border: '1px solid #1a1a1a',

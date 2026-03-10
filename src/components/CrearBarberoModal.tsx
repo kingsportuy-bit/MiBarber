@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useBarberos } from "@/hooks/useBarberos";
 import { useBarberiaInfo } from "@/hooks/useBarberiaInfo";
 import { toast } from "sonner";
+import { Checkbox } from "./ui/app-checkbox";
 
 interface CrearBarberoModalProps {
   open: boolean;
@@ -54,7 +55,7 @@ export function CrearBarberoModal({ open, onOpenChange, idBarberia, id_sucursal,
     setFormData(prev => {
       const especialidades = [...prev.especialidades];
       const index = especialidades.findIndex(e => e === servicioId);
-      
+
       if (index >= 0) {
         // Si ya está seleccionado, lo removemos
         especialidades.splice(index, 1);
@@ -62,7 +63,7 @@ export function CrearBarberoModal({ open, onOpenChange, idBarberia, id_sucursal,
         // Si no está seleccionado, lo agregamos
         especialidades.push(servicioId);
       }
-      
+
       return {
         ...prev,
         especialidades
@@ -73,7 +74,7 @@ export function CrearBarberoModal({ open, onOpenChange, idBarberia, id_sucursal,
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       await createBarbero.mutateAsync({
         nombre: formData.nombre,
@@ -88,10 +89,10 @@ export function CrearBarberoModal({ open, onOpenChange, idBarberia, id_sucursal,
         id_sucursal: id_sucursal, // Incluir id_sucursal en los datos
         admin: formData.nivel_permisos === 1 // Sincronizar con nivel_permisos
       });
-      
+
       toast.success("Barbero creado correctamente");
       onBarberoCreado();
-      
+
       // Resetear el formulario antes de cerrar el modal
       setFormData({
         nombre: "",
@@ -102,7 +103,7 @@ export function CrearBarberoModal({ open, onOpenChange, idBarberia, id_sucursal,
         nivel_permisos: 2,
         especialidades: []
       });
-      
+
       // Cerrar el modal después de resetear el formulario
       onOpenChange(false);
     } catch (error) {
@@ -123,7 +124,7 @@ export function CrearBarberoModal({ open, onOpenChange, idBarberia, id_sucursal,
             Crear Nuevo Barbero
           </h3>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="v2-modal-body">
           <div className="space-y-4">
             <div>
@@ -140,7 +141,7 @@ export function CrearBarberoModal({ open, onOpenChange, idBarberia, id_sucursal,
                 required
               />
             </div>
-            
+
             <div>
               <label className="v2-label">
                 Teléfono
@@ -154,7 +155,7 @@ export function CrearBarberoModal({ open, onOpenChange, idBarberia, id_sucursal,
                 placeholder="Teléfono de contacto"
               />
             </div>
-            
+
             <div>
               <label className="v2-label">
                 Email
@@ -168,7 +169,7 @@ export function CrearBarberoModal({ open, onOpenChange, idBarberia, id_sucursal,
                 placeholder="Email del barbero"
               />
             </div>
-            
+
             <div>
               <label className="v2-label">
                 Nombre de usuario
@@ -183,7 +184,7 @@ export function CrearBarberoModal({ open, onOpenChange, idBarberia, id_sucursal,
                 required
               />
             </div>
-            
+
             <div>
               <label className="v2-label">
                 Contraseña
@@ -198,7 +199,7 @@ export function CrearBarberoModal({ open, onOpenChange, idBarberia, id_sucursal,
                 required
               />
             </div>
-            
+
             <div>
               <label className="v2-label">
                 Nivel de Permisos
@@ -213,7 +214,7 @@ export function CrearBarberoModal({ open, onOpenChange, idBarberia, id_sucursal,
                 <option value={2}>Barbero Normal - Acceso limitado (2)</option>
               </select>
             </div>
-            
+
             <div>
               <label className="v2-label">
                 Especialidades (servicios que puede realizar este barbero)
@@ -224,17 +225,14 @@ export function CrearBarberoModal({ open, onOpenChange, idBarberia, id_sucursal,
                 ) : serviciosQuery.isError ? (
                   <p className="text-red-500">Error al cargar servicios</p>
                 ) : serviciosQuery.data && serviciosQuery.data.length > 0 ? (
-                  <div className="space-y-2">
+                  <div className="space-y-3 pl-1 py-1">
                     {serviciosQuery.data.map((servicio) => (
-                      <label key={servicio.id_servicio} className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={formData.especialidades.includes(servicio.id_servicio)}
-                          onChange={() => handleEspecialidadChange(servicio.id_servicio, servicio.nombre)}
-                          className="v2-checkbox"
-                        />
-                        <span className="text-[var(--text-primary)]">{servicio.nombre}</span>
-                      </label>
+                      <Checkbox
+                        key={servicio.id_servicio}
+                        checked={formData.especialidades.includes(servicio.id_servicio)}
+                        onChange={() => handleEspecialidadChange(servicio.id_servicio, servicio.nombre)}
+                        label={<span className="text-[var(--text-primary)]">{servicio.nombre}</span>}
+                      />
                     ))}
                   </div>
                 ) : (
@@ -244,7 +242,7 @@ export function CrearBarberoModal({ open, onOpenChange, idBarberia, id_sucursal,
             </div>
           </div>
         </form>
-        
+
         <div className="v2-modal-footer">
           <button
             type="button"

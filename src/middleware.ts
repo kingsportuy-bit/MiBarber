@@ -18,18 +18,18 @@ function getCookie(request: NextRequest, name: string) {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
+
   // NO procesar rutas de API
   if (pathname.startsWith('/api/')) {
     return NextResponse.next();
   }
-  
+
   // Actualizar la sesión de Supabase primero
   const supabaseResponse = await updateSession(request);
-  
+
   // Verificar autenticación
   const isAuthenticated = await isAuthenticatedRequest(request);
-  
+
   // Manejar la ruta raíz
   if (pathname === "/") {
     if (isAuthenticated) {
@@ -40,7 +40,7 @@ export async function middleware(request: NextRequest) {
       return mergeResponses(supabaseResponse, response);
     }
   }
-  
+
   // Si no está autenticado y trata de acceder a una ruta protegida, redirigir al login
   if (!isAuthenticated && isProtectedRoute(pathname)) {
     const response = NextResponse.redirect(new URL("/login", request.url));
@@ -66,6 +66,7 @@ function isProtectedRoute(pathname: string): boolean {
   const protectedRoutes = [
     "/inicio",
     "/agenda",
+    "/calendario",
     "/clientes",
     "/whatsapp",
     "/mi-barberia",
@@ -73,7 +74,7 @@ function isProtectedRoute(pathname: string): boolean {
     "/caja",
     "/bloqueos"
   ];
-  
+
   return protectedRoutes.some(route => pathname.startsWith(route));
 }
 

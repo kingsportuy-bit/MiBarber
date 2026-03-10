@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { Barbero, Service } from "@/types/db";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 import { useQueryClient } from "@tanstack/react-query";
+import { Checkbox } from "./ui/app-checkbox";
 
 interface EditarBarberoModalProps {
   open: boolean;
@@ -12,20 +13,20 @@ interface EditarBarberoModalProps {
   onSave: (data: Partial<Barbero>) => Promise<void>;
 }
 
-export function EditarBarberoModal({ 
-  open, 
-  onOpenChange, 
+export function EditarBarberoModal({
+  open,
+  onOpenChange,
   barbero,
-  onSave 
+  onSave
 }: EditarBarberoModalProps) {
   console.log("EditarBarberoModal - Props recibidas:", { open, barbero });
-  
+
   // Log para diagnóstico de especialidades
   console.log('[DIAGNÓSTICO] EditarBarberoModal - Datos del barbero:', barbero);
   console.log('[DIAGNÓSTICO] EditarBarberoModal - Especialidades del barbero:', barbero?.especialidades);
   console.log('[DIAGNÓSTICO] EditarBarberoModal - Tipo de especialidades:', typeof barbero?.especialidades);
   console.log('[DIAGNÓSTICO] EditarBarberoModal - ¿Es un array?', Array.isArray(barbero?.especialidades));
-  
+
   const [username, setUsername] = useState(barbero.username || "");
   const [email, setEmail] = useState(barbero.email || "");
   const [telefono, setTelefono] = useState(barbero.telefono || "");
@@ -37,7 +38,7 @@ export function EditarBarberoModal({
   });
   const [serviciosDisponibles, setServiciosDisponibles] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Cliente de consulta para invalidar cachés
   const queryClient = useQueryClient();
 
@@ -54,7 +55,7 @@ export function EditarBarberoModal({
 
       if (error) throw error;
       setServiciosDisponibles(data || []);
-      
+
       // Verificar las especialidades cargadas
       console.log("Servicios disponibles cargados:", data);
       console.log("Especialidades actuales:", especialidades);
@@ -63,7 +64,7 @@ export function EditarBarberoModal({
       setServiciosDisponibles([]);
     }
   }, [barbero.id_sucursal, especialidades]);
-  
+
   // Cargar servicios disponibles cuando se abre el modal
   useEffect(() => {
     console.log("useEffect - Cambio en open o id_sucursal:", { open, id_sucursal: barbero.id_sucursal });
@@ -71,7 +72,7 @@ export function EditarBarberoModal({
       loadServiciosDisponibles();
     }
   }, [open, barbero.id_sucursal, loadServiciosDisponibles]);
-  
+
   // Actualizar especialidades cuando cambie el barbero
   useEffect(() => {
     console.log("useEffect - Cambio en barbero:", barbero);
@@ -79,7 +80,7 @@ export function EditarBarberoModal({
     console.log("Actualizando especialidades desde barbero:", newEspecialidades);
     setEspecialidades(newEspecialidades);
   }, [barbero]);
-  
+
   // Log cuando cambian las especialidades
   useEffect(() => {
     console.log("Especialidades actualizadas:", especialidades);
@@ -88,7 +89,7 @@ export function EditarBarberoModal({
   const handleEspecialidadChange = (servicioId: string, checked: boolean) => {
     console.log(`Cambiando especialidad ${servicioId} a ${checked}`);
     console.log("Especialidades actuales antes del cambio:", especialidades);
-    
+
     if (checked) {
       setEspecialidades(prev => {
         const newEspecialidades = [...prev, servicioId];
@@ -107,7 +108,7 @@ export function EditarBarberoModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       await onSave({
         username,
@@ -115,12 +116,12 @@ export function EditarBarberoModal({
         telefono,
         especialidades
       });
-      
+
       // Invalidar las consultas relacionadas con barberos y servicios para que se actualicen
       queryClient.invalidateQueries({ queryKey: ["barberos"] });
       queryClient.invalidateQueries({ queryKey: ["barberos-list"] });
       queryClient.invalidateQueries({ queryKey: ["servicios"] });
-      
+
       onOpenChange(false);
     } catch (error) {
       console.error("Error al guardar los cambios:", error);
@@ -142,9 +143,9 @@ export function EditarBarberoModal({
   return (
     <div className={`fixed inset-0 z-50 ${open ? "block" : "hidden"}`}>
       <div className="v2-overlay" onClick={handleClose}></div>
-      
+
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <div 
+        <div
           className="v2-modal"
           onClick={(e) => e.stopPropagation()}
         >
@@ -152,7 +153,7 @@ export function EditarBarberoModal({
             <h2 className="v2-modal-title">
               Editar Información Personal
             </h2>
-            <button 
+            <button
               onClick={handleClose}
               className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl"
             >
@@ -224,20 +225,12 @@ export function EditarBarberoModal({
                         const isChecked = especialidades.includes(servicio.id_servicio);
                         console.log(`Renderizando servicio ${servicio.id_servicio} - ${servicio.nombre}, checked: ${isChecked}`);
                         return (
-                          <div key={servicio.id_servicio} className="flex items-center">
-                            <input
-                              type="checkbox"
-                              id={`servicio-${servicio.id_servicio}`}
+                          <div key={servicio.id_servicio} className="py-1">
+                            <Checkbox
                               checked={isChecked}
                               onChange={(e) => handleEspecialidadChange(servicio.id_servicio, e.target.checked)}
-                              className="qoder-dark-checkbox h-5 w-5 rounded border-qoder-dark-border bg-qoder-dark-bg-form text-qoder-dark-accent-primary focus:ring-qoder-dark-accent-primary"
+                              label={<span className="text-qoder-dark-text-primary">{servicio.nombre}</span>}
                             />
-                            <label 
-                              htmlFor={`servicio-${servicio.id_servicio}`} 
-                              className="ml-2 text-qoder-dark-text-primary"
-                            >
-                              {servicio.nombre}
-                            </label>
                           </div>
                         );
                       })

@@ -21,7 +21,7 @@ export function DashboardContainer({ periodo }: DashboardContainerProps) {
     barberoSeleccionado,
     fechaDesde,
     fechaHasta,
-    
+
     // Funciones
     handleTabChange,
     handleFiltroBarberoChange,
@@ -30,9 +30,9 @@ export function DashboardContainer({ periodo }: DashboardContainerProps) {
     handleFechaDesdeChange,
     handleFechaHastaChange
   } = useDashboardFilters();
-  
+
   const { idBarberia, isAdmin, barbero: barberoActual } = useBarberoAuth();
-  
+
   // 🔐 REGLAS DE SEGURIDAD - CRÍTICO
   // id_barberia SIEMPRE de la sesión (NUNCA puede cambiar)
   const barberiaSegura = idBarberia; // SIEMPRE usar de sesión
@@ -43,7 +43,7 @@ export function DashboardContainer({ periodo }: DashboardContainerProps) {
   const sucursalSegura = isAdmin
     ? (sucursalSeleccionada || barberoActual?.id_sucursal || null) // Admin puede cambiar
     : (barberoActual?.id_sucursal || null); // Barbero común: FIJO (fallback)
-  
+
   const {
     adminStats,
     isLoading,
@@ -56,7 +56,7 @@ export function DashboardContainer({ periodo }: DashboardContainerProps) {
     fechaDesde,
     fechaHasta
   });
-  
+
   // Manejo de estados de carga y error
   if (isLoading) {
     return (
@@ -65,7 +65,7 @@ export function DashboardContainer({ periodo }: DashboardContainerProps) {
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -80,7 +80,7 @@ export function DashboardContainer({ periodo }: DashboardContainerProps) {
       </div>
     );
   }
-  
+
   if (!adminStats.data) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -92,22 +92,21 @@ export function DashboardContainer({ periodo }: DashboardContainerProps) {
       </div>
     );
   }
-  
+
   const stats = adminStats.data;
 
   return (
-    <div className="p-6 rounded-lg" style={{ background: 'var(--qoder-dark-bg-quaternary)' }}>
+    <div className="p-6 rounded-none" style={{ background: 'var(--qoder-dark-bg-quaternary)' }}>
       {/* Pestañas estilo navegador Chrome */}
       <div className="flex overflow-x-auto pb-1 -mb-1">
         <button
-          className={`py-2 px-4 font-medium text-sm rounded-t-lg mr-1 relative transition-all duration-200 ${
-            activeTab === "sucursales"
+          className={`py-2 px-4 font-medium text-sm rounded-t-lg mr-1 relative transition-all duration-200 ${activeTab === "sucursales"
               ? "text-qoder-dark-accent-primary bg-qoder-dark-bg-secondary border-x border-t border-qoder-dark-border-primary z-10"
               : "text-qoder-dark-text-secondary hover:text-qoder-dark-text-primary bg-qoder-dark-bg-tertiary hover:bg-qoder-dark-bg-secondary border border-transparent"
-          }`}
+            }`}
           style={{
-            clipPath: activeTab === "sucursales" 
-              ? "polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%)" 
+            clipPath: activeTab === "sucursales"
+              ? "polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%)"
               : "polygon(0 0, calc(100% - 8px) 0, calc(100% - 2px) 100%, 0 100%)"
           }}
           onClick={() => handleTabChange("sucursales")}
@@ -117,14 +116,13 @@ export function DashboardContainer({ periodo }: DashboardContainerProps) {
           </div>
         </button>
         <button
-          className={`py-2 px-4 font-medium text-sm rounded-t-lg mr-1 relative transition-all duration-200 ${
-            activeTab === "barberos"
+          className={`py-2 px-4 font-medium text-sm rounded-t-lg mr-1 relative transition-all duration-200 ${activeTab === "barberos"
               ? "text-qoder-dark-accent-primary bg-qoder-dark-bg-secondary border-x border-t border-qoder-dark-border-primary z-10"
               : "text-qoder-dark-text-secondary hover:text-qoder-dark-text-primary bg-qoder-dark-bg-tertiary hover:bg-qoder-dark-bg-secondary border border-transparent"
-          }`}
+            }`}
           style={{
-            clipPath: activeTab === "barberos" 
-              ? "polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%)" 
+            clipPath: activeTab === "barberos"
+              ? "polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%)"
               : "polygon(0 0, calc(100% - 8px) 0, calc(100% - 2px) 100%, 0 100%)"
           }}
           onClick={() => handleTabChange("barberos")}
@@ -134,14 +132,13 @@ export function DashboardContainer({ periodo }: DashboardContainerProps) {
           </div>
         </button>
         <button
-          className={`py-2 px-4 font-medium text-sm rounded-t-lg mr-1 relative transition-all duration-200 ${
-            activeTab === "clientes"
+          className={`py-2 px-4 font-medium text-sm rounded-t-lg mr-1 relative transition-all duration-200 ${activeTab === "clientes"
               ? "text-qoder-dark-accent-primary bg-qoder-dark-bg-secondary border-x border-t border-qoder-dark-border-primary z-10"
               : "text-qoder-dark-text-secondary hover:text-qoder-dark-text-primary bg-qoder-dark-bg-tertiary hover:bg-qoder-dark-bg-secondary border border-transparent"
-          }`}
+            }`}
           style={{
-            clipPath: activeTab === "clientes" 
-              ? "polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%)" 
+            clipPath: activeTab === "clientes"
+              ? "polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%)"
               : "polygon(0 0, calc(100% - 8px) 0, calc(100% - 2px) 100%, 0 100%)"
           }}
           onClick={() => handleTabChange("clientes")}
@@ -152,7 +149,7 @@ export function DashboardContainer({ periodo }: DashboardContainerProps) {
         </button>
         <div className="flex-grow border-b border-qoder-dark-border-primary"></div>
       </div>
-      
+
       {/* Contenido de las pestañas */}
       {activeTab === "sucursales" && (
         <SucursalesTab
@@ -165,7 +162,7 @@ export function DashboardContainer({ periodo }: DashboardContainerProps) {
           onFechaHastaChange={handleFechaHastaChange}
         />
       )}
-      
+
       {activeTab === "barberos" && (
         <BarberosTab
           stats={stats}
@@ -177,7 +174,7 @@ export function DashboardContainer({ periodo }: DashboardContainerProps) {
           onBarberoChange={handleBarberoChange}
         />
       )}
-      
+
       {activeTab === "clientes" && (
         <ClientesTab
           stats={stats}

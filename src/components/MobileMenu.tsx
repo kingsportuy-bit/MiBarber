@@ -28,7 +28,6 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     // Para administradores, solo mostrar páginas exclusivas de administrador
     if (isAdmin) {
       return [
-        { href: "/caja", label: "Caja" },
         { href: "/estadisticas", label: "Estadísticas" },
         { href: "/mi-barberia", label: "Mi Barbería" }
       ];

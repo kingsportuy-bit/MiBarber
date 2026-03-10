@@ -94,14 +94,21 @@ const IconShield = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// Helper to format names: only first letter of each word capitalized
+// Helper to format names: only first letter of the name and surname capitalized
 function formatBarberName(name: string): string {
   if (!name) return name;
-  return name
-    .toLowerCase()
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+  const words = name.toLowerCase().split(' ').filter(word => word.length > 0);
+  if (words.length === 0) return '';
+
+  if (words.length === 1) {
+    return words[0].charAt(0).toUpperCase() + words[0].slice(1);
+  }
+
+  // Format only first name and first surname
+  const firstName = words[0];
+  const lastName = words[1];
+
+  return `${firstName.charAt(0).toUpperCase() + firstName.slice(1)} ${lastName.charAt(0).toUpperCase() + lastName.slice(1)}`;
 }
 
 export function NavBar() {
@@ -109,18 +116,15 @@ export function NavBar() {
   const router = useRouter();
   const [isNavbarHidden, setIsNavbarHidden] = useState(false);
   const [shouldHideCompletely, setShouldHideCompletely] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const scrollPositionRef = useRef(0);
 
   // Ocultar completamente en la vista de chat individual de WhatsApp (mobile)
   useEffect(() => {
     const handleHashChange = () => {
       if (typeof window !== 'undefined' && pathname?.startsWith("/whatsapp")) {
-        const isMobile = window.innerWidth < 768;
-        if (isMobile) {
-          setShouldHideCompletely(window.location.hash === '#chat-view' || window.location.hash === '#chat-list');
-        } else {
-          setShouldHideCompletely(false);
-        }
+        // En WhatsApp móvil ya no ocultamos la NavBar (logo), queremos que se vea siempre
+        setShouldHideCompletely(false);
       }
     };
     handleHashChange();
@@ -220,7 +224,7 @@ export function NavBar() {
   // Redirigir barberos normales de Caja
   useEffect(() => {
     if (authState.isAuthenticated && !authState.isAdmin && pathname === "/v2/caja") {
-      router.push("/agenda");
+      router.push("/calendario");
     }
   }, [pathname, authState.isAuthenticated, authState.isAdmin, router]);
 
@@ -233,8 +237,8 @@ export function NavBar() {
     if (authState.isAdmin) {
       tabs = [
         { href: "/inicio", label: "Dashboard", icon: <IconHome className="w-5 h-5" /> },
-        { href: "/turnos", label: "Agenda", icon: <IconCalendarCheck className="w-5 h-5" /> },
-        { href: "/agenda", label: "Calendario", icon: <IconCalendar className="w-5 h-5" /> },
+        { href: "/agenda", label: "Agenda", icon: <IconCalendarCheck className="w-5 h-5" /> },
+        { href: "/calendario", label: "Calendario", icon: <IconCalendar className="w-5 h-5" /> },
         { href: "/clientes", label: "Clientes", icon: <IconUsers className="w-5 h-5" /> },
         { href: "/whatsapp", label: "WhatsApp", icon: <IconMessageCircle className="w-5 h-5" /> },
         { href: "/caja", label: "Caja", icon: <IconDollarSign className="w-5 h-5" /> },
@@ -245,8 +249,8 @@ export function NavBar() {
     } else {
       tabs = [
         { href: "/inicio", label: "Dashboard", icon: <IconHome className="w-5 h-5" /> },
-        { href: "/turnos", label: "Agenda", icon: <IconCalendarCheck className="w-5 h-5" /> },
-        { href: "/agenda", label: "Calendario", icon: <IconCalendar className="w-5 h-5" /> },
+        { href: "/agenda", label: "Agenda", icon: <IconCalendarCheck className="w-5 h-5" /> },
+        { href: "/calendario", label: "Calendario", icon: <IconCalendar className="w-5 h-5" /> },
         { href: "/whatsapp", label: "WhatsApp", icon: <IconMessageCircle className="w-5 h-5" /> },
       ];
     }
@@ -272,32 +276,54 @@ export function NavBar() {
   }
 
   return (
-    <nav className={`navbar ${isNavbarHidden ? 'navbar-hidden' : ''}`}>
+    <nav className={`navbar ${isNavbarHidden ? 'navbar-hidden' : ''} ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      {/* Collapse Toggle Button (Desktop Only) */}
+      {!shouldHideNavBar && !shouldHideCompletely && authState.isAuthenticated && (
+        <button
+          className="sidebar-collapse-btn hidden md:flex"
+          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          aria-label={isSidebarCollapsed ? "Expandir menú" : "Contraer menú"}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
+      )}
+
       <div className="nav-container min-w-0">
         {/* Logo */}
         <Link
           href="/inicio"
           className="nav-logo"
           style={{
-            paddingLeft: '10px',
-            paddingRight: '10px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            width: '100%',
+            width: 'auto',
             flexShrink: 0
           }}
         >
-          <img
-            src="/logo-barberox.png"
-            alt="Barberox"
-            style={{
-              height: '28px',
-              width: 'auto',
-              minWidth: '90px',
-              objectFit: 'contain'
-            }}
-          />
+          {isSidebarCollapsed ? (
+            <img
+              src="/logo-barberox - B.png"
+              alt="B"
+              style={{
+                height: '32px',
+                width: 'auto',
+                objectFit: 'contain'
+              }}
+            />
+          ) : (
+            <img
+              src="/logo-barberox.png"
+              alt="Barberox"
+              style={{
+                height: '28px',
+                width: 'auto',
+                minWidth: '90px',
+                objectFit: 'contain'
+              }}
+            />
+          )}
         </Link>
 
         {/* Desktop: sidebar navigation links */}
@@ -305,7 +331,7 @@ export function NavBar() {
           <div className="hidden md:flex sidebar-nav-section">
             {tabs.map((t) => {
               const active = t.href === "/inicio"
-                ? pathname === "/inicio" || pathname === "/"
+                ? pathname === "/inicio" || pathname === "/" || pathname?.startsWith("/inicio/")
                 : pathname?.startsWith(t.href);
               return (
                 <Link
@@ -327,21 +353,38 @@ export function NavBar() {
         <div className="hidden md:block sidebar-footer">
           {authState.isAuthenticated && (
             <>
+              {/* Name Display (No link) */}
+              <div
+                className="nav-link"
+                style={{ marginBottom: '4px', cursor: 'default' }}
+                title="Usuario"
+              >
+                <span className="client-name" style={{
+                  textTransform: 'none',
+                  fontSize: '1.2rem',
+                  letterSpacing: '0.05em',
+                  paddingLeft: '10px'
+                }}>
+                  {formatBarberName(authState.userName) || 'Usuario'}
+                </span>
+              </div>
+
               {/* Profile link */}
               <Link
                 href="/perfil"
-                className={`nav-link ${pathname?.startsWith('/perfil') ? 'active' : ''}`}
-                style={{ marginBottom: '4px' }}
+                className={`nav-link w-full text-left uppercase tracking-widest text-xs rounded-none ${pathname?.startsWith('/perfil') ? 'active' : ''}`}
+                style={{
+                  fontFamily: 'var(--font-rasputin), serif',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '10px 20px',
+                  fontWeight: 500,
+                  margin: '0 8px',
+                }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                <span className="client-name" style={{
-                  textTransform: 'none',
-                  fontFamily: "'Old English Text MT', 'Roboto', 'Arial', sans-serif",
-                  fontSize: '1.2rem',
-                  letterSpacing: '0.02em',
-                }}>
-                  {formatBarberName(authState.userName) || 'Perfil'}
-                </span>
+                <svg className="profile-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                <span>Mi Perfil</span>
               </Link>
               {/* Logout */}
               <button
@@ -371,24 +414,25 @@ export function NavBar() {
         {/* Mobile: right-side controls */}
         <div className="ml-auto flex items-center gap-3 md:hidden">
           {authState.isAuthenticated && authState.userName && (
-            <UserDropdownMenu
-              userName={formatBarberName(authState.userName)}
-              isAdmin={authState.isAdmin}
-              onLogout={handleLogout}
-            />
+            <>
+              <UserDropdownMenu
+                userName={formatBarberName(authState.userName)}
+                isAdmin={authState.isAdmin}
+                onLogout={handleLogout}
+              />
+              <div className="md:hidden">
+                <MobileMenu
+                  isOpen={isMobileMenuOpen}
+                  onClose={() => setIsMobileMenuOpen(false)}
+                />
+              </div>
+            </>
           )}
 
           {!authState.isAuthenticated && (
             <Link href="/login" className="nav-link">
               Iniciar SesiÃ³n
             </Link>
-          )}
-
-          {authState.isAuthenticated && (
-            <MobileMenu
-              isOpen={isMobileMenuOpen}
-              onClose={() => setIsMobileMenuOpen(false)}
-            />
           )}
         </div>
       </div>

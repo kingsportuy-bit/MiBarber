@@ -18,6 +18,7 @@ import { TablaMovimientos } from '@/components/caja/v2/TablaMovimientos';
 import { ModalMovimiento } from '@/components/caja/v2/ModalMovimiento';
 import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 import { formatearMonto } from '@/types/caja';
+import { toast } from 'sonner';
 import type { MovimientoCaja, FormularioMovimiento, TipoMovimiento, FiltrosCaja } from '@/types/caja';
 import { usePageTitle } from '@/hooks/usePageTitle';
 
@@ -139,10 +140,10 @@ export default function CajaPage() {
         await agregarMutation.mutateAsync(datos as any);
       }
       handleCerrarModal();
-      alert(movimientoEdicion ? 'Movimiento actualizado' : 'Movimiento agregado');
+      toast.success(movimientoEdicion ? 'Movimiento actualizado' : 'Movimiento agregado');
     } catch (error) {
       console.error('Error al guardar movimiento:', error);
-      alert('Error al guardar el movimiento');
+      toast.error('Error al guardar el movimiento');
     }
   };
 
@@ -157,10 +158,10 @@ export default function CajaPage() {
         await eliminarMutation.mutateAsync(movimientoAEliminar);
         setConfirmModalOpen(false);
         setMovimientoAEliminar(null);
-        alert('Movimiento eliminado correctamente');
+        toast.success('Movimiento eliminado correctamente');
       } catch (error) {
         console.error('Error eliminando movimiento:', error);
-        alert('Error al eliminar el movimiento');
+        toast.error('Error al eliminar el movimiento');
       }
     }
   };

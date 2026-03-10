@@ -56,7 +56,7 @@ export function ProtectedDashboard({ onEdit, onCreate }: ProtectedDashboardProps
   return (
     <div className="flex flex-col h-full">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl md:text-2xl font-bold text-qoder-dark-text-primary">Tablero de Turnos</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-qoder-dark-text-primary">Agenda</h2>
         {onCreate && (
           <div className="hidden md:block">
             <button

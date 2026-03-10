@@ -104,14 +104,8 @@ export default function EstadisticasPage() {
   const { filters, setFilters } = useGlobalFilters();
   const [activeTab, setActiveTab] = useState('resumen');
 
-  useEffect(() => {
-    if (!filters.fechaInicio || !filters.fechaFin) {
-      const today = new Date();
-      const first = new Date(today.getFullYear(), today.getMonth(), 1);
-      const last = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-      setFilters(prev => ({ ...prev, fechaInicio: first.toISOString().split('T')[0], fechaFin: last.toISOString().split('T')[0] }));
-    }
-  }, [filters.fechaInicio, filters.fechaFin, setFilters]);
+  // Se eliminó la preselección local de fechas para usar los GlobalFilters estandarizados
+
 
   const filtrosEstadisticas = convertirFiltrosParaEstadisticas(filters);
   const { data: sucursales, isLoading: lSuc } = useEstadisticasSucursales(filtrosEstadisticas);

@@ -54,13 +54,7 @@ export function UltraSimpleLabel({
   return (
     <label
       htmlFor={htmlFor}
-      style={{
-        display: 'block',
-        marginBottom: '0.25rem',
-        fontWeight: 600,
-        fontSize: '0.875rem',
-        color: '#ccc',
-      }}
+      className="block mb-1 text-[12px] font-medium text-[#8a8a8a] uppercase tracking-wider font-[family-name:var(--font-body)]"
     >
       {children}
     </label>
@@ -97,7 +91,7 @@ export function UltraSimpleInput({
   return (
     <input
       type={type}
-      value={value}
+      value={value === null || value === undefined ? "" : value}
       onChange={onChange}
       placeholder={placeholder}
       id={id}
@@ -105,19 +99,9 @@ export function UltraSimpleInput({
       required={required}
       disabled={disabled}
       step={step}
-      style={{
-        width: '100%',
-        padding: '0.5rem 1rem',
-        backgroundColor: '#3a3a3a',
-        border: '1px solid #444',
-        borderRadius: '4px',
-        color: 'white',
-        fontSize: '1rem',
-        fontFamily: 'inherit',
-        transition: 'border-color 0.2s',
-        boxSizing: 'border-box',
-        ...style
-      }}
+      min={min}
+      className="w-full app-input text-[14px]"
+      style={style}
     />
   );
 }
@@ -143,29 +127,19 @@ export function UltraSimpleSelect({
 }: UltraSimpleSelectProps) {
   return (
     <select
-      value={value}
+      value={value === null || value === undefined ? "" : value}
       onChange={onChange}
       id={id}
       name={name}
       required={required}
       disabled={disabled}
+      className="w-full app-input cursor-pointer appearance-none text-[14px]"
       style={{
-        width: '100%',
-        padding: '0.5rem 1rem',
-        backgroundColor: '#3a3a3a',
-        border: '1px solid #444',
-        borderRadius: '4px',
-        color: 'white',
-        fontSize: '1rem',
-        fontFamily: 'inherit',
-        transition: 'border-color 0.2s',
-        boxSizing: 'border-box',
-        appearance: 'none',
         backgroundImage: "url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23cccccc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e\")",
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'right 1rem center',
         backgroundSize: '1rem',
-        paddingRight: '3rem',
+        paddingRight: '2.5rem',
       }}
     >
       {children}
@@ -196,7 +170,7 @@ export function UltraSimpleTextarea({
 }: UltraSimpleTextareaProps) {
   return (
     <textarea
-      value={value}
+      value={value === null || value === undefined ? "" : value}
       onChange={onChange}
       placeholder={placeholder}
       id={id}
@@ -204,20 +178,7 @@ export function UltraSimpleTextarea({
       required={required}
       disabled={disabled}
       rows={rows}
-      style={{
-        width: '100%',
-        padding: '0.5rem 1rem',
-        backgroundColor: '#3a3a3a',
-        border: '1px solid #444',
-        borderRadius: '4px',
-        color: 'white',
-        fontSize: '1rem',
-        fontFamily: 'inherit',
-        transition: 'border-color 0.2s',
-        boxSizing: 'border-box',
-        resize: 'vertical',
-        minHeight: '100px',
-      }}
+      className="w-full app-input resize-y min-h-[100px] text-[14px]"
     />
   );
 }
@@ -237,53 +198,26 @@ export function UltraSimpleButton({
   variant = 'primary',
   disabled
 }: UltraSimpleButtonProps) {
-  const baseStyle: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '0.5rem 1rem',
-    borderRadius: '0px',
-    fontWeight: 600,
-    fontSize: '11px',
-    fontFamily: 'var(--font-rasputin), serif',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    border: 'none',
-    transition: 'all 0.3s',
-    position: 'relative',
-    overflow: 'hidden',
-    lineHeight: 1,
-    minHeight: '40px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.1em',
-  };
-
-  const variantStyles: Record<string, React.CSSProperties> = {
-    primary: {
-      backgroundColor: '#FF7700',
-      color: 'white',
-      boxShadow: '0 2px 4px rgba(255, 119, 0, 0.3)',
-    },
-    secondary: {
-      backgroundColor: '#3a3a3a',
-      color: 'white',
-      border: '1px solid #444',
-      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-    },
-    danger: {
-      backgroundColor: '#ef4444',
-      color: 'white',
-      boxShadow: '0 2px 4px rgba(239, 68, 68, 0.3)',
-    }
-  };
+  // Use V3 button styles
+  let btnClass = "";
+  if (variant === 'primary') {
+    btnClass = "app-btn-primary w-full sm:w-auto text-[11px] font-bold tracking-widest uppercase py-3 px-6";
+  } else if (variant === 'danger') {
+    btnClass = "w-full sm:w-auto px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold tracking-widest uppercase transition-all duration-300 disabled:opacity-50 text-[11px]";
+  } else {
+    // Secondary
+    btnClass = "w-full sm:w-auto px-6 py-3 bg-[#1a1a1a] hover:bg-[#333] border border-[#333] text-gray-300 font-bold tracking-[0.2em] uppercase transition-all duration-300 disabled:opacity-50 text-[11px] font-[family-name:var(--font-rasputin)]";
+  }
 
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
+      className={btnClass}
       style={{
-        ...(baseStyle as React.CSSProperties),
-        ...variantStyles[variant],
+        lineHeight: 1,
+        minHeight: '40px',
       }}
     >
       {children}
@@ -301,14 +235,7 @@ export function UltraSimpleModalFooter({
   style = {}
 }: UltraSimpleModalFooterProps) {
   return (
-    <div style={{
-      display: 'flex',
-      gap: '0.5rem',
-      justifyContent: 'flex-end',
-      paddingTop: '1rem',
-      borderTop: '1px solid #444',
-      ...style
-    }}>
+    <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-5 mt-6 border-t border-[#333]" style={style}>
       {children}
     </div>
   );

@@ -3,8 +3,15 @@
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useState, useEffect } from "react";
 import { useDashboardCompleto } from "@/hooks/useDashboardCompleto";
-import Link from "next/link";
 import type { Appointment } from "@/types/db";
+import { EnhancedFinalAppointmentModal } from "@/components/EnhancedFinalAppointmentModal";
+import { BloqueoModalForm } from "@/features/perfil/components/BloqueoModalForm";
+import { ModalMovimiento } from "@/components/caja/v2/ModalMovimiento";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useAgregarMovimiento, useBarberos } from "@/hooks/useCaja";
+import { supabase } from "@/lib/supabaseClient";
+import Link from "next/link";
+import { getLocalDateTime, getLocalDateString } from "@/shared/utils/dateUtils";
 
 function formatHora(hora: string) {
   if (!hora) return "--:--";
@@ -40,8 +47,19 @@ export default function DashboardPage() {
   const { citasHoy, ingresosHoy, proximasCitas, citasSemana, citasMes,
     ingresosMes,
     ingresoEstimadoMes,
-    isLoading
+    isLoading,
+    refetch,
   } = useDashboardCompleto();
+
+  const { idBarberia, barbero, isAdmin } = useAuth();
+  const { data: barberos = [] } = useBarberos();
+  const agregarMovimientoCaja = useAgregarMovimiento();
+
+  // Modal states
+  const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
+  const [isBloqueoModalOpen, setIsBloqueoModalOpen] = useState(false);
+  const [isCajaModalOpen, setIsCajaModalOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<Partial<Appointment> | null>(null);
 
   // Derive KPIs
   const [now, setNow] = useState<Date | null>(null);
@@ -102,10 +120,61 @@ export default function DashboardPage() {
     .sort((a: Appointment, b: Appointment) => a.hora.localeCompare(b.hora));
 
   const turnosToShow = showTomorrow ? turnosMañana : turnosPendientesHoy;
-  const turnosLabel = showTomorrow ? "Turnos de mañana" : "Turnos pendientes";
+  const turnosLabel = showTomorrow ? "Agenda de mañana" : "Agenda pendiente";
 
   // Sorted today appointments
   const citasOrdenadas = [...citasHoy].sort((a: Appointment, b: Appointment) => a.hora.localeCompare(b.hora));
+
+  const handleOpenAppointmentModal = () => {
+    const currentDate = getLocalDateTime();
+    setSelectedAppointment({
+      fecha: getLocalDateString(currentDate),
+      hora: "",
+      servicio: "",
+      barbero: ""
+    });
+    setIsAppointmentModalOpen(true);
+  };
+
+  const handleSubmitBloqueo = async (bloqueoData: any) => {
+    if (!idBarberia || !barbero) return;
+
+    try {
+      const { error } = await supabase
+        .from('mibarber_bloqueos_barbero')
+        .insert({
+          id_barbero: barbero.id_barbero,
+          id_barberia: idBarberia,
+          id_sucursal: barbero.id_sucursal,
+          fecha: bloqueoData.fecha,
+          hora_inicio: bloqueoData.hora_inicio || null,
+          hora_fin: bloqueoData.hora_fin || null,
+          tipo: bloqueoData.tipo,
+          motivo: bloqueoData.motivo || null,
+          activo: true,
+          creado_por: barbero.id_barbero
+        });
+
+      if (error) throw error;
+      alert("Bloqueo creado con éxito");
+      setIsBloqueoModalOpen(false);
+    } catch (err) {
+      console.error("Error creating bloqueo:", err);
+      alert("Error al crear el bloqueo");
+    }
+  };
+
+  const handleSubmitCaja = async (datos: any) => {
+    try {
+      await agregarMovimientoCaja.mutateAsync(datos);
+      alert("Movimiento agregado a caja");
+      setIsCajaModalOpen(false);
+      refetch();
+    } catch (err) {
+      console.error("Error adding caja movement:", err);
+      alert("Error al agregar movimiento");
+    }
+  };
 
   if (!isMounted || isLoading) {
     return (
@@ -126,30 +195,26 @@ export default function DashboardPage() {
     <div style={{ padding: "0 20px 24px", width: "100%", margin: "0 auto" }}>
 
       {/* Header */}
-      <div style={{
+      <div className="dashboard-header" style={{
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
         marginBottom: 32,
         gap: 24
       }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 16 }}>
+        <div className="header-title-group" style={{ display: "flex", alignItems: "baseline", gap: 16 }}>
           <h1 style={{ fontSize: "1.1rem", margin: 0, letterSpacing: "0.1em", fontWeight: 700 }}>
             DASHBOARD
           </h1>
-          <p style={{ color: "#666", fontSize: "0.75rem", margin: 0, fontFamily: "var(--font-body)", textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
+          <p className="header-date" style={{ color: "#666", fontSize: "0.75rem", margin: 0, fontFamily: "var(--font-body)", textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
             {now ? now.toLocaleDateString("es-UY", { weekday: "long", day: "numeric", month: "long" }) : ""}
           </p>
         </div>
 
         {/* Acciones Rápidas (Sutiles y Alineadas) */}
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+        <div className="quick-actions" style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <button
-            onClick={() => {
-              const event = new CustomEvent('openNewAppointmentModal');
-              window.dispatchEvent(event);
-              window.location.href = '/turnos';
-            }}
+            onClick={handleOpenAppointmentModal}
             style={{
               display: "flex", alignItems: "center", gap: 6,
               background: "transparent", border: "none", color: "#C5A059",
@@ -162,42 +227,25 @@ export default function DashboardPage() {
             onMouseOut={(e) => e.currentTarget.style.opacity = "1"}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-            Nuevo turno
+            Nueva cita
           </button>
 
-          <Link
-            href="/bloqueos"
+          <button
+            onClick={() => setIsBloqueoModalOpen(true)}
             style={{
               display: "flex", alignItems: "center", gap: 6,
               background: "transparent", border: "none", color: "#666",
               fontSize: "0.7rem", fontWeight: 500, cursor: "pointer",
               fontFamily: "var(--font-body)", textTransform: "uppercase",
               letterSpacing: "0.05em", transition: "color 0.2s",
-              textDecoration: "none", whiteSpace: "nowrap"
+              padding: 0, whiteSpace: "nowrap"
             }}
             onMouseOver={(e) => e.currentTarget.style.color = "#8A8A8A"}
             onMouseOut={(e) => e.currentTarget.style.color = "#666"}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
             Bloqueo
-          </Link>
-
-          <Link
-            href="/caja"
-            style={{
-              display: "flex", alignItems: "center", gap: 6,
-              background: "transparent", border: "none", color: "#666",
-              fontSize: "0.7rem", fontWeight: 500, cursor: "pointer",
-              fontFamily: "var(--font-body)", textTransform: "uppercase",
-              letterSpacing: "0.05em", transition: "color 0.2s",
-              textDecoration: "none", whiteSpace: "nowrap"
-            }}
-            onMouseOver={(e) => e.currentTarget.style.color = "#8A8A8A"}
-            onMouseOut={(e) => e.currentTarget.style.color = "#666"}
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
-            Caja
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -205,17 +253,12 @@ export default function DashboardPage() {
       <div>
         {/* Next Appointment — Hero Card */}
         {siguienteTurno ? (
-          <div style={{
-            background: "#0a0a0a",
-            border: "1px solid #1a1a1a",
-            padding: "24px",
-            marginBottom: 24,
-          }}>
+          <div className="app-card" style={{ marginBottom: 24, padding: "24px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
                   <p style={{ color: "#8A8A8A", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", margin: 0, fontFamily: "var(--font-body)" }}>
-                    Siguiente turno
+                    Siguiente cita
                   </p>
                   {siguienteTurno.hora && (
                     <span style={{
@@ -271,15 +314,13 @@ export default function DashboardPage() {
             </div>
           </div>
         ) : (
-          <div style={{
-            background: "#0a0a0a",
-            border: "1px solid #1a1a1a",
-            padding: "24px",
+          <div className="app-card" style={{
             marginBottom: 24,
+            padding: "24px",
             textAlign: "center",
           }}>
             <p style={{ color: "#8A8A8A", fontSize: "0.875rem", margin: 0, fontFamily: "var(--font-body)" }}>
-              No hay más turnos pendientes hoy
+              No hay más citas pendientes hoy
             </p>
           </div>
         )}
@@ -287,12 +328,12 @@ export default function DashboardPage() {
         {/* KPI Grid — 5 cards alineadas */}
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
-          gap: 16,
-          marginBottom: 32,
+          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+          gap: "16px",
+          marginBottom: "32px"
         }}>
           {/* Ingresos hoy */}
-          <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", padding: "20px" }}>
+          <div className="app-card" style={{ padding: "20px" }}>
             <p style={{ color: "#8A8A8A", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px", fontFamily: "var(--font-body)" }}>
               Ingresos hoy
             </p>
@@ -302,7 +343,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Ingresos del mes */}
-          <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", padding: "20px" }}>
+          <div className="app-card" style={{ padding: "20px" }}>
             <p style={{ color: "#8A8A8A", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px", fontFamily: "var(--font-body)" }}>
               Ingresos / Mes
             </p>
@@ -312,7 +353,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Ingresos estimados del mes */}
-          <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", padding: "20px" }}>
+          <div className="app-card" style={{ padding: "20px" }}>
             <p style={{ color: "#8A8A8A", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px", fontFamily: "var(--font-body)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title="Ingresos Estimados / Mes">
               Estimados / Mes
             </p>
@@ -322,7 +363,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Completados del mes */}
-          <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", padding: "20px" }}>
+          <div className="app-card" style={{ padding: "20px" }}>
             <p style={{ color: "#8A8A8A", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px", fontFamily: "var(--font-body)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title="Completados / Mes">
               Completados / Mes
             </p>
@@ -332,7 +373,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Pendientes del mes */}
-          <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", padding: "20px" }}>
+          <div className="app-card" style={{ padding: "20px" }}>
             <p style={{ color: "#8A8A8A", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px", fontFamily: "var(--font-body)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title="Pendiente / Mes">
               Pendiente / Mes
             </p>
@@ -343,9 +384,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Turnos pendientes / mañana */}
-        <div style={{
-          background: "#0a0a0a",
-          border: "1px solid #1a1a1a",
+        <div className="app-card" style={{
           padding: "20px",
           maxHeight: 420,
           overflowY: "auto",
@@ -354,14 +393,14 @@ export default function DashboardPage() {
             <h3 style={{ fontSize: "1rem", margin: 0, letterSpacing: "0.04em" }}>
               {turnosLabel}
             </h3>
-            <Link href="/turnos" style={{ color: "#C5A059", fontSize: "0.8125rem", fontFamily: "var(--font-body)" }}>
+            <Link href="/agenda" style={{ color: "#C5A059", fontSize: "0.8125rem", fontFamily: "var(--font-body)" }}>
               Ver todos →
             </Link>
           </div>
 
           {turnosToShow.length === 0 ? (
             <p style={{ color: "#8A8A8A", fontSize: "0.875rem", textAlign: "center", padding: "20px 0", fontFamily: "var(--font-body)" }}>
-              {showTomorrow ? "Sin turnos para mañana" : "Sin turnos pendientes"}
+              {showTomorrow ? "Sin citas para mañana" : "Sin citas pendientes"}
             </p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -405,6 +444,47 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
+      {/* Modal Components */}
+      <EnhancedFinalAppointmentModal
+        open={isAppointmentModalOpen}
+        onOpenChange={(open) => {
+          setIsAppointmentModalOpen(open);
+          if (!open) refetch();
+        }}
+        initial={selectedAppointment || undefined}
+      />
+
+      <BloqueoModalForm
+        isOpen={isBloqueoModalOpen}
+        initialData={null}
+        onClose={() => setIsBloqueoModalOpen(false)}
+        onSubmit={handleSubmitBloqueo}
+      />
+      <style>{`
+        @media (max-width: 600px) {
+          .dashboard-header {
+            flex-wrap: wrap !important;
+            justify-content: space-between !important;
+            gap: 12px 0px !important;
+          }
+          .header-title-group {
+            display: contents !important;
+          }
+          .dashboard-header h1 {
+            order: 1 !important;
+            flex-grow: 1 !important;
+          }
+          .quick-actions {
+            order: 2 !important;
+          }
+          .header-date {
+            order: 3 !important;
+            width: 100% !important;
+            margin-top: 4px !important;
+            white-space: normal !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

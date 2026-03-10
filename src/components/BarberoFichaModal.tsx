@@ -15,7 +15,7 @@ type Props = {
 
 export function BarberoFichaModal({ open, onOpenChange, barbero, idBarberia }: Props) {
   const serviciosQuery = useServiciosList(idBarberia);
-  
+
   // Función para obtener el nombre del servicio por su ID
   const getNombreServicio = (servicioId: string) => {
     if (serviciosQuery.data) {
@@ -37,7 +37,7 @@ export function BarberoFichaModal({ open, onOpenChange, barbero, idBarberia }: P
               Ficha del Barbero
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button 
+              <button
                 className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl"
                 aria-label="Cerrar"
               >
@@ -48,7 +48,7 @@ export function BarberoFichaModal({ open, onOpenChange, barbero, idBarberia }: P
           <div className="v2-modal-body">
             <div className="space-y-4">
               {/* Información básica */}
-              <div className="bg-[var(--bg-form)] rounded-lg p-4">
+              <div className="bg-[var(--bg-form)] rounded-none p-4">
                 <h3 className="font-semibold text-[var(--text-primary)] mb-3">Información Básica</h3>
                 <div className="space-y-2">
                   <div>
@@ -69,38 +69,37 @@ export function BarberoFichaModal({ open, onOpenChange, barbero, idBarberia }: P
                   </div>
                 </div>
               </div>
-              
+
               {/* Rol y Estado */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-[var(--bg-form)] rounded-lg p-4">
+                <div className="bg-[var(--bg-form)] rounded-none p-4">
                   <h3 className="font-semibold text-[var(--text-primary)] mb-3">Rol</h3>
-                  <BarberoNivelPermisos 
-                    barbero={barbero} 
-                    onUpdate={() => {}}
+                  <BarberoNivelPermisos
+                    barbero={barbero}
+                    onUpdate={() => { }}
                     readonly={true}
                   />
                 </div>
-                <div className="bg-[var(--bg-form)] rounded-lg p-4">
+                <div className="bg-[var(--bg-form)] rounded-none p-4">
                   <h3 className="font-semibold text-[var(--text-primary)] mb-3">Estado</h3>
-                  <span className={`px-3 py-1 rounded-full text-sm ${
-                    barbero.activo 
-                      ? "bg-green-900 text-green-300" 
+                  <span className={`px-3 py-1 rounded-none text-sm ${barbero.activo
+                      ? "bg-green-900 text-green-300"
                       : "bg-red-900 text-red-300"
-                  }`}>
+                    }`}>
                     {barbero.activo ? 'Activo' : 'Inactivo'}
                   </span>
                 </div>
               </div>
-              
+
               {/* Especialidades */}
-              <div className="bg-[var(--bg-form)] rounded-lg p-4">
+              <div className="bg-[var(--bg-form)] rounded-none p-4">
                 <h3 className="font-semibold text-[var(--text-primary)] mb-3">Especialidades</h3>
                 {barbero.especialidades && barbero.especialidades.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {barbero.especialidades.map((esp: string, index: number) => (
-                      <span 
-                        key={index} 
-                        className="bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] px-3 py-1 rounded-full text-sm"
+                      <span
+                        key={index}
+                        className="bg-[var(--accent-primary)]/20 text-[var(--accent-primary)] px-3 py-1 rounded-none text-sm"
                       >
                         {getNombreServicio(esp)}
                       </span>
@@ -110,24 +109,24 @@ export function BarberoFichaModal({ open, onOpenChange, barbero, idBarberia }: P
                   <p className="text-[var(--text-secondary)]">No tiene especialidades asignadas</p>
                 )}
               </div>
-              
+
               {/* Información adicional */}
-              <div className="bg-[var(--bg-form)] rounded-lg p-4">
+              <div className="bg-[var(--bg-form)] rounded-none p-4">
                 <h3 className="font-semibold text-[var(--text-primary)] mb-3">Información Adicional</h3>
                 <div className="space-y-2">
                   <div>
                     <label className="text-xs text-[var(--text-secondary)]">Fecha de Creación</label>
                     <p className="text-[var(--text-primary)]">
-                      {barbero.created_at 
-                        ? new Date(barbero.created_at).toLocaleDateString('es-ES') 
+                      {barbero.created_at
+                        ? new Date(barbero.created_at).toLocaleDateString('es-ES')
                         : "No especificada"}
                     </p>
                   </div>
                   <div>
                     <label className="text-xs text-[var(--text-secondary)]">Última Actualización</label>
                     <p className="text-[var(--text-primary)]">
-                      {barbero.updated_at 
-                        ? new Date(barbero.updated_at).toLocaleDateString('es-ES') 
+                      {barbero.updated_at
+                        ? new Date(barbero.updated_at).toLocaleDateString('es-ES')
                         : "No especificada"}
                     </p>
                   </div>

@@ -9,10 +9,10 @@ interface CardProps {
  * Componente Card base del sistema V2
  */
 export function Card({ children, className = '' }: CardProps) {
-  // Si se pasa una clase v2 específica, usar esa. Si no, usar v2-card por defecto
-  const baseClass = className.includes('v2-card') ? '' : 'v2-card';
+  // Use the global app-card class by default
+  const baseClass = (className.includes('app-card') || className.includes('v2-card')) ? '' : 'app-card';
   const classes = `${baseClass} ${className}`.trim();
-  
+
   return (
     <div className={classes}>
       {children}
@@ -27,7 +27,7 @@ interface CardHeaderProps {
 
 export function CardHeader({ children, className = '' }: CardHeaderProps) {
   const classes = `v2-mb-md ${className}`.trim();
-  
+
   return (
     <div className={classes}>
       {children}
@@ -42,7 +42,7 @@ interface CardContentProps {
 
 export function CardContent({ children, className = '' }: CardContentProps) {
   const classes = className.trim();
-  
+
   return (
     <div className={classes}>
       {children}

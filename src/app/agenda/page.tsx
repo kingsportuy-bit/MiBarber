@@ -68,6 +68,17 @@ export default function DashboardPage() {
   return (
     <div style={{ padding: "0 20px 24px", width: "100%", margin: "0 auto" }}>
 
+      {/* Botón Nuevo Turno - Desktop */}
+      <div className="hidden md:flex justify-end mb-4">
+        <button
+          onClick={handleCreateNewAppointment}
+          className="flex items-center gap-2 bg-[#C5A059] hover:bg-[#D4B068] text-black px-6 py-3 rounded-none font-bold hover:shadow-[0_0_15px_rgba(197,160,89,0.3)] transition-all uppercase tracking-widest text-xs"
+          style={{ fontFamily: 'var(--font-rasputin), serif' }}
+        >
+          + Nueva Cita
+        </button>
+      </div>
+
       {/* Vista de escritorio - Tablero Kanban */}
       <div className="hidden md:block" style={{ overflow: "auto" }}>
         <KanbanBoard

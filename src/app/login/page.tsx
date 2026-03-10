@@ -156,10 +156,11 @@ export default function LoginPage() {
           <p style={{
             color: 'rgba(255,255,255,0.45)',
             fontSize: '0.875rem',
-            fontFamily: "'Inter', 'Roboto', -apple-system, sans-serif",
-            letterSpacing: '0.02em',
+            fontFamily: 'var(--font-rasputin), serif',
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase'
           }}>
-            Sistema de gestión para barberías
+            Inteligencia artificial para barberías
           </p>
         </div>
 
@@ -256,20 +257,11 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
+            className="action-button"
             style={{
               width: '100%',
               padding: '14px',
-              background: loading ? '#333' : '#C5A059',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '10px',
-              fontSize: '0.9375rem',
-              fontWeight: 600,
               cursor: loading ? 'not-allowed' : 'pointer',
-              fontFamily: "'Inter', 'Roboto', -apple-system, sans-serif",
-              letterSpacing: '0.03em',
-              textTransform: 'uppercase' as const,
-              transition: 'all 0.2s ease',
               opacity: loading ? 0.6 : 1,
               marginTop: '8px',
             }}
@@ -291,8 +283,7 @@ export default function LoginPage() {
             href="https://codexa.uy"
             target="_blank"
             rel="noopener noreferrer"
-            className="footer-link"
-            style={{ color: 'rgba(255,255,255,0.35)', textDecoration: 'none', transition: 'color 0.2s ease' }}
+            className="footer-link codexa-link"
           >
             Code<span className="codexa-x">x</span>a
           </a>

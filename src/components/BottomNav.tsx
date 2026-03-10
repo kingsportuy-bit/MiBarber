@@ -44,11 +44,17 @@ const IconUser = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const IconMore = ({ className }: { className?: string }) => (
+const IconShield = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="1" />
-    <circle cx="19" cy="12" r="1" />
-    <circle cx="5" cy="12" r="1" />
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </svg>
+);
+
+const IconDollarSign = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" x2="12" y1="2" y2="22" />
+    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
   </svg>
 );
 
@@ -56,7 +62,6 @@ export function BottomNav() {
   const pathname = usePathname();
   const { isAuthenticated, isAdmin } = useAuth();
   const [isChatView, setIsChatView] = useState(false);
-  const [showMoreSheet, setShowMoreSheet] = useState(false);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -69,8 +74,8 @@ export function BottomNav() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  // No mostrar en: no autenticado, admin, WhatsApp chat view, login
-  if (!isAuthenticated || pathname?.startsWith('/admin') || pathname?.startsWith('/login') || (pathname?.startsWith('/whatsapp') && isChatView)) {
+  // No mostrar en: no autenticado, admin, o login
+  if (!isAuthenticated || pathname?.startsWith('/admin') || pathname?.startsWith('/login')) {
     return null;
   }
 
@@ -79,21 +84,21 @@ export function BottomNav() {
   const navItems: NavItem[] = isAdmin
     ? [
       { href: "/inicio", label: "Dashboard", icon: <IconCalendarCheck /> },
-      { href: "/turnos", label: "Agenda", icon: <IconCalendar /> },
+      { href: "/agenda", label: "Agenda", icon: <IconCalendar /> },
       { href: "/whatsapp", label: "WhatsApp", icon: <IconMessageCircle /> },
-      { href: "#more", label: "Más", icon: <IconMore /> },
+      { href: "/caja", label: "Caja", icon: <IconDollarSign /> },
+      { href: "/bloqueos", label: "Bloqueos", icon: <IconShield /> },
     ]
     : [
       { href: "/inicio", label: "Dashboard", icon: <IconCalendarCheck /> },
-      { href: "/turnos", label: "Agenda", icon: <IconCalendar /> },
+      { href: "/agenda", label: "Agenda", icon: <IconCalendar /> },
       { href: "/whatsapp", label: "WhatsApp", icon: <IconMessageCircle /> },
       { href: "/perfil", label: "Perfil", icon: <IconUser /> },
     ];
 
   const isActive = (href: string) => {
-    if (href === "#more") return showMoreSheet;
     if (href === "/inicio") return pathname === href;
-    if (href === "/turnos") return pathname === href;
+    if (href === "/agenda") return pathname === href;
     return pathname?.startsWith(href);
   };
 
@@ -101,65 +106,10 @@ export function BottomNav() {
     if (typeof window !== 'undefined' && window.location.hash) {
       window.location.hash = '';
     }
-    if (href === "#more") {
-      setShowMoreSheet(!showMoreSheet);
-    } else {
-      setShowMoreSheet(false);
-    }
   };
 
   return (
     <>
-      {/* "Más" bottom sheet overlay */}
-      {showMoreSheet && (
-        <div
-          className="fixed inset-0 z-40 md:hidden"
-          onClick={() => setShowMoreSheet(false)}
-          style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
-        >
-          <div
-            className="absolute bottom-16 left-0 right-0 animate-slideUp"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: 'rgba(17,17,17,0.98)',
-              borderTop: '1px solid var(--qoder-dark-border-primary)',
-              borderRadius: '16px 16px 0 0',
-              padding: '12px 8px 8px',
-            }}
-          >
-            {/* Handle bar */}
-            <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.2)', margin: '0 auto 12px' }} />
-
-            {[
-              { href: "/caja", label: "Caja" },
-              { href: "/clientes", label: "Clientes" },
-              { href: "/estadisticas", label: "Estadísticas" },
-              { href: "/mi-barberia", label: "Mi Barbería" },
-              { href: "/perfil", label: "Perfil" },
-            ].map(item => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setShowMoreSheet(false)}
-                className="block"
-                style={{
-                  padding: '14px 20px',
-                  color: pathname?.startsWith(item.href) ? '#C5A059' : 'rgba(255,255,255,0.8)',
-                  fontSize: '0.9375rem',
-                  fontWeight: pathname?.startsWith(item.href) ? 600 : 400,
-                  borderRadius: '10px',
-                  background: pathname?.startsWith(item.href) ? 'rgba(255,119,0,0.08)' : 'transparent',
-                  textDecoration: 'none',
-                  fontFamily: "'Inter', 'Roboto', -apple-system, sans-serif",
-                }}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Bottom navigation bar */}
       <nav className="fixed bottom-0 left-0 right-0 md:hidden z-50">
         <div
@@ -168,7 +118,6 @@ export function BottomNav() {
         >
           {navItems.map((item) => {
             const active = isActive(item.href);
-            const isMoreButton = item.href === "#more";
 
             const content = (
               <div
@@ -205,17 +154,6 @@ export function BottomNav() {
               </div>
             );
 
-            if (isMoreButton) {
-              return (
-                <button
-                  key={item.href}
-                  onClick={() => handleNavigation(item.href)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', padding: 0, textTransform: 'none', letterSpacing: 'normal' }}
-                >
-                  {content}
-                </button>
-              );
-            }
 
             return (
               <Link

@@ -13,10 +13,10 @@ import { toast } from "sonner";
 
 export function ClientsTable() {
   const { idBarberia, isAdmin } = useBarberoAuth();
-  const { 
-    filters, 
-    sucursales, 
-    barberos 
+  const {
+    filters,
+    sucursales,
+    barberos
   } = useGlobalFilters();
 
   // Función para convertir puntaje a estrellas con borde dorado y sin relleno
@@ -74,32 +74,32 @@ export function ClientsTable() {
   const [q, setQ] = useState("");
   // Establecer el orden predeterminado como "último agregado"
   const [sortBy, setSortBy] = useState<SortOption>("ultimo_agregado");
-  
+
   // Agregar efecto para verificar cambios en el estado de búsqueda
   useEffect(() => {
     console.log("🔍 Estado de búsqueda actualizado:", q);
   }, [q]);
-  
+
   const { data, isLoading, createMutation, updateMutation, deleteMutation } =
     useClientes(q, sortBy, filters.sucursalId || undefined); // Usar q para la búsqueda y sucursalId del filtro global
 
   // Usar todos los clientes filtrados por sucursal
   const filteredClients = data || [];
-  
+
   // Estado para la paginación
   const [currentPage, setCurrentPage] = useState(1);
   const clientsPerPage = 10;
-  
+
   // Calcular índices para la paginación
   const indexOfLastClient = currentPage * clientsPerPage;
   const indexOfFirstClient = indexOfLastClient - clientsPerPage;
   const currentClients = filteredClients.slice(indexOfFirstClient, indexOfLastClient);
-  
+
   // Calcular número total de páginas
   const totalPages = Math.ceil(filteredClients.length / clientsPerPage);
 
   const [open, setOpen] = useState(false);
-  
+
   // Debugging - log when open state changes
   useEffect(() => {
     console.log('ClientModal open state changed:', open);
@@ -111,7 +111,7 @@ export function ClientsTable() {
     open: boolean;
     client: Client | null;
   }>({ open: false, client: null });
-  
+
   // Debugging - log when deleteConfirm state changes
   useEffect(() => {
     console.log('DeleteConfirm state changed:', deleteConfirm);
@@ -122,7 +122,7 @@ export function ClientsTable() {
     open: boolean;
     client: Client | null;
   }>({ open: false, client: null });
-  
+
   // Debugging - log when detailModal state changes
   useEffect(() => {
     console.log('DetailModal state changed:', detailModal);
@@ -135,7 +135,7 @@ export function ClientsTable() {
       if (editing?.id_cliente) {
         // Permitir editar todos los campos disponibles
         const updateData = {
-          id_cliente: values.id_cliente!,
+          id_cliente: values.id_cliente || editing?.id_cliente!,
           nombre: values.nombre,
           telefono: values.telefono,
           notas: values.notas,
@@ -174,9 +174,22 @@ export function ClientsTable() {
       }
       setOpen(false);
       setEditing(undefined);
-    } catch (e: unknown) {
-      console.error("Error al guardar cliente:", e);
-      const message = e instanceof Error ? e.message : "No se pudo guardar";
+    } catch (e: any) {
+      console.error("❌ Error al guardar cliente (objeto completo):", e);
+      console.error("❌ Error stringify:", JSON.stringify(e));
+
+      let message = "No se pudo guardar";
+      if (e instanceof Error) message = e.message;
+      else if (e?.message) message = e.message;
+      else if (e?.error_description) message = e.error_description;
+      else if (typeof e === 'string') message = e;
+
+      // Si es un error de Supabase/Postgrest
+      if (e?.code) {
+        message = `Error ${e.code}: ${e.message || 'Error de base de datos'}`;
+        if (e.details) message += ` - ${e.details}`;
+      }
+
       toast.error(message);
     }
   };
@@ -237,7 +250,7 @@ export function ClientsTable() {
           <div className="flex-1 min-w-[200px] max-w-xs">
             <GlobalFilters showDateFilters={false} showBarberoFilter={false} />
           </div>
-          
+
           {/* Buscador y botón Nuevo a la derecha */}
           <div className="flex items-center gap-2">
             <div className="relative">
@@ -253,7 +266,7 @@ export function ClientsTable() {
                   <button
                     onClick={() => setQ('')}
                     className="boton-simple"
-                    style={{ 
+                    style={{
                       background: 'transparent',
                       border: 'none',
                       padding: '0.25rem',
@@ -273,7 +286,7 @@ export function ClientsTable() {
                 </div>
               )}
             </div>
-            
+
             <button
               onClick={() => {
                 console.log('Opening new client modal');
@@ -302,7 +315,7 @@ export function ClientsTable() {
         </div>
 
         {/* Contenedor de la tabla con altura responsiva */}
-        <div className="bg-qoder-dark-bg-secondary flex-grow flex flex-col h-full overflow-hidden rounded-xl">
+        <div className="app-card flex-grow flex flex-col h-full overflow-hidden !p-0">
           <div className="h-full flex flex-col">
             <div className="overflow-auto flex-grow h-full">
               {/* Tabla responsive con diseño de cards en móviles */}
@@ -508,7 +521,7 @@ export function ClientsTable() {
                       </td>
                     </tr>
                   )}
-                  
+
                   {/* Fila de paginación para desktop */}
                   <tr>
                     <td colSpan={6} className="px-4 py-3 bg-qoder-dark-bg-secondary rounded-b-xl">
@@ -521,7 +534,7 @@ export function ClientsTable() {
                             >
                               Anterior
                             </span>
-                            
+
                             {/* Números de página */}
                             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                               let pageNum;
@@ -534,20 +547,20 @@ export function ClientsTable() {
                               } else {
                                 pageNum = currentPage - 2 + i;
                               }
-                              
+
                               return (
                                 <span
                                   key={pageNum}
                                   onClick={() => setCurrentPage(pageNum)}
-                                  className={`text-sm cursor-pointer px-2 ${currentPage === pageNum 
-                                    ? 'text-qoder-dark-accent-primary font-medium' 
+                                  className={`text-sm cursor-pointer px-2 ${currentPage === pageNum
+                                    ? 'text-qoder-dark-accent-primary font-medium'
                                     : 'text-qoder-dark-text-muted hover:text-qoder-dark-text-primary'}`}
                                 >
                                   {pageNum}
                                 </span>
                               );
                             })}
-                            
+
                             <span
                               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                               className="text-qoder-dark-text-muted text-sm cursor-pointer hover:text-qoder-dark-text-primary px-2"
@@ -555,7 +568,7 @@ export function ClientsTable() {
                               Siguiente
                             </span>
                           </div>
-                          
+
                           <div className="text-qoder-dark-text-primary text-xs">
                             Página {currentPage} de {totalPages} (Total: {filteredClients.length} clientes)
                           </div>
@@ -565,7 +578,7 @@ export function ClientsTable() {
                   </tr>
                 </tbody>
               </table>
-              
+
               {/* Vista de tabla para móviles */}
               <div className="md:hidden">
                 <div className="w-full overflow-x-auto">
@@ -580,8 +593,8 @@ export function ClientsTable() {
                     </thead>
                     <tbody>
                       {currentClients.map((c) => (
-                        <tr 
-                          key={c.id_cliente} 
+                        <tr
+                          key={c.id_cliente}
                           className="border-b border-qoder-dark-border-primary hover:bg-qoder-dark-bg-hover text-center"
                         >
                           <td className="py-2 px-2 text-qoder-dark-text-primary text-sm truncate max-w-[100px]">
@@ -647,13 +660,13 @@ export function ClientsTable() {
                     </tbody>
                   </table>
                 </div>
-                
+
                 {!isLoading && (filteredClients?.length ?? 0) === 0 && (
                   <div className="text-center py-6 text-qoder-dark-text-secondary">
                     Sin resultados
                   </div>
                 )}
-                
+
                 {/* Paginación para mobile - Alineada a la derecha */}
                 {totalPages > 1 && (
                   <div className="px-4 py-3 bg-qoder-dark-bg-secondary border-t border-qoder-dark-border-primary">
@@ -665,7 +678,7 @@ export function ClientsTable() {
                         >
                           Anterior
                         </span>
-                        
+
                         {/* Números de página */}
                         {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                           let pageNum;
@@ -678,20 +691,20 @@ export function ClientsTable() {
                           } else {
                             pageNum = currentPage - 2 + i;
                           }
-                          
+
                           return (
                             <span
                               key={pageNum}
                               onClick={() => setCurrentPage(pageNum)}
-                              className={`text-sm cursor-pointer px-2 ${currentPage === pageNum 
-                                ? 'text-qoder-dark-accent-primary font-medium' 
+                              className={`text-sm cursor-pointer px-2 ${currentPage === pageNum
+                                ? 'text-qoder-dark-accent-primary font-medium'
                                 : 'text-qoder-dark-text-muted hover:text-qoder-dark-text-primary'}`}
                             >
                               {pageNum}
                             </span>
                           );
                         })}
-                        
+
                         <span
                           onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                           className="text-qoder-dark-text-muted text-sm cursor-pointer hover:text-qoder-dark-text-primary px-2"
@@ -699,7 +712,7 @@ export function ClientsTable() {
                           Siguiente
                         </span>
                       </div>
-                      
+
                       <div className="text-qoder-dark-text-primary text-xs">
                         Página {currentPage} de {totalPages} (Total: {filteredClients.length} clientes)
                       </div>

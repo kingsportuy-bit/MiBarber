@@ -65,6 +65,8 @@ export function WhatsAppChatMobile() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [showChatList, setShowChatList] = useState<boolean>(true); // Controla qué panel mostrar
+  const [visibleLimit, setVisibleLimit] = useState(20); // Límite para carga gradual (lazy loading)
+  const listRef = useRef<HTMLDivElement>(null);
 
   // Cambiar para que no seleccione automáticamente el primer chat
   const activeConv = grouped?.find((g: ChatConversation) => g.session_id === active) || null;
@@ -345,6 +347,19 @@ export function WhatsAppChatMobile() {
     }, 300); // Pequeño delay para que el teclado tenga tiempo de aparecer
   };
 
+  // Manejar scroll para lazy loading
+  const handleListScroll = () => {
+    if (listRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = listRef.current;
+      // Si llegamos cerca del final (100px), cargar más
+      if (scrollTop + clientHeight >= scrollHeight - 100) {
+        if (visibleLimit < filteredConversations.length) {
+          setVisibleLimit(prev => prev + 20);
+        }
+      }
+    }
+  };
+
   return (
     <>
       {/* Modal QR cuando WhatsApp está desconectado (se mantiene abierto mientras actualiza el QR) */}
@@ -371,8 +386,8 @@ export function WhatsAppChatMobile() {
         </div>
       )}
 
-      {/* Contenedor principal del chat - diseño móvil */}
-      <div className={`flex flex-col w-full bg-[#161717] overflow-hidden min-w-0 ${showChatList ? 'h-[calc(100vh-64px)]' : 'h-dvh'} ${wppActivo === "Desconectado" ? 'opacity-40 pointer-events-none select-none' : ''}`}>
+      {/* Contenedor principal del chat - diseño móvil mejorado */}
+      <div className={`flex flex-col w-full bg-[#161717] overflow-hidden min-w-0 h-[calc(100dvh-60px-64px)] ${wppActivo === "Desconectado" ? 'opacity-40 pointer-events-none select-none' : ''}`} style={{ marginTop: '0px' }}>
         {showChatList ? (
           // Vista de lista de chats (móvil)
           <div className="flex flex-col h-full w-full min-w-0">
@@ -479,7 +494,7 @@ export function WhatsAppChatMobile() {
                       placeholder="Buscar por nombre o teléfono..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full h-10 py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-lg pr-10 bg-qoder-dark-bg-form border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
+                      className="w-full h-10 py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-none pr-10 bg-qoder-dark-bg-form border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
                     />
                     {searchTerm && (
                       <button
@@ -496,8 +511,12 @@ export function WhatsAppChatMobile() {
               )}
             </div>
 
-            {/* Lista de conversaciones */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#161717] scrollbar-styled min-w-0">
+            {/* Lista de conversaciones con Lazy Loading */}
+            <div
+              ref={listRef}
+              onScroll={handleListScroll}
+              className="flex-1 overflow-y-auto custom-scrollbar bg-[#161717] scrollbar-styled min-w-0"
+            >
               {isLoading && (
                 <div className="p-4 text-center">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-qoder-dark-accent-primary mx-auto mb-2"></div>
@@ -505,7 +524,7 @@ export function WhatsAppChatMobile() {
                 </div>
               )}
 
-              {filteredConversations.map((conversation: ChatConversation) => {
+              {filteredConversations.slice(0, visibleLimit).map((conversation: ChatConversation) => {
                 const lastMessage = conversation.messages[conversation.messages.length - 1];
                 const clientName = getClientName(conversation.session_id);
                 const isActive = active === conversation.session_id;
@@ -691,15 +710,11 @@ export function WhatsAppChatMobile() {
                 className="flex-1 relative overflow-hidden min-w-0"
                 style={{ backgroundColor: '#161717' }}
               >
-                {/* Capa de fondo fijo con patrón */}
+                {/* Capa de fondo fijo (Patrón eliminado por solicitud) */}
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
-                    backgroundImage: "url('https://i.postimg.cc/bwtp831q/m5BEg2K4OR4.png')",
-                    backgroundRepeat: 'repeat',
-                    backgroundSize: 'auto 100%',
-                    backgroundPosition: 'center',
-                    backgroundAttachment: 'fixed',
+                    backgroundColor: 'transparent',
                     mixBlendMode: 'overlay'
                   }}
                 />
@@ -780,28 +795,34 @@ export function WhatsAppChatMobile() {
                   )}
                 </div>
               </div>
-              {/* Área de entrada de mensaje */}
+              {/* Á rea de entrada de mensaje estilo WhatsApp Mobile */}
               {activeConv && (
-                <div className="p-3 bg-transparent min-w-0 relative">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <input
-                      type="text"
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      onFocus={handleInputFocus}
-                      placeholder="Escribe un mensaje..."
-                      className="flex-1 py-4 px-4 focus:outline-none focus:ring-0 focus:ring-transparent focus:border-transparent bg-[#242626] relative pill-effect border-0"
-                      style={{ backgroundColor: '#242626' }}
-                    />
+                <div className="p-2 bg-[#161717] border-t border-qoder-dark-border-primary min-w-0 relative">
+                  <div className="flex items-end gap-2 min-w-0">
+                    <div className="flex-1 relative">
+                      <textarea
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSendMessage();
+                          }
+                        }}
+                        onFocus={handleInputFocus}
+                        placeholder="Escribe un mensaje..."
+                        rows={1}
+                        className="w-full py-3 px-4 focus:outline-none focus:ring-0 bg-[#242626] rounded-2xl border-0 text-qoder-dark-text-primary resize-none custom-scrollbar scrollbar-none"
+                        style={{ maxHeight: '120px' }}
+                      />
+                    </div>
                     <button
                       onClick={handleSendMessage}
                       disabled={!message.trim()}
-                      className="p-3 bg-green-600 rounded-full hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                      style={{ transform: 'rotate(90deg)' }}
+                      className="p-3 bg-[#C5A059] rounded-full hover:bg-amber-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex-shrink-0 mb-0.5 shadow-lg active:scale-95"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                       </svg>
                     </button>
                   </div>

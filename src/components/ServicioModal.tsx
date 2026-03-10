@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import type { Service, Barbero } from "@/types/db";
 import { useBarberosList } from "@/hooks/useBarberosList";
 import { useActualizarEspecialidadesBarbero } from "@/hooks/useActualizarEspecialidadesBarbero";
+import { Checkbox } from "./ui/app-checkbox";
 
 // Tipo para la información de asignación de barbero
 type BarberoAsignacionInfo = {
@@ -194,10 +195,8 @@ export function ServicioModal({ open, onOpenChange, initial, onSave, onCancel, i
                         : barberoId === barbero.id_barbero;
 
                       return (
-                        <div key={barbero.id_barbero} className="flex items-center">
-                          <input
-                            type="checkbox"
-                            id={`barbero-${barbero.id_barbero}`}
+                        <div key={barbero.id_barbero} className="py-1">
+                          <Checkbox
                             checked={tieneEspecialidad}
                             onChange={(e) => {
                               if (isEdit) {
@@ -229,11 +228,8 @@ export function ServicioModal({ open, onOpenChange, initial, onSave, onCancel, i
                                 }
                               }
                             }}
-                            className="mr-2 h-4 w-4 text-[var(--accent-primary)] rounded"
+                            label={<span className="text-sm text-[var(--text-primary)]">{barbero.nombre}</span>}
                           />
-                          <label htmlFor={`barbero-${barbero.id_barbero}`} className="text-sm text-[var(--text-primary)]">
-                            {barbero.nombre}
-                          </label>
                         </div>
                       );
                     })}

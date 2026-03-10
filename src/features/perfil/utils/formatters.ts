@@ -18,6 +18,7 @@ export function formatDate(dateString: string): string {
     const [year, month, day] = dateString.split('-').map(Number);
     const date = new Date(year, month - 1, day); // Mes es 0-indexado
     return new Intl.DateTimeFormat('es-UY', {
+      weekday: 'short',
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -26,6 +27,7 @@ export function formatDate(dateString: string): string {
 
   // Para otros formatos, usar el comportamiento original
   return new Intl.DateTimeFormat('es-UY', {
+    weekday: 'short',
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -43,11 +45,11 @@ export function diasSemanaNombres(diasString: string): string {
   try {
     // Si viene como string '0,1,2'
     const diasArray = diasString.split(',').map(d => d.trim());
-    const nombresDias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const diasCortos = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
     // Verificamos si son números del 0 al 6
     if (diasArray.every(d => !isNaN(Number(d)) && Number(d) >= 0 && Number(d) <= 6)) {
-      return diasArray.map(d => nombresDias[Number(d)]).join(', ');
+      return diasArray.map(d => diasCortos[Number(d)]).join(', ');
     }
 
     // Comportamiento anterior para arrays booleanos en JSON

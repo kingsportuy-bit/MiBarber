@@ -50,7 +50,7 @@ export function SingleFormAppointmentModal({
 
   const { idBarberia, isAdmin, barbero: barberoActual } = useBarberoAuth();
   const { sucursales: allSucursales, isLoading: isLoadingSucursales } = useSucursales(idBarberia || undefined);
-  
+
   // Estados para los campos del formulario
   const [selectedSucursalId, setSelectedSucursalId] = useState<string | undefined>(propSucursalId);
   const [isInitialSelectionDone, setIsInitialSelectionDone] = useState(false);
@@ -71,10 +71,10 @@ export function SingleFormAppointmentModal({
     nombre: "",
     telefono: "",
   });
-  
+
   // Estado para verificar solapamiento
   const [isOverlapping, setIsOverlapping] = useState(false);
-  
+
   // Efecto para reiniciar los estados cuando se abre el modal o cambia la cita
   useEffect(() => {
     if (open) {
@@ -104,7 +104,7 @@ export function SingleFormAppointmentModal({
       // Si se proporciona una sucursalId como prop, usarla
       if (propSucursalId) {
         setSelectedSucursalId(propSucursalId);
-      } 
+      }
       // Para barberos normales, seleccionar automáticamente su sucursal
       else if (!isAdmin && barberoActual?.id_sucursal) {
         setSelectedSucursalId(barberoActual.id_sucursal);
@@ -130,38 +130,38 @@ export function SingleFormAppointmentModal({
 
   // Hooks para obtener datos
   const { data: clientesData, isLoading: isLoadingClientes, createMutation: createClientMutation } = useClientes(
-    undefined, 
-    "ultimo_agregado", 
+    undefined,
+    "ultimo_agregado",
     selectedSucursalId
   );
-  
+
   const { data: serviciosData, isLoading: isLoadingServicios } = useServiciosListPorSucursal(selectedSucursalId);
   const { data: barberosData, isLoading: isLoadingBarberos } = useBarberosList(idBarberia || undefined, selectedSucursalId);
-  
+
   // Obtener citas existentes para verificar solapamiento
   const { data: citasExistentes } = useCitas({
     barberoId: barberId || undefined,
     fecha: date,
   });
-  
+
   // Verificar solapamiento cuando cambian los valores relevantes
   useEffect(() => {
     if (barberId && date && time && duration && citasExistentes) {
       // Filtrar solo citas pendientes y confirmadas
-      const citasFiltradas = citasExistentes.filter(cita => 
+      const citasFiltradas = citasExistentes.filter(cita =>
         cita.estado === "pendiente" || cita.estado === "confirmado"
       );
-      
+
       // Si estamos editando, excluir la cita actual
-      const citasParaVerificar = initial?.id_cita 
+      const citasParaVerificar = initial?.id_cita
         ? citasFiltradas.filter(cita => cita.id_cita !== initial.id_cita)
         : citasFiltradas;
-      
+
       if (citasParaVerificar.length > 0) {
         // Extraer hora y minutos
         const [hora, minutos] = time.split(":").map(Number);
         const duracion = parseInt(duration) || 30; // Por defecto 30 minutos
-        
+
         // Verificar solapamiento
         const solapado = isTimeSlotOccupied(
           hora,
@@ -173,7 +173,7 @@ export function SingleFormAppointmentModal({
           !!initial?.id_cita, // isEdit
           initial?.id_cita
         );
-        
+
         setIsOverlapping(solapado);
       } else {
         setIsOverlapping(false);
@@ -191,7 +191,7 @@ export function SingleFormAppointmentModal({
     idCitaEditando: initial?.id_cita,
     duracionServicio: duration ? parseInt(duration, 10) : undefined,
   });
-  
+
   // Obtener horarios de la sucursal
   const { horarios: horariosSucursal } = useHorariosSucursales(selectedSucursalId);
 
@@ -199,7 +199,7 @@ export function SingleFormAppointmentModal({
   const filteredBarberos = barberosData?.filter((barbero: Barbero) => {
     // Si no hay servicio seleccionado, mostrar todos los barberos
     if (!serviceId) return true;
-    
+
     // Filtrar barberos que pueden ofrecer el servicio seleccionado
     // Esta lógica puede necesitar ajustes según cómo se almacenen las especialidades
     return true; // Por ahora mostramos todos
@@ -226,7 +226,7 @@ export function SingleFormAppointmentModal({
 
     console.log("Horarios disponibles:", horariosDisponibles);
     console.log("=== FIN GENERATE AVAILABLE TIMES (NUEVA LÓGICA) ===");
-    
+
     return horariosDisponibles || [];
   }, [selectedSucursalId, date, barberId, initial?.id_cita, isLoadingHorarios, horariosDisponibles]);
 
@@ -257,7 +257,7 @@ export function SingleFormAppointmentModal({
     console.log('=== DEBUG handleCreateQuickClient ===');
     console.log('Datos del cliente rápido:', quickClientData);
     console.log('Teléfono ingresado:', quickClientData.telefono);
-    
+
     if (!quickClientData.nombre.trim()) {
       alert("Por favor ingrese el nombre del cliente");
       return;
@@ -266,11 +266,11 @@ export function SingleFormAppointmentModal({
     // Validar el formato del número de teléfono si se ingresó uno
     if (quickClientData.telefono) {
       console.log('Validando teléfono...');
-      
+
       // Usar la función compartida de validación
       const isValid = isValidPhoneNumberLocal(quickClientData.telefono);
       console.log('Resultado de validación:', isValid);
-      
+
       if (!isValid) {
         alert("El formato del número de celular debe ser: 09xxxxxxx o +5989xxxxxxx");
         return;
@@ -285,7 +285,7 @@ export function SingleFormAppointmentModal({
     try {
       // Normalizar el número de teléfono antes de crear el cliente
       const normalizedPhone = quickClientData.telefono ? normalizePhoneNumber(quickClientData.telefono) : null;
-      
+
       // Crear el cliente con los datos proporcionados
       const newClientArray: Client[] = (await createClientMutation.mutateAsync({
         nombre: quickClientData.nombre,
@@ -311,138 +311,138 @@ export function SingleFormAppointmentModal({
     }
   };
 
-const handleSubmit = async () => {
-  setIsSubmitting(true);
-  
-  try {
-    // Validaciones básicas
-    if (!clientName) {
-      alert("Por favor seleccione un cliente");
-      setIsSubmitting(false);
-      return;
-    }
-    
-    if (!serviceName) {
-      alert("Por favor seleccione un servicio");
-      setIsSubmitting(false);
-      return;
-    }
-    
-    if (!barberName) {
-      alert("Por favor seleccione un barbero");
-      setIsSubmitting(false);
-      return;
-    }
-    
-    if (!date || !time) {
-      alert("Por favor seleccione fecha y hora");
-      setIsSubmitting(false);
-      return;
-    }
-    
-    // ✅ OBTENER Y VALIDAR DURACIÓN
-    let finalDuration = duration || '';
-    
-    if (!finalDuration && serviceId) {
-      const selectedService = serviciosData?.find((s: Service) => s.id_servicio === serviceId);
-      if (selectedService && selectedService.duracion_minutos) {
-        finalDuration = selectedService.duracion_minutos.toString();
-      }
-    }
-    
-    if (!finalDuration) {
-      alert("No se pudo determinar la duración del servicio");
-      setIsSubmitting(false);
-      return;
-    }
-    
-    // ✅ OBTENER Y VALIDAR TELÉFONO
-    let finalPhone = clientPhone;
-    
-    if (clientId && !clientPhone) {
-      const selectedClient = clientesData?.find((c: Client) => c.id_cliente === clientId);
-      if (selectedClient?.telefono) {
-        finalPhone = selectedClient.telefono;
-        setClientPhone(selectedClient.telefono);
-      } else {
-        alert("El cliente seleccionado no tiene teléfono registrado. Por favor actualice sus datos.");
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+
+    try {
+      // Validaciones básicas
+      if (!clientName) {
+        alert("Por favor seleccione un cliente");
         setIsSubmitting(false);
         return;
       }
-    }
-    
-    if (!finalPhone || finalPhone.trim() === '') {
-      alert("El teléfono del cliente es obligatorio");
-      setIsSubmitting(false);
-      return;
-    }
-    
-    if (!isValidPhoneNumberLocal(finalPhone)) {
-      alert("El formato del teléfono debe ser: 09xxxxxxx, 9xxxxxxx o +5989xxxxxxx");
-      setIsSubmitting(false);
-      return;
-    }
-    
-    const normalizedPhone = normalizePhoneNumberLocal(finalPhone);
-    
-    // ✅ OBTENER PRECIO DEL SERVICIO
-    const selectedService = serviciosData?.find((s: Service) => s.id_servicio === serviceId);
-    const ticket = selectedService?.precio || null;
-    
-    // ✅ OBTENER ESTADO DE LA CITA
-    const estadoCita = appointmentStatus as "pendiente" | "completado" | "cancelado";
 
-    // ✅ CONSTRUIR OBJETO COMPLETO
-    const appointmentData: Partial<Appointment> = {
-      fecha: date,
-      hora: time,
-      cliente_nombre: clientName,
-      servicio: serviceName,
-      barbero: barberName,
-      telefono: normalizedPhone,
-      id_barbero: barberId || '',
-      id_sucursal: selectedSucursalId || '',
-      id_barberia: idBarberia || '',
-      duracion: finalDuration,  // ✅ Ahora está definido
-      estado: estadoCita,
-      nota: note?.trim() || null,
-      id_cliente: clientId || null,
-      id_servicio: serviceId || null,
-      ticket: ticket || undefined,
-      nro_factura: initial?.nro_factura || undefined,
-      notificacion_barbero: initial?.notificacion_barbero || undefined,
-      notificacion_cliente: initial?.notificacion_cliente || undefined,
-      metodo_pago: initial?.metodo_pago || undefined,
-      created_at: initial?.created_at || undefined,
-      updated_at: initial?.updated_at || undefined,
-    };
-    
-    console.log('📤 appointmentData con teléfono:', appointmentData);
-    
-    await onSave(appointmentData);
-    onOpenChange(false);
-    
-    // Resetear formulario
-    setClientId(null);
-    setClientName("");
-    setServiceId(null);
-    setServiceName("");
-    setDuration("");
-    setBarberId(null);
-    setBarberName("");
-    setDate(getLocalDateString(new Date()));
-    setTime("");
-    setNote("");
-    setClientPhone(null);
-    setAppointmentStatus("pendiente"); // Resetear el estado de la cita
-    
-  } catch (error) {
-    console.error("Error al guardar el turno:", error);
-    alert("Error al guardar el turno. Por favor intente nuevamente.");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      if (!serviceName) {
+        alert("Por favor seleccione un servicio");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!barberName) {
+        alert("Por favor seleccione un barbero");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!date || !time) {
+        alert("Por favor seleccione fecha y hora");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // ✅ OBTENER Y VALIDAR DURACIÓN
+      let finalDuration = duration || '';
+
+      if (!finalDuration && serviceId) {
+        const selectedService = serviciosData?.find((s: Service) => s.id_servicio === serviceId);
+        if (selectedService && selectedService.duracion_minutos) {
+          finalDuration = selectedService.duracion_minutos.toString();
+        }
+      }
+
+      if (!finalDuration) {
+        alert("No se pudo determinar la duración del servicio");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // ✅ OBTENER Y VALIDAR TELÉFONO
+      let finalPhone = clientPhone;
+
+      if (clientId && !clientPhone) {
+        const selectedClient = clientesData?.find((c: Client) => c.id_cliente === clientId);
+        if (selectedClient?.telefono) {
+          finalPhone = selectedClient.telefono;
+          setClientPhone(selectedClient.telefono);
+        } else {
+          alert("El cliente seleccionado no tiene teléfono registrado. Por favor actualice sus datos.");
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      if (!finalPhone || finalPhone.trim() === '') {
+        alert("El teléfono del cliente es obligatorio");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!isValidPhoneNumberLocal(finalPhone)) {
+        alert("El formato del teléfono debe ser: 09xxxxxxx, 9xxxxxxx o +5989xxxxxxx");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const normalizedPhone = normalizePhoneNumberLocal(finalPhone);
+
+      // ✅ OBTENER PRECIO DEL SERVICIO
+      const selectedService = serviciosData?.find((s: Service) => s.id_servicio === serviceId);
+      const ticket = selectedService?.precio || null;
+
+      // ✅ OBTENER ESTADO DE LA CITA
+      const estadoCita = appointmentStatus as "pendiente" | "completado" | "cancelado";
+
+      // ✅ CONSTRUIR OBJETO COMPLETO
+      const appointmentData: Partial<Appointment> = {
+        fecha: date,
+        hora: time,
+        cliente_nombre: clientName,
+        servicio: serviceName,
+        barbero: barberName,
+        telefono: normalizedPhone,
+        id_barbero: barberId || '',
+        id_sucursal: selectedSucursalId || '',
+        id_barberia: idBarberia || '',
+        duracion: finalDuration,  // ✅ Ahora está definido
+        estado: estadoCita,
+        nota: note?.trim() || null,
+        id_cliente: clientId || null,
+        id_servicio: serviceId || null,
+        ticket: ticket || undefined,
+        nro_factura: initial?.nro_factura || undefined,
+        notificacion_barbero: initial?.notificacion_barbero || undefined,
+        notificacion_cliente: initial?.notificacion_cliente || undefined,
+        metodo_pago: initial?.metodo_pago || undefined,
+        created_at: initial?.created_at || undefined,
+        updated_at: initial?.updated_at || undefined,
+      };
+
+      console.log('📤 appointmentData con teléfono:', appointmentData);
+
+      await onSave(appointmentData);
+      onOpenChange(false);
+
+      // Resetear formulario
+      setClientId(null);
+      setClientName("");
+      setServiceId(null);
+      setServiceName("");
+      setDuration("");
+      setBarberId(null);
+      setBarberName("");
+      setDate(getLocalDateString(new Date()));
+      setTime("");
+      setNote("");
+      setClientPhone(null);
+      setAppointmentStatus("pendiente"); // Resetear el estado de la cita
+
+    } catch (error) {
+      console.error("Error al guardar el turno:", error);
+      alert("Error al guardar el turno. Por favor intente nuevamente.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Función para convertir hora a minutos
   const horaAMinutos = (hora: string): number => {
@@ -453,20 +453,20 @@ const handleSubmit = async () => {
   // Verificar si el horario seleccionado se solapa con una cita existente
   const isTimeOverlapping = useMemo(() => {
     if (!time || !citasExistentes || !duration) return false;
-    
+
     const selectedTimeMinutes = horaAMinutos(time);
     const serviceDuration = parseInt(duration, 10);
-    
+
     return citasExistentes.some((cita: Appointment) => {
       // Excluir la cita que se está editando
       if (initial?.id_cita && cita.id_cita === initial.id_cita) {
         return false;
       }
-      
+
       const citaStart = horaAMinutos(cita.hora);
       const citaDuration = parseInt(cita.duracion || "30", 10);
       const citaEnd = citaStart + citaDuration;
-      
+
       // Verificar solapamiento
       return selectedTimeMinutes < citaEnd && selectedTimeMinutes + serviceDuration > citaStart;
     });
@@ -489,7 +489,7 @@ const handleSubmit = async () => {
           justifyContent: 'center',
           padding: '16px'
         }} />
-        <Dialog.Content className="v2-modal" style={{ 
+        <Dialog.Content className="v2-modal" style={{
           maxWidth: '600px',
           background: '#2a2a2a',
           border: '1px solid #333333',
@@ -522,7 +522,7 @@ const handleSubmit = async () => {
               {initial?.id_cita ? "Editar Turno" : "Crear Nuevo Turno"}
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button 
+              <button
                 className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl"
                 aria-label="Cerrar"
                 style={{
@@ -536,303 +536,303 @@ const handleSubmit = async () => {
           <div className="v2-modal-body" style={{
             marginBottom: '16px'
           }}>
-          
-          <div className="space-y-4">
-            {/* Filtro de sucursal (solo para administradores) */}
-            {isAdmin && (
-              <div className="mb-4">
-                <label className="v2-label">
-                  Sucursal
-                </label>
-                <select
-                  value={selectedSucursalId || ""}
-                  onChange={(e) => setSelectedSucursalId(e.target.value || undefined)}
-                  className="v2-select"
-                  disabled={isLoadingSucursales}
-                >
-                  {allSucursales?.map((sucursal: any) => (
-                    <option key={sucursal.id} value={sucursal.id}>
-                      {sucursal.nombre_sucursal || `Sucursal ${sucursal.numero_sucursal}`}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-            
-            {/* Servicio y Duración (en la misma línea) */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="v2-label">
-                  Servicio
-                </label>
-                <select
-                  value={serviceId || ""}
-                  onChange={(e) => {
-                    const selectedService = serviciosData?.find((s: Service) => s.id_servicio === e.target.value);
-                    setServiceId(e.target.value || null);
-                    setServiceName(selectedService?.nombre || "");
-                    // Actualizar la duración cuando se selecciona un servicio
-                    if (selectedService) {
-                      setDuration(selectedService.duracion_minutos.toString());
-                    }
-                  }}
-                  className="v2-select"
-                  disabled={isLoadingServicios}
-                >
-                  <option value="">Seleccione un servicio</option>
-                  {serviciosData?.map((servicio: Service) => (
-                    <option key={servicio.id_servicio} value={servicio.id_servicio}>
-                      {servicio.nombre} - ${servicio.precio}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="v2-label">
-                  Duración (minutos)
-                </label>
-                <input
-                  type="number"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  className="v2-input"
-                  placeholder="Ej: 30"
-                  min="1"
-                />
-              </div>
-            </div>
-            
-            {/* Barbero */}
-            <div className="mb-4">
-              <label className="v2-label">
-                Barbero
-              </label>
-              <select
-                value={barberId || ""}
-                onChange={(e) => {
-                  const selectedBarber = filteredBarberos.find((b: Barbero) => b.id_barbero === e.target.value);
-                  setBarberId(e.target.value || null);
-                  setBarberName(selectedBarber?.nombre || "");
-                }}
-                className="v2-select"
-                disabled={isLoadingBarberos}
-              >
-                <option value="">Seleccione un barbero</option>
-                {filteredBarberos.map((barbero: Barbero) => (
-                  <option key={barbero.id_barbero} value={barbero.id_barbero}>
-                    {barbero.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            {/* Fecha y Hora (en la misma línea) */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="v2-label">
-                  Fecha
-                </label>
-                <div className="w-full">
-                  <CustomDatePicker
-                    value={date}
-                    onChange={setDate}
-                    placeholder="Seleccionar fecha"
+
+            <div className="space-y-4">
+              {/* Filtro de sucursal (solo para administradores) */}
+              {isAdmin && (
+                <div className="mb-4">
+                  <label className="v2-label">
+                    Sucursal
+                  </label>
+                  <select
+                    value={selectedSucursalId || ""}
+                    onChange={(e) => setSelectedSucursalId(e.target.value || undefined)}
+                    className="v2-select"
+                    disabled={isLoadingSucursales}
+                  >
+                    {allSucursales?.map((sucursal: any) => (
+                      <option key={sucursal.id} value={sucursal.id}>
+                        {sucursal.nombre_sucursal || `Sucursal ${sucursal.numero_sucursal}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Servicio y Duración (en la misma línea) */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="v2-label">
+                    Servicio
+                  </label>
+                  <select
+                    value={serviceId || ""}
+                    onChange={(e) => {
+                      const selectedService = serviciosData?.find((s: Service) => s.id_servicio === e.target.value);
+                      setServiceId(e.target.value || null);
+                      setServiceName(selectedService?.nombre || "");
+                      // Actualizar la duración cuando se selecciona un servicio
+                      if (selectedService) {
+                        setDuration(selectedService.duracion_minutos.toString());
+                      }
+                    }}
+                    className="v2-select"
+                    disabled={isLoadingServicios}
+                  >
+                    <option value="">Seleccione un servicio</option>
+                    {serviciosData?.map((servicio: Service) => (
+                      <option key={servicio.id_servicio} value={servicio.id_servicio}>
+                        {servicio.nombre} - ${servicio.precio}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="v2-label">
+                    Duración (minutos)
+                  </label>
+                  <input
+                    type="number"
+                    value={duration}
+                    onChange={(e) => setDuration(e.target.value)}
+                    className="v2-input"
+                    placeholder="Ej: 30"
+                    min="1"
                   />
                 </div>
               </div>
-              <div>
+
+              {/* Barbero */}
+              <div className="mb-4">
                 <label className="v2-label">
-                  Hora
+                  Barbero
                 </label>
                 <select
-                  value={getFormattedTimeValue}
-                  onChange={(e) => setTime(e.target.value)}
-                  className={`v2-select ${isTimeOverlapping ? 'border-yellow-500' : ''}`}
-                  disabled={isLoadingHorarios}
+                  value={barberId || ""}
+                  onChange={(e) => {
+                    const selectedBarber = filteredBarberos.find((b: Barbero) => b.id_barbero === e.target.value);
+                    setBarberId(e.target.value || null);
+                    setBarberName(selectedBarber?.nombre || "");
+                  }}
+                  className="v2-select"
+                  disabled={isLoadingBarberos}
                 >
-                  <option value="">Seleccione una hora</option>
-                  {availableTimes.map((timeOption) => (
-                    <option key={timeOption} value={timeOption}>
-                      {timeOption}
+                  <option value="">Seleccione un barbero</option>
+                  {filteredBarberos.map((barbero: Barbero) => (
+                    <option key={barbero.id_barbero} value={barbero.id_barbero}>
+                      {barbero.nombre}
                     </option>
                   ))}
                 </select>
-                {isTimeOverlapping && (
-                  <p className="text-yellow-500 text-xs mt-1">
-                    ⚠️ Este horario se solapa con una cita existente. El turno se creará de todos modos.
-                  </p>
-                )}
-                {isLoadingHorarios && (
-                  <p className="text-qoder-dark-text-secondary text-xs mt-1">
-                    Cargando horarios disponibles...
-                  </p>
-                )}
               </div>
-            </div>
 
-            {/* Cliente */}
-            <div className="mb-4">
-              <label className="v2-label">
-                Cliente
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={clientName}
-                  onChange={(e) => {
-                    setClientName(e.target.value);
-                    // Limpiar la selección si el usuario modifica el texto
-                    if (clientId) {
-                      setClientId(null);
-                      setClientPhone(null);
-                    }
-                  }}
-                  className="v2-input"
-                  placeholder="Buscar cliente..."
-                />
-                {clientName && !clientId && (
-                  <div className="absolute z-10 w-full mt-1 max-h-40 overflow-y-auto border border-qoder-dark-border rounded-lg bg-qoder-dark-bg-primary">
-                    {clientesData
-                      ?.filter((cliente: Client) => 
-                        (cliente.nombre && cliente.nombre.toLowerCase().includes(clientName.toLowerCase())) ||
-                        (cliente.telefono && cliente.telefono.includes(clientName))
-                      )
-                      .map((cliente: Client) => (
-                        <div
-                          key={cliente.id_cliente}
-                          className="px-3 py-2 hover:bg-qoder-dark-bg-hover cursor-pointer text-qoder-dark-text-primary"
-                          onClick={() => {
-                            setClientId(cliente.id_cliente);
-                            setClientName(cliente.nombre);
-                            setClientPhone(cliente.telefono || null);
-                          }}
-                        >
-                          {cliente.nombre}
-                          {cliente.telefono && (
-                            <span className="text-qoder-dark-text-secondary text-sm ml-2">
-                              ({cliente.telefono})
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                  </div>
-                )}
-              </div>
-              
-              {/* Botón para crear cliente rápido */}
-              <button
-                type="button"
-                onClick={() => setShowQuickClientForm(!showQuickClientForm)}
-                className="mt-2 text-xs text-qoder-dark-accent-primary boton-simple"
-              >
-                + Crear cliente rápido
-              </button>
-              
-              {/* Formulario de cliente rápido */}
-              {showQuickClientForm && (
-                <div className="mt-3 p-3 bg-qoder-dark-bg-secondary rounded-lg">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <div>
-                      <label className="v2-label">
-                        Nombre *
-                      </label>
-                      <input
-                        type="text"
-                        value={quickClientData.nombre}
-                        onChange={(e) => setQuickClientData({...quickClientData, nombre: e.target.value})}
-                        className="v2-input"
-                        placeholder="Nombre completo"
-                      />
-                    </div>
-                    <div>
-                      <label className="v2-label">
-                        Teléfono
-                      </label>
-                      <input
-                        type="text"
-                        value={quickClientData.telefono}
-                        onChange={(e) => setQuickClientData({...quickClientData, telefono: e.target.value})}
-                        className="v2-input"
-                        placeholder="Teléfono"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex gap-2 mt-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowQuickClientForm(false)}
-                      className="v2-btn v2-btn-secondary"
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCreateQuickClient}
-                      className="v2-btn v2-btn-primary"
-                    >
-                      Crear
-                    </button>
-                    
+              {/* Fecha y Hora (en la misma línea) */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="v2-label">
+                    Fecha
+                  </label>
+                  <div className="w-full">
+                    <CustomDatePicker
+                      value={date}
+                      onChange={setDate}
+                      placeholder="Seleccionar fecha"
+                    />
                   </div>
                 </div>
-              )}
-            </div>
+                <div>
+                  <label className="v2-label">
+                    Hora
+                  </label>
+                  <select
+                    value={getFormattedTimeValue}
+                    onChange={(e) => setTime(e.target.value)}
+                    className={`v2-select ${isTimeOverlapping ? 'border-yellow-500' : ''}`}
+                    disabled={isLoadingHorarios}
+                  >
+                    <option value="">Seleccione una hora</option>
+                    {availableTimes.map((timeOption) => (
+                      <option key={timeOption} value={timeOption}>
+                        {timeOption}
+                      </option>
+                    ))}
+                  </select>
+                  {isTimeOverlapping && (
+                    <p className="text-yellow-500 text-xs mt-1">
+                      ⚠️ Este horario se solapa con una cita existente. El turno se creará de todos modos.
+                    </p>
+                  )}
+                  {isLoadingHorarios && (
+                    <p className="text-qoder-dark-text-secondary text-xs mt-1">
+                      Cargando horarios disponibles...
+                    </p>
+                  )}
+                </div>
+              </div>
 
-            {/* Estado de la cita (solo para edición) */}
-            {initial?.id_cita && (
+              {/* Cliente */}
               <div className="mb-4">
                 <label className="v2-label">
-                  Estado
+                  Cliente
                 </label>
-                <select
-                  value={appointmentStatus}
-                  onChange={(e) => setAppointmentStatus(e.target.value)}
-                  className="v2-select"
-                >
-                  <option value="pendiente">Pendiente</option>
-                  <option value="completado">Completado</option>
-                  <option value="cancelado">Cancelado</option>
-                </select>
-              </div>
-            )}
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={clientName}
+                    onChange={(e) => {
+                      setClientName(e.target.value);
+                      // Limpiar la selección si el usuario modifica el texto
+                      if (clientId) {
+                        setClientId(null);
+                        setClientPhone(null);
+                      }
+                    }}
+                    className="v2-input"
+                    placeholder="Buscar cliente..."
+                  />
+                  {clientName && !clientId && (
+                    <div className="absolute z-10 w-full mt-1 max-h-40 overflow-y-auto border border-qoder-dark-border rounded-none bg-qoder-dark-bg-primary">
+                      {clientesData
+                        ?.filter((cliente: Client) =>
+                          (cliente.nombre && cliente.nombre.toLowerCase().includes(clientName.toLowerCase())) ||
+                          (cliente.telefono && cliente.telefono.includes(clientName))
+                        )
+                        .map((cliente: Client) => (
+                          <div
+                            key={cliente.id_cliente}
+                            className="px-3 py-2 hover:bg-qoder-dark-bg-hover cursor-pointer text-qoder-dark-text-primary"
+                            onClick={() => {
+                              setClientId(cliente.id_cliente);
+                              setClientName(cliente.nombre);
+                              setClientPhone(cliente.telefono || null);
+                            }}
+                          >
+                            {cliente.nombre}
+                            {cliente.telefono && (
+                              <span className="text-qoder-dark-text-secondary text-sm ml-2">
+                                ({cliente.telefono})
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
 
-            {/* Nota */}
-            <div className="mb-4">
-              <label className="v2-label">
-                Nota
-              </label>
-              <textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                className="v2-textarea"
-                rows={3}
-                placeholder="Agregar nota..."
-              />
+                {/* Botón para crear cliente rápido */}
+                <button
+                  type="button"
+                  onClick={() => setShowQuickClientForm(!showQuickClientForm)}
+                  className="mt-2 text-xs text-qoder-dark-accent-primary boton-simple"
+                >
+                  + Crear cliente rápido
+                </button>
+
+                {/* Formulario de cliente rápido */}
+                {showQuickClientForm && (
+                  <div className="mt-3 p-3 bg-qoder-dark-bg-secondary rounded-none">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <div>
+                        <label className="v2-label">
+                          Nombre *
+                        </label>
+                        <input
+                          type="text"
+                          value={quickClientData.nombre}
+                          onChange={(e) => setQuickClientData({ ...quickClientData, nombre: e.target.value })}
+                          className="v2-input"
+                          placeholder="Nombre completo"
+                        />
+                      </div>
+                      <div>
+                        <label className="v2-label">
+                          Teléfono
+                        </label>
+                        <input
+                          type="text"
+                          value={quickClientData.telefono}
+                          onChange={(e) => setQuickClientData({ ...quickClientData, telefono: e.target.value })}
+                          className="v2-input"
+                          placeholder="Teléfono"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowQuickClientForm(false)}
+                        className="v2-btn v2-btn-secondary"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCreateQuickClient}
+                        className="v2-btn v2-btn-primary"
+                      >
+                        Crear
+                      </button>
+
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Estado de la cita (solo para edición) */}
+              {initial?.id_cita && (
+                <div className="mb-4">
+                  <label className="v2-label">
+                    Estado
+                  </label>
+                  <select
+                    value={appointmentStatus}
+                    onChange={(e) => setAppointmentStatus(e.target.value)}
+                    className="v2-select"
+                  >
+                    <option value="pendiente">Pendiente</option>
+                    <option value="completado">Completado</option>
+                    <option value="cancelado">Cancelado</option>
+                  </select>
+                </div>
+              )}
+
+              {/* Nota */}
+              <div className="mb-4">
+                <label className="v2-label">
+                  Nota
+                </label>
+                <textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  className="v2-textarea"
+                  rows={3}
+                  placeholder="Agregar nota..."
+                />
+              </div>
+            </div>
+
+            {/* Botones de acción */}
+            <div className="v2-modal-footer">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="v2-btn v2-btn-secondary"
+                disabled={isSubmitting}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="v2-btn v2-btn-primary"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Guardando..." : "Guardar Turno"}
+              </button>
             </div>
           </div>
-          
-          {/* Botones de acción */}
-          <div className="v2-modal-footer">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="v2-btn v2-btn-secondary"
-              disabled={isSubmitting}
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="v2-btn v2-btn-primary"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Guardando..." : "Guardar Turno"}
-            </button>
-          </div>
-        </div>
-      </Dialog.Content>
-    </Dialog.Portal>
-  </Dialog.Root>
-);
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
 }

@@ -19,46 +19,46 @@ export function AppointmentList({ fecha }: AppointmentListProps) {
   const [barberoFiltro, setBarberoFiltro] = useState<string | null>(null); // Estado para el filtro de barbero
   const [sucursalFiltro, setSucursalFiltro] = useState<string | null>(null); // Estado para el filtro de sucursal
   const { data: barberos } = useBarberosList(idBarberia || undefined, sucursalFiltro); // Obtener lista de barberos filtrados por sucursal
-  
+
   // Cuando cambia la sucursal, resetear el filtro de barbero
   useEffect(() => {
     setBarberoFiltro(null);
   }, [sucursalFiltro]);
-  
+
   // Obtener citas con los filtros aplicados
   const { data: citas, isLoading } = useCitas({
     sucursalId: isAdmin && sucursalFiltro ? sucursalFiltro : undefined, // Aplicar filtro de sucursal si es admin
     fecha: undefined, // No filtrar por fecha específica (lo haremos después)
     barberoId: isAdmin && barberoFiltro ? barberoFiltro : undefined // Aplicar filtro de barbero si es admin
   });
-  
+
   // Formatear la fecha para mostrar
   const formatDisplayDate = (dateString: string) => {
     const [year, month, day] = dateString.split('-').map(Number);
     const date = new Date(year, month - 1, day);
-    
+
     // Verificar si es hoy
     const today = new Date();
     const isToday = date.getDate() === today.getDate() &&
-                   date.getMonth() === today.getMonth() &&
-                   date.getFullYear() === today.getFullYear();
-    
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear();
+
     if (isToday) {
-      return "Turnos de Hoy";
+      return "Agenda de Hoy";
     }
-    
-    // Formato para otros días: "Turnos del martes, 25 de setiembre" (sin año)
+
+    // Formato para otros días: "Agenda del martes, 25 de setiembre" (sin año)
     const weekday = date.toLocaleDateString('es-UY', { weekday: 'long' });
     const dayOfMonth = date.getDate();
     const monthName = date.toLocaleDateString('es-UY', { month: 'long' });
-    
-    return `Turnos del ${weekday}, ${dayOfMonth} de ${monthName}`;
+
+    return `Agenda del ${weekday}, ${dayOfMonth} de ${monthName}`;
   };
-  
+
   // Filtrar citas para mostrar solo las del día especificado
   const citasDelDia = useMemo(() => {
     if (!citas) return [];
-    
+
     // Usar la utilidad de fecha corregida
     const targetDate = fecha || getLocalDateString();
     return citas.filter(cita => cita.fecha === targetDate);
@@ -82,16 +82,16 @@ export function AppointmentList({ fecha }: AppointmentListProps) {
   return (
     <div className="v2-window">
       <div className="v2-window-header">
-        <h3 className="font-semibold text-[var(--text-primary)]">{fecha ? formatDisplayDate(fecha) : "Turnos de Hoy"}</h3>
+        <h3 className="font-semibold text-[var(--text-primary)]">{fecha ? formatDisplayDate(fecha) : "Agenda de Hoy"}</h3>
         <span className="cursor-button px-2 py-1 text-xs font-mono bg-[var(--bg-tertiary)] rounded text-[var(--text-primary)]">
           {citasOrdenadas.length}
         </span>
       </div>
-      
+
       {/* Filtros para administradores */}
       {isAdmin && (
         <div className="p-4 border-b border-[var(--border-primary)] flex flex-wrap gap-2">
-          <select 
+          <select
             value={sucursalFiltro || ""}
             onChange={(e) => setSucursalFiltro(e.target.value || null)}
             className="v2-select"
@@ -103,7 +103,7 @@ export function AppointmentList({ fecha }: AppointmentListProps) {
               </option>
             ))}
           </select>
-          <select 
+          <select
             value={barberoFiltro || ""}
             onChange={(e) => setBarberoFiltro(e.target.value || null)}
             className="v2-select"
@@ -117,7 +117,7 @@ export function AppointmentList({ fecha }: AppointmentListProps) {
           </select>
         </div>
       )}
-      
+
       <div className="p-4">
         {citasOrdenadas.length === 0 ? (
           <div className="text-center py-8">
@@ -126,8 +126,8 @@ export function AppointmentList({ fecha }: AppointmentListProps) {
         ) : (
           <div className="space-y-3">
             {citasOrdenadas.map((cita) => (
-              <div 
-                key={cita.id_cita} 
+              <div
+                key={cita.id_cita}
                 className="v2-card p-4 hover-lift smooth-transition"
               >
                 <div className="flex justify-between items-start">
@@ -137,7 +137,7 @@ export function AppointmentList({ fecha }: AppointmentListProps) {
                   </div>
                   <span className="text-sm font-mono text-[var(--text-secondary)]">{cita.hora.slice(0, 5)}</span>
                 </div>
-                
+
                 <div className="flex justify-between items-center mt-2">
                   <span className="text-xs text-[var(--text-secondary)]">
                     {cita.barbero}
@@ -148,7 +148,7 @@ export function AppointmentList({ fecha }: AppointmentListProps) {
                     </span>
                   )}
                 </div>
-                
+
                 {cita.nota && (
                   <div className="mt-2 pt-2 border-t border-[var(--border-primary)]">
                     <p className="text-xs text-[var(--text-muted)] line-clamp-2" title={cita.nota}>

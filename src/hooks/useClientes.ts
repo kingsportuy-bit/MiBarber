@@ -303,12 +303,24 @@ export function useClientes(
 
   const updateMutation = useMutation({
     mutationFn: async (partial: Partial<Client> & { id_cliente: string }) => {
+      console.log("📝 useClientes.updateMutation - Payload original:", partial);
+
+      // Separar el ID de los datos a actualizar
+      const { id_cliente, ...updateData } = partial;
+
+      console.log("📝 useClientes.updateMutation - ID:", id_cliente);
+      console.log("📝 useClientes.updateMutation - Datos a enviar:", updateData);
+
       const { data, error } = await (supabase as any)
         .from("mibarber_clientes")
-        .update(partial)
-        .eq("id_cliente", partial.id_cliente)
+        .update(updateData)
+        .eq("id_cliente", id_cliente)
         .select();
-      if (error) throw error;
+
+      if (error) {
+        console.error("❌ useClientes.updateMutation - Error de Supabase:", error);
+        throw error;
+      }
       return data as Client[];
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["clientes"] }),

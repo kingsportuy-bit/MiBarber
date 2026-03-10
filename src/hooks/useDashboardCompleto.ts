@@ -24,7 +24,7 @@ export function useDashboardCompleto() {
   };
 
   // Citas de hoy
-  const { data: citasHoy, isLoading: isLoadingCitas } = useQuery({
+  const { data: citasHoy, isLoading: isLoadingCitas, refetch: refetchCitasHoy } = useQuery({
     queryKey: ["dashboardCitasHoy"],
     queryFn: async (): Promise<Appointment[]> => {
       const hoy = getLocalDateString();
@@ -34,7 +34,7 @@ export function useDashboardCompleto() {
   });
 
   // Ingresos de hoy
-  const { data: ingresosHoy, isLoading: isLoadingIngresos } = useQuery({
+  const { data: ingresosHoy, isLoading: isLoadingIngresos, refetch: refetchIngresosHoy } = useQuery({
     queryKey: ["dashboardIngresosHoy"],
     queryFn: async (): Promise<CajaRecord[]> => {
       const hoy = getLocalDateString();
@@ -47,7 +47,7 @@ export function useDashboardCompleto() {
   });
 
   // Próximas citas (mañana en adelante)
-  const { data: proximasCitas, isLoading: isLoadingProximas } = useQuery({
+  const { data: proximasCitas, isLoading: isLoadingProximas, refetch: refetchProximas } = useQuery({
     queryKey: ["dashboardProximasCitas"],
     queryFn: async (): Promise<Appointment[]> => {
       const hoy = getLocalDateString();
@@ -62,7 +62,7 @@ export function useDashboardCompleto() {
   });
 
   // Citas de la semana
-  const { data: citasSemana, isLoading: isLoadingSemana } = useQuery({
+  const { data: citasSemana, isLoading: isLoadingSemana, refetch: refetchSemana } = useQuery({
     queryKey: ["dashboardCitasSemana"],
     queryFn: async (): Promise<Appointment[]> => {
       const hoy = new Date();
@@ -82,7 +82,7 @@ export function useDashboardCompleto() {
   });
 
   // Citas del mes
-  const { data: citasMes, isLoading: isLoadingMes } = useQuery({
+  const { data: citasMes, isLoading: isLoadingMes, refetch: refetchMes } = useQuery({
     queryKey: ["dashboardCitasMes"],
     queryFn: async (): Promise<Appointment[]> => {
       const now = new Date();
@@ -100,7 +100,7 @@ export function useDashboardCompleto() {
   });
 
   // Ingresos del mes
-  const { data: ingresosMes, isLoading: isLoadingIngresosMes } = useQuery({
+  const { data: ingresosMes, isLoading: isLoadingIngresosMes, refetch: refetchIngresosMes } = useQuery({
     queryKey: ["dashboardIngresosMes"],
     queryFn: async (): Promise<CajaRecord[]> => {
       const now = new Date();
@@ -132,6 +132,15 @@ export function useDashboardCompleto() {
     isLoadingMes ||
     isLoadingIngresosMes;
 
+  const refetch = () => {
+    refetchCitasHoy();
+    refetchIngresosHoy();
+    refetchProximas();
+    refetchSemana();
+    refetchMes();
+    refetchIngresosMes();
+  };
+
   return {
     citasHoy: citasHoy || [],
     ingresosHoy: ingresosHoy || [],
@@ -141,5 +150,6 @@ export function useDashboardCompleto() {
     ingresosMes: ingresosMes || [],
     ingresoEstimadoMes,
     isLoading,
+    refetch,
   };
 }

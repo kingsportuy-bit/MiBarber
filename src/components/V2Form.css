@@ -5,38 +5,40 @@
 /* Variables CSS para mantener consistencia con el sistema V2 */
 .v2-form-standalone {
   /* Variables de color */
-  --color-primary: #FF7700;
-  --color-primary-hover: #E56B00;
-  --bg-secondary: #2a2a2a; /* Fondo gris oscuro como V2 */
-  --bg-tertiary: #3a3a3a;
-  --bg-input: #3a3a3a;
-  --border-primary: #444444;
-  --border-focus: #FF7700;
+  --color-primary: #C5A059;
+  --color-primary-hover: #D4B068;
+  --bg-secondary: #0a0a0a;
+  /* Sincronizar con qoder-dark-bg-secondary */
+  /* Fondo gris oscuro como V2 */
+  --bg-tertiary: #111111;
+  --bg-input: #0a0a0a;
+  --border-primary: #1a1a1a;
+  --border-focus: #C5A059;
   --text-primary: #ffffff;
   --text-secondary: #cccccc;
   --text-muted: #999999;
   --color-danger: #ef4444;
   --color-success: #10b981;
-  
+
   /* Variables de espaciado */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
   --space-md: 1rem;
   --space-lg: 1.5rem;
   --space-xl: 2rem;
-  
+
   /* Variables de tipografía */
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
-  
+
   /* Variables de radio */
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  
+  --radius-md: 0;
+  --radius-lg: 0;
+
   /* Variables de transición */
   --transition-fast: 0.15s ease;
   --transition-normal: 0.3s ease;
-  
+
   /* Estilos base del formulario */
   background: var(--bg-secondary);
   border: 1px solid var(--border-primary);
@@ -107,7 +109,8 @@
   font-family: inherit;
   transition: border-color var(--transition-fast);
   line-height: 1.5;
-  box-sizing: border-box; /* Asegurar tamaño correcto */
+  box-sizing: border-box;
+  /* Asegurar tamaño correcto */
 }
 
 .v2-input::placeholder {
@@ -139,7 +142,8 @@
   line-height: 1.5;
   resize: vertical;
   min-height: 100px;
-  box-sizing: border-box; /* Asegurar tamaño correcto */
+  box-sizing: border-box;
+  /* Asegurar tamaño correcto */
 }
 
 .v2-textarea::placeholder {
@@ -163,8 +167,10 @@
   font-family: inherit;
   transition: border-color var(--transition-fast);
   cursor: pointer;
-  box-sizing: border-box; /* Asegurar tamaño correcto */
-  appearance: none; /* Eliminar estilo nativo */
+  box-sizing: border-box;
+  /* Asegurar tamaño correcto */
+  appearance: none;
+  /* Eliminar estilo nativo */
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23cccccc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 1rem center;
@@ -194,9 +200,12 @@
   position: relative;
   overflow: hidden;
   line-height: 1;
-  min-height: 40px; /* Altura mínima como V2 */
-  text-transform: uppercase; /* Mayúsculas como V2 */
-  letter-spacing: 0.5px; /* Espaciado como V2 */
+  min-height: 40px;
+  /* Altura mínima como V2 */
+  text-transform: uppercase;
+  /* Mayúsculas como V2 */
+  letter-spacing: 0.5px;
+  /* Espaciado como V2 */
 }
 
 .v2-btn:disabled {
@@ -208,14 +217,18 @@
 /* Botón primario */
 .v2-btn-primary {
   background-color: var(--color-primary);
-  color: var(--text-primary);
-  box-shadow: 0 2px 4px rgba(255, 119, 0, 0.3); /* Sombra como V2 */
+  color: #000000;
+  box-shadow: 0 2px 4px rgba(197, 160, 89, 0.2);
 }
 
 .v2-btn-primary:hover:not(:disabled) {
   background-color: var(--color-primary-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(255, 119, 0, 0.4); /* Sombra hover como V2 */
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(197, 160, 89, 0.3);
+}
+
+.v2-btn-primary:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 /* Botón secundario */
@@ -223,25 +236,22 @@
   background-color: var(--bg-tertiary);
   color: var(--text-primary);
   border: 1px solid var(--border-primary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra como V2 */
 }
 
 .v2-btn-secondary:hover:not(:disabled) {
-  background-color: #333333;
+  background-color: #1a1a1a;
   border-color: var(--color-primary);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra hover como V2 */
 }
 
 /* Botón de peligro */
 .v2-btn-danger {
   background-color: var(--color-danger);
-  color: var(--text-primary);
+  color: #ffffff;
 }
 
 .v2-btn-danger:hover:not(:disabled) {
   background-color: #dc2626;
-  transform: translateY(-2px);
+  opacity: 0.9;
 }
 
 /* Mensajes de error */
@@ -277,7 +287,7 @@
 [data-radix-portal] .v2-form-standalone {
   background: var(--bg-secondary) !important;
   border: 1px solid var(--border-primary) !important;
-  border-radius: var(--radius-lg) !important;
+  border-radius: 0 !important;
   padding: var(--space-md) !important;
   max-width: 600px !important;
   width: 100% !important;
@@ -345,7 +355,7 @@
   .v2-form-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .v2-form-grid .v2-form-group.full-width {
     grid-column: span 2;
   }
@@ -355,7 +365,8 @@
 .v2-standalone-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.7); /* Opacidad más clara como V2 */
+  background-color: rgba(0, 0, 0, 0.7);
+  /* Opacidad más clara como V2 */
   z-index: 1040;
   display: flex;
   align-items: center;
@@ -383,7 +394,8 @@
   color: var(--text-primary);
   visibility: visible !important;
   opacity: 1 !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Sombra como V2 */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  /* Sombra como V2 */
 }
 
 /* Header del modal */
@@ -395,9 +407,11 @@
   padding: var(--space-md);
   padding-bottom: var(--space-md);
   border-bottom: 1px solid var(--border-primary);
-  font-size: 1.25rem; /* Tamaño de fuente como V2 */
+  font-size: 1.25rem;
+  /* Tamaño de fuente como V2 */
   font-weight: var(--font-weight-bold);
-  background-color: var(--bg-secondary); /* Asegurar fondo del header */
+  background-color: var(--bg-secondary);
+  /* Asegurar fondo del header */
 }
 
 /* Título del modal */
@@ -452,7 +466,7 @@
 [data-radix-portal] .v2-standalone-modal {
   background: var(--bg-secondary) !important;
   border: 1px solid var(--border-primary) !important;
-  border-radius: var(--radius-lg) !important;
+  border-radius: 0 !important;
   padding: var(--space-md) !important;
   max-width: 600px !important;
   width: 100% !important;

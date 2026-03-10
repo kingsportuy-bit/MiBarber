@@ -12,6 +12,7 @@ import type { ChatConversation, ChatMessage, Client } from "@/types/db";
 import Image from "next/image";
 
 import { WhatsAppChatMobile } from "@/components/WhatsAppChatMobile"; // Importar el componente móvil
+import { CustomSelect } from "@/components/shared/CustomSelect";
 
 // Función para convertir puntaje a estrellas con borde dorado y sin relleno
 const getStarsFromScore = (puntaje: number) => {
@@ -414,12 +415,12 @@ export function WhatsAppChat() {
           </div>
         )}
 
-        {/* Contenedor principal del chat */}
-        <div className={`flex h-full w-full bg-qoder-dark-bg-secondary overflow-hidden min-w-0 ${wppActivo === "Desconectado" ? 'opacity-40 pointer-events-none select-none' : ''}`}>
+        {/* Contenedor principal del chat - Transparente para mostrar fondo estrellado */}
+        <div className={`flex h-full w-full bg-transparent overflow-hidden min-w-0 ${wppActivo === "Desconectado" ? 'opacity-40 pointer-events-none select-none' : ''}`}>
           {/* Panel izquierdo - Lista de chats estilo WhatsApp (resizable) */}
-          <aside className="border-r border-qoder-dark-border-primary flex flex-col bg-qoder-dark-bg-form relative flex-shrink-0" style={{ fontSize: '1.2705em', width: `${sidebarWidth}px`, minWidth: '280px', maxWidth: '600px' }}>
+          <aside className="flex flex-col bg-qoder-dark-bg-form/90 backdrop-blur-md relative flex-shrink-0" style={{ fontSize: '1.2705em', width: `${sidebarWidth}px`, minWidth: '280px', maxWidth: '600px' }}>
             {/* Header del panel de chats */}
-            <div className="p-2 bg-qoder-dark-bg-header min-w-0 relative">
+            <div className="p-2 bg-qoder-dark-bg-header/80 min-w-0 relative">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2 px-2">
                   <h2 className="font-semibold text-qoder-dark-text-primary" style={{ fontSize: '1.1em' }}>WhatsApp</h2>
@@ -463,26 +464,26 @@ export function WhatsAppChat() {
                       <label className="block text-xs text-qoder-dark-text-secondary mb-1.5">
                         Filtrar por sucursal:
                       </label>
-                      <select
+                      <CustomSelect
                         value={showAllSucursales ? "todas" : (selectedSucursal || "")}
-                        onChange={(e) => {
-                          if (e.target.value === "todas") {
+                        onValueChange={(value) => {
+                          if (value === "todas") {
                             setShowAllSucursales(true);
                             setSelectedSucursal(undefined);
                           } else {
                             setShowAllSucursales(false);
-                            setSelectedSucursal(e.target.value || undefined);
+                            setSelectedSucursal(value || undefined);
                           }
                         }}
-                        className="w-full h-10 qoder-dark-search-box py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-none border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
-                      >
-                        <option value="todas">Todos los chats</option>
-                        {sucursales?.map((sucursal: any) => (
-                          <option key={sucursal.id} value={sucursal.id}>
-                            {sucursal.nombre_sucursal || `Sucursal ${sucursal.numero_sucursal}`}
-                          </option>
-                        ))}
-                      </select>
+                        options={[
+                          { value: "todas", label: "Todos los chats" },
+                          ...(sucursales?.map((s: any) => ({
+                            value: String(s.id),
+                            label: s.nombre_sucursal || `Sucursal ${s.numero_sucursal}`
+                          })) || [])
+                        ]}
+                        className="rounded-none border-qoder-dark-border-primary"
+                      />
                     </div>
 
                     {/* Campo de búsqueda */}
@@ -529,7 +530,7 @@ export function WhatsAppChat() {
                       placeholder="Buscar por nombre o teléfono..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full h-10 py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-lg pr-10 bg-qoder-dark-bg-form border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
+                      className="w-full h-10 py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-none pr-10 bg-qoder-dark-bg-form border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
                     />
                     {searchTerm && (
                       <button
@@ -565,7 +566,7 @@ export function WhatsAppChat() {
             <div className="flex-1 overflow-y-auto custom-scrollbar border-b border-qoder-dark-border-primary bg-qoder-dark-bg-header scrollbar-styled min-w-0 relative" style={{ padding: '0 10px' }}>
               {isLoading && (
                 <div className="p-4 text-center">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-qoder-dark-accent-primary mx-auto mb-2"></div>
+                  <div className="animate-spin rounded-none h-6 w-6 border-b-2 border-qoder-dark-accent-primary mx-auto mb-2"></div>
                   <p className="text-sm text-qoder-dark-text-secondary">Cargando chats...</p>
                 </div>
               )}
@@ -670,38 +671,22 @@ export function WhatsAppChat() {
           {/* Resize handle */}
           <div
             onMouseDown={handleMouseDown}
-            className="flex-shrink-0 cursor-col-resize hover:bg-qoder-dark-accent-primary/30 transition-colors relative group"
-            style={{ width: '4px', background: 'transparent' }}
+            className="flex-shrink-0 cursor-col-resize relative group"
+            style={{ width: '1px', background: 'rgba(255, 255, 255, 0.05)' }}
           >
-            <div className="absolute inset-y-0 left-0 w-1 bg-qoder-dark-border-primary group-hover:bg-qoder-dark-accent-primary transition-colors" />
+            <div className="absolute inset-y-0 left-0 w-[1px] bg-transparent group-hover:bg-qoder-dark-accent-primary transition-colors" />
           </div>
 
-          {/* Panel derecho - Ventana de chat */}
-          <div className="flex-1 flex flex-col min-w-0 relative" style={{ backgroundColor: '#161717' }}>
-
-            {/* Contenedor con color #161717 y imagen de fondo detrás de M y E */}
-            {showBackgroundImage && (
-              <div
-                className="absolute inset-0 z-0 overflow-hidden"
-                style={{ backgroundColor: '#161717' }}
-              >
-                <div
-                  className="absolute inset-0 bg-[url('https://i.postimg.cc/bwtp831q/m5BEg2K4OR4.png')] bg-repeat bg-center"
-                  style={{
-                    backgroundSize: 'auto 100%',
-                    mixBlendMode: 'overlay'
-                  }}
-                ></div>
-              </div>
-            )}
+          {/* Panel derecho - Ventana de chat - Transparente para mostrar fondo estrellado */}
+          <div className="flex-1 flex flex-col min-w-0 relative bg-transparent">
 
             {/* Header del chat */}
             {activeConv ? (
-              <div className="p-33 bg-qoder-dark-bg-header flex items-center justify-between min-w-0 relative">
+              <div className="pl-4 py-0 pr-0 bg-qoder-dark-bg-header flex items-center justify-between min-w-0 relative">
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setActive(null)}
-                    className="md:hidden p-2 rounded-full hover:bg-qoder-dark-bg-hover transition-colors"
+                    className="md:hidden p-2 rounded-none hover:bg-qoder-dark-bg-hover transition-colors"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-qoder-dark-text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -747,7 +732,7 @@ export function WhatsAppChat() {
 
                 <div className="flex items-center gap-2">
                   {/* Control humano/IA */}
-                  <div className="flex items-center gap-2 bg-qoder-dark-bg-form px-3 py-1 rounded-full border border-qoder-dark-border-primary">
+                  <div className="flex items-center gap-2 bg-qoder-dark-bg-form px-3 py-1 rounded-none border border-qoder-dark-border-primary">
                     <span className="text-xs text-qoder-dark-text-secondary">IA</span>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
@@ -763,14 +748,14 @@ export function WhatsAppChat() {
                 </div>
               </div>
             ) : (
-              <div className="p-4 bg-[#161717] flex items-center justify-center h-16">
+              <div className="p-4 bg-transparent flex items-center justify-center h-16">
               </div>
             )}
 
-            {/* Área de mensajes */}
-            <div className="flex-1 overflow-y-auto p-12 custom-scrollbar scrollbar-styled bg-transparent bg-[url('/whatsapp-bg.png')] bg-repeat bg-[length:300px_500px] min-w-0 relative" id="messages-container">
+            {/* Área de mensajes - Fondo transparente - Padding mínimo */}
+            <div className="flex-1 overflow-y-auto py-0 px-12 custom-scrollbar scrollbar-styled bg-transparent min-w-0 relative" id="messages-container">
               {activeConv ? (
-                <div className="space-y-2">
+                <div className="space-y-1 mt-2">
                   {activeConv.messages.map((msg: ChatMessage, index: number) => (
                     <div
                       key={index}
@@ -824,7 +809,7 @@ export function WhatsAppChat() {
                   <div ref={messagesEndRef} style={{ height: '1px' }} />
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-full bg-[#161717]">
+                <div className="flex items-center justify-center h-full bg-transparent">
                   <div className="text-center text-qoder-dark-text-secondary">
                     <p className="max-w-md">Selecciona un chat para comenzar a enviar y recibir mensajes</p>
                   </div>
@@ -834,7 +819,7 @@ export function WhatsAppChat() {
 
             {/* Área de entrada de mensaje */}
             {activeConv && (
-              <div className="p-3 bg-transparent min-w-0 relative">
+              <div className="py-1 px-2 bg-transparent min-w-0 relative">
                 <div className="flex items-center gap-2 min-w-0">
                   <input
                     type="text"
@@ -845,19 +830,6 @@ export function WhatsAppChat() {
                     className="flex-1 py-4 px-4 focus:outline-none focus:ring-0 focus:ring-transparent focus:border-transparent bg-[#242626] relative pill-effect border-0"
                     style={{ backgroundColor: '#242626' }}
                   />
-                  <button
-                    onClick={handleSendMessage}
-                    disabled={!message.trim()}
-                    title="Enviar mensaje"
-                    className={`h-full aspect-square min-h-[56px] min-w-[56px] rounded-full flex items-center justify-center transition-colors ${message.trim()
-                      ? 'bg-qoder-dark-accent-primary text-white hover:bg-opacity-90'
-                      : 'bg-[#242626] text-gray-500 cursor-not-allowed'
-                      }`}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                    </svg>
-                  </button>
                 </div>
               </div>
             )}
@@ -870,7 +842,6 @@ export function WhatsAppChat() {
         <WhatsAppChatMobile />
       </div>
 
-      {/* Modal para imagen en pantalla completa */}
       {fullscreenImage && (
         <div
           className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4 cursor-pointer min-w-0"

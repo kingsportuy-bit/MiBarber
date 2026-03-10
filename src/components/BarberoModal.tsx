@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useBarberiaInfo } from "@/hooks/useBarberiaInfo";
 import type { Barbero } from "@/types/db";
+import { Checkbox } from "./ui/app-checkbox";
+import { Radio } from "./ui/app-radio";
 
 type Props = {
   open: boolean;
@@ -215,17 +217,14 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
                   ) : serviciosError ? (
                     <p className="text-red-500">Error al cargar servicios</p>
                   ) : servicios && servicios.length > 0 ? (
-                    <div className="space-y-2">
+                    <div className="space-y-3 pl-1 py-1">
                       {servicios.map((servicio) => (
-                        <label key={servicio.id_servicio} className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={especialidades.includes(servicio.id_servicio)}
-                            onChange={() => handleEspecialidadChange(servicio.id_servicio)}
-                            className="v2-checkbox"
-                          />
-                          <span className="text-[var(--text-primary)]">{servicio.nombre}</span>
-                        </label>
+                        <Checkbox
+                          key={servicio.id_servicio}
+                          checked={especialidades.includes(servicio.id_servicio)}
+                          onChange={() => handleEspecialidadChange(servicio.id_servicio)}
+                          label={<span className="text-[var(--text-primary)]">{servicio.nombre}</span>}
+                        />
                       ))}
                     </div>
                   ) : (
@@ -240,25 +239,17 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
               {isAdminUser && !isBarberoPrincipal && (
                 <div className="col-span-2">
                   <label className="v2-label">Rol</label>
-                  <div className="flex items-center gap-4 mt-1">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        checked={isAdminRole}
-                        onChange={() => setIsAdminRole(true)}
-                        className="v2-radio"
-                      />
-                      <span className="text-[var(--text-primary)]">Administrador</span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        checked={!isAdminRole}
-                        onChange={() => setIsAdminRole(false)}
-                        className="v2-radio"
-                      />
-                      <span className="text-[var(--text-primary)]">Barbero Normal</span>
-                    </label>
+                  <div className="flex items-center gap-6 mt-1">
+                    <Radio
+                      checked={isAdminRole}
+                      onChange={() => setIsAdminRole(true)}
+                      label={<span className="text-[var(--text-primary)]">Administrador</span>}
+                    />
+                    <Radio
+                      checked={!isAdminRole}
+                      onChange={() => setIsAdminRole(false)}
+                      label={<span className="text-[var(--text-primary)]">Barbero Normal</span>}
+                    />
                   </div>
                 </div>
               )}
@@ -387,15 +378,11 @@ export function BarberoModal({ open, onOpenChange, initial, onSave, isAdminUser 
               )}
 
               <div className="col-span-2">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={activo}
-                    onChange={(e) => setActivo(e.target.checked)}
-                    className="v2-checkbox"
-                  />
-                  <span className="text-[var(--text-primary)]">Activo</span>
-                </label>
+                <Checkbox
+                  checked={activo}
+                  onChange={(e) => setActivo(e.target.checked)}
+                  label={<span className="text-[var(--text-primary)]">Activo</span>}
+                />
               </div>
             </div>
           </div>

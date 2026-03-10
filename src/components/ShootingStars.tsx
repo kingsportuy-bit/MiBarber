@@ -22,29 +22,31 @@ export function ShootingStars() {
         resize();
         window.addEventListener("resize", resize);
 
-        // ── Twinkling stars ──
+        // ── Twinkling stars (Needle-like) ──
         interface Star {
             x: number; y: number; r: number;
             baseAlpha: number; alpha: number;
             speed: number; phase: number;
+            spikes: boolean;
         }
 
         const stars: Star[] = [];
-        const STAR_COUNT = 350;
+        const STAR_COUNT = 400;
 
         for (let i = 0; i < STAR_COUNT; i++) {
             stars.push({
                 x: Math.random() * w,
                 y: Math.random() * h,
-                r: Math.random() * 0.4 + 0.1,
+                r: Math.random() * 0.5 + 0.1, // Small radius for needle effect
                 baseAlpha: Math.random() * 0.5 + 0.5,
                 alpha: 0,
-                speed: Math.random() * 0.001 + 0.0005,
+                speed: Math.random() * 0.003 + 0.001, // Slightly faster for realistic twinkle
                 phase: Math.random() * Math.PI * 2,
+                spikes: Math.random() > 0.9, // Only some stars have diffraction spikes
             });
         }
 
-        // ── Shooting stars ──
+        // ── Shooting stars (Restored) ──
         interface Meteor {
             x: number; y: number;
             vx: number; vy: number;
@@ -92,10 +94,33 @@ export function ShootingStars() {
             // Draw twinkling stars
             for (const s of stars) {
                 s.phase += s.speed * dt;
-                s.alpha = s.baseAlpha * (0.2 + 0.8 * ((Math.sin(s.phase) + 1) / 2));
+
+                // Realistic Twinkle: Sharp intermittent bursts
+                const twinkle = (Math.sin(s.phase) + 1) / 2;
+                const burst = Math.pow((Math.sin(s.phase * 0.5) + 1) / 2, 12);
+
+                s.alpha = s.baseAlpha * (0.1 + 0.8 * twinkle + 0.1 * burst);
 
                 ctx.globalAlpha = s.alpha;
-                ctx.fillRect(s.x, s.y, s.r * 2, s.r * 2);
+
+                // Needle Effect: Very small bright center
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Diffraction spikes for "needle" intensity
+                if (s.spikes && s.alpha > 0.7) {
+                    ctx.beginPath();
+                    ctx.lineWidth = 0.3;
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${s.alpha * 0.5})`;
+                    // Horizontal
+                    ctx.moveTo(s.x - 2, s.y);
+                    ctx.lineTo(s.x + 2, s.y);
+                    // Vertical
+                    ctx.moveTo(s.x, s.y - 2);
+                    ctx.lineTo(s.x, s.y + 2);
+                    ctx.stroke();
+                }
             }
 
             // Spawn shooting stars
@@ -103,7 +128,7 @@ export function ShootingStars() {
             if (meteorTimer >= nextMeteor) {
                 spawnMeteor();
                 meteorTimer = 0;
-                nextMeteor = 2000 + Math.random() * 6000;
+                nextMeteor = 3000 + Math.random() * 8000;
             }
 
             // Draw shooting stars

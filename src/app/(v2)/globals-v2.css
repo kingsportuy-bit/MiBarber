@@ -315,11 +315,13 @@
 }
 
 .v2-card {
-  background: #000000 !important;
-  border: 1px solid var(--border-primary);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-component);
-  transition: all var(--transition-normal);
+  background: rgba(0, 0, 0, 0.65) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid var(--border-primary) !important;
+  border-radius: 0 !important;
+  padding: var(--spacing-component) !important;
+  transition: all var(--transition-normal) !important;
 }
 
 .v2-card:hover {
@@ -330,9 +332,8 @@
 /* Tarjetas pequeÃ±as (clase1) */
 .v2-card-small {
   border: 1px solid var(--border-primary) !important;
-  border-radius: var(--radius-md) !important;
-  padding: var(--space-sm) !important;
-  padding-left: 2rem !important;
+  border-radius: 0 !important;
+  padding: var(--space-md) var(--space-lg) !important;
   /* â­ NUEVO: Padding izquierdo */
   min-height: 120px !important;
   transition: all var(--transition-normal) !important;
@@ -345,9 +346,11 @@
 
 /* Tarjetas grandes (clase2) */
 .v2-card-large {
-  background: #000000 !important;
+  background: rgba(0, 0, 0, 0.65) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
   border: 1px solid var(--border-primary) !important;
-  border-radius: var(--radius-lg) !important;
+  border-radius: 0 !important;
   padding: var(--spacing-lg) !important;
   min-height: 180px !important;
   transition: all var(--transition-normal) !important;
@@ -375,7 +378,7 @@
 .v2-card-static {
   background: var(--bg-secondary);
   border: 1px solid var(--border-primary);
-  border-radius: var(--radius-lg);
+  border-radius: 0;
   padding: var(--spacing-component);
 }
 
@@ -386,7 +389,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-inline);
-  padding: 16px 32px;
+  padding: 12px 24px;
   border-radius: 0px;
   font-weight: var(--font-weight-bold);
   font-size: var(--text-body);
@@ -404,23 +407,27 @@
 .v2-btn-primary {
   background-color: var(--color-primary);
   color: #000000;
-  box-shadow: 0px 0px 40px 0px rgba(197, 160, 89, 0.15);
+  box-shadow: 0px 4px 10px rgba(197, 160, 89, 0.15);
 }
 
 .v2-btn-primary:hover:not(:disabled) {
   background-color: var(--color-primary-hover);
-  box-shadow: 0px 0px 60px 0px rgba(197, 160, 89, 0.3);
-  transform: translateY(-2px);
+  box-shadow: 0px 6px 15px rgba(197, 160, 89, 0.25);
+  transform: translateY(-1px);
+}
+
+.v2-btn-primary:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .v2-btn-secondary {
-  background-color: transparent;
+  background-color: var(--bg-secondary);
   color: #F5F0EB;
-  border: 1px solid #2A2A2A;
+  border: 1px solid var(--border-primary);
 }
 
 .v2-btn-secondary:hover:not(:disabled) {
-  background-color: rgba(197, 160, 89, 0.05);
+  background-color: var(--bg-hover);
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
@@ -432,7 +439,7 @@
 
 .v2-btn-danger:hover:not(:disabled) {
   background-color: #dc2626;
-  transform: translateY(-2px);
+  opacity: 0.9;
 }
 
 .v2-btn:disabled {

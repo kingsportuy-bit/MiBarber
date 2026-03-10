@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  LegacyV2Modal, 
-  LegacyV2Form, 
-  LegacyV2FormSection, 
-  LegacyV2FormGroup, 
-  LegacyV2Label, 
-  LegacyV2Input, 
+import {
+  LegacyV2Modal,
+  LegacyV2Form,
+  LegacyV2FormSection,
+  LegacyV2FormGroup,
+  LegacyV2Label,
+  LegacyV2Input,
   LegacyV2Textarea,
   LegacyV2Button,
   LegacyV2ModalFooter
@@ -29,7 +29,7 @@ export function LegacyClientModal({
   editOnly = false
 }: LegacyClientModalProps) {
   const isEdit = Boolean(initial?.id_cliente);
-  
+
   const [formData, setFormData] = useState({
     nombre: initial?.nombre || "",
     telefono: initial?.telefono || "",
@@ -61,19 +61,25 @@ export function LegacyClientModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validar el formato del número de teléfono si se ingresó uno
     if (formData.telefono && !isValidPhoneNumber(formData.telefono)) {
       alert("El formato del número de celular debe ser: 09xxxxxxx o +5989xxxxxxx");
       return;
     }
-    
+
     // Normalizar el número de teléfono antes de guardar
+    // y convertir strings vacíos a null para evitar errores de tipo en la DB (especialmente fechas)
     const normalizedData = {
       ...formData,
-      telefono: formData.telefono ? normalizePhoneNumber(formData.telefono) : undefined
+      id_cliente: initial?.id_cliente,
+      telefono: formData.telefono ? normalizePhoneNumber(formData.telefono) : null,
+      email: formData.email || null,
+      fecha_nacimiento: formData.fecha_nacimiento || null,
+      direccion: formData.direccion || null,
+      notas: formData.notas || null
     };
-    
+
     try {
       await onSave(normalizedData);
       onOpenChange(false);
@@ -87,99 +93,131 @@ export function LegacyClientModal({
     onOpenChange(false);
   };
 
+  if (!open) return null;
+
   return (
-    <LegacyV2Modal
-      open={open}
-      onOpenChange={onOpenChange}
-      title={isEdit ? "Editar cliente" : "Nuevo cliente"}
-    >
-      <LegacyV2Form onSubmit={handleSubmit}>
-        <LegacyV2FormSection>
-          <div className="v2-form-grid">
-            <LegacyV2FormGroup>
-              <LegacyV2Label htmlFor="telefono">Celular</LegacyV2Label>
-              <LegacyV2Input
-                id="telefono"
-                type="tel"
-                value={formData.telefono}
-                onChange={(e) => handleChange('telefono', e.target.value)}
-                placeholder="Ej: 099123456"
-              />
-            </LegacyV2FormGroup>
-            
-            <LegacyV2FormGroup>
-              <LegacyV2Label htmlFor="nombre">Nombre *</LegacyV2Label>
-              <LegacyV2Input
-                id="nombre"
-                value={formData.nombre}
-                onChange={(e) => handleChange('nombre', e.target.value)}
-                placeholder="Nombre completo del cliente"
-                required
-              />
-            </LegacyV2FormGroup>
-            
+    <div className="v2-overlay" onClick={handleClose}>
+      <div className="v2-modal max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
+        <div className="v2-modal-header border-b border-[#1a1a1a] pb-4 mb-4">
+          <h2 className="text-xl font-bold font-[family-name:var(--font-rasputin)] text-[#F5F0EB] tracking-wide">
+            {isEdit ? "Editar Cliente" : "Nuevo Cliente"}
+          </h2>
+          <button
+            onClick={handleClose}
+            className="text-[#8a8a8a] hover:text-[#C5A059] transition-colors text-2xl leading-none"
+          >
+            &times;
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="v2-modal-body">
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5 w-full">
+                <label htmlFor="nombre" className="text-[13px] font-medium text-[#8A8A8A] font-[family-name:var(--font-body)] tracking-wide">
+                  Nombre *
+                </label>
+                <input
+                  id="nombre"
+                  type="text"
+                  className="app-input"
+                  value={formData.nombre}
+                  onChange={(e) => handleChange('nombre', e.target.value)}
+                  placeholder="Nombre completo..."
+                  required
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5 w-full">
+                <label htmlFor="telefono" className="text-[13px] font-medium text-[#8A8A8A] font-[family-name:var(--font-body)] tracking-wide">
+                  Celular
+                </label>
+                <input
+                  id="telefono"
+                  type="tel"
+                  className="app-input"
+                  value={formData.telefono}
+                  onChange={(e) => handleChange('telefono', e.target.value)}
+                  placeholder="099 123 456"
+                />
+              </div>
+            </div>
+
             {/* Campos adicionales - solo se muestran en modo edición */}
             {isEdit && (
-              <>
-                <LegacyV2FormGroup>
-                  <LegacyV2Label htmlFor="email">Email (Opcional)</LegacyV2Label>
-                  <LegacyV2Input
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5 w-full">
+                  <label htmlFor="email" className="text-[13px] font-medium text-[#8A8A8A] font-[family-name:var(--font-body)] tracking-wide">
+                    Email (Opcional)
+                  </label>
+                  <input
                     id="email"
                     type="email"
+                    className="app-input"
                     value={formData.email}
                     onChange={(e) => handleChange('email', e.target.value)}
                     placeholder="correo@ejemplo.com"
                   />
-                </LegacyV2FormGroup>
-                
-                <LegacyV2FormGroup>
-                  <LegacyV2Label htmlFor="fecha_nacimiento">Fecha de Nacimiento (Opcional)</LegacyV2Label>
-                  <LegacyV2Input
+                </div>
+
+                <div className="flex flex-col gap-1.5 w-full">
+                  <label htmlFor="fecha_nacimiento" className="text-[13px] font-medium text-[#8A8A8A] font-[family-name:var(--font-body)] tracking-wide">
+                    Nacimiento (Opcional)
+                  </label>
+                  <input
                     id="fecha_nacimiento"
                     type="date"
+                    className="app-input"
                     value={formData.fecha_nacimiento}
                     onChange={(e) => handleChange('fecha_nacimiento', e.target.value)}
                   />
-                </LegacyV2FormGroup>
-                
-                <LegacyV2FormGroup className="full-width">
-                  <LegacyV2Label htmlFor="direccion">Dirección (Opcional)</LegacyV2Label>
-                  <LegacyV2Input
+                </div>
+
+                <div className="flex flex-col gap-1.5 w-full sm:col-span-2">
+                  <label htmlFor="direccion" className="text-[13px] font-medium text-[#8A8A8A] font-[family-name:var(--font-body)] tracking-wide">
+                    Dirección (Opcional)
+                  </label>
+                  <input
                     id="direccion"
+                    type="text"
+                    className="app-input"
                     value={formData.direccion}
                     onChange={(e) => handleChange('direccion', e.target.value)}
-                    placeholder="Dirección completa"
+                    placeholder="Dirección completa..."
                   />
-                </LegacyV2FormGroup>
-              </>
+                </div>
+              </div>
             )}
-            
-            <LegacyV2FormGroup className="full-width">
-              <LegacyV2Label htmlFor="notas">Notas</LegacyV2Label>
-              <LegacyV2Textarea
+
+            <div className="flex flex-col gap-1.5 w-full">
+              <label htmlFor="notas" className="text-[13px] font-medium text-[#8A8A8A] font-[family-name:var(--font-body)] tracking-wide">
+                Notas
+              </label>
+              <textarea
                 id="notas"
+                className="app-input min-h-[80px] resize-none"
                 value={formData.notas}
                 onChange={(e) => handleChange('notas', e.target.value)}
-                placeholder="Notas sobre el cliente..."
+                placeholder="Notas sobre el cliente o preferencias..."
                 rows={3}
               />
-            </LegacyV2FormGroup>
+            </div>
           </div>
-        </LegacyV2FormSection>
-        
-        <LegacyV2ModalFooter>
-          <LegacyV2Button 
-            type="button" 
-            variant="secondary" 
-            onClick={handleClose}
-          >
-            Cancelar
-          </LegacyV2Button>
-          <LegacyV2Button type="submit" variant="primary">
-            {isEdit ? "Actualizar" : "Crear cliente"}
-          </LegacyV2Button>
-        </LegacyV2ModalFooter>
-      </LegacyV2Form>
-    </LegacyV2Modal>
+
+          <div className="v2-modal-footer flex gap-3 justify-end items-center mt-6 pt-4 border-t border-[#1a1a1a]">
+            <button
+              type="button"
+              className="px-4 py-2 text-[14px] font-medium text-[#8a8a8a] hover:text-[#C5A059] transition-colors"
+              onClick={handleClose}
+            >
+              Cancelar
+            </button>
+            <button type="submit" className="app-btn-primary">
+              {isEdit ? "Actualizar" : "Crear cliente"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }

@@ -51,7 +51,7 @@ export function StatsCards({
 
 function Card({ title, value }: { title: string; value: string }) {
   return (
-    <div className="rounded-lg border border-white/10 p-3">
+    <div className="rounded-none border border-white/10 p-3">
       <div className="text-xs opacity-70">{title}</div>
       <div className="text-2xl font-semibold">{value}</div>
     </div>

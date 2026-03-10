@@ -42,7 +42,7 @@ export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMe
     <DropdownMenu.Root onOpenChange={setIsOpen}>
       <DropdownMenu.Trigger asChild>
         <button
-          className="hidden md:flex text-qoder-dark-text-primary hover:text-qoder-dark-accent-orange p-1 rounded-md hover:bg-qoder-dark-bg-hover items-center gap-1 relative client-name"
+          className="hidden md:flex text-qoder-dark-text-primary hover:text-qoder-dark-accent-orange p-1 rounded-none hover:bg-qoder-dark-bg-hover items-center gap-1 relative client-name"
           title="Menú de usuario"
           style={{
             fontFamily: "'Old English Text MT', 'Roboto', 'Arial', sans-serif",
@@ -53,7 +53,7 @@ export function UserDropdownMenu({ userName, isAdmin, onLogout }: UserDropdownMe
             background: 'transparent', // Sobrescribir el gradiente naranja
             backgroundImage: 'none', // Eliminar cualquier imagen de fondo
             padding: '0.25rem 0.5rem', // Ajustar padding
-            borderRadius: '0.375rem', // Ajustar border-radius
+            borderRadius: '0', // Ajustar border-radius
             fontWeight: 'normal', // Ajustar fontWeight
             textTransform: 'none', // Eliminar transformación de texto
             letterSpacing: 'normal', // Eliminar espaciado de letras

@@ -46,7 +46,7 @@ export function ModalMovimiento({
   barberos = [],
 }: ModalMovimientoProps) {
   const esEdicion = !!movimiento;
-  
+
   // Estado del formulario
   const [formData, setFormData] = useState<Partial<FormularioMovimiento>>({
     tipo: 'ingreso',
@@ -144,14 +144,14 @@ export function ModalMovimiento({
           <h2 className="v2-modal-title">
             {esEdicion ? 'Editar Movimiento' : 'Nuevo Movimiento'}
           </h2>
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-2xl"
           >
             ×
           </button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="v2-modal-body">
           <div className="space-y-4">
             {/* Tipo de movimiento */}
@@ -217,8 +217,9 @@ export function ModalMovimiento({
                   type="number"
                   step="0.01"
                   className="v2-input"
-                  value={formData.monto}
+                  value={formData.monto === 0 ? '' : formData.monto}
                   onChange={(e) => handleChange('monto', parseFloat(e.target.value) || 0)}
+                  placeholder="0"
                 />
                 {errores.monto && <span className="v2-error-message">{errores.monto}</span>}
               </div>
@@ -229,8 +230,9 @@ export function ModalMovimiento({
                     type="number"
                     step="0.01"
                     className="v2-input"
-                    value={formData.propina}
+                    value={formData.propina === 0 ? '' : formData.propina}
                     onChange={(e) => handleChange('propina', parseFloat(e.target.value) || 0)}
+                    placeholder="0"
                   />
                 </div>
               )}

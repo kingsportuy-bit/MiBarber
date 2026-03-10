@@ -23,8 +23,9 @@ export function Button({
   type = 'button',
   ...props
 }: ButtonProps) {
-  const classes = `v2-btn v2-btn-${variant} v2-btn-${size} ${className}`.trim();
-  
+  const baseClass = variant === 'primary' ? 'app-btn-primary' : `v2-btn v2-btn-${variant}`;
+  const classes = `${baseClass} ${variant === 'primary' ? '' : `v2-btn-${size}`} ${className}`.trim();
+
   return (
     <button type={type} className={classes} {...props}>
       {children}

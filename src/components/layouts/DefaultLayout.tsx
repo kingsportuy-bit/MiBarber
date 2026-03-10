@@ -29,7 +29,20 @@ export function DefaultLayout({
           }
         }
         ${noPadding ? `
-          .dashboard { padding: 0 !important; margin-top: 0 !important; margin-bottom: 0 !important; height: 100dvh !important; position: fixed !important; top: 0; left: 0; right: 0; bottom: 0; }
+          .dashboard { 
+            padding: 0 !important; 
+            margin-top: 0 !important; 
+            margin-bottom: 0 !important; 
+            height: 100dvh !important;
+            position: fixed !important; 
+            top: 0; 
+            left: var(--sidebar-width, 240px); 
+            right: 0; 
+            bottom: 0; 
+          }
+          @media (max-width: 767px) {
+            .dashboard { left: 0 !important; }
+          }
           .dashboard-content { padding: 0 !important; padding-top: 0 !important; height: 100% !important; display: flex !important; flex-direction: column !important; overflow: hidden !important; }
         ` : ''}
       `}</style>

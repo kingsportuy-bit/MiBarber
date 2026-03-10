@@ -20,22 +20,25 @@ export function GeneralLayout({
   // Para la página de admin, usar un layout más simple
   const isAdminPage = pathname?.startsWith('/admin');
 
-  // Verificar si estamos en la vista individual de chat de WhatsApp
+  // Verificar si estamos en la vista individual de chat de WhatsApp (solo en mÃ³vil)
   useEffect(() => {
-    const handleHashChange = () => {
+    const checkChatView = () => {
       if (typeof window !== 'undefined') {
-        setIsChatView(window.location.hash === '#chat-view');
+        const isMobile = window.innerWidth < 768;
+        setIsChatView(isMobile && window.location.hash === '#chat-view');
       }
     };
 
-    // Verificar el hash inicial
-    handleHashChange();
+    // Verificar el estado inicial
+    checkChatView();
 
-    // Escuchar cambios en el hash
-    window.addEventListener('hashchange', handleHashChange);
+    // Escuchar cambios en el hash y en el tamaÃ±o de la ventana
+    window.addEventListener('hashchange', checkChatView);
+    window.addEventListener('resize', checkChatView);
 
     return () => {
-      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('hashchange', checkChatView);
+      window.removeEventListener('resize', checkChatView);
     };
   }, []);
 
@@ -55,5 +58,14 @@ export function GeneralLayout({
   const isWhatsapp = pathname?.startsWith('/whatsapp');
   const isWhatsappChatView = isWhatsapp && isChatView;
 
-  return <DefaultLayout onRefresh={handleRefresh} noPadding={isWhatsappChatView || false} hideFooter={isWhatsappChatView}>{children}</DefaultLayout>;
+  // En WhatsApp, siempre queremos sin padding (todo el ancho) y sin el footer de barberox
+  return (
+    <DefaultLayout
+      onRefresh={handleRefresh}
+      noPadding={isWhatsapp}
+      hideFooter={isWhatsapp}
+    >
+      {children}
+    </DefaultLayout>
+  );
 }

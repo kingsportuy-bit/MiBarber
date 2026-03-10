@@ -11,12 +11,10 @@ body {
 }
 
 /* Layout adjustments for mobile */
+/* Layout adjustments for mobile (handled in media queries) */
 .dashboard {
-  padding: 3px;
-  margin-top: 60px;
-  /* Space for fixed navbar */
-  margin-bottom: 64px;
-  /* Space for bottom navigation */
+  /* Base styles for all devices */
+  display: block;
 }
 
 .dashboard-content {

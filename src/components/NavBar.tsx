@@ -123,13 +123,19 @@ export function NavBar() {
   useEffect(() => {
     const handleHashChange = () => {
       if (typeof window !== 'undefined' && pathname?.startsWith("/whatsapp")) {
-        // En WhatsApp móvil ya no ocultamos la NavBar (logo), queremos que se vea siempre
+        const isMobile = window.innerWidth < 768;
+        setShouldHideCompletely(isMobile && window.location.hash === '#chat-view');
+      } else {
         setShouldHideCompletely(false);
       }
     };
     handleHashChange();
     window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('resize', handleHashChange);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('resize', handleHashChange);
+    };
   }, [pathname]);
 
   // Ocultar en scroll (solo mobile)

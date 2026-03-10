@@ -116,6 +116,40 @@ export function useDashboardCompleto() {
     refetchInterval: 60000,
   });
 
+  // Citas del mes pasado (para comparación)
+  const { data: citasMesPasado, isLoading: isLoadingCitasMesPasado, refetch: refetchCitasMesPasado } = useQuery({
+    queryKey: ["dashboardCitasMesPasado"],
+    queryFn: async (): Promise<Appointment[]> => {
+      const now = new Date();
+      const inicioMesPasado = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const finMesPasado = new Date(now.getFullYear(), now.getMonth(), 0);
+      const inicioStr = getLocalDateString(inicioMesPasado);
+      const finStr = getLocalDateString(finMesPasado);
+      return (await fetchData("mibarber_citas", "*", [
+        ["gte", "fecha", inicioStr],
+        ["lte", "fecha", finStr],
+      ])) as Appointment[];
+    },
+    refetchInterval: 60000,
+  });
+
+  // Ingresos del mes pasado (para comparación)
+  const { data: ingresosMesPasado, isLoading: isLoadingIngresosMesPasado, refetch: refetchIngresosMesPasado } = useQuery({
+    queryKey: ["dashboardIngresosMesPasado"],
+    queryFn: async (): Promise<CajaRecord[]> => {
+      const now = new Date();
+      const inicioMesPasado = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const finMesPasado = new Date(now.getFullYear(), now.getMonth(), 0);
+      const inicioStr = getLocalDateString(inicioMesPasado);
+      const finStr = getLocalDateString(finMesPasado);
+      return (await fetchData("mibarber_caja", "*", [
+        ["gte", "fecha", `${inicioStr}T00:00:00`],
+        ["lte", "fecha", `${finStr}T23:59:59`],
+      ])) as CajaRecord[];
+    },
+    refetchInterval: 60000,
+  });
+
   // Ingreso estimado del mes (sum of tickets for completed/pending/confirmado)
   const ingresoEstimadoMes = citasMes ? citasMes.reduce((acc, cita) => {
     if (["completado", "pendiente", "confirmado"].includes(cita.estado)) {
@@ -124,13 +158,36 @@ export function useDashboardCompleto() {
     return acc;
   }, 0) : 0;
 
+  // Comparación con mes pasado (mismo período: día 1 hasta el día actual del mes)
+  const diaActual = new Date().getDate();
+
+  // Ingresos del mes pasado hasta el mismo día
+  const ingresoMesPasadoAlDia = (ingresosMesPasado || []).reduce((sum: number, r: any) => {
+    const fecha = new Date(r.fecha);
+    if (fecha.getDate() <= diaActual) {
+      const monto = Number(r.monto || r.ticket || 0);
+      return sum + (r.tipo === "egreso" ? -monto : monto);
+    }
+    return sum;
+  }, 0);
+
+  // Turnos completados del mes pasado hasta el mismo día
+  const completadosMesPasadoAlDia = (citasMesPasado || []).filter((c: Appointment) => {
+    const fecha = c.fecha?.split('T')[0];
+    if (!fecha) return false;
+    const dia = parseInt(fecha.split('-')[2], 10);
+    return dia <= diaActual && c.estado === "completado";
+  }).length;
+
   const isLoading =
     isLoadingCitas ||
     isLoadingIngresos ||
     isLoadingProximas ||
     isLoadingSemana ||
     isLoadingMes ||
-    isLoadingIngresosMes;
+    isLoadingIngresosMes ||
+    isLoadingCitasMesPasado ||
+    isLoadingIngresosMesPasado;
 
   const refetch = () => {
     refetchCitasHoy();
@@ -139,6 +196,8 @@ export function useDashboardCompleto() {
     refetchSemana();
     refetchMes();
     refetchIngresosMes();
+    refetchCitasMesPasado();
+    refetchIngresosMesPasado();
   };
 
   return {
@@ -149,6 +208,8 @@ export function useDashboardCompleto() {
     citasMes: citasMes || [],
     ingresosMes: ingresosMes || [],
     ingresoEstimadoMes,
+    ingresoMesPasadoAlDia,
+    completadosMesPasadoAlDia,
     isLoading,
     refetch,
   };

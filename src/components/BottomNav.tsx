@@ -74,8 +74,13 @@ export function BottomNav() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  // No mostrar en: no autenticado, admin, o login
+  // No mostrar en: no autenticado, admin, login, o vista chat individual
   if (!isAuthenticated || pathname?.startsWith('/admin') || pathname?.startsWith('/login')) {
+    return null;
+  }
+
+  // Ocultar la barra inferior cuando estamos en el chat individual de WhatsApp
+  if (isChatView && pathname?.startsWith('/whatsapp')) {
     return null;
   }
 

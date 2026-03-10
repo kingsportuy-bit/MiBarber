@@ -47,6 +47,8 @@ export default function DashboardPage() {
   const { citasHoy, ingresosHoy, proximasCitas, citasSemana, citasMes,
     ingresosMes,
     ingresoEstimadoMes,
+    ingresoMesPasadoAlDia,
+    completadosMesPasadoAlDia,
     isLoading,
     refetch,
   } = useDashboardCompleto();
@@ -94,6 +96,20 @@ export default function DashboardPage() {
   // Monthly completed & pending
   const completadosMes = (citasMes || []).filter((c: Appointment) => c.estado === "completado").length;
   const pendientesMes = (citasMes || []).filter((c: Appointment) => c.estado === "pendiente" || c.estado === "confirmado").length;
+
+  // Comparisons vs last month (same period)
+  const ingresoMesActualAlDia = (ingresosMes || []).reduce((sum: number, r: any) => {
+    const monto = Number(r.monto || r.ticket || 0);
+    return sum + (r.tipo === "egreso" ? -monto : monto);
+  }, 0);
+
+  const diffIngresos = ingresoMesPasadoAlDia > 0
+    ? ((ingresoMesActualAlDia - ingresoMesPasadoAlDia) / ingresoMesPasadoAlDia) * 100
+    : ingresoMesActualAlDia > 0 ? 100 : 0;
+
+  const diffCompletados = completadosMesPasadoAlDia > 0
+    ? ((completadosMes - completadosMesPasadoAlDia) / completadosMesPasadoAlDia) * 100
+    : completadosMes > 0 ? 100 : 0;
 
   // Next appointment
   const siguienteTurno = citasHoy
@@ -283,7 +299,7 @@ export default function DashboardPage() {
                           const diffMins = Math.floor(diffMs / 60000);
                           const hh = Math.floor(diffMins / 60);
                           const mm = diffMins % 60;
-                          return `en ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+                          return `en ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')} hs.`;
                         }
                         return "Ahora";
                       })()}
@@ -364,8 +380,8 @@ export default function DashboardPage() {
 
           {/* Completados del mes */}
           <div className="app-card" style={{ padding: "20px" }}>
-            <p style={{ color: "#8A8A8A", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px", fontFamily: "var(--font-body)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title="Completados / Mes">
-              Completados / Mes
+            <p style={{ color: "#8A8A8A", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px", fontFamily: "var(--font-body)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title="Turnos Completados / Mes">
+              Turnos Completados / Mes
             </p>
             <p style={{ fontSize: "1.75rem", fontWeight: 600, margin: 0, color: "#F5F0EB", fontFamily: "var(--font-body)" }}>
               {completadosMes}
@@ -374,11 +390,57 @@ export default function DashboardPage() {
 
           {/* Pendientes del mes */}
           <div className="app-card" style={{ padding: "20px" }}>
-            <p style={{ color: "#8A8A8A", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px", fontFamily: "var(--font-body)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title="Pendiente / Mes">
-              Pendiente / Mes
+            <p style={{ color: "#8A8A8A", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px", fontFamily: "var(--font-body)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title="Turnos Pendientes / Mes">
+              Turnos Pendientes / Mes
             </p>
             <p style={{ fontSize: "1.75rem", fontWeight: 600, margin: 0, color: "#C5A059", fontFamily: "var(--font-body)" }}>
               {pendientesMes}
+            </p>
+          </div>
+
+          {/* Comparación Ingresos vs mes anterior */}
+          <div className="app-card" style={{ padding: "20px" }}>
+            <p style={{ color: "#8A8A8A", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px", fontFamily: "var(--font-body)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title="Ingresos vs Mes Anterior">
+              Ingresos vs Mes Anterior
+            </p>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+              <p style={{ fontSize: "1.75rem", fontWeight: 600, margin: 0, color: "#F5F0EB", fontFamily: "var(--font-body)" }}>
+                {formatMoney(ingresoMesActualAlDia)}
+              </p>
+              <span style={{
+                fontSize: "0.8rem",
+                fontWeight: 600,
+                color: diffIngresos >= 0 ? "#10b981" : "#ef4444",
+                fontFamily: "var(--font-body)",
+              }}>
+                {diffIngresos >= 0 ? "▲" : "▼"} {Math.abs(diffIngresos).toFixed(0)}%
+              </span>
+            </div>
+            <p style={{ color: "#666", fontSize: "0.7rem", margin: "4px 0 0", fontFamily: "var(--font-body)" }}>
+              Mes pasado al día {new Date().getDate()}: {formatMoney(ingresoMesPasadoAlDia)}
+            </p>
+          </div>
+
+          {/* Comparación Turnos completados vs mes anterior */}
+          <div className="app-card" style={{ padding: "20px" }}>
+            <p style={{ color: "#8A8A8A", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px", fontFamily: "var(--font-body)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title="Turnos vs Mes Anterior">
+              Turnos vs Mes Anterior
+            </p>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+              <p style={{ fontSize: "1.75rem", fontWeight: 600, margin: 0, color: "#F5F0EB", fontFamily: "var(--font-body)" }}>
+                {completadosMes}
+              </p>
+              <span style={{
+                fontSize: "0.8rem",
+                fontWeight: 600,
+                color: diffCompletados >= 0 ? "#10b981" : "#ef4444",
+                fontFamily: "var(--font-body)",
+              }}>
+                {diffCompletados >= 0 ? "▲" : "▼"} {Math.abs(diffCompletados).toFixed(0)}%
+              </span>
+            </div>
+            <p style={{ color: "#666", fontSize: "0.7rem", margin: "4px 0 0", fontFamily: "var(--font-body)" }}>
+              Mes pasado al día {new Date().getDate()}: {completadosMesPasadoAlDia} turnos
             </p>
           </div>
         </div>

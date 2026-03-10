@@ -25,17 +25,22 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
   // Definir items del menú basados en el rol del usuario
   const tabs = useMemo(() => {
-    // Para administradores, solo mostrar páginas exclusivas de administrador
+    // Mi Perfil siempre visible para todos los usuarios
+    const commonTabs = [
+      { href: "/perfil", label: "Mi Perfil" },
+    ];
+
+    // Para administradores, agregar páginas exclusivas de administrador
     if (isAdmin) {
       return [
+        ...commonTabs,
         { href: "/estadisticas", label: "Estadísticas" },
         { href: "/mi-barberia", label: "Mi Barbería" }
       ];
     }
 
-    // Para barberos normales, no mostrar páginas en el menú hamburguesa
-    // ya que están disponibles en la navegación inferior
-    return [];
+    // Para barberos normales, solo Mi Perfil
+    return commonTabs;
   }, [isAdmin]);
 
   const toggleMenu = () => {

@@ -387,7 +387,7 @@ export function WhatsAppChatMobile() {
       )}
 
       {/* Contenedor principal del chat - diseño móvil mejorado */}
-      <div className={`flex flex-col w-full bg-[#161717] overflow-hidden min-w-0 h-[calc(100dvh-60px-64px)] ${wppActivo === "Desconectado" ? 'opacity-40 pointer-events-none select-none' : ''}`} style={{ marginTop: '0px' }}>
+      <div className={`flex flex-col w-full bg-[#161717] overflow-hidden min-w-0 ${showChatList ? 'h-[calc(100dvh-60px-64px)]' : 'h-[100dvh]'} ${wppActivo === "Desconectado" ? 'opacity-40 pointer-events-none select-none' : ''}`} style={{ marginTop: '0px' }}>
         {showChatList ? (
           // Vista de lista de chats (móvil)
           <div className="flex flex-col h-full w-full min-w-0">

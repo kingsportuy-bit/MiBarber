@@ -53,6 +53,7 @@ export function GeneralLayout({
   }
 
   const isWhatsapp = pathname?.startsWith('/whatsapp');
+  const isWhatsappChatView = isWhatsapp && isChatView;
 
-  return <DefaultLayout onRefresh={handleRefresh} noPadding={isWhatsapp} hideFooter={isWhatsapp}>{children}</DefaultLayout>;
+  return <DefaultLayout onRefresh={handleRefresh} noPadding={isWhatsapp || false} hideFooter={isWhatsapp || isWhatsappChatView}>{children}</DefaultLayout>;
 }

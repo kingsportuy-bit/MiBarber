@@ -64,12 +64,19 @@ export function WhatsAppChatMobile() {
   const [message, setMessage] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
-  const [showChatList, setShowChatList] = useState<boolean>(true); // Controla qué panel mostrar
+  const [showChatList, setShowChatList] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.location.hash !== '#chat-view';
+    }
+    return true;
+  });
   const [visibleLimit, setVisibleLimit] = useState(20); // Límite para carga gradual (lazy loading)
   const listRef = useRef<HTMLDivElement>(null);
 
   // Cambiar para que no seleccione automáticamente el primer chat
-  const activeConv = grouped?.find((g: ChatConversation) => g.session_id === active) || null;
+  const activeConv = useMemo(() => {
+    return grouped?.find((g: ChatConversation) => g.session_id === active) || null;
+  }, [grouped, active]);
 
   // Efecto para notificar al padre cuando cambia la vista
   useEffect(() => {

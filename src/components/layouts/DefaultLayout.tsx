@@ -18,7 +18,7 @@ export function DefaultLayout({
       className={`dashboard ${hideFooter ? '' : 'pb-20 md:pb-0'}`}
       style={{
         marginLeft: 'var(--sidebar-width, 0px)',
-        ...(noPadding ? { padding: 0, height: '100vh', overflow: 'hidden' } : {})
+        ...(noPadding ? { padding: 0, height: '100dvh', overflow: 'hidden', marginTop: 0, marginBottom: 0, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 } : {})
       }}
     >
       {/* Sidebar offset only on desktop */}
@@ -29,8 +29,8 @@ export function DefaultLayout({
           }
         }
         ${noPadding ? `
-          .dashboard { padding: 0 !important; margin-top: 0 !important; }
-          .dashboard-content { padding: 0 !important; padding-top: 0 !important; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+          .dashboard { padding: 0 !important; margin-top: 0 !important; margin-bottom: 0 !important; height: 100dvh !important; position: fixed !important; top: 0; left: 0; right: 0; bottom: 0; }
+          .dashboard-content { padding: 0 !important; padding-top: 0 !important; height: 100% !important; display: flex !important; flex-direction: column !important; overflow: hidden !important; }
         ` : ''}
       `}</style>
       <div className="dashboard-content" style={noPadding ? { padding: 0, height: '100%', flex: 1, overflow: 'hidden' } : {}}>

@@ -838,7 +838,7 @@ export function WhatsAppChat() {
       </div>
 
       {/* Versión móvil */}
-      <div className="block md:hidden h-screen w-full z-10">
+      <div className="block md:hidden h-[100dvh] w-full z-10">
         <WhatsAppChatMobile />
       </div>
 

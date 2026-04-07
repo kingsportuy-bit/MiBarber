@@ -1,5 +1,5 @@
 // Tipos para el sistema de citas
-import type { Appointment } from '@/types/db';
+import type { Appointment, EstadoCita } from '@/types/db';
 
 // Tipo para crear una cita
 export interface CreateCitaData {
@@ -13,7 +13,8 @@ export interface CreateCitaData {
   id_barberia: string;
   
   // Campos opcionales
-  estado?: "pendiente" | "confirmado" | "cancelado" | "completado";
+  estado?: EstadoCita;
+  estado_ciclo?: string;
   nota?: string | null;
   id_cliente?: string | null;
   ticket?: number | null;
@@ -21,9 +22,8 @@ export interface CreateCitaData {
   duracion?: string | null;
   id_barbero?: string | null;
   id_servicio?: string | null;
-  creado?: string;
   notificacion_barbero?: string | null;
-  notificacion_cliente?: string | null;
+  notificacion_confirmacion?: string;
 }
 
 // Tipo para actualizar una cita
@@ -37,7 +37,8 @@ export interface UpdateCitaData {
   barbero?: string;
   id_sucursal?: string;
   id_barberia?: string;
-  estado?: "pendiente" | "confirmado" | "cancelado" | "completado";
+  estado?: EstadoCita;
+  estado_ciclo?: string;
   nota?: string | null;
   id_cliente?: string | null;
   ticket?: number | null;
@@ -45,9 +46,8 @@ export interface UpdateCitaData {
   duracion?: string | null;
   id_barbero?: string | null;
   id_servicio?: string | null;
-  creado?: string;
   notificacion_barbero?: string | null;
-  notificacion_cliente?: string | null;
+  notificacion_confirmacion?: string;
 }
 
 // Tipo para datos de rango de fechas

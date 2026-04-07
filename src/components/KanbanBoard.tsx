@@ -14,7 +14,7 @@ import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
 
 // Definir tipos para las columnas del tablero Kanban
 type ColumnId = "pendientes" | "confirmadas" | "completadas" | "canceladas";
-type EstadoCita = "pendiente" | "confirmado" | "completado" | "cancelado";
+type EstadoCita = "pendiente" | "confirmada" | "completado" | "cancelado";
 
 interface Column {
   id: ColumnId;
@@ -122,7 +122,7 @@ export function KanbanBoard({
     citas.forEach(cita => {
       // Mapear el estado de la cita a una columna del tablero
       let columnId: ColumnId = "pendientes";
-      if (cita.estado === "confirmado") {
+      if (cita.estado === "confirmada") {
         columnId = "confirmadas";
       } else if (cita.estado === "completado") {
         columnId = "completadas";
@@ -276,11 +276,11 @@ export function KanbanBoard({
           servicio: values.servicio || "",
           estado: values.estado || "pendiente",
           nota: values.nota || null,
-          creado: values.creado || new Date().toISOString(),
           id_cliente: values.id_cliente || null,
           duracion: values.duracion || "30m",
           notificacion_barbero: values.notificacion_barbero || null,
-          notificacion_cliente: values.notificacion_cliente || null,
+          notificacion_recordatorio: null,
+          notificacion_confirmacion: "no",
           ticket: values.ticket || null,
           nro_factura: values.nro_factura || null,
           barbero: values.barbero || "",
@@ -351,7 +351,7 @@ export function KanbanBoard({
         newColumnId = "pendientes";
         break;
       case "confirmadas":
-        newEstado = "confirmado";
+        newEstado = "confirmada";
         newColumnId = "confirmadas";
         break;
       case "completadas":
@@ -507,7 +507,7 @@ export function KanbanBoard({
 
       {/* Tablero Kanban principal - visible solo en pantallas medianas y grandes */}
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="hidden md:grid md:grid-cols-4 gap-6 w-full">
+        <div className="hidden md:grid md:grid-cols-4 gap-6 w-full" style={{ height: "calc(100vh - 260px)", alignItems: "stretch" }}>
           {Object.values(columns).map((column) => {
             const columnTasks = column.taskIds
               .map(taskId => kanbanTasks[taskId])

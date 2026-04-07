@@ -65,12 +65,23 @@ export function WhatsAppChat() {
   const { qrUrl, wppActivo } = useWhatsAppStatus(statusSucursalId);
   const isWhatsAppConnected = wppActivo === "Conectado";
 
-  const { grouped, isLoading, subscriptionError, refreshChats, isRefreshing, clients } = useWhatsAppChats(sucursalId, showAllSucursales);
+  const { 
+    grouped, 
+    isLoading, 
+    subscriptionError, 
+    refreshChats, 
+    isRefreshing, 
+    clients,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = useWhatsAppChats(sucursalId, showAllSucursales);
   const [active, setActive] = useState<string | null>(null);
   const [message, setMessage] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null); // Estado para imagen en pantalla completa
   const [showBackgroundImage, setShowBackgroundImage] = useState<boolean>(false); // Estado para controlar la visibilidad de la imagen de fondo
+  const loadMoreRef = useRef<HTMLDivElement>(null); // Ref for infinite scroll sentinel
 
   // Cambiar para que no seleccione automáticamente el primer chat
   const activeConv = grouped?.find((g: ChatConversation) => g.session_id === active) || null;
@@ -215,6 +226,32 @@ export function WhatsAppChat() {
       setShowBackgroundImage(true);
     }
   }, [active]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage || isLoading) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          console.log('WhatsAppChat - Cargando más chats...');
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, isLoading]);
 
   // Función para verificar si un mensaje contiene una imagen
   const isImageUrl = (content: string) => {
@@ -564,7 +601,7 @@ export function WhatsAppChat() {
 
             {/* Lista de conversaciones */}
             <div className="flex-1 overflow-y-auto custom-scrollbar border-b border-qoder-dark-border-primary bg-qoder-dark-bg-header scrollbar-styled min-w-0 relative" style={{ padding: '0 10px' }}>
-              {isLoading && (
+              {isLoading && grouped.length === 0 && (
                 <div className="p-4 text-center">
                   <div className="animate-spin rounded-none h-6 w-6 border-b-2 border-qoder-dark-accent-primary mx-auto mb-2"></div>
                   <p className="text-sm text-qoder-dark-text-secondary">Cargando chats...</p>
@@ -659,6 +696,19 @@ export function WhatsAppChat() {
                   </div>
                 );
               })}
+
+              {/* Sentinel para infinite scroll */}
+              <div ref={loadMoreRef} className="h-10 flex items-center justify-center">
+                {isFetchingNextPage && (
+                  <div className="flex items-center gap-2 py-4">
+                    <div className="animate-spin rounded-none h-4 w-4 border-b-2 border-qoder-dark-accent-primary"></div>
+                    <span className="text-xs text-qoder-dark-text-secondary">Cargando más...</span>
+                  </div>
+                )}
+                {!hasNextPage && !isLoading && filteredConversations.length > 0 && (
+                  <p className="text-[10px] text-qoder-dark-text-secondary/30 mt-2 italic">Fin de la lista</p>
+                )}
+              </div>
 
               {!isLoading && filteredConversations.length === 0 && (
                 <div className="p-4 text-center text-qoder-dark-text-secondary">

@@ -17,6 +17,9 @@ export function GeneralLayout({
   // Para la página de login, usar un layout más simple
   const isLoginPage = pathname?.startsWith('/login');
 
+  // Para la página de registro, no usar ningún layout
+  const isRegistroPage = pathname?.startsWith('/registro');
+
   // Para la página de admin, usar un layout más simple
   const isAdminPage = pathname?.startsWith('/admin');
 
@@ -49,6 +52,10 @@ export function GeneralLayout({
 
   if (isLoginPage) {
     return <LoginLayout>{children}</LoginLayout>;
+  }
+
+  if (isRegistroPage) {
+    return <>{children}</>;
   }
 
   if (isAdminPage) {

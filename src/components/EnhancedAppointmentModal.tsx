@@ -151,7 +151,7 @@ export function EnhancedAppointmentModal({
     if (barberId && date && time && duration && citasExistentes) {
       // Filtrar solo citas pendientes y confirmadas
       const citasFiltradas = citasExistentes.filter(cita => 
-        cita.estado === "pendiente" || cita.estado === "confirmado"
+        cita.estado === "pendiente" || cita.estado === "confirmada"
       );
       
       // Si estamos editando, excluir la cita actual
@@ -393,7 +393,6 @@ export function EnhancedAppointmentModal({
         ticket: ticket || undefined,
         nro_factura: initial?.nro_factura || undefined,
         notificacion_barbero: initial?.notificacion_barbero || undefined,
-        notificacion_cliente: initial?.notificacion_cliente || undefined,
         metodo_pago: initial?.metodo_pago || undefined,
         created_at: initial?.created_at || undefined,
         updated_at: initial?.updated_at || undefined,

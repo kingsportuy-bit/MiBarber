@@ -164,7 +164,7 @@ export function StandaloneAppointmentModal({
         duracion: duration,
         ticket: parseFloat(price),
         nota: note,
-        estado: appointmentStatus as "pendiente" | "confirmado" | "cancelado" | "completado" | undefined,
+        estado: appointmentStatus as "pendiente" | "confirmada" | "cancelado" | "completado" | undefined,
         id_sucursal: selectedSucursalId
       };
       

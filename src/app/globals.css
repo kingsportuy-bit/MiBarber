@@ -472,12 +472,12 @@ h6 {
   border-color: var(--qoder-dark-accent-orange);
 }
 
-/* Aplicar el estilo qoder-dark-window - Modernizado */
+/* Contenedor principal — transparente para que se vean las estrellas del fondo */
 main {
-  background-color: var(--qoder-dark-bg-secondary);
-  border: 1px solid var(--qoder-dark-border-primary);
+  background-color: transparent;
+  border: none;
   border-radius: 0;
-  overflow: hidden;
+  overflow: visible;
   padding: 1rem;
 }
 

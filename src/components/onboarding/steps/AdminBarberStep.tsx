@@ -50,12 +50,12 @@ export default function AdminBarberStep({ data, updateData, onNext, onBack }: Ad
                 </div>
 
                 <div className="space-y-1">
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Celular Personal</label>
+                    <label className="block text-sm font-medium text-slate-300 mb-1">Tu Teléfono</label>
                     <motion.input
                         name="celular"
                         value={data.adminBarber.celular}
                         onChange={handleChange}
-                        placeholder="+598 99 111 222"
+                        placeholder="Ahora ingresa tu teléfono"
                         whileFocus={inputFocus}
                         className="w-full bg-slate-900/50 border border-slate-700 rounded-none p-3 text-white focus:outline-none focus:border-violet-500 transition-all placeholder-slate-600"
                     />

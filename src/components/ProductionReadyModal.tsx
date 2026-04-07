@@ -58,7 +58,7 @@ export function ProductionReadyModal({
   const [time, setTime] = useState<string>(initial?.hora || "");
   const [note, setNote] = useState<string>(initial?.nota || "");
   const [clientPhone, setClientPhone] = useState<string | null>(initial?.telefono || null);
-  const [appointmentStatus, setAppointmentStatus] = useState<"pendiente" | "confirmado" | "cancelado" | "completado">(initial?.estado as any || "pendiente");
+  const [appointmentStatus, setAppointmentStatus] = useState<"pendiente" | "confirmada" | "cancelado" | "completado">(initial?.estado as any || "pendiente");
   const [showQuickClientForm, setShowQuickClientForm] = useState(false);
   const [quickClientData, setQuickClientData] = useState({
     nombre: "",
@@ -630,7 +630,7 @@ export function ProductionReadyModal({
                 onChange={(e) => setAppointmentStatus(e.target.value as any)}
               >
                 <option value="pendiente">Pendiente</option>
-                <option value="confirmado">Confirmado</option>
+                <option value="confirmada">Confirmada</option>
                 <option value="cancelado">Cancelado</option>
                 <option value="completado">Completado</option>
               </UltraSimpleSelect>

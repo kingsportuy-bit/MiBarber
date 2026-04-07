@@ -153,23 +153,36 @@ export default function HorariosStep({ data, updateData, onNext, onBack }: Horar
                     <div className="flex flex-col gap-4 min-w-[150px]">
                         <h3 className="text-2xl font-bold text-white tracking-tight">{selectedDayName}</h3>
 
-                        <label className="flex items-center gap-3 cursor-pointer group/toggle">
+                        <label className="flex items-center gap-2 cursor-pointer group/toggle">
                             <motion.div
                                 className={`
-                                    w-14 h-8 rounded-full p-1 transition-colors duration-300 flex items-center border
-                                    ${selectedDay?.activo ? 'bg-emerald-500/20 border-emerald-500/50' : 'bg-slate-800 border-slate-700'}
+                                    relative h-8 rounded-full transition-colors duration-300 flex items-center
+                                    ${selectedDay?.activo ? 'bg-emerald-500' : 'bg-slate-700'}
                                 `}
+                                style={{ width: 80 }}
                             >
                                 <motion.div
                                     layout
                                     className={`
-                                        w-6 h-6 rounded-full shadow-md
-                                        ${selectedDay?.activo ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]' : 'bg-slate-500'}
+                                        absolute w-7 h-7 rounded-full shadow-md flex items-center justify-center text-xs font-bold
+                                        ${selectedDay?.activo ? 'bg-white left-0.5 text-emerald-600' : 'bg-slate-400 left-0.5 text-slate-600'}
                                     `}
-                                    animate={{ x: selectedDay?.activo ? 24 : 0 }}
-                                />
+                                    animate={{ 
+                                        left: selectedDay?.activo ? 48 : 2 
+                                    }}
+                                >
+                                    {selectedDay?.activo ? (
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                            <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
+                                        </svg>
+                                    ) : (
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                            <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                                        </svg>
+                                    )}
+                                </motion.div>
                             </motion.div>
-                            <span className={`font-medium transition-colors ${selectedDay?.activo ? 'text-emerald-400' : 'text-slate-500'}`}>
+                            <span className={`font-medium transition-colors text-sm px-3 py-1 rounded-full ${selectedDay?.activo ? 'text-emerald-400 bg-emerald-400/20' : 'text-slate-500 bg-slate-500/20'}`}>
                                 {selectedDay?.activo ? 'Abierto' : 'Cerrado'}
                             </span>
                             <input
@@ -195,7 +208,7 @@ export default function HorariosStep({ data, updateData, onNext, onBack }: Horar
                                 <div className="bg-slate-800/30 rounded-2xl p-5 border border-white/5 space-y-4">
                                     <div className="flex items-center gap-2 text-violet-300 mb-1">
                                         <SunIcon className="w-5 h-5" />
-                                        <span className="text-sm font-medium">Jornada Laboral</span>
+                                        <span className="text-sm font-medium px-3 py-1 rounded-full bg-violet-400/20 text-violet-300">Horario</span>
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
                                         <div>
@@ -225,7 +238,7 @@ export default function HorariosStep({ data, updateData, onNext, onBack }: Horar
                                 <div className="bg-slate-800/30 rounded-2xl p-5 border border-white/5 space-y-4">
                                     <div className="flex items-center gap-2 text-cyan-300 mb-1">
                                         <MoonIcon className="w-5 h-5" />
-                                        <span className="text-sm font-medium">Descanso (Opcional)</span>
+                                        <span className="text-sm font-medium px-3 py-1 rounded-full bg-cyan-400/20 text-cyan-300">Descanso</span>
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
                                         <div>

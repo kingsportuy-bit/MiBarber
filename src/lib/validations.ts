@@ -86,7 +86,7 @@ export const createAppointmentSchema = z.object({
 
 export const updateAppointmentSchema = createAppointmentSchema.partial().extend({
   id_cita: uuidSchema,
-  estado: z.enum(['pendiente', 'confirmado', 'cancelado', 'completado']).optional(),
+  estado: z.enum(['pendiente', 'modificado', 'cancelado', 'confirmada', 'completado']).optional(),
   ticket: z.number().min(0, 'El ticket no puede ser negativo').optional(),
   nro_factura: z.string().max(50, 'Número de factura muy largo').optional(),
   metodo_pago: z.string().max(50).optional(),

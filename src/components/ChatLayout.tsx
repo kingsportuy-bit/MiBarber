@@ -9,19 +9,36 @@ import { ChatSucursalFilter } from "@/components/ChatSucursalFilter";
 
 export function ChatLayout() {
   const [selectedSucursal, setSelectedSucursal] = useState<string | undefined>(undefined);
-  const { grouped, isLoading, subscriptionError, refreshChats, isRefreshing } = useChats(selectedSucursal);
-  const { data: clientes } = useClientes("", "ultimo_agregado");
+  const { 
+    grouped, 
+    isLoading, 
+    subscriptionError, 
+    refreshChats, 
+    isRefreshing,
+    clients,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching
+  } = useChats(selectedSucursal);
+  const { data: allClientes } = useClientes("", "ultimo_agregado");
   const [active, setActive] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>(""); // Para la búsqueda de chats
   const [messageSearchTerm, setMessageSearchTerm] = useState<string>(""); // Para la búsqueda de mensajes
   const [isSearchingMessages, setIsSearchingMessages] = useState<boolean>(false); // Para mostrar el input de búsqueda de mensajes
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null); // Ref for infinite scroll sentinel
   
   const activeConv = grouped?.find((g) => g.session_id === active) ?? grouped?.[0];
 
   // Función para obtener el nombre del cliente por su ID
   const getClientName = (sessionId: string) => {
-    const cliente = clientes?.find(c => c.id_cliente === sessionId);
+    // Buscar primero en los clientes cargados por el hook de chats (que son los más relevantes)
+    const chatCliente = clients?.find(c => c.id_cliente === sessionId || c.telefono === sessionId || c.id_conversacion?.toString() === sessionId);
+    if (chatCliente) return chatCliente.nombre;
+
+    // Fallback al hook de todos los clientes
+    const cliente = allClientes?.find(c => c.id_cliente === sessionId || c.telefono === sessionId || c.id_conversacion?.toString() === sessionId);
     return cliente?.nombre || "Cliente desconocido";
   };
 
@@ -92,6 +109,32 @@ export function ChatLayout() {
     }
   }, [activeConv]);
 
+  // Infinite scroll observer
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage || isLoading) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          console.log('ChatLayout - Cargando más chats...');
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, isLoading]);
+
   const handleSucursalChange = (idSucursal: string | undefined) => {
     setSelectedSucursal(idSucursal);
   };
@@ -106,7 +149,7 @@ export function ChatLayout() {
           <div className="flex items-center justify-between mb-2">
             <h2 className="font-semibold text-qoder-dark-text-primary px-2">Chats</h2>
             <div className="flex items-center gap-1 ml-auto">
-              {isRefreshing && (
+              {isFetching && (
                 <div className="flex items-center gap-1 text-xs text-qoder-dark-text-secondary">
                   <div className="animate-spin rounded-full h-3 w-3 border-b border-qoder-dark-accent-primary"></div>
                 </div>
@@ -147,7 +190,7 @@ export function ChatLayout() {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto custom-scrollbar bg-qoder-dark-bg-quaternary">
-          {isLoading && (
+          {isLoading && grouped.length === 0 && (
             <div className="p-4 text-center">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-qoder-dark-accent-primary mx-auto mb-2"></div>
               <p className="text-sm text-qoder-dark-text-secondary">Cargando chats...</p>
@@ -200,6 +243,19 @@ export function ChatLayout() {
               </button>
             );
           })}
+
+          {/* Sentinel para infinite scroll */}
+          <div ref={loadMoreRef} className="h-10 flex items-center justify-center">
+            {isFetchingNextPage && (
+              <div className="flex items-center gap-2 py-4">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-qoder-dark-accent-primary"></div>
+                <span className="text-xs text-qoder-dark-text-secondary">Cargando más...</span>
+              </div>
+            )}
+            {!hasNextPage && !isLoading && filteredConversations.length > 0 && (
+              <p className="text-[10px] text-qoder-dark-text-secondary/30 mt-2 italic">Fin de la lista</p>
+            )}
+          </div>
           {!isLoading && (filteredConversations.length === 0) && (
             <div className="p-8 text-center">
               <div className="text-4xl mb-2">💬</div>

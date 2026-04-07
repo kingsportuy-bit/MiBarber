@@ -37,8 +37,8 @@ const initialData: Data = {
       title: "To do",
       taskIds: ["task-1", "task-2", "task-3", "task-4"],
     },
-    "confirmado": {
-      id: "confirmado",
+    "confirmada": {
+      id: "confirmada",
       title: "In progress",
       taskIds: [],
     },
@@ -53,7 +53,7 @@ const initialData: Data = {
       taskIds: [],
     },
   },
-  columnOrder: ["pendiente", "confirmado", "completado", "cancelado"],
+  columnOrder: ["pendiente", "confirmada", "completado", "cancelado"],
 };
 
 export function TestDnd() {

@@ -1,5 +1,5 @@
-import OnboardingWizard from "@/components/onboarding/OnboardingWizard";
+import ConversationalOnboarding from "@/components/onboarding/ConversationalOnboarding";
 
 export default function RegistroPage() {
-    return <OnboardingWizard />;
+    return <ConversationalOnboarding />;
 }

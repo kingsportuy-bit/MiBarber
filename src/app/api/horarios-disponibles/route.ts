@@ -211,7 +211,7 @@ export async function GET(request: NextRequest) {
       .eq("id_barbero", idBarbero)
       .eq("fecha", fecha)
       // Solo considerar citas pendientes y confirmadas
-      .in("estado", ["pendiente", "confirmado"]);
+      .in("estado", ["pendiente", "confirmada"]);
 
     // Si estamos editando, excluir esa cita
     if (idCitaEditando) {

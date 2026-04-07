@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -74,8 +74,8 @@ export function BottomNav() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  // No mostrar en: no autenticado, admin, login, o vista chat individual
-  if (!isAuthenticated || pathname?.startsWith('/admin') || pathname?.startsWith('/login')) {
+  // No mostrar en: no autenticado, admin, login, registro, o vista chat individual
+  if (!isAuthenticated || pathname?.startsWith('/admin') || pathname?.startsWith('/login') || pathname?.startsWith('/registro')) {
     return null;
   }
 

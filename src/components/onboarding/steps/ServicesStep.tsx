@@ -1,5 +1,5 @@
 import { OnboardingData } from "../OnboardingWizard";
-import { PlusIcon, TrashIcon, SparklesIcon, CurrencyDollarIcon, ClockIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, TrashIcon, SparklesIcon, CurrencyDollarIcon, ClockIcon, XMarkIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -18,6 +18,17 @@ export default function ServicesStep({ data, updateData, onNext, onBack }: Servi
         descripcion: ""
     });
     const [isAdding, setIsAdding] = useState(false);
+    const [expandedServices, setExpandedServices] = useState<Set<string>>(new Set());
+
+    const toggleExpand = (serviceId: string) => {
+        const newExpanded = new Set(expandedServices);
+        if (newExpanded.has(serviceId)) {
+            newExpanded.delete(serviceId);
+        } else {
+            newExpanded.add(serviceId);
+        }
+        setExpandedServices(newExpanded);
+    };
 
     const handleAdd = () => {
         if (newService.nombre && newService.precio && newService.duracion) {
@@ -69,8 +80,40 @@ export default function ServicesStep({ data, updateData, onNext, onBack }: Servi
                             className="group relative bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-2xl p-5 hover:bg-slate-800/60 transition-colors flex flex-col sm:flex-row gap-4 sm:items-center justify-between shadow-lg shadow-black/20"
                         >
                             <div className="flex-1 space-y-2">
-                                <h3 className="text-lg font-bold text-white tracking-wide">{service.nombre}</h3>
-                                <p className="text-sm text-slate-400 line-clamp-2">{service.descripcion}</p>
+                                <div className="flex items-start justify-between">
+                                    <h3 className="text-lg font-bold text-white tracking-wide">{service.nombre}</h3>
+                                    {service.descripcion && (
+                                        <motion.button
+                                            onClick={() => toggleExpand(service.id || idx.toString())}
+                                            whileHover={{ scale: 1.1 }}
+                                            whileTap={{ scale: 0.9 }}
+                                            className="p-1 text-slate-400 hover:text-white transition-colors"
+                                        >
+                                            {expandedServices.has(service.id || idx.toString()) ? (
+                                                <ChevronUpIcon className="w-5 h-5" />
+                                            ) : (
+                                                <ChevronDownIcon className="w-5 h-5" />
+                                            )}
+                                        </motion.button>
+                                    )}
+                                </div>
+                                
+                                <AnimatePresence>
+                                    {expandedServices.has(service.id || idx.toString()) && service.descripcion && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: "auto" }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            className="text-sm text-slate-300 bg-slate-800/50 p-3 rounded-xl"
+                                        >
+                                            {service.descripcion}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                                {!expandedServices.has(service.id || idx.toString()) && service.descripcion && (
+                                    <p className="text-sm text-slate-400 line-clamp-2">{service.descripcion}</p>
+                                )}
 
                                 <div className="flex gap-4 mt-2">
                                     <div className="flex items-center gap-1.5 text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full text-xs font-bold border border-emerald-400/20">
@@ -172,13 +215,14 @@ export default function ServicesStep({ data, updateData, onNext, onBack }: Servi
                             <div className="space-y-1">
                                 <label className="text-xs text-slate-400 ml-1 font-medium">Descripción para IA</label>
                                 <motion.textarea
-                                    placeholder="Explica en qué consiste el servicio..."
+                                    placeholder="Describe lo máximo posible el servicio..."
                                     value={newService.descripcion}
                                     onChange={(e) => setNewService({ ...newService, descripcion: e.target.value })}
                                     whileFocus={inputFocus}
                                     className="w-full bg-slate-900/50 border border-slate-700 rounded-none p-3 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 resize-none transition-all"
                                     rows={3}
                                 />
+                                <p className="text-xs text-cyan-400 mt-1">Describe en detalle el servicio: técnicas utilizadas, qué incluye, consejos de mantenimiento, etc. Cuanto más detallado, mejor podrá explicarlo la IA a tus clientes.</p>
                             </div>
                         </div>
 

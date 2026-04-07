@@ -26,7 +26,7 @@ export function QuickStats({ appointments, fecha, barbero }: QuickStatsProps) {
     }
     
     const pendientes = filteredAppointments.filter(a => a.estado === "pendiente").length;
-    const confirmadas = filteredAppointments.filter(a => a.estado === "confirmado").length;
+    const confirmadas = filteredAppointments.filter(a => a.estado === "confirmada").length;
     const completadas = filteredAppointments.filter(a => a.estado === "completado").length;
     const canceladas = filteredAppointments.filter(a => a.estado === "cancelado").length;
     

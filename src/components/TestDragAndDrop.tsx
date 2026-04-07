@@ -14,7 +14,7 @@ const initialItems = {
     { id: "1", content: "Cita con Juan Pérez - 10:00 AM" },
     { id: "2", content: "Cita con María González - 11:00 AM" }
   ],
-  confirmado: [
+  confirmada: [
     { id: "3", content: "Cita con Carlos López - 2:00 PM" }
   ],
   completado: [
@@ -29,7 +29,7 @@ type ItemsType = {
 
 const columnStates = [
   { id: "pendiente", title: "Pendientes", color: "text-yellow-500", bgColor: "bg-yellow-500/10" },
-  { id: "confirmado", title: "Confirmadas", color: "text-blue-500", bgColor: "bg-blue-500/10" },
+  { id: "confirmada", title: "Confirmadas", color: "text-blue-500", bgColor: "bg-blue-500/10" },
   { id: "completado", title: "Completadas", color: "text-green-500", bgColor: "bg-green-500/10" },
   { id: "cancelado", title: "Canceladas", color: "text-red-500", bgColor: "bg-red-500/10" },
 ];

@@ -115,13 +115,13 @@ export function KanbanColumn({ column, tasks, onEdit }: KanbanColumnProps) {
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className="flex-1 px-3 py-3 space-y-3"
+            className="flex-1 px-3 py-3 space-y-3 overflow-y-auto"
             style={{
               backgroundColor: snapshot.isDraggingOver
                 ? styles.headerBg
                 : styles.dropBg,
               transition: "background-color 0.2s ease",
-              minHeight: 100,
+              height: "100%",
             }}
           >
             {tasks.map((task, index) => (

@@ -26,7 +26,7 @@ function getEstadoColor(estado: string) {
   switch (estado) {
     case "completado": return "#10b981";
     case "pendiente": return "#C5A059";
-    case "confirmado": return "#C5A059";
+    case "confirmada": return "#3b82f6";
     case "cancelado": return "#ef4444";
     default: return "#8A8A8A";
   }
@@ -36,7 +36,7 @@ function getEstadoLabel(estado: string) {
   switch (estado) {
     case "completado": return "Completado";
     case "pendiente": return "Pendiente";
-    case "confirmado": return "Confirmado";
+    case "confirmada": return "Confirmada";
     case "cancelado": return "Cancelado";
     default: return estado;
   }
@@ -78,7 +78,7 @@ export default function DashboardPage() {
   const currentTime = now ? `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}` : "";
 
   const completados = citasHoy.filter((c: Appointment) => c.estado === "completado").length;
-  const pendientes = citasHoy.filter((c: Appointment) => c.estado === "pendiente" || c.estado === "confirmado").length;
+  const pendientes = citasHoy.filter((c: Appointment) => c.estado === "pendiente" || c.estado === "confirmada").length;
   const totalHoy = citasHoy.length;
 
   // Revenue today
@@ -95,7 +95,7 @@ export default function DashboardPage() {
 
   // Monthly completed & pending
   const completadosMes = (citasMes || []).filter((c: Appointment) => c.estado === "completado").length;
-  const pendientesMes = (citasMes || []).filter((c: Appointment) => c.estado === "pendiente" || c.estado === "confirmado").length;
+  const pendientesMes = (citasMes || []).filter((c: Appointment) => c.estado === "pendiente" || c.estado === "confirmada").length;
 
   // Comparisons vs last month (same period)
   const ingresoMesActualAlDia = (ingresosMes || []).reduce((sum: number, r: any) => {
@@ -113,12 +113,12 @@ export default function DashboardPage() {
 
   // Next appointment
   const siguienteTurno = citasHoy
-    .filter((c: Appointment) => (c.estado === "pendiente" || c.estado === "confirmado") && c.hora >= currentTime)
+    .filter((c: Appointment) => (c.estado === "pendiente" || c.estado === "confirmada") && c.hora >= currentTime)
     .sort((a: Appointment, b: Appointment) => a.hora.localeCompare(b.hora))[0];
 
   // Determine which turns to display: today's pending, or tomorrow's if none left
   const turnosPendientesHoy = citasHoy
-    .filter((c: Appointment) => (c.estado === "pendiente" || c.estado === "confirmado") && c.hora >= currentTime)
+    .filter((c: Appointment) => (c.estado === "pendiente" || c.estado === "confirmada") && c.hora >= currentTime)
     .sort((a: Appointment, b: Appointment) => a.hora.localeCompare(b.hora));
 
   const showTomorrow = turnosPendientesHoy.length === 0;
@@ -131,7 +131,7 @@ export default function DashboardPage() {
   const turnosMañana = (proximasCitas || [])
     .filter((c: Appointment) => {
       const citaFecha = c.fecha?.split('T')[0];
-      return citaFecha === tomorrowStr && (c.estado === "pendiente" || c.estado === "confirmado");
+      return citaFecha === tomorrowStr && (c.estado === "pendiente" || c.estado === "confirmada");
     })
     .sort((a: Appointment, b: Appointment) => a.hora.localeCompare(b.hora));
 

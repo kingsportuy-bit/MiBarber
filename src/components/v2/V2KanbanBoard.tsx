@@ -13,7 +13,7 @@ import { getLocalDateString, getLocalDateTime } from "@/shared/utils/dateUtils";
 
 // Definir tipos para las columnas del tablero Kanban
 type ColumnId = "pendientes" | "completadas" | "canceladas";
-type EstadoCita = "pendiente" | "confirmado" | "completado" | "cancelado";
+type EstadoCita = "pendiente" | "confirmada" | "completado" | "cancelado";
 
 interface Column {
   id: ColumnId;
@@ -260,11 +260,11 @@ export function V2KanbanBoard({
           servicio: values.servicio || "",
           estado: values.estado || "pendiente",
           nota: values.nota || null,
-          creado: values.creado || new Date().toISOString(),
           id_cliente: values.id_cliente || null,
           duracion: values.duracion || "30m",
           notificacion_barbero: values.notificacion_barbero || null,
-          notificacion_cliente: values.notificacion_cliente || null,
+          notificacion_recordatorio: null,
+          notificacion_confirmacion: "no",
           ticket: values.ticket || null,
           nro_factura: values.nro_factura || null,
           barbero: values.barbero || "",

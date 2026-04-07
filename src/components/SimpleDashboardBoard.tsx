@@ -14,11 +14,11 @@ const initialAppointments: Appointment[] = [
     servicio: "Corte de cabello",
     estado: "pendiente",
     nota: null,
-    creado: "2023-10-14T10:00:00Z",
     id_cliente: null,
     duracion: "30m",
     notificacion_barbero: null,
-    notificacion_cliente: null,
+    notificacion_recordatorio: null,
+    notificacion_confirmacion: "no",
     ticket: 1500,
     nro_factura: null,
     barbero: "Carlos López",
@@ -34,13 +34,13 @@ const initialAppointments: Appointment[] = [
     hora: "11:00:00",
     cliente_nombre: "María González",
     servicio: "Barba",
-    estado: "confirmado",
+    estado: "confirmada",
     nota: null,
-    creado: "2023-10-14T11:00:00Z",
     id_cliente: null,
     duracion: "20m",
     notificacion_barbero: null,
-    notificacion_cliente: null,
+    notificacion_recordatorio: null,
+    notificacion_confirmacion: "no",
     ticket: 1000,
     nro_factura: null,
     barbero: "Carlos López",
@@ -58,11 +58,11 @@ const initialAppointments: Appointment[] = [
     servicio: "Corte y barba",
     estado: "completado",
     nota: null,
-    creado: "2023-10-14T12:00:00Z",
     id_cliente: null,
     duracion: "50m",
     notificacion_barbero: null,
-    notificacion_cliente: null,
+    notificacion_recordatorio: null,
+    notificacion_confirmacion: "no",
     ticket: 2500,
     nro_factura: null,
     barbero: "Carlos López",
@@ -76,14 +76,14 @@ const initialAppointments: Appointment[] = [
 
 const columnTitles = {
   pendiente: "Pendientes",
-  confirmado: "Confirmadas",
+  confirmada: "Confirmadas",
   completado: "Completadas",
   cancelado: "Canceladas",
 };
 
 const columnColors = {
   pendiente: "text-yellow-500",
-  confirmado: "text-blue-500",
+  confirmada: "text-blue-500",
   completado: "text-green-500",
   cancelado: "text-red-500",
 };
@@ -137,7 +137,7 @@ export function SimpleDashboardBoard() {
   // Agrupar citas por estado
   const citasPorEstado = {
     pendiente: appointments.filter(c => c.estado === "pendiente"),
-    confirmado: appointments.filter(c => c.estado === "confirmado"),
+    confirmada: appointments.filter(c => c.estado === "confirmada"),
     completado: appointments.filter(c => c.estado === "completado"),
     cancelado: appointments.filter(c => c.estado === "cancelado"),
   };

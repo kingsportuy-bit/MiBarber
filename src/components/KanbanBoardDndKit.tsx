@@ -63,7 +63,7 @@ interface Task extends Appointment {
 
 const columnStates: Column[] = [
   { id: "pendiente", title: "Pendientes", color: "text-orange-500", bgColor: "bg-orange-500/10" },
-  { id: "confirmado", title: "Confirmadas", color: "text-blue-500", bgColor: "bg-blue-500/10" },
+  { id: "confirmada", title: "Confirmadas", color: "text-blue-500", bgColor: "bg-blue-500/10" },
   { id: "completado", title: "Completadas", color: "text-green-500", bgColor: "bg-green-500/10" },
   { id: "cancelado", title: "Canceladas", color: "text-gray-500", bgColor: "bg-gray-500/10" },
 ];
@@ -133,7 +133,7 @@ const TaskCard = memo(({
     switch (task.columnId) {
       case 'pendiente':
         return 'border-l-4 border-l-orange-500'; // Naranja para pendientes
-      case 'confirmado':
+      case 'confirmada':
         return 'border-l-4 border-l-blue-500'; // Azul para confirmadas
       case 'completado':
         return 'border-l-4 border-l-green-500'; // Verde para completadas
@@ -328,7 +328,7 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
   const [isInitialSelectionDone, setIsInitialSelectionDone] = useState(false); // Bandera para controlar la preseleccion inicial
   
   // Tipos para estados válidos - WRAPPED IN useMemo
-  const validStates = useMemo(() => ["pendiente", "confirmado", "completado", "cancelado"] as const, []);
+  const validStates = useMemo(() => ["pendiente", "confirmada", "completado", "cancelado"] as const, []);
   type Estado = (typeof validStates)[number];
   
   // Estado canónico local para las columnas

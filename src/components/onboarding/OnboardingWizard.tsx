@@ -22,6 +22,7 @@ export type SucursalData = {
     direccion: string;
     ciudad: string;
     pais: string;
+    cod_pais: string;
     info_adicional: string;
     horarios: any[];
 };
@@ -31,6 +32,7 @@ export type OnboardingData = {
     currentBranchIndex: number;
     barberia: {
         nombre: string;
+        telefono: string;
     };
     // Array of branches
     sucursales: SucursalData[];
@@ -50,6 +52,12 @@ export type OnboardingData = {
     // Assignments: Record<BranchIndex, Record<BarberId, ServiceIds[]>>
     asignacionesPorSucursal: Record<number, Record<string, string[]>>;
 
+    // Context for conversational flow
+    branchContext?: Record<number, {
+        services: string[];
+        barberCount: number;
+    }>;
+
     // Active helpers (synced with index 0 initially)
     sucursal: SucursalData; // Defines the "current" one being edited (helper)
     barberos: any[]; // Current branch barbers helper
@@ -64,6 +72,7 @@ const INITIAL_SUCURSAL: SucursalData = {
     direccion: "",
     ciudad: "",
     pais: "",
+    cod_pais: "",
     info_adicional: "",
     horarios: []
 };
@@ -71,7 +80,7 @@ const INITIAL_SUCURSAL: SucursalData = {
 const INITIAL_DATA: OnboardingData = {
     branchCount: 1,
     currentBranchIndex: 0,
-    barberia: { nombre: "" },
+    barberia: { nombre: "", telefono: "" },
     sucursales: [{ ...INITIAL_SUCURSAL }],
     adminBarber: {
         nombre: "",

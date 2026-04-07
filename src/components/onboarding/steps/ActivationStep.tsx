@@ -1,7 +1,7 @@
 import { OnboardingData } from "../OnboardingWizard";
-import { useState } from "react";
-import { ArrowPathIcon, CheckCircleIcon, DevicePhoneMobileIcon, ChatBubbleLeftRightIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import { submitOnboardingData } from "@/lib/actions/onboarding";
+import { useState, useEffect } from "react";
+import { ArrowPathIcon, CheckCircleIcon, DevicePhoneMobileIcon, ChatBubbleLeftRightIcon, ExclamationTriangleIcon, UserGroupIcon } from "@heroicons/react/24/outline";
+import { submitOnboardingData, pollBarberConvReady, getInstanceQR } from "@/lib/actions/onboarding";
 import { AuthService } from "@/features/auth/services/AuthService";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -10,26 +10,58 @@ interface ActivationStepProps {
     onBack: () => void;
 }
 
+interface BarberStatus {
+    nombre: string;
+    confirmado: boolean;
+}
+
 export default function ActivationStep({ data, onBack }: ActivationStepProps) {
     const [status, setStatus] = useState<'idle' | 'generating' | 'ready' | 'success' | 'error'>('idle');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [qrCode, setQrCode] = useState<string | null>(null);
+    const [barberosConfirmados, setBarberosConfirmados] = useState<BarberStatus[]>([]);
+    const [pollingActive, setPollingActive] = useState(false);
+    const [sucursalId, setSucursalId] = useState<string | null>(null);
+    const [instanceName, setInstanceName] = useState<string | null>(null);
+
+    const allBarberos = [
+        { nombre: data.adminBarber.nombre, confirmado: false },
+        ...Object.values(data.barberosPorSucursal).flat().map((b: any) => ({ nombre: b.nombre || b.usuario, confirmado: false }))
+    ];
+
+    const totalBarberos = allBarberos.length;
 
     const generateAssistant = async () => {
         setStatus('generating');
         setErrorMessage(null);
 
         try {
-            // 1. Submit data to server
-            const result = await submitOnboardingData(data); // This is now a real server action
+            const result = await submitOnboardingData(data);
 
             if (result.success && result.session) {
-                // 2. Save session locally explicitly to ensure consistency
                 AuthService.saveSession(result.session);
 
-                // 3. Show QR (Mock for now, would be result.qrCode if we returned it)
-                setQrCode("https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg");
+                if (result.instanceName) {
+                    setInstanceName(result.instanceName);
+                    const qrResult = await getInstanceQR(result.instanceName);
+                    if (qrResult.qrCode) {
+                        setQrCode(qrResult.qrCode);
+                    } else if (qrResult.connected) {
+                        setQrCode("https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg");
+                    }
+                }
+
+                if (result.sucursalId) {
+                    setSucursalId(result.sucursalId);
+                }
+
+                const initialBarberos = [
+                    { nombre: data.adminBarber.nombre, confirmado: false },
+                    ...Object.values(data.barberosPorSucursal).flat().map((b: any) => ({ nombre: b.nombre || b.usuario, confirmado: false }))
+                ];
+                setBarberosConfirmados(initialBarberos);
                 setStatus('ready');
+                setPollingActive(true);
             } else {
                 throw new Error(result.error || "Error desconocido al crear la cuenta");
             }
@@ -40,9 +72,53 @@ export default function ActivationStep({ data, onBack }: ActivationStepProps) {
         }
     };
 
+    useEffect(() => {
+        if (status === 'ready' && pollingActive && sucursalId && instanceName) {
+            const pollBarberos = async () => {
+                try {
+                    const [qrResult, barberResult] = await Promise.all([
+                        getInstanceQR(instanceName),
+                        pollBarberConvReady(sucursalId)
+                    ]);
+
+                    if (qrResult.connected) {
+                        setQrCode(null);
+                    } else if (qrResult.qrCode && !qrCode) {
+                        setQrCode(qrResult.qrCode);
+                    }
+
+                    if (barberResult.barbers && barberResult.barbers.length > 0) {
+                        setBarberosConfirmados(prev => {
+                            return prev.map((b, idx) => {
+                                const serverBarber = barberResult.barbers[idx];
+                                if (serverBarber) {
+                                    return { ...b, confirmado: serverBarber.verified };
+                                }
+                                return b;
+                            });
+                        });
+
+                        if (barberResult.ready) {
+                            setPollingActive(false);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error polling:", error);
+                }
+            };
+
+            pollBarberos();
+            const interval = setInterval(pollBarberos, 5000);
+
+            return () => clearInterval(interval);
+        }
+    }, [status, pollingActive, sucursalId, instanceName]);
+
+    const todosConfirmados = barberosConfirmados.length > 0 && barberosConfirmados.every(b => b.confirmado);
+
     const finishProcess = () => {
+        if (!todosConfirmados) return;
         setStatus('success');
-        // Here we would redirect to dashboard
         setTimeout(() => {
             window.location.href = "/inicio";
         }, 2000);
@@ -160,7 +236,6 @@ export default function ActivationStep({ data, onBack }: ActivationStepProps) {
                         className="space-y-6 flex flex-col items-center"
                     >
                         <div className="bg-white p-4 rounded-2xl inline-block shadow-[0_0_50px_rgba(6,182,212,0.3)] relative group border-4 border-slate-900">
-                            {/* Replace with actual QR Image component */}
                             <img src={qrCode || ""} alt="WhatsApp QR" className="w-64 h-64 object-contain" />
                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
                                 <div className="bg-slate-900/90 text-white px-4 py-2 rounded-full text-sm font-bold backdrop-blur-sm border border-white/20">
@@ -172,23 +247,77 @@ export default function ActivationStep({ data, onBack }: ActivationStepProps) {
                         <div className="max-w-md mx-auto space-y-4 text-left bg-slate-900/80 p-6 rounded-2xl border border-white/10 backdrop-blur-md shadow-2xl">
                             <h3 className="text-lg font-semibold text-white flex items-center gap-2 border-b border-white/5 pb-3">
                                 <DevicePhoneMobileIcon className="w-6 h-6 text-cyan-400" />
-                                Pasos finales:
+                                Pasos para activar:
                             </h3>
-                            <ol className="list-decimal list-inside space-y-3 text-slate-300 text-sm">
-                                <li>Abre WhatsApp en tu celular.</li>
-                                <li>Ve a <strong>Dispositivos vinculados</strong> {'>'} <strong>Vincular dispositivo</strong>.</li>
-                                <li>Escanea el código QR que ves en pantalla.</li>
-                                <li>Envía un mensaje al número conectado con el texto: <br /> <span className="text-cyan-300 font-mono bg-cyan-900/30 px-2 py-1 rounded mt-2 block w-fit border border-cyan-500/20">"barbero - {data.adminBarber.nombre}"</span></li>
+                            <ol className="list-decimal list-inside space-y-4 text-slate-300 text-sm">
+                                <li className="space-y-1">
+                                    <span className="text-white font-medium">Crea un grupo desde tu número personal</span> y agrega al WhatsApp de la barbería.
+                                </li>
+                                <li className="space-y-2">
+                                    <span className="text-white font-medium">Todos los barberos</span> deben escribir el mismo código desde su propio celular en el grupo:<br /> 
+                                    <span className="text-cyan-300 font-mono bg-cyan-900/30 px-3 py-2 rounded-lg mt-2 block w-fit border border-cyan-500/20 text-base">
+                                        barbero - {data.adminBarber.nombre}
+                                    </span>
+                                    <span className="text-amber-400 text-xs block mt-1">⚠️ Todos deben escribirlo antes de continuar</span>
+                                </li>
+                                <li>Escanea el código QR para vincular el dispositivo.</li>
                             </ol>
                         </div>
 
+                        {barberosConfirmados.length > 0 && (
+                            <div className="max-w-md mx-auto w-full space-y-3">
+                                <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+                                    <UserGroupIcon className="w-5 h-5 text-violet-400" />
+                                    Estado de barberos:
+                                </h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    {barberosConfirmados.map((barbero, idx) => (
+                                        <motion.div
+                                            key={idx}
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            className={`
+                                                flex items-center justify-between p-3 rounded-xl border transition-all
+                                                ${barbero.confirmado 
+                                                    ? 'bg-emerald-500/10 border-emerald-500/30' 
+                                                    : 'bg-slate-800/50 border-slate-700'
+                                                }
+                                            `}
+                                        >
+                                            <span className={`text-sm ${barbero.confirmado ? 'text-emerald-400' : 'text-slate-300'}`}>
+                                                {barbero.nombre}
+                                            </span>
+                                            {barbero.confirmado ? (
+                                                <CheckCircleIcon className="w-5 h-5 text-emerald-400" />
+                                            ) : (
+                                                <div className="w-5 h-5 rounded-full border-2 border-slate-600" />
+                                            )}
+                                        </motion.div>
+                                    ))}
+                                </div>
+                                <p className="text-xs text-slate-500 text-center">
+                                    {pollingActive ? 'Esperando mensajes de los barberos...' : 'Todos los barberos han confirmado'}
+                                </p>
+                            </div>
+                        )}
+
                         <motion.button
                             onClick={finishProcess}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="w-full max-w-md px-6 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-lg rounded-xl shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all"
+                            disabled={!todosConfirmados}
+                            whileHover={todosConfirmados ? { scale: 1.05 } : {}}
+                            whileTap={todosConfirmados ? { scale: 0.95 } : {}}
+                            className={`
+                                w-full max-w-md px-6 py-4 font-bold text-lg rounded-xl shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all
+                                ${todosConfirmados
+                                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white'
+                                    : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                                }
+                            `}
                         >
-                            ¡Listo! Ya escaneé el código
+                            {!todosConfirmados 
+                                ? `Esperando confirmaciones (${barberosConfirmados.filter(b => b.confirmado).length}/${barberosConfirmados.length})`
+                                : '¡Listo! Ya escaneé el código'
+                            }
                         </motion.button>
                     </motion.div>
                 )}

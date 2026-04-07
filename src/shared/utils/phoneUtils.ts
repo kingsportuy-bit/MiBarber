@@ -1,3 +1,22 @@
+// Función para formatear número de teléfono para mostrar (con 0 adelante)
+export const formatPhoneForDisplay = (phone: string): string => {
+  const cleaned = phone.replace(/\D/g, '');
+  
+  if (cleaned.startsWith('598') && cleaned.length === 11) {
+    return '0' + cleaned.substring(3);
+  }
+  
+  if (cleaned.startsWith('9') && cleaned.length === 8) {
+    return '0' + cleaned;
+  }
+  
+  if (cleaned.startsWith('09') && cleaned.length === 9) {
+    return cleaned;
+  }
+  
+  return phone;
+};
+
 // Función para normalizar números de teléfono
 export const normalizePhoneNumber = (phone: string): string => {
   // Eliminar todos los caracteres que no sean dígitos

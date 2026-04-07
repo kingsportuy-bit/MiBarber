@@ -104,20 +104,20 @@ export class AuthService {
   }
 
   // Validar permisos de administrador
-  static isAdmin(admin: boolean): boolean {
+  static isAdmin(admin?: boolean): boolean {
     return admin === true; // true = Admin según especificaciones
   }
 
   // Crear sesión a partir de datos de barbero
   static createSessionFromBarbero(barbero: Barbero): AuthSession {
     console.log('AuthService.createSessionFromBarbero - Creando sesión para barbero:', barbero);
-    const session = {
+    const session: AuthSession = {
       user: {
         id: barbero.id_barbero,
-        email: barbero.email,
+        email: barbero.email || null,
         name: barbero.nombre,
         username: barbero.username || '',
-        nivel_permisos: barbero.nivel_permisos,
+        nivel_permisos: barbero.nivel_permisos ?? 2,
         admin: this.isAdmin(barbero.admin),
         id_barberia: barbero.id_barberia,
         id_sucursal: barbero.id_sucursal,

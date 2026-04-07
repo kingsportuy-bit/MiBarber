@@ -391,11 +391,11 @@ export function DesktopAgenda() {
                       const statusColors: Record<string, { bg: string; text: string; border: string; dot: string }> = {
                         completado: { bg: 'rgba(16,185,129,0.08)', text: '#10b981', border: 'rgba(16,185,129,0.3)', dot: '#10b981' },
                         pendiente: { bg: 'rgba(197,160,89,0.08)', text: '#C5A059', border: 'rgba(197,160,89,0.3)', dot: '#C5A059' },
-                        confirmado: { bg: 'rgba(59,130,246,0.08)', text: '#3b82f6', border: 'rgba(59,130,246,0.3)', dot: '#3b82f6' },
+                        confirmada: { bg: 'rgba(59,130,246,0.08)', text: '#3b82f6', border: 'rgba(59,130,246,0.3)', dot: '#3b82f6' },
                       };
                       const colors = statusColors[appointment.estado] || statusColors.pendiente;
 
-                      const estadoLabel = appointment.estado === 'completado' ? 'Completado' : appointment.estado === 'confirmado' ? 'Confirmado' : 'Pendiente';
+                      const estadoLabel = appointment.estado === 'completado' ? 'Completado' : appointment.estado === 'confirmada' ? 'Confirmada' : 'Pendiente';
 
                       return (
                         <div

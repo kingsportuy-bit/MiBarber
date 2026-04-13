@@ -18,8 +18,6 @@ export class AuthService {
     if (typeof window === 'undefined') return;
     
     try {
-      console.log('AuthService.saveSession - Guardando sesión:', session);
-      
       // Guardar en localStorage
       localStorage.setItem(SESSION_KEY, JSON.stringify(session));
       
@@ -27,8 +25,6 @@ export class AuthService {
       // Usar document.cookie con SameSite=None y Secure para mejor compatibilidad
       const cookieValue = encodeURIComponent(JSON.stringify(session));
       document.cookie = `barber_auth_session=${cookieValue}; path=/; max-age=${24 * 60 * 60}; SameSite=Lax;`;
-      
-      console.log('AuthService.saveSession - Sesión guardada correctamente');
     } catch (error) {
       console.error('AuthService.saveSession - Error guardando sesión:', error);
     }
@@ -40,42 +36,33 @@ export class AuthService {
     if (typeof window === 'undefined') return null;
     
     try {
-      console.log('AuthService.loadSession - Intentando cargar sesión...');
-      
       // Primero intentar desde localStorage
       let sessionStr = localStorage.getItem(SESSION_KEY);
-      console.log('AuthService.loadSession - sessionStr desde localStorage:', sessionStr);
       
       // Si no está en localStorage, intentar desde cookies
       if (!sessionStr) {
-        console.log('AuthService.loadSession - No encontrado en localStorage, buscando en cookies...');
         const cookies = document.cookie.split(';');
         for (const cookie of cookies) {
           const [name, value] = cookie.trim().split('=');
           if (name === 'barber_auth_session') {
             sessionStr = decodeURIComponent(value);
-            console.log('AuthService.loadSession - sessionStr desde cookie:', sessionStr);
             break;
           }
         }
       }
       
       if (!sessionStr) {
-        console.log('AuthService.loadSession - No se encontró sesión en localStorage ni en cookies');
         return null;
       }
       
       const session: AuthSession = JSON.parse(sessionStr);
-      console.log('AuthService.loadSession - Sesión parseada:', session);
       
       // Verificar si la sesión expiró
       if (Date.now() > session.expiresAt) {
-        console.log('AuthService.loadSession - Sesión expirada, limpiando...');
         this.clearSession();
         return null;
       }
       
-      console.log('AuthService.loadSession - Sesión válida cargada');
       return session;
     } catch (error) {
       console.error('AuthService.loadSession - Error cargando sesión:', error);
@@ -89,15 +76,11 @@ export class AuthService {
     if (typeof window === 'undefined') return;
     
     try {
-      console.log('AuthService.clearSession - Limpiando sesión...');
-      
       // Limpiar localStorage
       localStorage.removeItem(SESSION_KEY);
       
       // También eliminar la cookie
       document.cookie = `barber_auth_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax;`;
-      
-      console.log('AuthService.clearSession - Sesión limpiada correctamente');
     } catch (error) {
       console.error('AuthService.clearSession - Error limpiando sesión:', error);
     }
@@ -110,7 +93,6 @@ export class AuthService {
 
   // Crear sesión a partir de datos de barbero
   static createSessionFromBarbero(barbero: Barbero): AuthSession {
-    console.log('AuthService.createSessionFromBarbero - Creando sesión para barbero:', barbero);
     const session: AuthSession = {
       user: {
         id: barbero.id_barbero,
@@ -124,7 +106,6 @@ export class AuthService {
       },
       expiresAt: Date.now() + SESSION_DURATION,
     };
-    console.log('AuthService.createSessionFromBarbero - Sesión creada:', session);
     return session;
   }
   

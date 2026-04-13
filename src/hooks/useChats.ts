@@ -13,20 +13,23 @@ export function useChats(idSucursal?: string) {
   const fallbackIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [subscriptionError, setSubscriptionError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [isFetchingHistory, setIsFetchingHistory] = useState<boolean>(false);
   const { idBarberia, isAdmin, barbero } = useBarberoAuth();
+
+  const [accumulatedHistory, setAccumulatedHistory] = useState<HistoryLog[]>([]);
+  const processedClientIdsRef = useRef<Set<string>>(new Set());
 
   const sucursalId = (idSucursal !== undefined && idSucursal !== "" && idSucursal !== "undefined") ? idSucursal : 
                      (!isAdmin && barbero?.id_sucursal ? barbero.id_sucursal : undefined);
 
-  // Obtener datos de clientes paginados
   const clientsQuery = useInfiniteQuery({
     queryKey: ["clientes_paginados", idBarberia, sucursalId],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }): Promise<{ clients: Client[], nextCursor: number | null }> => {
-      const pageSize = 10;
+      const pageSize = 20;
       let query = (supabase as any)
         .from("mibarber_clientes")
-        .select("id_cliente, ultima_interaccion, chat_humano, nombre, id_barberia, id_sucursal, telefono, id_conversacion")
+        .select("id_cliente, ultima_interaccion, chat_humano, nombre, id_barberia, id_sucursal, telefono, foto_perfil, id_conversacion, puntaje")
         .order("ultima_interaccion", { ascending: false })
         .range(pageParam, pageParam + pageSize - 1);
       
@@ -51,23 +54,30 @@ export function useChats(idSucursal?: string) {
     return data?.pages.flatMap(page => page.clients) || [];
   }, [clientsQuery.data]);
 
-  const listQuery = useQuery({
-    queryKey: ["chat_historial", idBarberia, sucursalId, allLoadedClients.length],
-    queryFn: async (): Promise<HistoryLog[]> => {
-      if (allLoadedClients.length === 0) return [];
-      
-      const telefonos = allLoadedClients.map((c: any) => c.telefono).filter((t: string | null) => t !== null && t !== '');
-      const idsConversacion = allLoadedClients
+  useEffect(() => {
+    if (allLoadedClients.length === 0) return;
+
+    const newClients = allLoadedClients.filter(c => {
+      const id = c.id_conversacion?.toString() || c.telefono;
+      return id && !processedClientIdsRef.current.has(id);
+    });
+
+    if (newClients.length === 0) return;
+
+    const fetchNewHistory = async () => {
+      const telefonos = newClients.map((c: any) => c.telefono).filter((t: string | null) => t !== null && t !== '');
+      const idsConversacion = newClients
         .map((c: any) => c.id_conversacion)
         .filter((id: number | null) => id !== null && id !== undefined)
         .map(String);
       
-      const allSessionIds = [...new Set([...telefonos, ...idsConversacion])];
-      
-      if (allSessionIds.length === 0) return [];
+      const sessionIdsToFetch = [...new Set([...telefonos, ...idsConversacion])];
+      if (sessionIdsToFetch.length === 0) return;
+
+      sessionIdsToFetch.forEach(id => processedClientIdsRef.current.add(id));
 
       const fetchInChunks = async (sessionIds: string[]) => {
-        const chunkSize = 100;
+        const chunkSize = 20;
         const chunks = [];
         for (let i = 0; i < sessionIds.length; i += chunkSize) {
           chunks.push(sessionIds.slice(i, i + chunkSize));
@@ -88,105 +98,115 @@ export function useChats(idSucursal?: string) {
         return results.flat();
       };
 
-      const historyData = await fetchInChunks(allSessionIds);
-      return historyData.sort((a: any, b: any) => a.id - b.id) as HistoryLog[];
-    },
-    enabled: !!idBarberia && allLoadedClients.length > 0,
-    placeholderData: keepPreviousData,
-  });
+      try {
+        setIsFetchingHistory(true);
+        const newHistoryData = await fetchInChunks(sessionIdsToFetch);
+        setAccumulatedHistory(prev => {
+          const existingIds = new Set(prev.map(h => h.id));
+          const filteredNew = newHistoryData.filter((h: any) => !existingIds.has(h.id));
+          return [...prev, ...filteredNew].sort((a: any, b: any) => (a.id || 0) - (b.id || 0));
+        });
+      } catch (err) {
+        console.error("Error incremental useChats:", err);
+      } finally {
+        setIsFetchingHistory(false);
+      }
+    };
+
+    fetchNewHistory();
+  }, [allLoadedClients, supabase]);
 
   const refreshChats = async () => {
     if (isRefreshing) return;
     setIsRefreshing(true);
     try {
-      await qc.invalidateQueries({ queryKey: ['chat_historial'] });
+      processedClientIdsRef.current.clear();
+      setAccumulatedHistory([]);
       await qc.invalidateQueries({ queryKey: ['clientes_paginados'] });
     } catch (error) {
-      console.error("Error refrescando chats:", error);
     } finally {
       setIsRefreshing(false);
     }
   };
 
   useEffect(() => {
-    fallbackIntervalRef.current = setInterval(() => {
-      qc.invalidateQueries({ queryKey: ['chat_historial'] });
-      qc.invalidateQueries({ queryKey: ['clientes_paginados'] });
-    }, 10000);
-    return () => {
-      if (fallbackIntervalRef.current) clearInterval(fallbackIntervalRef.current);
-    };
-  }, [qc]);
-
-  useEffect(() => {
     if (!supabase) return;
     const channelName = `chat-historial-changes-${Date.now()}`;
-    try {
-      const channel = supabase
-        .channel(channelName)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'mibarber_historial' }, () => {
-          qc.invalidateQueries({ queryKey: ['chat_historial'] });
-        })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'mibarber_clientes' }, () => {
-          qc.invalidateQueries({ queryKey: ['clientes_paginados'] });
-          qc.invalidateQueries({ queryKey: ['chat_historial'] });
-        })
-        .subscribe();
-      subscriptionRef.current = channel;
-    } catch (e) {}
+    const channel = supabase
+      .channel(channelName)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mibarber_historial' }, (payload: any) => {
+        const newLog = payload.new as HistoryLog;
+        setAccumulatedHistory(prev => {
+          const exists = prev.some(h => h.id === newLog.id);
+          if (exists) return prev;
+          return [...prev, newLog].sort((a: any, b: any) => (a.id || 0) - (b.id || 0));
+        });
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'mibarber_clientes' }, () => {
+        qc.invalidateQueries({ queryKey: ['clientes_paginados'] });
+      })
+      .subscribe();
+    subscriptionRef.current = channel;
 
-    return () => {
-      if (subscriptionRef.current) supabase.removeChannel(subscriptionRef.current);
-    };
+    return () => { if (subscriptionRef.current) supabase.removeChannel(subscriptionRef.current); };
   }, [supabase, qc]);
 
   const grouped = useMemo(() => {
-    const clientMap = new Map<string, Client>();
-    allLoadedClients.forEach((client: Client) => {
-      if (client.id_conversacion) clientMap.set(client.id_conversacion.toString(), client);
-      if (client.telefono) clientMap.set(client.telefono, client);
+    const conversations = new Map<string, ChatMessage[]>();
+    accumulatedHistory.forEach((log: HistoryLog) => {
+      try {
+        const messageData = typeof log.message === 'string' ? JSON.parse(log.message) : log.message;
+        if (messageData && messageData.content) {
+          const sessionId = log.session_id;
+          const messages = conversations.get(sessionId) || [];
+          const timestamp = log.timestamptz || messageData.timestamp || new Date().toISOString();
+                
+          messages.push({
+            timestamp,
+            sender: messageData.type === 'human' ? 'client' : 'agent',
+            content: typeof messageData.content === 'object' ? JSON.stringify(messageData.content) : messageData.content,
+            type: messageData.type || 'message'
+          });
+          conversations.set(sessionId, messages);
+        }
+      } catch (e) {}
     });
     
-    const conversations = new Map<string, ChatMessage[]>();
-    if (listQuery.data) {
-      listQuery.data.forEach((log: HistoryLog) => {
-        try {
-          const messageData = typeof log.message === 'string' ? JSON.parse(log.message) : log.message;
-          if (messageData && messageData.content) {
-            const sessionId = log.session_id;
-            const messages = conversations.get(sessionId) || [];
-            const timestamp = log.timestamptz || messageData.timestamp || new Date().toISOString();
-                
-            messages.push({
-              timestamp,
-              sender: messageData.type === 'human' ? 'client' : 'agent',
-              content: typeof messageData.content === 'object' ? JSON.stringify(messageData.content) : messageData.content,
-              type: messageData.type || 'message'
-            });
-            conversations.set(sessionId, messages);
-          }
-        } catch (e) {}
-      });
-    }
+    // Usar un Map para deduplicar por session_id y asegurar consistencia
+    const dedupedMap = new Map<string, any>();
     
-    const conversationList = Array.from(conversations.entries())
-      .map(([session_id, messages]) => {
+    allLoadedClients.forEach(client => {
+      const sessionIdOrTelefono = client.id_conversacion?.toString() || client.telefono || "";
+      if (!sessionIdOrTelefono || sessionIdOrTelefono === "0") return;
+      
+      if (!dedupedMap.has(sessionIdOrTelefono)) {
+        const messages = conversations.get(sessionIdOrTelefono) || [];
         const sortedMessages = messages.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-        return {
-          session_id,
+        
+        const lastActivity = sortedMessages.length > 0 
+          ? sortedMessages[sortedMessages.length - 1].timestamp 
+          : (client.ultima_interaccion || '');
+
+        dedupedMap.set(sessionIdOrTelefono, {
+          session_id: sessionIdOrTelefono,
           messages: sortedMessages,
-          lastActivity: sortedMessages.length > 0 ? sortedMessages[sortedMessages.length - 1].timestamp : ''
-        };
-      })
-      .filter(conv => conv.messages.length > 0);
+          lastActivity
+        });
+      }
+    });
     
+    const conversationList = Array.from(dedupedMap.values());
+    
+    // Ordenar por actividad más reciente
     return conversationList.sort((a, b) => b.lastActivity.localeCompare(a.lastActivity));
-  }, [listQuery.data, allLoadedClients]);
+  }, [accumulatedHistory, allLoadedClients]);
+
+  const isLoadingTotal = clientsQuery.isLoading && grouped.length === 0;
 
   return { 
-    isLoading: (listQuery.isLoading || clientsQuery.isLoading) && grouped.length === 0,
-    isError: listQuery.isError || clientsQuery.isError,
-    error: listQuery.error || clientsQuery.error,
+    isLoading: isLoadingTotal,
+    isError: clientsQuery.isError,
+    error: clientsQuery.error,
     grouped, 
     subscriptionError, 
     refreshChats, 
@@ -195,7 +215,8 @@ export function useChats(idSucursal?: string) {
     fetchNextPage: clientsQuery.fetchNextPage,
     hasNextPage: clientsQuery.hasNextPage,
     isFetchingNextPage: clientsQuery.isFetchingNextPage,
-    isInitialLoading: (listQuery.isLoading || clientsQuery.isLoading) && grouped.length === 0,
-    isFetching: listQuery.isFetching || clientsQuery.isFetching
+    isInitialLoading: isLoadingTotal,
+    isFetching: clientsQuery.isFetching || isFetchingHistory,
+    isFetchingHistory
   };
 }

@@ -120,7 +120,7 @@ export function ChatLayout() {
           fetchNextPage();
         }
       },
-      { threshold: 0.1, rootMargin: '100px' }
+      { threshold: 1.0, rootMargin: '0px' }
     );
 
     const currentRef = loadMoreRef.current;
@@ -246,7 +246,7 @@ export function ChatLayout() {
 
           {/* Sentinel para infinite scroll */}
           <div ref={loadMoreRef} className="h-10 flex items-center justify-center">
-            {isFetchingNextPage && (
+            {isFetching && (
               <div className="flex items-center gap-2 py-4">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-qoder-dark-accent-primary"></div>
                 <span className="text-xs text-qoder-dark-text-secondary">Cargando más...</span>

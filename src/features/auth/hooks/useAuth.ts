@@ -40,23 +40,8 @@ export function useAuth(): UseAuthReturn {
   const loadSession = useCallback(() => {
     try {
       const session = AuthService.loadSession();
-      console.log('useAuth - Sesión cargada:', session);
       
       if (session) {
-        // ⚡ DEBUGGING INTENSIVO DE SESIÓN
-        if (session) {
-          console.log('═══════════════════════════════════════════');
-          console.log('🔍 DEBUGGING COMPLETO DE SESIÓN');
-          console.log('═══════════════════════════════════════════');
-          console.log('session:', JSON.stringify(session, null, 2));
-          console.log('session.user:', JSON.stringify(session.user, null, 2));
-          console.log('session.user.id:', session.user.id);
-          console.log('session.user.email:', session.user.email);
-          console.log('session.user.id_barberia:', session.user.id_barberia);
-          console.log('session.user.id_sucursal:', session.user.id_sucursal);
-          console.log('═══════════════════════════════════════════');
-        }
-        
         setAuthState({
           isAuthenticated: true,
           isAdmin: session.user.admin,
@@ -86,11 +71,8 @@ export function useAuth(): UseAuthReturn {
     // Solo ejecutar en el cliente
     if (typeof window === 'undefined') return;
     
-    console.log('useAuth - Iniciando carga de sesión...');
-    
     // Listener para cambios de autenticación
     const handleAuthChange = (event: CustomEvent) => {
-      console.log('useAuth - Evento de cambio de autenticación recibido:', event.detail);
       loadSession();
     };
 
@@ -113,7 +95,6 @@ export function useAuth(): UseAuthReturn {
     try {
       const session = AuthService.loadSession();
       if (session) {
-        console.log('useAuth - Sesión refrescada:', session);
         setAuthState({
           isAuthenticated: true,
           isAdmin: session.user.admin,
@@ -146,14 +127,12 @@ export function useAuth(): UseAuthReturn {
     
     if (authState.isAuthenticated && authState.session) {
       const interval = setInterval(() => {
-        console.log('useAuth - Verificando sesión periódicamente...');
         const session = AuthService.loadSession();
         
         // Si la sesión ha cambiado o se ha perdido, actualizar el estado
         if (!session || 
             session.user.id !== authState.session?.user.id ||
             session.user.id_barberia !== authState.session?.user.id_barberia) {
-          console.log('useAuth - Sesión cambiada o perdida, refrescando...');
           refreshSession();
         }
       }, 30000); // Verificar cada 30 segundos
@@ -190,14 +169,6 @@ export function useAuth(): UseAuthReturn {
     updated_at: new Date().toISOString(),
   } : null;
 
-  console.log('useAuth - Valores a devolver:', {
-    isAuthenticated: authState.isAuthenticated,
-    isAdmin: authState.isAdmin,
-    session: authState.session,
-    barberoFromSession,
-    idBarberia: authState.session?.user.id_barberia || null,
-    idSucursal: authState.session?.user.id_sucursal || null,
-  });
 
   return {
     ...authState,

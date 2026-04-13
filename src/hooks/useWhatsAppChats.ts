@@ -1,210 +1,378 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useQuery, useQueryClient, useInfiniteQuery, keepPreviousData, type InfiniteData } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueryClient,
+  useInfiniteQuery,
+  keepPreviousData,
+  type InfiniteData,
+} from "@tanstack/react-query";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 import type { HistoryLog, ChatConversation, ChatMessage, Client } from "@/types/db";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 
-export function useWhatsAppChats(idSucursal?: string, showAllSucursales: boolean = false) {
+// ─── Constantes ──────────────────────────────────────────────────────
+const HISTORY_BATCH_SIZE = 400;
+const CLIENT_SELECT =
+  "id_cliente, ultima_interaccion, chat_humano, nombre, id_barberia, id_sucursal, telefono, foto_perfil, id_conversacion, puntaje";
+
+// ─── Helpers ─────────────────────────────────────────────────────────
+
+/** Parsea un row de mibarber_historial en un ChatMessage */
+function parseHistoryMessage(row: any): ChatMessage | null {
+  try {
+    const msg =
+      typeof row.message === "string" ? JSON.parse(row.message) : row.message;
+    const content = msg?.content || msg?.text;
+    if (!content) return null;
+    return {
+      timestamp: row.timestamptz || msg.timestamp || new Date().toISOString(),
+      sender: msg.type === "human" ? "client" : "agent",
+      content:
+        typeof content === "object" ? JSON.stringify(content) : content,
+      type: msg.type || "message",
+      source: msg.source,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** Obtiene clientes en lotes para evitar URLs largas */
+async function fetchClientsBatched(
+  supabase: any,
+  sessionIds: string[]
+): Promise<Client[]> {
+  if (sessionIds.length === 0) return [];
+
+  const numericIds: number[] = [];
+  const phoneIds: string[] = [];
+  for (const sid of sessionIds) {
+    const num = Number(sid);
+    if (!isNaN(num) && num > 0) numericIds.push(num);
+    else if (sid) phoneIds.push(sid);
+  }
+
+  const results: Client[] = [];
+  const BATCH = 30;
+
+  // Por id_conversacion
+  for (let i = 0; i < numericIds.length; i += BATCH) {
+    const batch = numericIds.slice(i, i + BATCH);
+    const { data } = await supabase
+      .from("mibarber_clientes")
+      .select(CLIENT_SELECT)
+      .in("id_conversacion", batch);
+    if (data) results.push(...data);
+  }
+
+  // Por telefono
+  for (let i = 0; i < phoneIds.length; i += BATCH) {
+    const batch = phoneIds.slice(i, i + BATCH);
+    const { data } = await supabase
+      .from("mibarber_clientes")
+      .select(CLIENT_SELECT)
+      .in("telefono", batch);
+    if (data) results.push(...data);
+  }
+
+  // Deduplicar por id_cliente
+  const seen = new Set<string>();
+  return results.filter((c) => {
+    if (!c.id_cliente || seen.has(c.id_cliente)) return false;
+    seen.add(c.id_cliente);
+    return true;
+  });
+}
+
+// ─── Hook Principal ──────────────────────────────────────────────────
+
+export function useWhatsAppChats(
+  idSucursal?: string,
+  showAllSucursales: boolean = false,
+  activeSessionId?: string | null
+) {
   const supabase = getSupabaseClient();
   const qc = useQueryClient();
   const subscriptionRef = useRef<any>(null);
-  const fallbackIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [subscriptionError, setSubscriptionError] = useState<string | null>(null);
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { idBarberia, isAdmin, barbero } = useBarberoAuth();
 
-  // Determinar la sucursal a usar
-  const sucursalId = (idSucursal !== undefined && idSucursal !== "" && idSucursal !== "undefined") ? idSucursal :
-    (!isAdmin && barbero?.id_sucursal ? barbero.id_sucursal : undefined);
+  // Refs para valores usados en el handler del realtime (evita recrear suscripción)
+  const activeSessionIdRef = useRef(activeSessionId);
+  activeSessionIdRef.current = activeSessionId;
 
-  // Obtener datos de clientes paginados
-  const clientsQuery = useInfiniteQuery({
-    queryKey: ["whatsapp_clientes", idBarberia, sucursalId, showAllSucursales],
-    initialPageParam: 0,
-    queryFn: async ({ pageParam = 0 }): Promise<{ clients: Client[], nextCursor: number | null }> => {
-      const pageSize = 10;
+  const sucursalId =
+    idSucursal !== undefined && idSucursal !== "" && idSucursal !== "undefined"
+      ? idSucursal
+      : !isAdmin && barbero?.id_sucursal
+        ? barbero.id_sucursal
+        : undefined;
+
+  // ─── 1. Query paginado al historial (fuente de verdad del orden) ───
+  const sessionsQuery = useInfiniteQuery({
+    queryKey: ["whatsapp_sessions", idBarberia, sucursalId, showAllSucursales],
+    initialPageParam: undefined as number | undefined,
+    queryFn: async ({ pageParam: cursor }): Promise<{ rows: any[]; lastId: number | null }> => {
       let query = (supabase as any)
-        .from("mibarber_clientes")
-        .select("id_cliente, ultima_interaccion, chat_humano, nombre, id_barberia, id_sucursal, telefono, foto_perfil, id_conversacion")
-        .order("ultima_interaccion", { ascending: false })
-        .range(pageParam, pageParam + pageSize - 1);
+        .from("mibarber_historial")
+        .select("id, session_id, message, timestamptz")
+        .eq("procesado", 1)
+        .order("id", { ascending: false })
+        .limit(HISTORY_BATCH_SIZE);
 
-      if (idBarberia) {
-        query = query.eq("id_barberia", idBarberia);
-      }
-
-      if (!showAllSucursales && sucursalId) {
+      if (cursor !== undefined) query = query.lt("id", cursor);
+      if (!showAllSucursales && sucursalId)
         query = query.eq("id_sucursal", sucursalId);
-      }
 
       const { data, error } = await query;
-      if (error) {
-        console.error('useWhatsAppChats - Error obteniendo clientes:', error);
-        return { clients: [], nextCursor: null };
+      if (error || !data || data.length === 0) {
+        return { rows: [], lastId: null };
       }
 
-      const nextCursorCount = data.length === pageSize ? pageParam + pageSize : null;
-      return { clients: data as Client[], nextCursor: nextCursorCount };
+      return {
+        rows: data,
+        lastId: data[data.length - 1].id,
+      };
     },
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    getNextPageParam: (lastPage) => {
+      if (
+        !lastPage.rows ||
+        lastPage.rows.length < HISTORY_BATCH_SIZE ||
+        lastPage.lastId === null
+      )
+        return undefined;
+      return lastPage.lastId;
+    },
     enabled: !!idBarberia,
+    staleTime: 30_000,
   });
 
-  const allLoadedClients = useMemo(() => {
-    const data = clientsQuery.data as InfiniteData<{ clients: Client[], nextCursor: number | null }> | undefined;
-    return data?.pages.flatMap(page => page.clients) || [];
-  }, [clientsQuery.data]);
+  // ─── 2. Derivar sesiones únicas con último mensaje ─────────────────
+  const { conversationList, allSessionIds } = useMemo(() => {
+    const allRows =
+      sessionsQuery.data?.pages.flatMap((p: any) => p.rows) || [];
 
+    const sessionMap = new Map<
+      string,
+      {
+        session_id: string;
+        lastMessage: ChatMessage | null;
+        lastTimestamp: string;
+        lastId: number;
+      }
+    >();
+
+    for (const row of allRows) {
+      if (!row.session_id || row.session_id === "0") continue;
+
+      // Solo guardar la primera ocurrencia (más reciente por ORDER BY id DESC)
+      if (!sessionMap.has(row.session_id)) {
+        sessionMap.set(row.session_id, {
+          session_id: row.session_id,
+          lastMessage: parseHistoryMessage(row),
+          lastTimestamp: row.timestamptz || new Date(0).toISOString(),
+          lastId: row.id,
+        });
+      }
+    }
+
+    // Ya están en orden por lastId DESC (heredado del ORDER BY del query)
+    const list = Array.from(sessionMap.values());
+    return {
+      conversationList: list,
+      allSessionIds: list.map((s) => s.session_id),
+    };
+  }, [sessionsQuery.data]);
+
+  // ─── 3. Hidratar datos de cliente para sesiones visibles ───────────
+  const { data: clientsData } = useQuery({
+    queryKey: ["whatsapp_session_clients", allSessionIds],
+    queryFn: () => fetchClientsBatched(supabase, allSessionIds),
+    enabled: allSessionIds.length > 0,
+    staleTime: 60_000,
+    placeholderData: keepPreviousData,
+  });
+
+  // ─── 4. Mensajes completos del chat activo (bajo demanda) ──────────
+  const { data: activeMessagesRaw } = useQuery({
+    queryKey: ["whatsapp_chat_messages", activeSessionId],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("mibarber_historial")
+        .select("id, session_id, message, timestamptz")
+        .eq("procesado", 1)
+        .eq("session_id", activeSessionId!)
+        .order("id", { ascending: true });
+      if (error) return [];
+      return data || [];
+    },
+    enabled: !!activeSessionId,
+    staleTime: 10_000,
+  });
+
+  const activeMessages = useMemo(() => {
+    if (!activeMessagesRaw) return null;
+    return activeMessagesRaw
+      .map(parseHistoryMessage)
+      .filter((m: ChatMessage | null): m is ChatMessage => m !== null);
+  }, [activeMessagesRaw]);
+
+  // ─── 5. Mapa de clientes por session_id ────────────────────────────
+  const clientMap = useMemo(() => {
+    const map = new Map<string, Client>();
+    clientsData?.forEach((c: Client) => {
+      if (c.id_conversacion) map.set(c.id_conversacion.toString(), c);
+      if (c.telefono) map.set(c.telefono, c);
+    });
+    return map;
+  }, [clientsData]);
+
+  // Ref para usar en el handler de realtime sin recrear suscripción
+  const clientMapRef = useRef(clientMap);
+  clientMapRef.current = clientMap;
+
+  // ─── 6. Construir resultado: grouped ───────────────────────────────
+  const grouped: ChatConversation[] = useMemo(() => {
+    return conversationList.map((session) => {
+      const client = clientMap.get(session.session_id);
+      const isActive = activeSessionId === session.session_id;
+
+      let messages: ChatMessage[];
+      if (isActive && activeMessages) {
+        messages = activeMessages;
+      } else {
+        messages = session.lastMessage ? [session.lastMessage] : [];
+      }
+
+      return {
+        session_id: session.session_id,
+        messages,
+        lastActivity: session.lastTimestamp,
+        client_info: client,
+      } as any;
+    });
+  }, [conversationList, clientMap, activeSessionId, activeMessages]);
+
+  // ─── 7. Suscripción en tiempo real ─────────────────────────────────
+  useEffect(() => {
+    if (!supabase) return;
+
+    const channelName = `whatsapp-sessions-${sucursalId || "all"}-${Date.now()}`;
+    const queryKey = [
+      "whatsapp_sessions",
+      idBarberia,
+      sucursalId,
+      showAllSucursales,
+    ];
+
+    const channel = supabase
+      .channel(channelName)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "mibarber_historial" },
+        (payload: any) => {
+          const newRow = payload.new;
+          if (!newRow?.session_id) return;
+
+          // Inyectar optimistamente al inicio de la primera página
+          qc.setQueryData(queryKey, (oldData: any) => {
+            if (!oldData?.pages?.[0]) return oldData;
+            return {
+              ...oldData,
+              pages: [
+                {
+                  ...oldData.pages[0],
+                  rows: [newRow, ...oldData.pages[0].rows],
+                },
+                ...oldData.pages.slice(1),
+              ],
+            };
+          });
+
+          // Si es del chat activo, inyectar en sus mensajes
+          const currentActive = activeSessionIdRef.current;
+          if (newRow.session_id === currentActive) {
+            qc.setQueryData(
+              ["whatsapp_chat_messages", currentActive],
+              (old: any[] | undefined) => {
+                if (!old) return [newRow];
+                if (old.some((r: any) => r.id === newRow.id)) return old;
+                return [...old, newRow];
+              }
+            );
+          }
+
+          // Si es una sesión nueva, refrescar datos de clientes
+          if (!clientMapRef.current.has(newRow.session_id)) {
+            qc.invalidateQueries({
+              queryKey: ["whatsapp_session_clients"],
+            });
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "mibarber_clientes" },
+        () => {
+          qc.invalidateQueries({
+            queryKey: ["whatsapp_session_clients"],
+          });
+        }
+      )
+      .subscribe((status: string) => {
+        if (status === "SUBSCRIBED") {
+          setSubscriptionError(null);
+        } else if (status === "CHANNEL_ERROR") {
+          setSubscriptionError("Error en la suscripción de mensajes");
+        }
+      });
+
+    subscriptionRef.current = channel;
+
+    return () => {
+      if (subscriptionRef.current) {
+        supabase.removeChannel(subscriptionRef.current);
+      }
+    };
+  }, [supabase, qc, idBarberia, sucursalId, showAllSucursales]);
+
+  // ─── 8. Refresh manual ─────────────────────────────────────────────
   const refreshChats = async () => {
     if (isRefreshing) return;
     setIsRefreshing(true);
     try {
-      await qc.invalidateQueries({ queryKey: ['whatsapp_historial'] });
-      await qc.invalidateQueries({ queryKey: ['whatsapp_clientes'] });
-    } catch (error) {
-      console.error("Error refrescando chats:", error);
+      await qc.invalidateQueries({ queryKey: ["whatsapp_sessions"] });
+      await qc.invalidateQueries({ queryKey: ["whatsapp_session_clients"] });
+      if (activeSessionId) {
+        await qc.invalidateQueries({
+          queryKey: ["whatsapp_chat_messages", activeSessionId],
+        });
+      }
     } finally {
       setIsRefreshing(false);
     }
   };
 
-  const listQuery = useQuery({
-    queryKey: ["whatsapp_historial", idBarberia, sucursalId, showAllSucursales, allLoadedClients.length],
-    queryFn: async (): Promise<HistoryLog[]> => {
-      if (allLoadedClients.length === 0) return [];
+  // ─── 9. Retorno ────────────────────────────────────────────────────
+  const isLoadingInitial = sessionsQuery.isLoading && grouped.length === 0;
 
-      const idsConversacion = allLoadedClients
-        .map((c: any) => c.id_conversacion)
-        .filter((id: number | null) => id !== null && id !== undefined);
-
-      const telefonos = allLoadedClients
-        .map((c: any) => c.telefono)
-        .filter((t: string | null) => t !== null && t !== undefined && t !== '');
-
-      if (idsConversacion.length === 0 && telefonos.length === 0) return [];
-
-      const allSessionIds = [...new Set([...idsConversacion.map(String), ...telefonos])];
-
-      const fetchInChunks = async (sessionIds: string[]) => {
-        const chunkSize = 100;
-        const chunks = [];
-        for (let i = 0; i < sessionIds.length; i += chunkSize) {
-          chunks.push(sessionIds.slice(i, i + chunkSize));
-        }
-
-        const results = await Promise.all(chunks.map(async (chunk) => {
-          const { data, error } = await (supabase as any)
-            .from("mibarber_historial")
-            .select("id, session_id, message, timestamptz, id_sucursal")
-            .eq("procesado", 1)
-            .in("session_id", chunk)
-            .order("id", { ascending: true });
-
-          if (error) return [];
-          return data || [];
-        }));
-
-        return results.flat();
-      };
-
-      const historyData = await fetchInChunks(allSessionIds);
-      return historyData.sort((a: any, b: any) => a.id - b.id) as HistoryLog[];
-    },
-    enabled: !!idBarberia && allLoadedClients.length > 0,
-    placeholderData: keepPreviousData,
-  });
-
-  useEffect(() => {
-    fallbackIntervalRef.current = setInterval(() => {
-      qc.invalidateQueries({ queryKey: ['whatsapp_historial'] });
-      qc.invalidateQueries({ queryKey: ['whatsapp_clientes'] });
-    }, 10000);
-    return () => {
-      if (fallbackIntervalRef.current) clearInterval(fallbackIntervalRef.current);
-    };
-  }, [qc]);
-
-  useEffect(() => {
-    if (!supabase) return;
-    const channelName = `whatsapp-historial-changes-${Date.now()}`;
-    try {
-      const channel = supabase
-        .channel(channelName)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'mibarber_historial' }, () => {
-          qc.invalidateQueries({ queryKey: ['whatsapp_historial'] });
-        })
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'mibarber_clientes' }, () => {
-          qc.invalidateQueries({ queryKey: ['whatsapp_clientes'] });
-          qc.invalidateQueries({ queryKey: ['whatsapp_historial'] });
-        })
-        .subscribe();
-      subscriptionRef.current = channel;
-    } catch (e) { console.error(e); }
-
-    return () => {
-      if (subscriptionRef.current) supabase.removeChannel(subscriptionRef.current);
-    };
-  }, [supabase, qc]);
-
-  const grouped = useMemo(() => {
-    const clientMap = new Map<string, Client>();
-    allLoadedClients.forEach((client: Client) => {
-      if (client.id_conversacion) clientMap.set(client.id_conversacion.toString(), client);
-      if (client.telefono) clientMap.set(client.telefono, client);
-    });
-
-    const conversations = new Map<string, ChatMessage[]>();
-    if (listQuery.data) {
-      listQuery.data.forEach((log: HistoryLog) => {
-        try {
-          const messageData = typeof log.message === 'string' ? JSON.parse(log.message) : log.message;
-          if (messageData && messageData.content) {
-            const sessionId = log.session_id;
-            const messages = conversations.get(sessionId) || [];
-            const timestamp = log.timestamptz || messageData.timestamp || new Date().toISOString();
-
-            messages.push({
-              timestamp,
-              sender: messageData.type === 'human' ? 'client' : 'agent',
-              content: typeof messageData.content === 'object' ? JSON.stringify(messageData.content) : messageData.content,
-              type: messageData.type || 'message',
-              source: messageData.source
-            });
-            conversations.set(sessionId, messages);
-          }
-        } catch (e) {}
-      });
-    }
-
-    const conversationList = Array.from(conversations.entries())
-      .map(([session_id, messages]) => {
-        const sortedMessages = messages.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-        return {
-          session_id,
-          messages: sortedMessages,
-          lastActivity: sortedMessages.length > 0 ? sortedMessages[sortedMessages.length - 1].timestamp : ''
-        };
-      })
-      .filter(conv => conv.messages.length > 0);
-
-    return conversationList.sort((a, b) => b.lastActivity.localeCompare(a.lastActivity));
-  }, [listQuery.data, allLoadedClients]);
-
-  return { 
-    isLoading: (listQuery.isLoading || clientsQuery.isLoading) && grouped.length === 0,
-    isError: listQuery.isError || clientsQuery.isError,
-    error: listQuery.error || clientsQuery.error,
-    grouped, 
-    subscriptionError, 
-    refreshChats, 
-    isRefreshing, 
-    clients: allLoadedClients,
-    fetchNextPage: clientsQuery.fetchNextPage,
-    hasNextPage: clientsQuery.hasNextPage,
-    isFetchingNextPage: clientsQuery.isFetchingNextPage,
-    isInitialLoading: (listQuery.isLoading || clientsQuery.isLoading) && grouped.length === 0,
-    isFetching: listQuery.isFetching || clientsQuery.isFetching
+  return {
+    grouped,
+    clients: clientsData || [],
+    isLoading: isLoadingInitial,
+    isError: sessionsQuery.isError,
+    error: sessionsQuery.error,
+    subscriptionError,
+    refreshChats,
+    isRefreshing,
+    fetchNextPage: sessionsQuery.fetchNextPage,
+    hasNextPage: sessionsQuery.hasNextPage ?? false,
+    isFetchingNextPage: sessionsQuery.isFetchingNextPage,
+    isInitialLoading: isLoadingInitial,
+    isFetching: sessionsQuery.isFetching,
+    isFetchingHistory: sessionsQuery.isFetching,
   };
 }

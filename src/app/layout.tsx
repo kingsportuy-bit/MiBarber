@@ -30,14 +30,19 @@ const rasputin = localFont({
 import { BackgroundScene } from "@/components/BackgroundScene";
 import { ShootingStars } from "@/components/ShootingStars";
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1.0,
+  maximumScale: 1.0,
+  userScalable: false,
+};
+
 export const metadata: Metadata = {
   title: {
     template: '%s',
     default: 'Barberox',
   },
   description: "Barber shop management system",
-
-  viewport: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no"
 };
 
 export default function RootLayout({

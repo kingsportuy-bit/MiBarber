@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useLayoutEffect, useMemo } from "react";
 import { useWhatsAppChats } from "@/hooks/useWhatsAppChats";
-import { useClientes, useClientesByIds } from "@/hooks/useClientes";
+import { useClientes } from "@/hooks/useClientes";
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 import { useSucursales } from "@/hooks/useSucursales";
 import { useWhatsAppStatus } from "@/hooks/useWhatsAppStatus";
@@ -11,6 +11,52 @@ import { getSupabaseClient } from "@/lib/supabaseClient";
 import type { ChatConversation, ChatMessage, Client } from "@/types/db";
 import Image from "next/image";
 import { VirtualKeyboardHandler } from "@/components/VirtualKeyboardHandler";
+
+// Componente Avatar que maneja errores de imagen sin manipular el DOM directamente
+function AvatarImage({ src, alt, className, size = 40 }: { src: string; alt: string; className?: string; size?: number }) {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError || !src) {
+    return (
+      <span className="text-white font-semibold">
+        {alt.charAt(0).toUpperCase()}
+      </span>
+    );
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={size}
+      height={size}
+      className={className || "w-full h-full rounded-full object-cover"}
+      onError={() => setHasError(true)}
+    />
+  );
+}
+
+// Componente Avatar nativo (sin Next Image) para el header
+function AvatarImageNative({ src, alt, className }: { src: string; alt: string; className?: string }) {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError || !src) {
+    return (
+      <span className="text-white font-semibold">
+        {alt.charAt(0).toUpperCase()}
+      </span>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className || "w-10 h-10 rounded-full object-cover"}
+      onError={() => setHasError(true)}
+    />
+  );
+}
 
 // Función para convertir puntaje a estrellas con borde dorado y sin relleno
 const getStarsFromScore = (puntaje: number) => {
@@ -59,8 +105,19 @@ export function WhatsAppChatMobile() {
   const { qrUrl, wppActivo } = useWhatsAppStatus(statusSucursalId);
   const isWhatsAppConnected = wppActivo === "Conectado";
 
-  const { grouped, isLoading, subscriptionError, refreshChats, isRefreshing, clients } = useWhatsAppChats(sucursalId, showAllSucursales);
   const [active, setActive] = useState<string | null>(null);
+  const { 
+    grouped, 
+    isLoading, 
+    subscriptionError, 
+    refreshChats, 
+    isRefreshing, 
+    clients,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching
+  } = useWhatsAppChats(sucursalId, showAllSucursales, active);
   const [message, setMessage] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
@@ -70,7 +127,8 @@ export function WhatsAppChatMobile() {
     }
     return true;
   });
-  const [visibleLimit, setVisibleLimit] = useState(20); // Límite para carga gradual (lazy loading)
+  const [visibleLimit, setVisibleLimit] = useState(40); // Límite inicial para renderizado local
+  const loadMoreRef = useRef<HTMLDivElement>(null); // Ref pal sentinel de infinite scroll
   const listRef = useRef<HTMLDivElement>(null);
 
   // Cambiar para que no seleccione automáticamente el primer chat
@@ -110,7 +168,7 @@ export function WhatsAppChatMobile() {
       c.id_cliente === sessionId ||
       (c.id_conversacion && c.id_conversacion.toString() === sessionId)
     );
-    return cliente?.nombre || "Cliente desconocido";
+    return cliente?.nombre || sessionId || "Cliente desconocido";
   };
 
   // Función para obtener información del cliente
@@ -122,34 +180,7 @@ export function WhatsAppChatMobile() {
     );
   };
 
-  // Obtener IDs únicos de clientes de las conversaciones
-  const clienteIds = useMemo(() => {
-    if (!grouped) return [];
-    return Array.from(
-      new Set(
-        grouped
-          .map(conv => {
-            const client = getClientInfo(conv.session_id);
-            return client?.id_cliente;
-          })
-          .filter((id): id is string => id !== null && id !== undefined)
-      )
-    );
-  }, [grouped, clients]);
-
-  // Obtener información de todos los clientes necesarios
-  const { data: clientesData } = useClientesByIds(clienteIds);
-
-  // Crear un mapa de clientes por ID para acceso rápido
-  const clientesMap = useMemo(() => {
-    if (!clientesData) return {};
-    return clientesData.reduce((acc, cliente) => {
-      if (cliente.id_cliente) {
-        acc[cliente.id_cliente] = cliente;
-      }
-      return acc;
-    }, {} as Record<string, Client>);
-  }, [clientesData]);
+  // La información del cliente ya viene incluida en 'clients' vía useWhatsAppChats
 
   // Filtrar conversaciones según el término de búsqueda
   const filteredConversations = useMemo(() => {
@@ -354,14 +385,41 @@ export function WhatsAppChatMobile() {
     }, 300); // Pequeño delay para que el teclado tenga tiempo de aparecer
   };
 
+  // Infinite scroll observer para mobile
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage || isLoading) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          console.log('WhatsAppChatMobile - Cargando más chats de la BD...');
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, isLoading]);
+
   // Manejar scroll para lazy loading
   const handleListScroll = () => {
     if (listRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = listRef.current;
-      // Si llegamos cerca del final (100px), cargar más
-      if (scrollTop + clientHeight >= scrollHeight - 100) {
-        if (visibleLimit < filteredConversations.length) {
-          setVisibleLimit(prev => prev + 20);
+      // Si llegamos realmente al final, cargar más
+      if (scrollTop + clientHeight >= scrollHeight - 10) {
+        // También cargar más de la base de datos si es necesario
+        if (hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
         }
       }
     }
@@ -524,17 +582,19 @@ export function WhatsAppChatMobile() {
               onScroll={handleListScroll}
               className="flex-1 overflow-y-auto custom-scrollbar bg-[#161717] scrollbar-styled min-w-0"
             >
-              {isLoading && (
+              {isLoading && grouped.length === 0 && (
                 <div className="p-4 text-center">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-qoder-dark-accent-primary mx-auto mb-2"></div>
                   <p className="text-sm text-qoder-dark-text-secondary">Cargando chats...</p>
                 </div>
               )}
 
-              {filteredConversations.slice(0, visibleLimit).map((conversation: ChatConversation) => {
-                const lastMessage = conversation.messages[conversation.messages.length - 1];
-                const clientName = getClientName(conversation.session_id);
+              {filteredConversations.map((conversation: ChatConversation) => {
+                const lastMessage = conversation.messages.length > 0 ? conversation.messages[conversation.messages.length - 1] : null;
+                const clientName = (conversation as any).client_info?.nombre || getClientName(conversation.session_id);
                 const isActive = active === conversation.session_id;
+                const clientInfo = (conversation as any).client_info || getClientInfo(conversation.session_id);
+                const fotoPerfil = clientInfo?.foto_perfil;
 
                 return (
                   <div
@@ -552,19 +612,11 @@ export function WhatsAppChatMobile() {
 
                           if (fotoPerfil) {
                             return (
-                              <Image
+                              <AvatarImage
                                 src={fotoPerfil}
                                 alt={clientName}
-                                width={40}
-                                height={40}
+                                size={40}
                                 className="w-full h-full rounded-full object-cover"
-                                onError={(e) => {
-                                  // Si la imagen no carga, mostrar el avatar con inicial
-                                  e.currentTarget.onerror = null;
-                                  if (e.currentTarget.parentElement) {
-                                    e.currentTarget.parentElement.innerHTML = `<span class="text-white font-semibold">${clientName.charAt(0).toUpperCase()}</span>`;
-                                  }
-                                }}
                               />
                             );
                           } else {
@@ -584,10 +636,9 @@ export function WhatsAppChatMobile() {
                             {formatName(clientName)}
                             {(() => {
                               const clientInfo = getClientInfo(conversation.session_id);
-                              const clientData = clientInfo?.id_cliente ? clientesMap[clientInfo.id_cliente] : undefined;
-                              return clientData && clientData.puntaje !== null && clientData.puntaje !== undefined ? (
+                              return clientInfo && clientInfo.puntaje !== null && clientInfo.puntaje !== undefined ? (
                                 <span className="ml-2">
-                                  {getStarsFromScore(clientData.puntaje)}
+                                  {getStarsFromScore(clientInfo.puntaje)}
                                 </span>
                               ) : null;
                             })()}
@@ -620,6 +671,19 @@ export function WhatsAppChatMobile() {
                 );
               })}
 
+              {/* Sentinel para infinite scroll en el historial real */}
+              <div ref={loadMoreRef} className="h-10 flex items-center justify-center p-4">
+                {isFetching && (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-qoder-dark-accent-primary"></div>
+                    <span className="text-xs text-qoder-dark-text-secondary">Cargando más...</span>
+                  </div>
+                )}
+                {!hasNextPage && !isLoading && filteredConversations.length > 0 && (
+                  <p className="text-[10px] text-qoder-dark-text-secondary/30 italic">Fin de la lista</p>
+                )}
+              </div>
+
               {!isLoading && filteredConversations.length === 0 && (
                 <div className="p-4 text-center text-qoder-dark-text-secondary">
                   <p>No hay chats disponibles</p>
@@ -651,18 +715,10 @@ export function WhatsAppChatMobile() {
 
                         if (fotoPerfil) {
                           return (
-                            <img
+                            <AvatarImageNative
                               src={fotoPerfil}
                               alt={clientName}
                               className="w-10 h-10 rounded-full object-cover"
-                              onError={(e) => {
-                                // Si la imagen no carga, mostrar el avatar con inicial
-                                e.currentTarget.onerror = null;
-                                e.currentTarget.onerror = null;
-                                if (e.currentTarget.parentElement) {
-                                  e.currentTarget.parentElement.innerHTML = `<span class="text-white font-semibold">${clientName.charAt(0).toUpperCase()}</span>`;
-                                }
-                              }}
                             />
                           );
                         } else {
@@ -679,10 +735,9 @@ export function WhatsAppChatMobile() {
                         {formatName(getClientName(activeConv.session_id))}
                         {(() => {
                           const clientInfo = getClientInfo(activeConv.session_id);
-                          const clientData = clientInfo?.id_cliente ? clientesMap[clientInfo.id_cliente] : undefined;
-                          return clientData && clientData.puntaje !== null && clientData.puntaje !== undefined ? (
+                          return clientInfo && clientInfo.puntaje !== null && clientInfo.puntaje !== undefined ? (
                             <span className="ml-2">
-                              {getStarsFromScore(clientData.puntaje)}
+                              {getStarsFromScore(clientInfo.puntaje)}
                             </span>
                           ) : null;
                         })()}

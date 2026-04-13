@@ -6,6 +6,7 @@ import { useClientes } from "@/hooks/useClientes";
 import { formatWhatsAppTimestamp } from "@/utils/formatters";
 import AutoRefreshChat from "@/components/AutoRefreshChat";
 import { ChatSucursalFilter } from "@/components/ChatSucursalFilter";
+import type { ChatMessage } from "@/types/db";
 
 export function ChatLayout() {
   const [selectedSucursal, setSelectedSucursal] = useState<string | undefined>(undefined);
@@ -68,7 +69,7 @@ export function ChatLayout() {
   };
 
   // Filtrar mensajes por término de búsqueda
-  const filteredMessages = activeConv?.messages.filter(message => 
+  const filteredMessages = activeConv?.messages.filter((message: ChatMessage) => 
     message.content.toLowerCase().includes(messageSearchTerm.toLowerCase())
   ) || [];
 
@@ -335,7 +336,7 @@ export function ChatLayout() {
           {activeConv && isSearchingMessages ? (
             // Mostrar mensajes filtrados cuando se está buscando
             filteredMessages && filteredMessages.length > 0 ? (
-              filteredMessages.map((message, index) => (
+              filteredMessages.map((message: ChatMessage, index: number) => (
                 <div 
                   key={`${activeConv.session_id}-${index}`} 
                   className={`flex ${
@@ -369,7 +370,7 @@ export function ChatLayout() {
             )
           ) : activeConv?.messages ? (
             // Mostrar todos los mensajes cuando no se está buscando
-            activeConv.messages.map((message, index) => (
+            activeConv.messages.map((message: ChatMessage, index: number) => (
               <div 
                 key={`${activeConv.session_id}-${index}`} 
                 className={`flex ${

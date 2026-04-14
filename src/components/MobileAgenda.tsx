@@ -378,7 +378,15 @@ export function MobileAgenda() {
                       <div
                         key={appointment.id_cita}
                         onClick={() => handleAppointmentClick(appointment)}
-                        className="bg-qoder-dark-bg-form rounded-none p-4 border border-qoder-dark-border cursor-pointer"
+                        className={`bg-qoder-dark-bg-form rounded-none p-4 border border-qoder-dark-border cursor-pointer transition-all hover:bg-qoder-dark-bg-secondary ${
+                          appointment.estado === "confirmada" 
+                            ? "border-l-4 border-l-[#3b82f6]" 
+                            : appointment.estado === "pendiente"
+                            ? "border-l-4 border-l-[#C5A059]"
+                            : appointment.estado === "completado"
+                            ? "border-l-4 border-l-[#10b981]"
+                            : ""
+                        }`}
                       >
                         <div className="flex justify-between items-start">
                           <div>

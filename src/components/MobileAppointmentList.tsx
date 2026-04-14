@@ -56,10 +56,10 @@ export function MobileAppointmentList({ onEdit }: MobileAppointmentListProps) {
     barberoId: barberoActual?.id_barbero || undefined,
   });
 
-  // Filtrar citas para mostrar solo pendientes y completadas (excluir canceladas)
+  // Filtrar citas para mostrar solo pendientes, confirmadas y completadas (excluir canceladas)
   const citasFiltradas = useMemo(() => {
     return citas.filter(cita =>
-      cita.estado === "pendiente" || cita.estado === "completado"
+      cita.estado === "pendiente" || cita.estado === "confirmada" || cita.estado === "completado"
     );
   }, [citas]);
 
@@ -208,7 +208,15 @@ export function MobileAppointmentList({ onEdit }: MobileAppointmentListProps) {
               return (
                 <div
                   key={cita.id_cita}
-                  className="p-3 rounded-none shadow-md bg-qoder-dark-bg-form cursor-pointer"
+                  className={`p-3 rounded-none shadow-md bg-qoder-dark-bg-form cursor-pointer transition-all hover:bg-qoder-dark-bg-secondary border border-qoder-dark-border ${
+                    cita.estado === "confirmada" 
+                      ? "border-l-4 border-l-[#3b82f6]" 
+                      : cita.estado === "pendiente"
+                      ? "border-l-4 border-l-[#C5A059]"
+                      : cita.estado === "completado"
+                      ? "border-l-4 border-l-[#10b981]"
+                      : ""
+                  }`}
                   onClick={() => handleEditAppointment(cita)}
                 >
                   <div className="flex justify-between items-center">

@@ -1,12 +1,13 @@
-﻿/* Variables centralizadas en globals.css â€” no duplicar aquÃ­ */
+/* Variables centralizadas en globals.css â€” no duplicar aquÃ­ */
 
 /* ============================================
    NAVBAR â€” Mobile: top bar / Desktop: sidebar
    ============================================ */
 
 /* Mobile: barra superior compacta */
+/* Mobile: barra superior compacta con Glassmorphism premium */
 .navbar {
-  background: rgba(0, 0, 0, 0.92);
+  background: linear-gradient(135deg, rgba(15, 15, 15, 0.75) 0%, rgba(5, 5, 5, 0.9) 100%);
   height: var(--navbar-height, 56px);
   display: flex;
   justify-content: center;
@@ -17,20 +18,21 @@
   left: 0;
   right: 0;
   z-index: 999;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--qoder-dark-border-primary);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
   width: 100%;
   box-sizing: border-box;
   font-family: 'Inter', 'Roboto', -apple-system, sans-serif;
-  transition: transform 300ms ease-in-out;
+  transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
 }
 
 .navbar.navbar-hidden {
   transform: translateY(-100%);
 }
 
-/* Desktop: sidebar lateral */
+/* Desktop: sidebar lateral Glassmorphism */
 @media (min-width: 768px) {
   .navbar {
     top: 0;
@@ -43,12 +45,14 @@
     justify-content: flex-start;
     align-items: stretch;
     border-bottom: none;
-    border-right: 1px solid var(--qoder-dark-border-primary);
-    background: rgba(0, 0, 0, 0.95);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    background: linear-gradient(180deg, rgba(10, 10, 10, 0.85) 0%, rgba(3, 3, 3, 0.95) 100%);
+    backdrop-filter: blur(30px) saturate(160%);
+    -webkit-backdrop-filter: blur(30px) saturate(160%);
     transform: none !important;
     overflow-y: auto;
     overflow-x: hidden;
-    transition: width 0.3s ease;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
   }
 
   .navbar.sidebar-collapsed {
@@ -103,15 +107,15 @@ a.nav-logo {
 
 @media (min-width: 768px) {
   a.nav-logo {
-    padding: 24px 20px 20px 28px;
+    padding: 28px 20px 24px 28px;
     justify-content: flex-start;
-    border-bottom: 1px solid var(--qoder-dark-border-primary);
-    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 12px;
     transition: all 0.3s ease;
   }
 
   .sidebar-collapsed a.nav-logo {
-    padding: 24px 0 20px 0;
+    padding: 28px 0 24px 0;
     justify-content: center;
   }
 }
@@ -128,8 +132,8 @@ a.nav-logo.active::after {
 /* Estilo para nombres de clientes */
 .client-name {
   font-family: var(--font-rasputin), serif;
-  color: #C5A059 !important;
-  /* Dorado */
+  color: #C5A059 !important; /* Dorado */
+  text-shadow: 0 0 8px rgba(197, 160, 89, 0.2);
 }
 
 .sidebar-collapsed .client-name {
@@ -152,71 +156,84 @@ a.nav-logo.active::after {
   color: #9E8772;
 }
 
+/* Enlaces con transiciones y micro-animaciones interactivas */
 .nav-link {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.55);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   text-decoration: none;
-  padding: 0.5rem 0.75rem;
+  padding: 0.6rem 1rem;
   position: relative;
-  font-weight: 400;
+  font-weight: 500;
   font-family: var(--font-rasputin), serif;
   text-transform: uppercase;
-  font-size: 0.8125rem;
-  letter-spacing: 0.04em;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
   border-radius: 0;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   white-space: nowrap;
   overflow: hidden;
 }
 
 @media (min-width: 768px) {
   .nav-link {
-    padding: 10px 20px;
-    font-size: 0.8125rem;
-    border-radius: 0;
-    margin: 0 8px;
+    padding: 12px 20px;
+    margin: 2px 10px;
+    border-radius: 6px; /* Bordes ligeramente redondeados para un look moderno */
   }
 
   .sidebar-collapsed .nav-link {
-    padding: 10px 0;
+    padding: 12px 0;
     justify-content: center;
-    border-radius: 0;
+    margin: 2px 6px;
+    border-radius: 6px;
   }
 
   .sidebar-collapsed .nav-link span {
     display: none;
   }
 
-  /* Increase icon sizes when collapsed for better tap area */
+  /* Aumento suave de los iconos en menú colapsado */
   .sidebar-collapsed .nav-link svg {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
 }
 
 .nav-link:hover {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.05);
   text-decoration: none;
+  transform: translateX(4px); /* Micro-desplazamiento en hover */
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-collapsed .nav-link:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+  transform: scale(1.05);
 }
 
 .nav-link.active {
   color: #C5A059;
-  background: rgba(197, 160, 89, 0.1);
+  background: rgba(197, 160, 89, 0.08);
+  box-shadow: inset 3px 0 0 #C5A059; /* Indicador izquierdo premium en active */
+  font-weight: 600;
+}
+
+.nav-link.active svg {
+  color: #C5A059;
+  filter: drop-shadow(0 0 6px rgba(197, 160, 89, 0.4));
 }
 
 .nav-link.active:hover {
-  background: rgba(197, 160, 89, 0.25);
+  background: rgba(197, 160, 89, 0.12);
   color: #C5A059;
+  transform: translateX(6px);
 }
 
-/* Remove underline effects â€” using background highlight instead */
+/* Remove underline effects — using background highlight instead */
 .nav-link::after {
   display: none;
 }
@@ -503,47 +520,67 @@ h1.page-title::after {
 
 /* BotÃ³n primario â€” Redirigido al Sistema de DiseÃ±o Master */
 /* Alias para mantener compatibilidad con componentes previos */
+/* Botón primario — Con gradiente dorado premium y sombras volumétricas */
 .action-button,
 .qoder-dark-button-primary {
-  /* Copying base logic to ensure no transition glitches if @apply isn't used */
-  background: var(--qoder-dark-button-primary);
-  color: var(--qoder-dark-button-primary-text);
-  border: none;
+  background: linear-gradient(135deg, #c5a059 0%, #a8813b 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 12px 24px;
+  border-radius: 6px; /* Esquinas ligeramente suavizadas */
   font-weight: 600;
   cursor: pointer;
   font-size: 0.9375rem;
   font-family: var(--font-rasputin), serif;
   text-transform: uppercase;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   letter-spacing: 0.05em;
+  box-shadow: 0 4px 12px rgba(197, 160, 89, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .action-button:hover,
 .qoder-dark-button-primary:hover {
-  background: var(--qoder-dark-button-hover);
+  background: linear-gradient(135deg, #d3ad64 0%, #b88f44 100%);
+  transform: translateY(-2px); /* Elevar en hover */
+  box-shadow: 0 6px 20px rgba(197, 160, 89, 0.35);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* BotÃ³n secundario â€” Redirigido al Sistema de DiseÃ±o */
+.action-button:active,
+.qoder-dark-button-primary:active {
+  transform: translateY(1px); /* Efecto de pulsación */
+  box-shadow: 0 2px 8px rgba(197, 160, 89, 0.15);
+}
+
+/* Botón secundario — Redirigido al Sistema de Diseño */
 .btn-secondary {
-  background: var(--qoder-dark-button-secondary);
-  border: 1px solid var(--qoder-dark-border-primary);
-  color: var(--qoder-dark-button-secondary-text);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
   padding: 10px 20px;
-  border-radius: 0;
+  border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
   font-size: 0.875rem;
   font-family: var(--font-rasputin), serif;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .btn-secondary:hover {
-  border-color: var(--qoder-dark-button-primary);
-  color: var(--qoder-dark-button-primary);
-  background: var(--qoder-dark-bg-hover);
+  border-color: #C5A059;
+  color: #C5A059;
+  background: rgba(197, 160, 89, 0.05);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+  transform: translateY(1px);
 }
 
 /* Reset de botones â€” eliminar estilos heredados del navegador */

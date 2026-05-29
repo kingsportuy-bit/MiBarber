@@ -1,6 +1,6 @@
-// Hook para obtener horarios disponibles
+// Hook para obtener horarios disponibles (en realidad obtiene las citas para calcular ocupación)
 import { useQuery } from "@tanstack/react-query";
-import { getSupabaseClient } from "@/lib/supabaseClient";
+import { getAppointmentRepository } from "@/lib/adapters/factory";
 import type { Appointment } from '@/types/db';
 import type { HorariosDisponiblesParams } from '../types';
 
@@ -17,7 +17,7 @@ export function useHorariosDisponibles({
   fecha,
   barberoId
 }: HorariosDisponiblesParams): UseHorariosDisponiblesResult {
-  const supabase = getSupabaseClient();
+  const appointmentRepository = getAppointmentRepository();
 
   const queryResult = useQuery({
     queryKey: ["horarios-disponibles", sucursalId, fecha, barberoId],
@@ -26,23 +26,17 @@ export function useHorariosDisponibles({
         return [];
       }
       
-      let q = (supabase as any).from("mibarber_citas").select("*");
+      // Llamar al repositorio (este método devuelve las citas para esa fecha, 
+      // lo cual se usa luego en la UI para calcular qué horarios están libres)
+      const citas = await appointmentRepository.list({
+        sucursalId,
+        fecha,
+        barberoId,
+        page: 1,
+        pageSize: 1000 // Suficiente para un día
+      });
       
-      // Filtrar por sucursal
-      q = q.eq("id_sucursal", sucursalId);
-      
-      // Filtrar por fecha
-      q = q.eq("fecha", fecha);
-      
-      // Si se especifica un barbero, filtrar por él
-      if (barberoId) {
-        q = q.eq("id_barbero", barberoId);
-      }
-      
-      const { data, error } = await q.order("hora", { ascending: true });
-      if (error) throw error;
-      
-      return data as Appointment[];
+      return citas;
     },
     staleTime: 2 * 60 * 1000, // 2 minutos
   });

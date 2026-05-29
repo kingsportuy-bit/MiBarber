@@ -31,7 +31,7 @@ import { useBarberosList } from "@/hooks/useBarberosList";
 import { useServiciosListPorSucursal } from "@/hooks/useServiciosListPorSucursal";
 import { useHorariosSucursales } from "@/hooks/useHorariosSucursales";
 import { useBloqueosPorDia } from "@/hooks/useBloqueosBarbero"; // Importar useBloqueosPorDia
-import { getSupabaseClient } from "@/lib/supabaseClient";
+import { getPanelActionRepository } from "@/lib/adapters/factory";
 import { getLocalDateString, getLocalDateTime } from "@/utils/dateUtils";
 import type { Appointment } from "@/types/db";
 import { useGlobalFilters } from "@/contexts/GlobalFiltersContext";
@@ -752,103 +752,43 @@ export function KanbanBoardDndKit({ onEdit, filters }: KanbanBoardDndKitProps) {
     try {
       console.log('Iniciando actualización de cita:', { citaId, newStatus });
       
-      // Verificar que los parámetros sean válidos
-      if (!citaId || !newStatus) {
-        const errorMsg = `Parámetros inválidos: citaId=${citaId}, newStatus=${newStatus}`;
-        console.error('Error de validación en updateCitaStatus:', errorMsg);
-        throw new Error(errorMsg);
+      // Mapear el nuevo estado a una acción del panel
+      let accionPanel: 'cancelar' | 'confirmar_asistencia' | 'reagendar' | 'completar' | null = null;
+      if (newStatus === 'cancelado') accionPanel = 'cancelar';
+      if (newStatus === 'completado') accionPanel = 'completar';
+      
+      if (!accionPanel) {
+        throw new Error(`El cambio a estado '${newStatus}' no está soportado temporalmente por drag & drop.`);
       }
-      
-      // Verificar que el nuevo estado sea válido
-      if (!validStates.includes(newStatus as Estado)) {
-        const errorMsg = `Estado inválido: ${newStatus}. Estados válidos: ${validStates.join(', ')}`;
-        console.error('Error de validación de estado en updateCitaStatus:', errorMsg);
-        throw new Error(errorMsg);
-      }
-      
-      // Registrar el objeto supabase para verificar que esté correctamente inicializado
-      console.log('Supabase client:', supabase);
-      
-      // Registrar la operación antes de ejecutarla
-      console.log('Ejecutando actualización en Supabase:', {
-        table: "mibarber_citas",
-        updateData: { estado: newStatus },
-        condition: { id_cita: citaId }
-      });
-      
-      const result = await (supabase as any)
+
+      // Obtener datos de la cita temporalmente (lectura segura)
+      const { data: citaData, error: citaError } = await (supabase as any)
         .from("mibarber_citas")
-        .update({ estado: newStatus })
+        .select("id_sucursal, barbero")
         .eq("id_cita", citaId)
-        .select()
         .single();
-      
-      const { data, error } = result;
-      
-      console.log('Respuesta completa de Supabase:', { result, data, error });
-      
-      // Verificar si hay error de Supabase
-      if (error) {
-        // Registrar el error tal como viene
-        console.error('Error directo de Supabase:', error);
         
-        // Crear un objeto de error más detallado
-        const errorDetails = {
-          message: error.message || 'Error desconocido de Supabase',
-          code: error.code || 'UNKNOWN_ERROR',
-          details: error.details || 'No hay detalles adicionales',
-          hint: error.hint || 'No hay sugerencias disponibles',
-          citaId,
-          newStatus,
-          fullError: error // Registrar el error completo
-        };
-        
-        console.error('Error en updateCitaStatus - Detalles completos:', JSON.stringify(errorDetails, null, 2));
-        throw new Error(`Error al actualizar cita: ${errorDetails.message} (Código: ${errorDetails.code})`);
+      if (citaError || !citaData) {
+        throw new Error("No se pudo leer la cita original para el cambio de estado.");
       }
-      
-      // Verificar si no se obtuvieron datos
-      if (!data) {
-        const warnMsg = `No se encontró la cita para actualizar: ${citaId}`;
-        console.warn(warnMsg);
-        throw new Error(warnMsg);
-      }
-      
-      console.log('Cita actualizada exitosamente:', { citaId, newStatus, data });
-      
-      // Verificar que la actualización realmente se haya realizado
-      if (data.estado !== newStatus) {
-        const warnMsg = `La cita no se actualizó correctamente. Estado esperado: ${newStatus}, Estado actual: ${data.estado}`;
-        console.warn(warnMsg);
-        throw new Error(warnMsg);
-      }
-      
-      return data;
+
+      const repo = getPanelActionRepository();
+      await repo.panelAction({
+        id_cita: citaId,
+        id_sucursal: citaData.id_sucursal,
+        id_barbero: citaData.barbero,
+        accion: accionPanel,
+        origen: 'panel_barbero'
+      });
+
+      // El webhook no devuelve los datos inmediatos en el stub
+      // Forzaremos recarga para refrescar
+      return { id_cita: citaId, estado: newStatus };
     } catch (error: any) {
-      // Manejo más robusto de errores
-      console.error('Excepción capturada en updateCitaStatus:', error);
-      
-      const errorMessage = error?.message || 'Error desconocido en la actualización';
-      const errorStack = error?.stack || 'No stack trace disponible';
-      
-      // Registrar error con más detalle
-      const errorInfo = {
-        message: errorMessage,
-        stack: errorStack,
-        citaId,
-        newStatus,
-        timestamp: new Date().toISOString(),
-        typeofError: typeof error,
-        errorKeys: error ? Object.keys(error) : [],
-        fullError: error // Registrar el error completo
-      };
-      
-      console.error('Excepción en updateCitaStatus - Detalles completos:', JSON.stringify(errorInfo, null, 2));
-      
-      // Lanzar un nuevo error con mensaje más claro
-      throw new Error(`Fallo en actualización de cita: ${errorMessage}`);
+      console.error('Error capturado en updateCitaStatus:', error);
+      throw new Error(`Fallo en actualización de cita: ${error.message}`);
     }
-  }, [supabase, validStates]); // Añadido supabase y validStates como dependencias
+  }, [supabase, validStates]);
 
   const handleDragEnd = useCallback(
     async (event: DragEndEvent) => {

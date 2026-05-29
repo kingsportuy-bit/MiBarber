@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { getSupabaseClient } from "@/lib/supabaseClient";
+import { getPanelActionRepository } from "@/lib/adapters/factory";
 
 interface CompletarCitaModalProps {
   citaId: string;
@@ -54,66 +55,37 @@ export function CompletarCitaModal({ citaId, onClose, onCompletado }: CompletarC
     setError("");
     
     try {
-      // Primero obtener la cita para tener los datos necesarios
+      // Deuda técnica de obtención de cita (leer es seguro temporalmente)
       const { data: citaData, error: citaError } = await (supabase as any)
         .from("mibarber_citas")
         .select("id_cliente, id_servicio, id_barbero, id_sucursal, id_barberia")
         .eq("id_cita", citaId)
         .single();
       
-      if (citaError) throw citaError;
-      if (!citaData) throw new Error("No se encontró la cita");
-      
-      // Obtener el precio del servicio
-      let monto = 0;
-      if (citaData.id_servicio) {
-        const { data: servicioData, error: servicioError } = await (supabase as any)
-          .from("mibarber_servicios")
-          .select("precio")
-          .eq("id_servicio", citaData.id_servicio)
-          .single();
-        
-        if (!servicioError && servicioData) {
-          monto = servicioData.precio;
-        }
+      if (citaError || !citaData) {
+        throw new Error("No se pudo obtener la cita para completar.");
       }
-      
-      // Actualizar la cita a estado "completado"
-      const { error: updateError } = await (supabase as any)
-        .from("mibarber_citas")
-        .update({ 
-          estado: "completado",
-          nro_factura: numeroFactura || null,
-          metodo_pago: metodoPago
-        })
-        .eq("id_cita", citaId);
-      
-      if (updateError) throw updateError;
-      
-      // Crear registro en caja
-      const { error: cajaError } = await (supabase as any)
-        .from("mibarber_caja")
-        .insert({
-          id_cita: citaId,
-          id_cliente: citaData.id_cliente || null,
-          monto: monto,
-          numero_factura: numeroFactura || null,
-          fecha: new Date().toISOString(),
+
+      // Enviar la acción de completar a través del repositorio unificado
+      const repo = getPanelActionRepository();
+      await repo.panelAction({
+        id_cita: citaId,
+        id_sucursal: citaData.id_sucursal,
+        id_barbero: citaData.id_barbero,
+        accion: 'completar',
+        origen: 'panel_barbero',
+        datos_extra: {
           metodo_pago: metodoPago,
-          tipo: "ingreso",
-          concepto: "Servicio de barbería",
-          barbero: citaData.id_barbero || null,
-          id_sucursal: citaData.id_sucursal || null,
-          id_barberia: citaData.id_barberia || null
-        });
-      
-      if (cajaError) throw cajaError;
+          nro_factura: numeroFactura || null
+        }
+      });
       
       onCompletado();
       onClose();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error al completar cita:", err);
-      setError("Error al completar la cita. Por favor, intente nuevamente.");
+      // Extraemos el mensaje de error del stub si está presente
+      setError(err.message || "Error al completar la cita. Por favor, intente nuevamente.");
     } finally {
       setIsLoading(false);
     }

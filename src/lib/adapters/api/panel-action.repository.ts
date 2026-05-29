@@ -2,22 +2,22 @@ import type { IPanelActionRepository, PanelActionPayload, BarberoxResponse } fro
 
 export class HttpPanelActionRepository implements IPanelActionRepository {
   async panelAction(payload: PanelActionPayload): Promise<BarberoxResponse> {
-    // Por ahora lanzamos error según lo solicitado por Codex
-    throw new Error("Esperando webhook panel_barbero de Codex — ver communication.md");
+    if (payload.accion === 'reagendar') {
+      throw new Error("Reagendar no está disponible temporalmente (Pendiente contrato de nuevo slot).");
+    }
+
+    const WEBHOOK_URL = "https://webhookn8ncodexa.codexa.uy/webhook/panel-accion";
     
-    /* 
-    Implementación futura cuando el webhook esté listo:
-    const response = await fetch("POST_WEBHOOK_URL", {
+    const response = await fetch(WEBHOOK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
     
     if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`);
+      throw new Error(`Error HTTP: ${response.status} al ejecutar acción en n8n`);
     }
     
     return await response.json();
-    */
   }
 }

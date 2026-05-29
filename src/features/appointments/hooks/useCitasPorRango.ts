@@ -1,6 +1,6 @@
 // Hook para obtener citas por rango de fechas
 import { useQuery } from "@tanstack/react-query";
-import { getAppointmentRepository } from "@/lib/adapters/factory";
+import { getAppointmentReadRepository } from "@/lib/adapters/factory";
 import type { Appointment } from '@/types/db';
 import { useBarberoAuth } from "@/hooks/useBarberoAuth";
 import type { CitasPorRangoParams } from '../types';
@@ -29,26 +29,13 @@ export function useCitasPorRango({
         return [];
       }
       
-      // Si no se proporciona barberoId y el usuario no es administrador, solo mostrar sus propias citas
-      let finalBarberoId = barberoId;
-      if (!finalBarberoId && !isAdmin && barberoActual?.id_barbero) {
-        finalBarberoId = barberoActual.id_barbero;
-      }
-      
-      // Llamar al repositorio
-      const citas = await appointmentRepository.listPorRango({
-        sucursalId,
-        fechaInicio,
-        fechaFin,
-        barberoId: finalBarberoId
+      const repo = getAppointmentReadRepository();
+      return await repo.listarPorRango({
+        sucursalId: sucursalId,
+        fechaInicio: fechaInicio,
+        fechaFin: fechaFin,
+        barberoId: barberoId || (!isAdmin ? barberoActual?.id_barbero : undefined),
       });
-      
-      // El repositorio ya filtra por barbero, fecha, sucursal.
-      // Si tenemos un idBarberia (en caso de que el token pertenezca a un ecosistema multitenant), 
-      // y la data viene de supabase, podríamos tener que filtrarla acá si el adapter no lo hace,
-      // pero para mantener el patrón adaptamos:
-      if (idBarberia) {
-        return citas.filter(c => c.id_barberia === idBarberia);
       }
       
       return citas;

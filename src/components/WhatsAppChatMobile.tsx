@@ -91,17 +91,14 @@ function formatName(name: string): string {
 export function WhatsAppChatMobile() {
   const { idBarberia, isAdmin, barbero } = useBarberoAuth();
   const { sucursales } = useSucursales(idBarberia || undefined);
-  const [selectedSucursal, setSelectedSucursal] = useState<string | undefined>(undefined);
-  const [showAllSucursales, setShowAllSucursales] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Agregar estado para el término de búsqueda
   const supabase: any = getSupabaseClient();
 
-  // Para barberos comunes, usar la sucursal asociada
-  // Para administradores, permitir seleccionar sucursal o ver todas
-  const sucursalId = !isAdmin && barbero?.id_sucursal ? barbero.id_sucursal : selectedSucursal;
+  // Usar siempre la sucursal del barbero logueado
+  const sucursalId = barbero?.id_sucursal;
 
   // Estado de conexión de WhatsApp (QR y wpp_activo)
-  const statusSucursalId = barbero?.id_sucursal || selectedSucursal;
+  const statusSucursalId = barbero?.id_sucursal;
   const { qrUrl, wppActivo } = useWhatsAppStatus(statusSucursalId);
   const isWhatsAppConnected = wppActivo === "Conectado";
 
@@ -117,7 +114,7 @@ export function WhatsAppChatMobile() {
     hasNextPage,
     isFetchingNextPage,
     isFetching
-  } = useWhatsAppChats(sucursalId, showAllSucursales, active);
+  } = useWhatsAppChats(sucursalId, false, active);
   const [message, setMessage] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
@@ -492,88 +489,28 @@ export function WhatsAppChatMobile() {
                 </div>
               </div>
 
-              {/* Filtros para administradores y campo de búsqueda en la misma línea */}
-              {isAdmin && sucursales && sucursales.length > 0 ? (
-                <div className="px-2 py-2">
-                  <div className="flex items-end gap-3">
-                    {/* Filtro de sucursales */}
-                    <div className="flex-1 min-w-0">
-                      <label className="block text-xs text-qoder-dark-text-secondary mb-1.5">
-                        Filtrar por sucursal:
-                      </label>
-                      <select
-                        value={showAllSucursales ? "todas" : (selectedSucursal || "")}
-                        onChange={(e) => {
-                          if (e.target.value === "todas") {
-                            setShowAllSucursales(true);
-                            setSelectedSucursal(undefined);
-                          } else {
-                            setShowAllSucursales(false);
-                            setSelectedSucursal(e.target.value || undefined);
-                          }
-                        }}
-                        className="w-full h-10 qoder-dark-search-box py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-none border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
-                      >
-                        <option value="todas">Todos los chats</option>
-                        {sucursales?.map((sucursal: any) => (
-                          <option key={sucursal.id} value={sucursal.id}>
-                            {sucursal.nombre_sucursal || `Sucursal ${sucursal.numero_sucursal}`}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Campo de búsqueda */}
-                    <div className="flex-1 min-w-0">
-                      <label className="block text-xs text-qoder-dark-text-secondary mb-1.5">
-                        Buscar:
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          placeholder="Buscar..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full h-10 py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-none pr-10 bg-qoder-dark-bg-form border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
-                        />
-                        {searchTerm && (
-                          <button
-                            onClick={() => setSearchTerm('')}
-                            className="boton-simple absolute inset-y-0 right-0 flex items-center justify-center w-10 text-gray-400 hover:text-gray-300 transition-colors"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+              {/* Campo de búsqueda */}
+              <div className="px-2 py-2">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Buscar por nombre o teléfono..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full h-10 py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-none pr-10 bg-qoder-dark-bg-form border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="boton-simple absolute inset-y-0 right-0 flex items-center justify-center w-10 text-gray-400 hover:text-gray-300 transition-colors"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
-              ) : (
-                // Solo campo de búsqueda para usuarios no administradores
-                <div className="px-2 py-2">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Buscar por nombre o teléfono..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full h-10 py-2 px-3 text-qoder-dark-text-primary focus:outline-none rounded-none pr-10 bg-qoder-dark-bg-form border border-qoder-dark-border-primary focus:border-qoder-dark-accent-primary"
-                    />
-                    {searchTerm && (
-                      <button
-                        onClick={() => setSearchTerm('')}
-                        className="boton-simple absolute inset-y-0 right-0 flex items-center justify-center w-10 text-gray-400 hover:text-gray-300 transition-colors"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
 
             {/* Lista de conversaciones con Lazy Loading */}
